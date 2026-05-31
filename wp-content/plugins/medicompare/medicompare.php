@@ -15,6 +15,9 @@ class MediCompare {
 
         // Load CPTs
         add_action('init', [$this, 'load_cpts']);
+
+	// Load admin menu
+    	require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
     }
 
     public function load_cpts() {

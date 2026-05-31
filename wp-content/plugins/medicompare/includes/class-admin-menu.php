@@ -10,7 +10,6 @@ class MediCompare_Admin_Menu {
 
     public function register_menu() {
 
-        // Top-level menu
         add_menu_page(
             'MediCompare',
             'MediCompare',
@@ -21,7 +20,6 @@ class MediCompare_Admin_Menu {
             2
         );
 
-        // Dashboard submenu
         add_submenu_page(
             'medicompare',
             'Dashboard',
@@ -31,7 +29,6 @@ class MediCompare_Admin_Menu {
             [$this, 'dashboard_page']
         );
 
-        // CSV Upload submenu
         add_submenu_page(
             'medicompare',
             'Upload CSV',
@@ -41,7 +38,6 @@ class MediCompare_Admin_Menu {
             [$this, 'upload_csv_page']
         );
 
-        // Reports submenu
         add_submenu_page(
             'medicompare',
             'Reports',
@@ -60,6 +56,9 @@ class MediCompare_Admin_Menu {
         echo '<div class="wrap"><h1>Reports</h1><p>Reports module coming soon.</p></div>';
     }
 
+    /* ---------------------------------------------------------
+       STEP 6 — CSV PARSER
+    --------------------------------------------------------- */
     public function process_csv_upload() {
 
         if (!isset($_FILES['csv_file'])) {
@@ -68,18 +67,15 @@ class MediCompare_Admin_Menu {
 
         $file = $_FILES['csv_file'];
 
-        // Validate file type
         $allowed = ['text/csv', 'application/vnd.ms-excel'];
         if (!in_array($file['type'], $allowed)) {
             return ['error' => 'Invalid file type. Please upload a CSV file.'];
         }
 
-        // Validate upload success
         if ($file['error'] !== UPLOAD_ERR_OK) {
             return ['error' => 'File upload failed.'];
         }
 
-        // Read file
         $csv_path = $file['tmp_name'];
         $rows = array_map('str_getcsv', file($csv_path));
 
@@ -87,13 +83,9 @@ class MediCompare_Admin_Menu {
             return ['error' => 'CSV file is empty.'];
         }
 
-        // Extract header
         $header = array_map('trim', array_shift($rows));
-
-        // Normalise header to lowercase
         $header = array_map('strtolower', $header);
 
-        // Expected columns
         $required = ['product_code', 'product_name', 'price', 'stock'];
 
         foreach ($required as $col) {
@@ -102,7 +94,6 @@ class MediCompare_Admin_Menu {
             }
         }
 
-        // Map rows into structured array
         $mapped = [];
 
         foreach ($rows as $row) {
@@ -111,7 +102,6 @@ class MediCompare_Admin_Menu {
             $row = array_map('trim', $row);
             $data = array_combine($header, $row);
 
-            // Normalise values
             $mapped[] = [
                 'product_code' => $data['product_code'],
                 'product_name' => $data['product_name'],
@@ -126,6 +116,9 @@ class MediCompare_Admin_Menu {
         ];
     }
 
+    /* ---------------------------------------------------------
+       STEP 7 — INSERT / UPDATE SUPPLIER PRODUCTS
+    --------------------------------------------------------- */
     public function insert_supplier_products($supplier_id, $rows) {
         global $wpdb;
 
@@ -136,11 +129,9 @@ class MediCompare_Admin_Menu {
 
         foreach ($rows as $row) {
 
-            // Lookup product by product_code (stored as post_title)
             $product = get_page_by_title($row['product_code'], OBJECT, 'mc_product');
 
             if (!$product) {
-                // Create product if not exists
                 $product_id = wp_insert_post([
                     'post_title'  => $row['product_code'],
                     'post_type'   => 'mc_product',
@@ -150,7 +141,6 @@ class MediCompare_Admin_Menu {
                 $product_id = $product->ID;
             }
 
-            // Check if supplier/product combo already exists
             $existing = $wpdb->get_row($wpdb->prepare(
                 "SELECT id FROM $table WHERE supplier_id = %d AND product_id = %d",
                 $supplier_id,
@@ -158,7 +148,7 @@ class MediCompare_Admin_Menu {
             ));
 
             if ($existing) {
-                // Update existing row
+
                 $wpdb->update(
                     $table,
                     [
@@ -174,7 +164,7 @@ class MediCompare_Admin_Menu {
                 $updated++;
 
             } else {
-                // Insert new row
+
                 $wpdb->insert(
                     $table,
                     [
@@ -197,6 +187,9 @@ class MediCompare_Admin_Menu {
         ];
     }
 
+    /* ---------------------------------------------------------
+       STEP 8 — GET SUPPLIERS
+    --------------------------------------------------------- */
     public function get_suppliers() {
         return get_posts([
             'post_type'      => 'mc_supplier',
@@ -207,27 +200,86 @@ class MediCompare_Admin_Menu {
         ]);
     }
 
+    /* ---------------------------------------------------------
+       STEP 9 — AUTO-DETECT SUPPLIER FROM FILENAME
+    --------------------------------------------------------- */
+    public function detect_supplier_from_filename($filename, $suppliers) {
+
+        $filename = strtolower($filename);
+        $filename_normalized = str_replace([' ', '-', '_'], '', $filename);
+
+        foreach ($suppliers as $supplier) {
+
+            $name = strtolower($supplier->post_title);
+
+            $full = str_replace([' ', '-', '_'], '', $name);
+
+            $parts = explode(' ', $name);
+            $first = $parts[0];
+            $last = end($parts);
+            $initial = substr($last, 0, 1);
+
+            $patterns = [$full, $name, $first, $last, $initial];
+
+            foreach ($patterns as $pattern) {
+                $pattern = strtolower($pattern);
+                $pattern_normalized = str_replace([' ', '-', '_'], '', $pattern);
+
+                if (
+                    strpos($filename, $pattern) !== false ||
+                    strpos($filename_normalized, $pattern_normalized) !== false
+                ) {
+                    return $supplier->ID;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /* ---------------------------------------------------------
+       MAIN PAGE — TWO-PHASE SUBMISSION
+    --------------------------------------------------------- */
     public function upload_csv_page() {
 
         $result = null;
         $db_result = null;
 
-        // Fetch suppliers for dropdown
         $suppliers = $this->get_suppliers();
+        $auto_supplier_id = null;
 
-        // Handle CSV upload + processing
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+        /* -----------------------------------------
+           PHASE 1 — Auto-detect supplier ONLY
+        ----------------------------------------- */
+        if (
+            isset($_FILES['csv_file']) &&
+            !empty($_FILES['csv_file']['name']) &&
+            !isset($_POST['final_submit'])
+        ) {
+            $auto_supplier_id = $this->detect_supplier_from_filename(
+                $_FILES['csv_file']['name'],
+                $suppliers
+            );
+        }
 
-            // Step 6: Parse CSV
+        /* -----------------------------------------
+           PHASE 2 — Final CSV processing
+        ----------------------------------------- */
+        if (
+            $_SERVER['REQUEST_METHOD'] === 'POST' &&
+            isset($_POST['final_submit'])
+        ) {
+
             $result = $this->process_csv_upload();
 
             if ($result && isset($result['success'])) {
 
-                // Supplier selected by admin
                 $supplier_id = intval($_POST['supplier_id']);
 
-                // Step 7: Insert/update DB rows
-                $db_result = $this->insert_supplier_products($supplier_id, $result['data']);
+                $db_result = $this->insert_supplier_products(
+                    $supplier_id,
+                    $result['data']
+                );
             }
         }
 
@@ -235,19 +287,16 @@ class MediCompare_Admin_Menu {
         <div class="wrap">
             <h1>Upload Supplier CSV</h1>
 
-            <!-- Error Notice -->
             <?php if ($result && isset($result['error'])): ?>
                 <div class="notice notice-error"><p><?php echo esc_html($result['error']); ?></p></div>
             <?php endif; ?>
 
-            <!-- CSV Parsed Successfully -->
             <?php if ($result && isset($result['success'])): ?>
                 <div class="notice notice-success">
                     <p>CSV uploaded successfully. Parsed <?php echo count($result['data']); ?> rows.</p>
                 </div>
             <?php endif; ?>
 
-            <!-- DB Insert/Update Results -->
             <?php if ($db_result): ?>
                 <div class="notice notice-success">
                     <p>
@@ -257,7 +306,6 @@ class MediCompare_Admin_Menu {
                 </div>
             <?php endif; ?>
 
-            <!-- Preview Table -->
             <?php if ($result && isset($result['success'])): ?>
                 <h2>Preview</h2>
                 <table class="widefat striped">
@@ -282,40 +330,55 @@ class MediCompare_Admin_Menu {
                 </table>
             <?php endif; ?>
 
-            <!-- Upload Form -->
+            <!-- FORM -->
             <form method="post" enctype="multipart/form-data" style="margin-top:30px;">
 
-                <table class="form-table">
+    <table class="form-table">
 
-                    <!-- Supplier Dropdown -->
-                    <tr>
-                        <th scope="row"><label for="supplier_id">Supplier</label></th>
-                        <td>
-                            <select name="supplier_id" id="supplier_id" required>
-                                <option value="">Select Supplier</option>
-                                <?php foreach ($suppliers as $supplier): ?>
-                                    <option value="<?php echo $supplier->ID; ?>">
-                                        <?php echo esc_html($supplier->post_title); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </td>
-                    </tr>
+        <!-- CSV File FIRST -->
+        <tr>
+            <th scope="row"><label for="csv_file">CSV File</label></th>
+            <td><input type="file" name="csv_file" id="csv_file" accept=".csv" required></td>
+        </tr>
 
-                    <!-- CSV File -->
-                    <tr>
-                        <th scope="row"><label for="csv_file">CSV File</label></th>
-                        <td><input type="file" name="csv_file" id="csv_file" accept=".csv" required></td>
-                    </tr>
+        <!-- Supplier Dropdown SECOND -->
+        <tr>
+            <th scope="row"><label for="supplier_id">Supplier</label></th>
+            <td>
+                <select name="supplier_id" id="supplier_id" required>
+                    <option value="">Select Supplier</option>
+                    <?php foreach ($suppliers as $supplier): ?>
+                        <option value="<?php echo $supplier->ID; ?>"
+                            <?php selected($auto_supplier_id, $supplier->ID); ?>>
+                            <?php echo esc_html($supplier->post_title); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
 
-                </table>
+    </table>
 
-                <?php submit_button('Upload CSV'); ?>
-            </form>
+    <?php submit_button('Upload CSV', 'primary', 'final_submit'); ?>
+</form>
+
+<script>
+document.getElementById('csv_file').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+
+
+            <!-- AUTO-SUBMIT ON FILE SELECT -->
+            <script>
+                document.getElementById('csv_file').addEventListener('change', function() {
+                    this.form.submit();
+                });
+            </script>
+
         </div>
         <?php
     }
 }
 
-// IMPORTANT: Instantiation must be OUTSIDE the class
 new MediCompare_Admin_Menu();

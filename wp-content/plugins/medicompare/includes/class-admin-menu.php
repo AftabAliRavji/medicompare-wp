@@ -6,6 +6,9 @@ class MediCompare_Admin_Menu {
 
     public function __construct() {
         add_action('admin_menu', [$this, 'register_menu']);
+
+        // AJAX for supplier auto-detect
+        add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
     }
 
     public function register_menu() {
@@ -29,14 +32,96 @@ class MediCompare_Admin_Menu {
             [$this, 'dashboard_page']
         );
 
+        /* ---------------------------------------------------------
+           SUPPLIERS
+        --------------------------------------------------------- */
+
         add_submenu_page(
             'medicompare',
-            'Upload CSV',
-            'Upload CSV',
+            'Suppliers',
+            'Suppliers ALL',
             'manage_options',
-            'medicompare-upload-csv',
-            [$this, 'upload_csv_page']
+            'edit.php?post_type=mc_supplier'
         );
+
+        add_submenu_page(
+            'medicompare',
+            'Add New Supplier',
+            'Suppliers Add New',
+            'manage_options',
+            'post-new.php?post_type=mc_supplier'
+        );
+
+        add_submenu_page(
+            'medicompare',
+            'Upload Supplier Product CSV',
+            'Upload Supplier Product CSV',
+            'manage_options',
+            'medicompare-upload-supplier-product-csv',
+            [$this, 'upload_supplier_product_csv_page']
+        );
+
+        /* ---------------------------------------------------------
+           PRODUCTS
+        --------------------------------------------------------- */
+
+        add_submenu_page(
+            'medicompare',
+            'Products',
+            'Products ALL',
+            'manage_options',
+            'edit.php?post_type=mc_product'
+        );
+
+        add_submenu_page(
+            'medicompare',
+            'Add New Product',
+            'Products Add New',
+            'manage_options',
+            'post-new.php?post_type=mc_product'
+        );
+
+        add_submenu_page(
+            'medicompare',
+            'Upload Product CSV',
+            'Upload Product CSV',
+            'manage_options',
+            'medicompare-upload-product-csv',
+            [$this, 'upload_product_csv_page']
+        );
+
+        /* ---------------------------------------------------------
+           PHARMACIES
+        --------------------------------------------------------- */
+
+        add_submenu_page(
+            'medicompare',
+            'Pharmacies',
+            'Pharmacies ALL',
+            'manage_options',
+            'edit.php?post_type=mc_pharmacy'
+        );
+
+        add_submenu_page(
+            'medicompare',
+            'Add New Pharmacy',
+            'Pharmacies Add New',
+            'manage_options',
+            'post-new.php?post_type=mc_pharmacy'
+        );
+
+        add_submenu_page(
+            'medicompare',
+            'Upload Pharmacy CSV',
+            'Upload Pharmacy CSV',
+            'manage_options',
+            'medicompare-upload-pharmacy-csv',
+            [$this, 'upload_pharmacy_csv_page']
+        );
+
+        /* ---------------------------------------------------------
+           REPORTS
+        --------------------------------------------------------- */
 
         add_submenu_page(
             'medicompare',
@@ -46,18 +131,63 @@ class MediCompare_Admin_Menu {
             'medicompare-reports',
             [$this, 'reports_page']
         );
+
+        /* ---------------------------------------------------------
+           IMPORT LOGS
+        --------------------------------------------------------- */
+
+        add_submenu_page(
+            'medicompare',
+            'Import Logs',
+            'Import Logs',
+            'manage_options',
+            'medicompare-import-logs',
+            [$this, 'import_logs_page']
+        );
     }
 
+    /* ---------------------------------------------------------
+       DASHBOARD
+    --------------------------------------------------------- */
     public function dashboard_page() {
         echo '<div class="wrap"><h1>MediCompare Dashboard</h1><p>Welcome to the MediCompare admin panel.</p></div>';
     }
 
+    /* ---------------------------------------------------------
+       REPORTS (placeholder)
+    --------------------------------------------------------- */
     public function reports_page() {
         echo '<div class="wrap"><h1>Reports</h1><p>Reports module coming soon.</p></div>';
     }
 
     /* ---------------------------------------------------------
-       STEP 6 — CSV PARSER
+       IMPORT LOGS (placeholder)
+    --------------------------------------------------------- */
+    public function import_logs_page() {
+        echo '<div class="wrap"><h1>Import Logs</h1><p>Import logs will appear here.</p></div>';
+    }
+
+    /* ---------------------------------------------------------
+       AJAX — Detect Supplier From Filename
+    --------------------------------------------------------- */
+    public function ajax_detect_supplier() {
+
+        if (!isset($_POST['filename'])) {
+            wp_send_json_error(['message' => 'No filename provided']);
+        }
+
+        $filename = sanitize_text_field($_POST['filename']);
+        $suppliers = $this->get_suppliers();
+
+        $detected = $this->detect_supplier_from_filename($filename, $suppliers);
+
+        wp_send_json_success([
+            'supplier_id' => $detected
+        ]);
+    }
+
+    /* ---------------------------------------------------------
+       CSV PARSER (supplier product CSV)
     --------------------------------------------------------- */
     public function process_csv_upload() {
 
@@ -117,7 +247,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       STEP 7 — INSERT / UPDATE SUPPLIER PRODUCTS
+       INSERT / UPDATE SUPPLIER PRODUCTS
     --------------------------------------------------------- */
     public function insert_supplier_products($supplier_id, $rows) {
         global $wpdb;
@@ -188,7 +318,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       STEP 8 — GET SUPPLIERS
+       GET SUPPLIERS
     --------------------------------------------------------- */
     public function get_suppliers() {
         return get_posts([
@@ -201,7 +331,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       STEP 9 — AUTO-DETECT SUPPLIER FROM FILENAME
+       AUTO-DETECT SUPPLIER FROM FILENAME
     --------------------------------------------------------- */
     public function detect_supplier_from_filename($filename, $suppliers) {
 
@@ -238,33 +368,16 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       MAIN PAGE — TWO-PHASE SUBMISSION
+       SUPPLIER PRODUCT CSV UPLOAD (AJAX auto-detect)
     --------------------------------------------------------- */
-    public function upload_csv_page() {
+    public function upload_supplier_product_csv_page() {
 
         $result = null;
         $db_result = null;
 
         $suppliers = $this->get_suppliers();
-        $auto_supplier_id = null;
 
-        /* -----------------------------------------
-           PHASE 1 — Auto-detect supplier ONLY
-        ----------------------------------------- */
-        if (
-            isset($_FILES['csv_file']) &&
-            !empty($_FILES['csv_file']['name']) &&
-            !isset($_POST['final_submit'])
-        ) {
-            $auto_supplier_id = $this->detect_supplier_from_filename(
-                $_FILES['csv_file']['name'],
-                $suppliers
-            );
-        }
-
-        /* -----------------------------------------
-           PHASE 2 — Final CSV processing
-        ----------------------------------------- */
+        // Final upload
         if (
             $_SERVER['REQUEST_METHOD'] === 'POST' &&
             isset($_POST['final_submit'])
@@ -285,7 +398,7 @@ class MediCompare_Admin_Menu {
 
         ?>
         <div class="wrap">
-            <h1>Upload Supplier CSV</h1>
+            <h1>Upload Supplier Product CSV</h1>
 
             <?php if ($result && isset($result['error'])): ?>
                 <div class="notice notice-error"><p><?php echo esc_html($result['error']); ?></p></div>
@@ -330,54 +443,75 @@ class MediCompare_Admin_Menu {
                 </table>
             <?php endif; ?>
 
-            <!-- FORM -->
             <form method="post" enctype="multipart/form-data" style="margin-top:30px;">
 
-    <table class="form-table">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><label for="csv_file">CSV File</label></th>
+                        <td><input type="file" name="csv_file" id="csv_file" accept=".csv" required></td>
+                    </tr>
 
-        <!-- CSV File FIRST -->
-        <tr>
-            <th scope="row"><label for="csv_file">CSV File</label></th>
-            <td><input type="file" name="csv_file" id="csv_file" accept=".csv" required></td>
-        </tr>
+                    <tr>
+                        <th scope="row"><label for="supplier_id">Supplier</label></th>
+                        <td>
+                            <select name="supplier_id" id="supplier_id" required>
+                                <option value="">Select Supplier</option>
+                                <?php foreach ($suppliers as $supplier): ?>
+                                    <option value="<?php echo $supplier->ID; ?>">
+                                        <?php echo esc_html($supplier->post_title); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
 
-        <!-- Supplier Dropdown SECOND -->
-        <tr>
-            <th scope="row"><label for="supplier_id">Supplier</label></th>
-            <td>
-                <select name="supplier_id" id="supplier_id" required>
-                    <option value="">Select Supplier</option>
-                    <?php foreach ($suppliers as $supplier): ?>
-                        <option value="<?php echo $supplier->ID; ?>"
-                            <?php selected($auto_supplier_id, $supplier->ID); ?>>
-                            <?php echo esc_html($supplier->post_title); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </td>
-        </tr>
+                <?php submit_button('Upload Supplier Product CSV', 'primary', 'final_submit'); ?>
+            </form>
 
-    </table>
-
-    <?php submit_button('Upload CSV', 'primary', 'final_submit'); ?>
-</form>
-
-<script>
-document.getElementById('csv_file').addEventListener('change', function() {
-    this.form.submit();
-});
-</script>
-
-
-            <!-- AUTO-SUBMIT ON FILE SELECT -->
             <script>
-                document.getElementById('csv_file').addEventListener('change', function() {
-                    this.form.submit();
+            document.getElementById('csv_file').addEventListener('change', function () {
+
+                const fileInput = this;
+                if (!fileInput.files.length) return;
+
+                const filename = fileInput.files[0].name;
+
+                const data = new FormData();
+                data.append('action', 'medicompare_detect_supplier');
+                data.append('filename', filename);
+
+                fetch(ajaxurl, {
+                    method: 'POST',
+                    body: data
+                })
+                .then(response => response.json())
+                .then(result => {
+
+                    if (result.success && result.data.supplier_id) {
+                        const dropdown = document.getElementById('supplier_id');
+                        dropdown.value = result.data.supplier_id;
+                    }
                 });
+            });
             </script>
 
         </div>
         <?php
+    }
+
+    /* ---------------------------------------------------------
+       PRODUCT CSV UPLOAD (placeholder)
+    --------------------------------------------------------- */
+    public function upload_product_csv_page() {
+        echo '<div class="wrap"><h1>Upload Product CSV</h1><p>Coming soon.</p></div>';
+    }
+
+    /* ---------------------------------------------------------
+       PHARMACY CSV UPLOAD (placeholder)
+    --------------------------------------------------------- */
+    public function upload_pharmacy_csv_page() {
+        echo '<div class="wrap"><h1>Upload Pharmacy CSV</h1><p>Coming soon.</p></div>';
     }
 }
 

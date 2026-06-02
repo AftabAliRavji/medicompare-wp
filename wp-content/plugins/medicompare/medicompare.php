@@ -5,6 +5,10 @@
  * Version: 0.2.0
  * Author: Aftab
  */
+if (!session_id()) {
+    session_start();
+}
+
 
 if (!defined('ABSPATH')) exit;
 

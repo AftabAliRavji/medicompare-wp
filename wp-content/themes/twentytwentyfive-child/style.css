@@ -1,0 +1,33 @@
+/*
+ Theme Name: Twenty Twenty-Five Child
+ Template: twentytwentyfive
+*/
+
+@import url("../twentytwentyfive/style.css");
+
+/* MediCompare custom styles */
+.mc-register-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.mc-register-form label {
+    font-weight: bold;
+    margin-top: 15px;
+    display: block;
+}
+
+.mc-register-form input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+.mc-register-form button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}

@@ -5,24 +5,28 @@
  * Version: 0.2.0
  * Author: Aftab
  */
+
 if (!session_id()) {
     session_start();
 }
-
 
 if (!defined('ABSPATH')) exit;
 
 class MediCompare {
 
     public function __construct() {
+
         // Plugin activation
         register_activation_hook(__FILE__, [$this, 'activate']);
 
-        // Load CPTs
+        // Load CPTs early
         add_action('init', [$this, 'load_cpts'], 1);
 
         // Load admin menu
         require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
+
+        // Load front-end pharmacy registration
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-registration.php';
     }
 
     public function load_cpts() {

@@ -6,6 +6,8 @@ class MediCompare_Admin_Menu {
 
     public function __construct() {
         add_action('admin_menu', [$this, 'register_menu']);
+
+        // AJAX for supplier auto-detect
         add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
     }
 
@@ -50,6 +52,7 @@ class MediCompare_Admin_Menu {
             'post-new.php?post_type=mc_supplier'
         );
 
+        // NEW: Upload Supplier CSV
         add_submenu_page(
             'medicompare',
             'Upload Supplier CSV',
@@ -59,6 +62,7 @@ class MediCompare_Admin_Menu {
             [$this, 'upload_supplier_csv_page']
         );
 
+        // NEW: Supplier Products ALL
         add_submenu_page(
             'medicompare',
             'Supplier Products ALL',
@@ -68,6 +72,7 @@ class MediCompare_Admin_Menu {
             [$this, 'supplier_products_all_page']
         );
 
+        // Existing: Upload Supplier Product CSV
         add_submenu_page(
             'medicompare',
             'Upload Supplier Product CSV',
@@ -162,17 +167,27 @@ class MediCompare_Admin_Menu {
         );
     }
 
+    /* ---------------------------------------------------------
+       DASHBOARD
+    --------------------------------------------------------- */
     public function dashboard_page() {
         echo '<div class="wrap"><h1>MediCompare Dashboard</h1><p>Welcome to the MediCompare admin panel.</p></div>';
     }
 
+    /* ---------------------------------------------------------
+       REPORTS (placeholder)
+    --------------------------------------------------------- */
     public function reports_page() {
         echo '<div class="wrap"><h1>Reports</h1><p>Reports module coming soon.</p></div>';
     }
 
+    /* ---------------------------------------------------------
+       IMPORT LOGS (placeholder)
+    --------------------------------------------------------- */
     public function import_logs_page() {
         echo '<div class="wrap"><h1>Import Logs</h1><p>Import logs will appear here.</p></div>';
     }
+
     /* ---------------------------------------------------------
        SUPPLIER PRODUCT CSV PARSER
     --------------------------------------------------------- */
@@ -367,13 +382,14 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       INSERT OR UPDATE SUPPLIER PRODUCT ROW
+       INSERT OR UPDATE A SINGLE SUPPLIER PRODUCT ROW
     --------------------------------------------------------- */
     public function insert_supplier_product_row($supplier_id, $row) {
         global $wpdb;
 
         $table = $wpdb->prefix . 'medi_supplier_products';
 
+        // 1. Find or create product by product_code
         $product = get_page_by_title($row['product_code'], OBJECT, 'mc_product');
 
         if (!$product) {
@@ -386,12 +402,14 @@ class MediCompare_Admin_Menu {
             $product_id = $product->ID;
         }
 
+        // 2. Check if supplier/product mapping already exists
         $existing = $wpdb->get_row($wpdb->prepare(
             "SELECT id FROM $table WHERE supplier_id = %d AND product_id = %d",
             $supplier_id,
             $product_id
         ));
 
+        // 3. Update existing row
         if ($existing) {
 
             $wpdb->update(
@@ -409,6 +427,7 @@ class MediCompare_Admin_Menu {
             return 'updated';
         }
 
+        // 4. Insert new row
         $wpdb->insert(
             $table,
             [
@@ -423,6 +442,7 @@ class MediCompare_Admin_Menu {
 
         return 'inserted';
     }
+
     /* ---------------------------------------------------------
        INSERT / UPDATE PRODUCT
     --------------------------------------------------------- */
@@ -582,7 +602,7 @@ class MediCompare_Admin_Menu {
         }
 
         $filename = sanitize_text_field($_POST['filename']);
-        $suppliers = $this->get_suppliers();
+        $suppliers = $this->get_suppliers(); // ID → name
 
         foreach ($suppliers as $id => $name) {
 
@@ -597,7 +617,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       AUTO-DETECT SUPPLIER FROM FILENAME
+       AUTO-DETECT SUPPLIER FROM FILENAME (legacy helper)
     --------------------------------------------------------- */
     public function detect_supplier_from_filename($filename, $suppliers) {
 
@@ -635,6 +655,7 @@ class MediCompare_Admin_Menu {
 
     /* ---------------------------------------------------------
        SUPPLIER PRODUCT CSV UPLOAD PAGE
+       (Two‑Step + Session)
     --------------------------------------------------------- */
     public function upload_supplier_product_csv_page() {
 
@@ -644,6 +665,7 @@ class MediCompare_Admin_Menu {
 
         $suppliers = $this->get_suppliers();
 
+        // STEP 1 — PREVIEW
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_supplier_product_csv'])) {
 
             $mode = 'preview';
@@ -656,6 +678,7 @@ class MediCompare_Admin_Menu {
             }
         }
 
+        // STEP 2 — IMPORT
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_supplier_product_csv'])) {
 
             $mode = 'import';
@@ -692,6 +715,7 @@ class MediCompare_Admin_Menu {
         $import_summary = ['inserted' => 0, 'updated' => 0, 'skipped' => 0];
         $mode = null;
 
+        // PREVIEW MODE
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_product_csv'])) {
 
             $mode = 'preview';
@@ -702,6 +726,7 @@ class MediCompare_Admin_Menu {
             }
         }
 
+        // IMPORT MODE
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_product_csv'])) {
 
             $mode = 'import';
@@ -735,6 +760,7 @@ class MediCompare_Admin_Menu {
         $summary = ['inserted' => 0, 'updated' => 0, 'skipped' => 0];
         $mode = null;
 
+        // STEP 1 — PREVIEW
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_pharmacy_csv'])) {
 
             $mode = 'preview';
@@ -745,6 +771,7 @@ class MediCompare_Admin_Menu {
             }
         }
 
+        // STEP 2 — IMPORT
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_pharmacy_csv'])) {
 
             $mode = 'import';
@@ -768,19 +795,17 @@ class MediCompare_Admin_Menu {
 
         include __DIR__ . '/admin-pages/upload-pharmacies.php';
     }
+
     /* ---------------------------------------------------------
-       SUPPLIER CSV PARSER (FIXED)
+       SUPPLIER CSV PARSER (NEW)
     --------------------------------------------------------- */
     public function process_supplier_csv_upload() {
 
-        // Accept either name="supplier_csv_file" OR name="csv_file"
-        $file = $_FILES['supplier_csv_file']
-            ?? $_FILES['csv_file']
-            ?? null;
-
-        if (!$file) {
-            return ['error' => 'No CSV file uploaded.'];
+        if (!isset($_FILES['supplier_csv_file'])) {
+            return null;
         }
+
+        $file = $_FILES['supplier_csv_file'];
 
         $allowed = ['text/csv', 'application/vnd.ms-excel'];
         if (!in_array($file['type'], $allowed)) {
@@ -844,7 +869,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       INSERT / UPDATE SUPPLIER (NEW)
+       INSERT / UPDATE SUPPLIER FROM CSV ROW (NEW)
     --------------------------------------------------------- */
     public function insert_or_update_supplier_from_csv_row($row) {
 
@@ -853,6 +878,7 @@ class MediCompare_Admin_Menu {
             return 'skipped';
         }
 
+        // Find existing supplier by title
         $existing = get_page_by_title($name, OBJECT, 'mc_supplier');
 
         if ($existing) {
@@ -872,6 +898,7 @@ class MediCompare_Admin_Menu {
             $status = 'inserted';
         }
 
+        // Meta fields
         $meta = [
             'mc_supplier_email'      => sanitize_email($row['email']),
             'mc_supplier_phone'      => sanitize_text_field($row['phone']),
@@ -894,7 +921,8 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       SUPPLIER CSV UPLOAD PAGE (FIXED)
+       SUPPLIER CSV UPLOAD PAGE (NEW)
+       Two‑Step: Preview → Import
     --------------------------------------------------------- */
     public function upload_supplier_csv_page() {
 
@@ -902,6 +930,7 @@ class MediCompare_Admin_Menu {
         $summary = ['inserted' => 0, 'updated' => 0, 'skipped' => 0];
         $mode    = null;
 
+        // STEP 1 — PREVIEW
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_supplier_csv'])) {
 
             $mode   = 'preview';
@@ -912,6 +941,7 @@ class MediCompare_Admin_Menu {
             }
         }
 
+        // STEP 2 — IMPORT
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_supplier_csv'])) {
 
             $mode = 'import';
@@ -935,24 +965,15 @@ class MediCompare_Admin_Menu {
             }
         }
 
-        // Provide variables expected by the view file
-        $inserted = $summary['inserted'] ?? 0;
-        $updated  = $summary['updated']  ?? 0;
-        $skipped  = $summary['skipped']  ?? 0;
-
         include __DIR__ . '/admin-pages/upload-supplier-csv.php';
     }
 
     /* ---------------------------------------------------------
-       SUPPLIER PRODUCTS ALL PAGE (FIXED)
+       SUPPLIER PRODUCTS ALL PAGE (NEW)
     --------------------------------------------------------- */
     public function supplier_products_all_page() {
-
         $suppliers = $this->get_suppliers();
         $selected_supplier_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
-
-        // FIX: Provide variable expected by the view file
-        $selected_supplier = $selected_supplier_id;
 
         $products = [];
         if ($selected_supplier_id) {
@@ -963,25 +984,35 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       GET SUPPLIER PRODUCTS (NEW)
+       GET SUPPLIER PRODUCTS FOR A SUPPLIER (NEW)
     --------------------------------------------------------- */
     public function get_supplier_products($supplier_id) {
         global $wpdb;
 
         $supplier_id = intval($supplier_id);
-        if (!$supplier_id) return [];
+        if (!$supplier_id) {
+            return [];
+        }
 
         $table = $wpdb->prefix . 'medi_supplier_products';
 
         $sql = $wpdb->prepare("
-            SELECT sp.*, p.post_title AS product_title
+            SELECT sp.id,
+                   sp.price,
+                   sp.stock,
+                   sp.last_updated,
+                   p.ID   AS product_id,
+                   p.post_title AS product_title
             FROM {$table} sp
-            LEFT JOIN {$wpdb->posts} p ON sp.product_id = p.ID
+            LEFT JOIN {$wpdb->posts} p
+                ON sp.product_id = p.ID
             WHERE sp.supplier_id = %d
             ORDER BY p.post_title ASC
         ", $supplier_id);
 
-        return $wpdb->get_results($sql, ARRAY_A);
+        $rows = $wpdb->get_results($sql, ARRAY_A);
+
+        return $rows ? $rows : [];
     }
 }
 

@@ -37,7 +37,7 @@ class MediCompare_Pharmacy_CPT {
             'labels'      => $labels,
             'public'      => false,
             'show_ui'     => true,
-            'show_in_menu' => false, // handled by admin menu
+            'show_in_menu' => false,
             'show_in_admin_bar' => true,
             'menu_icon'   => 'dashicons-admin-users',
             'supports'    => ['title'],
@@ -45,7 +45,6 @@ class MediCompare_Pharmacy_CPT {
             'map_meta_cap'    => true,
             'has_archive'     => false,
             'hierarchical'    => false,
-            'menu_position' => null,
         ];
 
         register_post_type('mc_pharmacy', $args);
@@ -188,15 +187,22 @@ class MediCompare_Pharmacy_CPT {
        ADMIN COLUMNS
     --------------------------------------------------------- */
     public function add_pharmacy_columns($columns) {
+
         $new = [];
 
-        $new['cb'] = $columns['cb'];
-        $new['title'] = 'Pharmacy Name';
+        $new['cb']            = $columns['cb'];
+        $new['title']         = 'Pharmacy Name';
         $new['pharmacy_code'] = 'Code';
-        $new['email'] = 'Email';
-        $new['city'] = 'City';
-        $new['status'] = 'Status';
-        $new['date'] = $columns['date'];
+        $new['email']         = 'Email';
+        $new['phone']         = 'Phone';
+        $new['addr1']         = 'Address 1';
+        $new['addr2']         = 'Address 2';
+        $new['city']          = 'City';
+        $new['postcode']      = 'Postcode';
+        $new['gphc']          = 'GPhC';
+        $new['contact']       = 'Contact';
+        $new['status']        = 'Status';
+        $new['date']          = $columns['date'];
 
         return $new;
     }
@@ -213,8 +219,32 @@ class MediCompare_Pharmacy_CPT {
                 echo esc_html(get_post_meta($post_id, '_mc_email', true));
                 break;
 
+            case 'phone':
+                echo esc_html(get_post_meta($post_id, '_mc_phone', true));
+                break;
+
+            case 'addr1':
+                echo esc_html(get_post_meta($post_id, '_mc_address_line_1', true));
+                break;
+
+            case 'addr2':
+                echo esc_html(get_post_meta($post_id, '_mc_address_line_2', true));
+                break;
+
             case 'city':
                 echo esc_html(get_post_meta($post_id, '_mc_city', true));
+                break;
+
+            case 'postcode':
+                echo esc_html(get_post_meta($post_id, '_mc_postcode', true));
+                break;
+
+            case 'gphc':
+                echo esc_html(get_post_meta($post_id, '_mc_gphc_number', true));
+                break;
+
+            case 'contact':
+                echo esc_html(get_post_meta($post_id, '_mc_contact_name', true));
                 break;
 
             case 'status':
@@ -226,8 +256,9 @@ class MediCompare_Pharmacy_CPT {
 
     public function make_pharmacy_columns_sortable($columns) {
         $columns['pharmacy_code'] = 'pharmacy_code';
-        $columns['city'] = 'city';
-        $columns['status'] = 'status';
+        $columns['city']          = 'city';
+        $columns['postcode']      = 'postcode';
+        $columns['status']        = 'status';
         return $columns;
     }
 }

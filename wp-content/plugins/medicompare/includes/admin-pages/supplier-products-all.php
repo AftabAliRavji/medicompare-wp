@@ -4,53 +4,53 @@
     <form method="get">
         <input type="hidden" name="page" value="supplier-products-all">
 
-        <table class="form-table">
-            <tr>
-                <th><label for="supplier_id">Supplier</label></th>
-                <td>
-                    <select name="supplier_id" id="supplier_id" onchange="this.form.submit()">
-                        <option value="">Select Supplier</option>
-                        <?php foreach ($suppliers as $id => $name): ?>
-                            <option value="<?php echo $id; ?>" <?php selected($selected_supplier, $id); ?>>
-                                <?php echo esc_html($name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-        </table>
+        <label for="supplier_id"><strong>Supplier:</strong></label>
+        <select name="supplier_id" id="supplier_id" onchange="this.form.submit()">
+            <option value="">Select Supplier</option>
+
+            <?php foreach ($suppliers as $id => $name): ?>
+                <option value="<?php echo esc_attr($id); ?>"
+                    <?php selected($selected_supplier, $id); ?>>
+                    <?php echo esc_html($name); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </form>
 
-    <?php if ($selected_supplier && empty($products)): ?>
-        <p>No products found for this supplier.</p>
-    <?php endif; ?>
-
-    <?php if (!empty($products)): ?>
+    <?php if ($selected_supplier): ?>
 
         <h2>Products for: <?php echo esc_html($suppliers[$selected_supplier]); ?></h2>
 
-        <table class="widefat striped">
-            <thead>
-                <tr>
-                    <th>Product Code</th>
-                    <th>Product Name</th>
-                    <th>Price (£)</th>
-                    <th>Stock</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($products as $p): ?>
+        <?php if (!empty($products)): ?>
+
+            <table class="widefat striped">
+                <thead>
                     <tr>
-                        <td><?php echo esc_html(get_the_title($p->product_id)); ?></td>
-                        <td><?php echo esc_html($p->product_name); ?></td>
-                        <td><?php echo esc_html($p->price); ?></td>
-                        <td><?php echo esc_html($p->stock); ?></td>
-                        <td><?php echo esc_html($p->last_updated); ?></td>
+                        <th>Product Code</th>
+                        <th>Product Name</th>
+                        <th>Price (£)</th>
+                        <th>Stock</th>
+                        <th>Last Updated</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($products as $row): ?>
+                        <tr>
+                            <td><?php echo esc_html($row['product_id']); ?></td>
+                            <td><?php echo esc_html($row['product_title']); ?></td>
+                            <td><?php echo esc_html($row['price']); ?></td>
+                            <td><?php echo esc_html($row['stock']); ?></td>
+                            <td><?php echo esc_html($row['last_updated']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+        <?php else: ?>
+
+            <p>No products found for this supplier.</p>
+
+        <?php endif; ?>
 
     <?php endif; ?>
 </div>

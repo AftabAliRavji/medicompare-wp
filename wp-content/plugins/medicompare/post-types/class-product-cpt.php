@@ -179,13 +179,14 @@ class MediCompare_Product_CPT {
 
         $new = [];
 
-        $new['cb'] = $columns['cb'];
-        $new['title'] = 'Product Name';
+        $new['cb']           = $columns['cb'];
+        $new['title']        = 'Product Name';
         $new['product_code'] = 'Product Code';
-        $new['category'] = 'Category';
-        $new['strength'] = 'Strength';
-        $new['pack_size'] = 'Pack Size';
-        $new['date'] = $columns['date'];
+        $new['category']     = 'Category';
+        $new['strength']     = 'Strength';
+        $new['pack_size']    = 'Pack Size';
+        $new['description']  = 'Description';
+        $new['date']         = $columns['date'];
 
         return $new;
     }
@@ -208,6 +209,10 @@ class MediCompare_Product_CPT {
 
             case 'pack_size':
                 echo esc_html(get_post_meta($post_id, '_mc_pack_size', true));
+                break;
+
+            case 'description':
+                echo esc_html(get_post_meta($post_id, '_mc_description', true));
                 break;
         }
     }

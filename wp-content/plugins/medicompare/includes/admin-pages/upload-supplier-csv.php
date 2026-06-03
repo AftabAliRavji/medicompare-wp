@@ -14,9 +14,9 @@
         <div class="notice notice-success">
             <p>
                 Import complete.<br>
-                Inserted: <?php echo $db_result['inserted']; ?><br>
-                Updated: <?php echo $db_result['updated']; ?><br>
-                Skipped: <?php echo $db_result['skipped']; ?>
+                Inserted: <?php echo $summary['inserted']; ?><br>
+                Updated: <?php echo $summary['updated']; ?><br>
+                Skipped: <?php echo $summary['skipped']; ?>
             </p>
         </div>
     <?php endif; ?>

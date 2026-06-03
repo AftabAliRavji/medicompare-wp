@@ -1,34 +1,40 @@
 <?php
-error_log("Supplier CPT file loaded successfully");
-
 if (!defined('ABSPATH')) exit;
 
 class MediCompare_Supplier_CPT {
 
-    const META_EMAIL   = 'mc_supplier_email';
-    const META_PHONE   = 'mc_supplier_phone';
-    const META_CODE    = 'mc_supplier_code';
-    const META_STATUS  = 'mc_supplier_status';
-    const META_MANAGER = 'mc_supplier_manager';
+    /* ---------------------------------------------------------
+       META KEYS
+    --------------------------------------------------------- */
+    const META_EMAIL     = 'mc_supplier_email';
+    const META_PHONE     = 'mc_supplier_phone';
+    const META_CODE      = 'mc_supplier_code';
+    const META_STATUS    = 'mc_supplier_status';
+    const META_MANAGER   = 'mc_supplier_manager';
 
-    // NEW structured address fields
-    const META_ADDR1   = 'mc_supplier_address_1';
-    const META_ADDR2   = 'mc_supplier_address_2';
-    const META_CITY    = 'mc_supplier_city';
-    const META_COUNTY  = 'mc_supplier_county';
-    const META_POSTCODE = 'mc_supplier_postcode';
-    const META_COUNTRY  = 'mc_supplier_country';
+    const META_ADDR1     = 'mc_supplier_address_1';
+    const META_ADDR2     = 'mc_supplier_address_2';
+    const META_CITY      = 'mc_supplier_city';
+    const META_COUNTY    = 'mc_supplier_county';
+    const META_POSTCODE  = 'mc_supplier_postcode';
+    const META_COUNTRY   = 'mc_supplier_country';
 
     public function __construct() {
-        add_action('init',                               [$this, 'register_cpt'], 20);
-        add_action('add_meta_boxes',                     [$this, 'register_meta_boxes']);
-        add_action('save_post_mc_supplier',              [$this, 'save_meta'], 10, 2);
 
-        // Admin columns
-        add_filter('manage_mc_supplier_posts_columns',   [$this, 'add_admin_columns']);
+        add_action('init', [$this, 'register_cpt'], 20);
+
+        add_action('add_meta_boxes', [$this, 'register_meta_boxes']);
+        add_action('save_post_mc_supplier', [$this, 'save_meta'], 10, 2);
+
+        add_filter('manage_mc_supplier_posts_columns', [$this, 'add_admin_columns']);
         add_action('manage_mc_supplier_posts_custom_column', [$this, 'render_admin_columns'], 10, 2);
+
+        add_filter('manage_edit-mc_supplier_sortable_columns', [$this, 'sortable_columns']);
     }
 
+    /* ---------------------------------------------------------
+       REGISTER CPT
+    --------------------------------------------------------- */
     public function register_cpt() {
 
         $labels = [
@@ -50,19 +56,16 @@ class MediCompare_Supplier_CPT {
             'public'             => false,
             'show_ui'            => true,
             'show_in_menu'       => false,
-            'show_in_admin_bar'  => true,
-            'menu_icon'          => 'dashicons-groups',
             'supports'           => ['title'],
-            'capability_type'    => 'post',
-            'map_meta_cap'       => true,
-            'has_archive'        => false,
-            'hierarchical'       => false,
-            'menu_position'      => null,
+            'menu_icon'          => 'dashicons-groups',
         ];
 
         register_post_type('mc_supplier', $args);
     }
 
+    /* ---------------------------------------------------------
+       META BOXES
+    --------------------------------------------------------- */
     public function register_meta_boxes() {
 
         add_meta_box(
@@ -74,7 +77,6 @@ class MediCompare_Supplier_CPT {
             'high'
         );
 
-        // NEW structured address meta box
         add_meta_box(
             'mc_supplier_address',
             'Supplier Address',
@@ -99,43 +101,33 @@ class MediCompare_Supplier_CPT {
         <table class="form-table">
 
             <tr>
-                <th><label for="mc_supplier_email">Email</label></th>
-                <td>
-                    <input type="email" name="mc_supplier_email" id="mc_supplier_email"
-                           value="<?php echo esc_attr($email); ?>" class="regular-text">
-                    <p class="description">Used for order and invoice emails.</p>
-                </td>
+                <th>Email</th>
+                <td><input type="email" name="mc_supplier_email" class="regular-text"
+                           value="<?php echo esc_attr($email); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_phone">Phone</label></th>
-                <td>
-                    <input type="text" name="mc_supplier_phone" id="mc_supplier_phone"
-                           value="<?php echo esc_attr($phone); ?>" class="regular-text">
-                </td>
+                <th>Phone</th>
+                <td><input type="text" name="mc_supplier_phone" class="regular-text"
+                           value="<?php echo esc_attr($phone); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_manager">Account Manager</label></th>
-                <td>
-                    <input type="text" name="mc_supplier_manager" id="mc_supplier_manager"
-                           value="<?php echo esc_attr($manager); ?>" class="regular-text">
-                </td>
+                <th>Account Manager</th>
+                <td><input type="text" name="mc_supplier_manager" class="regular-text"
+                           value="<?php echo esc_attr($manager); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_code">Supplier Code</label></th>
-                <td>
-                    <input type="text" name="mc_supplier_code" id="mc_supplier_code"
-                           value="<?php echo esc_attr($code); ?>" class="regular-text">
-                    <p class="description">Internal unique code (used for imports, reporting, future APIs).</p>
-                </td>
+                <th>Supplier Code</th>
+                <td><input type="text" name="mc_supplier_code" class="regular-text"
+                           value="<?php echo esc_attr($code); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_status">Status</label></th>
+                <th>Status</th>
                 <td>
-                    <select name="mc_supplier_status" id="mc_supplier_status">
+                    <select name="mc_supplier_status">
                         <option value="active"    <?php selected($status, 'active'); ?>>Active</option>
                         <option value="suspended" <?php selected($status, 'suspended'); ?>>Suspended</option>
                         <option value="test"      <?php selected($status, 'test'); ?>>Test</option>
@@ -147,9 +139,6 @@ class MediCompare_Supplier_CPT {
         <?php
     }
 
-    /* ---------------------------------------------------------
-       NEW STRUCTURED ADDRESS META BOX
-    --------------------------------------------------------- */
     public function render_address_meta_box($post) {
 
         $addr1    = get_post_meta($post->ID, self::META_ADDR1, true);
@@ -163,39 +152,39 @@ class MediCompare_Supplier_CPT {
         <table class="form-table">
 
             <tr>
-                <th><label for="mc_supplier_address_1">Address Line 1</label></th>
-                <td><input type="text" name="mc_supplier_address_1" id="mc_supplier_address_1"
-                           class="regular-text" value="<?php echo esc_attr($addr1); ?>"></td>
+                <th>Address Line 1</th>
+                <td><input type="text" name="mc_supplier_address_1" class="regular-text"
+                           value="<?php echo esc_attr($addr1); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_address_2">Address Line 2</label></th>
-                <td><input type="text" name="mc_supplier_address_2" id="mc_supplier_address_2"
-                           class="regular-text" value="<?php echo esc_attr($addr2); ?>"></td>
+                <th>Address Line 2</th>
+                <td><input type="text" name="mc_supplier_address_2" class="regular-text"
+                           value="<?php echo esc_attr($addr2); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_city">City</label></th>
-                <td><input type="text" name="mc_supplier_city" id="mc_supplier_city"
-                           class="regular-text" value="<?php echo esc_attr($city); ?>"></td>
+                <th>City</th>
+                <td><input type="text" name="mc_supplier_city" class="regular-text"
+                           value="<?php echo esc_attr($city); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_county">County / Region</label></th>
-                <td><input type="text" name="mc_supplier_county" id="mc_supplier_county"
-                           class="regular-text" value="<?php echo esc_attr($county); ?>"></td>
+                <th>County</th>
+                <td><input type="text" name="mc_supplier_county" class="regular-text"
+                           value="<?php echo esc_attr($county); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_postcode">Postcode</label></th>
-                <td><input type="text" name="mc_supplier_postcode" id="mc_supplier_postcode"
-                           class="regular-text" value="<?php echo esc_attr($postcode); ?>"></td>
+                <th>Postcode</th>
+                <td><input type="text" name="mc_supplier_postcode" class="regular-text"
+                           value="<?php echo esc_attr($postcode); ?>"></td>
             </tr>
 
             <tr>
-                <th><label for="mc_supplier_country">Country</label></th>
-                <td><input type="text" name="mc_supplier_country" id="mc_supplier_country"
-                           class="regular-text" value="<?php echo esc_attr($country); ?>"></td>
+                <th>Country</th>
+                <td><input type="text" name="mc_supplier_country" class="regular-text"
+                           value="<?php echo esc_attr($country); ?>"></td>
             </tr>
 
         </table>
@@ -203,7 +192,7 @@ class MediCompare_Supplier_CPT {
     }
 
     /* ---------------------------------------------------------
-       SAVE ALL META FIELDS
+       SAVE META
     --------------------------------------------------------- */
     public function save_meta($post_id, $post) {
 
@@ -215,22 +204,20 @@ class MediCompare_Supplier_CPT {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
         if ($post->post_type !== 'mc_supplier') return;
 
-        // Standard fields
         $fields = [
-            self::META_EMAIL   => sanitize_email($_POST['mc_supplier_email'] ?? ''),
-            self::META_PHONE   => sanitize_text_field($_POST['mc_supplier_phone'] ?? ''),
-            self::META_CODE    => sanitize_text_field($_POST['mc_supplier_code'] ?? ''),
-            self::META_STATUS  => sanitize_text_field($_POST['mc_supplier_status'] ?? 'active'),
-            self::META_MANAGER => sanitize_text_field($_POST['mc_supplier_manager'] ?? ''),
-        ];
+            self::META_EMAIL     => sanitize_email($_POST['mc_supplier_email'] ?? ''),
+            self::META_PHONE     => sanitize_text_field($_POST['mc_supplier_phone'] ?? ''),
+            self::META_CODE      => sanitize_text_field($_POST['mc_supplier_code'] ?? ''),
+            self::META_STATUS    => sanitize_text_field($_POST['mc_supplier_status'] ?? 'active'),
+            self::META_MANAGER   => sanitize_text_field($_POST['mc_supplier_manager'] ?? ''),
 
-        // NEW structured address fields
-        $fields[self::META_ADDR1]    = sanitize_text_field($_POST['mc_supplier_address_1'] ?? '');
-        $fields[self::META_ADDR2]    = sanitize_text_field($_POST['mc_supplier_address_2'] ?? '');
-        $fields[self::META_CITY]     = sanitize_text_field($_POST['mc_supplier_city'] ?? '');
-        $fields[self::META_COUNTY]   = sanitize_text_field($_POST['mc_supplier_county'] ?? '');
-        $fields[self::META_POSTCODE] = sanitize_text_field($_POST['mc_supplier_postcode'] ?? '');
-        $fields[self::META_COUNTRY]  = sanitize_text_field($_POST['mc_supplier_country'] ?? 'United Kingdom');
+            self::META_ADDR1     => sanitize_text_field($_POST['mc_supplier_address_1'] ?? ''),
+            self::META_ADDR2     => sanitize_text_field($_POST['mc_supplier_address_2'] ?? ''),
+            self::META_CITY      => sanitize_text_field($_POST['mc_supplier_city'] ?? ''),
+            self::META_COUNTY    => sanitize_text_field($_POST['mc_supplier_county'] ?? ''),
+            self::META_POSTCODE  => sanitize_text_field($_POST['mc_supplier_postcode'] ?? ''),
+            self::META_COUNTRY   => sanitize_text_field($_POST['mc_supplier_country'] ?? 'United Kingdom'),
+        ];
 
         foreach ($fields as $key => $value) {
             update_post_meta($post_id, $key, $value);
@@ -244,21 +231,21 @@ class MediCompare_Supplier_CPT {
 
         $new = [];
 
-        foreach ($columns as $key => $label) {
-            if ($key === 'cb' || $key === 'title') {
-                $new[$key] = $label;
-            }
-        }
+        $new['cb']   = $columns['cb'];
+        $new['title'] = 'Supplier';
 
-        $new['mc_supplier_email']   = 'Email';
-        $new['mc_supplier_phone']   = 'Phone';
-        $new['mc_supplier_code']    = 'Code';
-        $new['mc_supplier_status']  = 'Status';
-        $new['mc_supplier_manager'] = 'Account Manager';
+        $new['email']     = 'Email';
+        $new['phone']     = 'Phone';
+        $new['code']      = 'Code';
+        $new['status']    = 'Status';
+        $new['manager']   = 'Account Manager';
 
-        // NEW address columns
-        $new['mc_supplier_city']     = 'City';
-        $new['mc_supplier_postcode'] = 'Postcode';
+        $new['addr1']     = 'Address 1';
+        $new['addr2']     = 'Address 2';
+        $new['city']      = 'City';
+        $new['county']    = 'County';
+        $new['postcode']  = 'Postcode';
+        $new['country']   = 'Country';
 
         return $new;
     }
@@ -267,34 +254,63 @@ class MediCompare_Supplier_CPT {
 
         switch ($column) {
 
-            case 'mc_supplier_email':
+            case 'email':
                 echo esc_html(get_post_meta($post_id, self::META_EMAIL, true));
                 break;
 
-            case 'mc_supplier_phone':
+            case 'phone':
                 echo esc_html(get_post_meta($post_id, self::META_PHONE, true));
                 break;
 
-            case 'mc_supplier_code':
+            case 'code':
                 echo esc_html(get_post_meta($post_id, self::META_CODE, true));
                 break;
 
-            case 'mc_supplier_status':
-                echo esc_html(ucfirst(get_post_meta($post_id, self::META_STATUS, true) ?: 'active'));
+            case 'status':
+                echo esc_html(ucfirst(get_post_meta($post_id, self::META_STATUS, true)));
                 break;
 
-            case 'mc_supplier_manager':
+            case 'manager':
                 echo esc_html(get_post_meta($post_id, self::META_MANAGER, true));
                 break;
 
-            case 'mc_supplier_city':
+            case 'addr1':
+                echo esc_html(get_post_meta($post_id, self::META_ADDR1, true));
+                break;
+
+            case 'addr2':
+                echo esc_html(get_post_meta($post_id, self::META_ADDR2, true));
+                break;
+
+            case 'city':
                 echo esc_html(get_post_meta($post_id, self::META_CITY, true));
                 break;
 
-            case 'mc_supplier_postcode':
+            case 'county':
+                echo esc_html(get_post_meta($post_id, self::META_COUNTY, true));
+                break;
+
+            case 'postcode':
                 echo esc_html(get_post_meta($post_id, self::META_POSTCODE, true));
                 break;
+
+            case 'country':
+                echo esc_html(get_post_meta($post_id, self::META_COUNTRY, true));
+                break;
         }
+    }
+
+    /* ---------------------------------------------------------
+       SORTABLE COLUMNS
+    --------------------------------------------------------- */
+    public function sortable_columns($columns) {
+
+        $columns['code']     = 'code';
+        $columns['city']     = 'city';
+        $columns['postcode'] = 'postcode';
+        $columns['status']   = 'status';
+
+        return $columns;
     }
 }
 

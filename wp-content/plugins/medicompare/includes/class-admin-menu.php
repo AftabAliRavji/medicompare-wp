@@ -53,6 +53,15 @@ class MediCompare_Admin_Menu {
         );
 
         add_submenu_page(
+    	  'medicompare', 
+    	  'Supplier Products ALL', 
+    	  'Supplier Products ALL', 
+    	  'manage_options', 
+    	  'supplier-products-all', 
+    	  [$this, 'supplier_products_all_page']
+	);
+
+        add_submenu_page(
             'medicompare',
             'Upload Supplier Product CSV',
             'Upload Supplier Product CSV',
@@ -634,6 +643,43 @@ public function ajax_detect_supplier() {
 
         return null;
     }
+
+    /* ---------------------------------------------------------
+   SUPPLIER PRODUCTS ALL PAGE
+--------------------------------------------------------- */
+public function supplier_products_all_page() {
+
+    $suppliers = $this->get_suppliers();
+
+    $selected_supplier = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
+
+    $products = [];
+
+    if ($selected_supplier) {
+        $products = $this->get_supplier_products($selected_supplier);
+    }
+
+    include __DIR__ . '/admin-pages/supplier-products-all.php';
+}
+
+  /* ---------------------------------------------------------
+   GET SUPPLIER PRODUCTS (JOINED WITH PRODUCT CPT)
+--------------------------------------------------------- */
+public function get_supplier_products($supplier_id) {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'medi_supplier_products';
+
+    return $wpdb->get_results($wpdb->prepare(
+        "SELECT sp.*, p.post_title AS product_name
+         FROM $table sp
+         LEFT JOIN {$wpdb->posts} p ON sp.product_id = p.ID
+         WHERE sp.supplier_id = %d
+         ORDER BY p.post_title ASC",
+        $supplier_id
+    ));
+}
+
     /* ---------------------------------------------------------
        SUPPLIER PRODUCT CSV UPLOAD PAGE
     --------------------------------------------------------- */

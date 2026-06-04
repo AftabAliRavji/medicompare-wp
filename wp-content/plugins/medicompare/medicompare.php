@@ -25,8 +25,9 @@ class MediCompare {
         // Load admin menu
         require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
 
-        // Load front-end pharmacy registration
+        // Front-end registration + claim flows
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-registration.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-claim.php';
     }
 
     public function load_cpts() {
@@ -40,7 +41,6 @@ class MediCompare {
     public function activate() {
         global $wpdb;
 
-        // Import logs table
         $table   = $wpdb->prefix . 'medi_import_logs';
         $charset = $wpdb->get_charset_collate();
 

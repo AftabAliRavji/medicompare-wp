@@ -13,12 +13,31 @@ class MediCompare_Pharmacy_Registration {
        AUTO-GENERATE PHARMACY CODE
     --------------------------------------------------------- */
     private function generate_pharmacy_code() {
-        $last = get_option('mc_last_pharmacy_code', 0);
+        $last = (int) get_option('mc_last_pharmacy_code', 0);
         $next = $last + 1;
 
         update_option('mc_last_pharmacy_code', $next);
 
         return 'PHARM-' . str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
+
+    private function find_pharmacy_by_email($email) {
+        if (!$email) return null;
+
+        $q = new WP_Query([
+            'post_type'      => 'mc_pharmacy',
+            'posts_per_page' => 1,
+            'meta_query'     => [
+                [
+                    'key'   => '_mc_email',
+                    'value' => $email,
+                ]
+            ]
+        ]);
+
+        if (!$q->have_posts()) return null;
+
+        return $q->posts[0];
     }
 
     /* ---------------------------------------------------------
@@ -74,7 +93,6 @@ class MediCompare_Pharmacy_Registration {
             <label>Confirm Password</label>
             <input type="password" name="mc_password_confirm" required>
 
-            <!-- reCAPTCHA -->
             <div class="g-recaptcha" data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc"></div>
 
             <button type="submit" name="mc_register_submit">Register</button>
@@ -98,26 +116,31 @@ class MediCompare_Pharmacy_Registration {
             return;
         }
 
+        $email = sanitize_email($_POST['mc_email']);
+
         // Validate passwords
         if ($_POST['mc_password'] !== $_POST['mc_password_confirm']) {
             wp_die('Passwords do not match.');
         }
 
-        // Validate email uniqueness
-        if (email_exists($_POST['mc_email'])) {
+        // Validate email uniqueness at WP user level
+        if (email_exists($email)) {
             wp_die('Email already registered.');
         }
 
         // Validate reCAPTCHA
         $response = wp_remote_post("https://www.google.com/recaptcha/api/siteverify", [
             'body' => [
-                'secret' => '6LeaBgstAAAAAJze9-SGJTKvqoHUDCkjlHEYbIyM',
-                'response' => $_POST['g-recaptcha-response']
+                'secret'   => '6LeaBgstAAAAAJze9-SGJTKvqoHUDCkjlHEYbIyM',
+                'response' => isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '',
             ]
         ]);
 
-        $result = json_decode($response['body']);
+        if (is_wp_error($response)) {
+            wp_die('reCAPTCHA request failed.');
+        }
 
+        $result = json_decode(wp_remote_retrieve_body($response));
         if (empty($result->success)) {
             wp_die('reCAPTCHA failed.');
         }
@@ -126,29 +149,46 @@ class MediCompare_Pharmacy_Registration {
            CREATE USER
         --------------------------------------------------------- */
         $user_id = wp_create_user(
-            sanitize_email($_POST['mc_email']),
+            $email,
             sanitize_text_field($_POST['mc_password']),
-            sanitize_email($_POST['mc_email'])
+            $email
         );
 
+        if (is_wp_error($user_id)) {
+            wp_die('Could not create user.');
+        }
+
         wp_update_user([
-            'ID' => $user_id,
+            'ID'   => $user_id,
             'role' => 'pharmacy_user'
         ]);
 
         /* ---------------------------------------------------------
-           CREATE PHARMACY CPT ENTRY
+           FIND OR CREATE PHARMACY CPT ENTRY (MATCH BY EMAIL)
         --------------------------------------------------------- */
-        $pharmacy_code = $this->generate_pharmacy_code();
+        $existing = $this->find_pharmacy_by_email($email);
 
-        $post_id = wp_insert_post([
-            'post_title'  => sanitize_text_field($_POST['mc_pharmacy_name']),
-            'post_type'   => 'mc_pharmacy',
-            'post_status' => 'publish'
-        ]);
+        if ($existing) {
+            $post_id = $existing->ID;
+            $pharmacy_code = get_post_meta($post_id, '_mc_pharmacy_code', true);
+            if (!$pharmacy_code) {
+                $pharmacy_code = $this->generate_pharmacy_code();
+                update_post_meta($post_id, '_mc_pharmacy_code', $pharmacy_code);
+            }
+        } else {
+            $pharmacy_code = $this->generate_pharmacy_code();
 
-        update_post_meta($post_id, '_mc_pharmacy_code', $pharmacy_code);
-        update_post_meta($post_id, '_mc_email', sanitize_email($_POST['mc_email']));
+            $post_id = wp_insert_post([
+                'post_title'  => sanitize_text_field($_POST['mc_pharmacy_name']),
+                'post_type'   => 'mc_pharmacy',
+                'post_status' => 'publish'
+            ]);
+
+            update_post_meta($post_id, '_mc_pharmacy_code', $pharmacy_code);
+        }
+
+        // Update / set meta from form
+        update_post_meta($post_id, '_mc_email', $email);
         update_post_meta($post_id, '_mc_phone', sanitize_text_field($_POST['mc_phone']));
         update_post_meta($post_id, '_mc_address_line_1', sanitize_text_field($_POST['mc_address_line_1']));
         update_post_meta($post_id, '_mc_address_line_2', sanitize_text_field($_POST['mc_address_line_2']));
@@ -156,18 +196,27 @@ class MediCompare_Pharmacy_Registration {
         update_post_meta($post_id, '_mc_postcode', sanitize_text_field($_POST['mc_postcode']));
         update_post_meta($post_id, '_mc_gphc_number', sanitize_text_field($_POST['mc_gphc_number']));
         update_post_meta($post_id, '_mc_contact_name', sanitize_text_field($_POST['mc_contact_name']));
-        update_post_meta($post_id, '_mc_status', 'pending_verification');
 
-        // Trial
-        update_post_meta($post_id, '_mc_trial_start', time());
-        update_post_meta($post_id, '_mc_trial_end', strtotime('+30 days'));
+        // Status + trial (only if not already set)
+        $status = get_post_meta($post_id, '_mc_status', true);
+        if (!$status) {
+            update_post_meta($post_id, '_mc_status', 'pending_verification');
+        }
+
+        $trial_start = get_post_meta($post_id, '_mc_trial_start', true);
+        $trial_end   = get_post_meta($post_id, '_mc_trial_end', true);
+
+        if (!$trial_start) {
+            update_post_meta($post_id, '_mc_trial_start', time());
+        }
+        if (!$trial_end) {
+            update_post_meta($post_id, '_mc_trial_end', strtotime('+30 days'));
+        }
 
         // Link user → pharmacy
         update_user_meta($user_id, '_mc_pharmacy_id', $post_id);
 
-        /* ---------------------------------------------------------
-           REDIRECT
-        --------------------------------------------------------- */
+        // Redirect
         wp_redirect(add_query_arg('registered', '1', wp_get_referer()));
         exit;
     }

@@ -7,6 +7,9 @@ class MediCompare_Admin_Menu {
     public function __construct() {
         add_action('admin_menu', [$this, 'register_menu']);
         add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
+
+        // Load verification logic on all admin requests
+        require_once plugin_dir_path(__FILE__) . 'admin-pages/pharmacy-verification.php';
     }
 
     public function register_menu() {
@@ -134,6 +137,16 @@ class MediCompare_Admin_Menu {
             'medicompare-upload-pharmacy-csv',
             [$this, 'upload_pharmacy_csv_page']
         );
+
+        add_submenu_page(
+            'medicompare',
+            'Pending Verification',
+            'Pending Verification',
+            'manage_options',
+            'medicompare-pharmacy-verification',
+            [$this, 'pharmacy_verification_page']
+        );
+
 
         /* ---------------------------------------------------------
            REPORTS
@@ -983,6 +996,12 @@ class MediCompare_Admin_Menu {
 
         return $wpdb->get_results($sql, ARRAY_A);
     }
+
+    public function pharmacy_verification_page() {
+     mc_render_pharmacy_verification_page();
+    }
+
+
 }
 
 new MediCompare_Admin_Menu();

@@ -28,6 +28,10 @@ class MediCompare {
         // Front-end registration + claim flows
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-registration.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-claim.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-login.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
+
+
     }
 
     public function load_cpts() {

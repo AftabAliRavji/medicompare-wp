@@ -37,7 +37,7 @@ class MediCompare_Pharmacy_Claim {
 
         if (!$q->have_posts()) return null;
 
-        $post = $q->posts[0];
+        $post   = $q->posts[0];
         $expiry = (int) get_post_meta($post->ID, '_mc_claim_token_expiry', true);
 
         if (!$expiry || $expiry < time()) {
@@ -52,44 +52,42 @@ class MediCompare_Pharmacy_Claim {
     --------------------------------------------------------- */
     public function generate_claim_token($post_id, $post, $update) {
 
-    error_log("MC CLAIM: generate_claim_token() fired for post_id={$post_id}, update=" . ($update ? 'true' : 'false') . ", post_type={$post->post_type}");
+        error_log("MC CLAIM: generate_claim_token() fired for post_id={$post_id}, update=" . ($update ? 'true' : 'false') . ", post_type={$post->post_type}");
 
-    if ($post->post_type !== 'mc_pharmacy') {
-        error_log("MC CLAIM: exiting because post_type is {$post->post_type}, not mc_pharmacy");
-        return;
+        if ($post->post_type !== 'mc_pharmacy') {
+            error_log("MC CLAIM: exiting because post_type is {$post->post_type}, not mc_pharmacy");
+            return;
+        }
+
+        // If token already exists, do nothing
+        $existing = get_post_meta($post_id, '_mc_claim_token', true);
+        if ($existing) {
+            error_log("MC CLAIM: token already exists, skipping");
+            return;
+        }
+
+        $email = get_post_meta($post_id, '_mc_email', true);
+        error_log("MC CLAIM: email meta for post_id={$post_id} is: " . var_export($email, true));
+
+        if (!$email) {
+            error_log("MC CLAIM: exiting because email is empty");
+            return;
+        }
+
+        $token  = $this->create_secure_token();
+        $expiry = time() + (48 * 60 * 60); // 48 hours
+
+        update_post_meta($post_id, '_mc_claim_token', $token);
+        update_post_meta($post_id, '_mc_claim_token_expiry', $expiry);
+
+        error_log("MC CLAIM: token generated for post_id={$post_id}: {$token}");
+
+        // Setup email (admin-created or CSV-imported pharmacy)
+        $this->send_claim_email($email, $token);
     }
-
-    // If token already exists, do nothing
-    $existing = get_post_meta($post_id, '_mc_claim_token', true);
-    if ($existing) {
-        error_log("MC CLAIM: token already exists, skipping");
-        return;
-    }
-
-    $email = get_post_meta($post_id, '_mc_email', true);
-    error_log("MC CLAIM: email meta for post_id={$post_id} is: " . var_export($email, true));
-
-    if (!$email) {
-        error_log("MC CLAIM: exiting because email is empty");
-        return;
-    }
-
-    $token  = $this->create_secure_token();
-    $expiry = time() + (48 * 60 * 60); // 48 hours
-
-    update_post_meta($post_id, '_mc_claim_token', $token);
-    update_post_meta($post_id, '_mc_claim_token_expiry', $expiry);
-
-    error_log("MC CLAIM: token generated for post_id={$post_id}: {$token}");
-
-    $this->send_claim_email($email, $token);
-}
-
-
 
     /* ---------------------------------------------------------
        WHEN PHARMACY IMPORTED VIA CSV
-       (YOU ALREADY TRIGGER mc_csv_pharmacy_imported WITH $post_id)
     --------------------------------------------------------- */
     public function generate_claim_token_after_csv($post_id) {
         $email = get_post_meta($post_id, '_mc_email', true);
@@ -101,11 +99,12 @@ class MediCompare_Pharmacy_Claim {
         update_post_meta($post_id, '_mc_claim_token', $token);
         update_post_meta($post_id, '_mc_claim_token_expiry', $expiry);
 
+        // Setup email for CSV-imported pharmacy
         $this->send_claim_email($email, $token);
     }
 
     /* ---------------------------------------------------------
-       SEND CLAIM EMAIL
+       SEND CLAIM EMAIL (SETUP EMAIL)
     --------------------------------------------------------- */
     private function send_claim_email($email, $token) {
         $link = site_url('/pharmacy/complete-registration/?token=' . urlencode($token));
@@ -122,6 +121,24 @@ class MediCompare_Pharmacy_Claim {
     }
 
     /* ---------------------------------------------------------
+       ADMIN NOTIFICATION EMAIL (AFTER CLAIM COMPLETED)
+    --------------------------------------------------------- */
+    private function send_admin_notification_email($post_id) {
+        // TODO: wire this to your real admin email
+        $admin_email = get_option('admin_email');
+
+        $pharmacy_name = get_the_title($post_id);
+        $subject = "New Pharmacy Awaiting Verification";
+        $message  = "Hello,\n\n";
+        $message .= "A pharmacy has completed its registration and is awaiting verification.\n\n";
+        $message .= "Pharmacy: " . $pharmacy_name . "\n";
+        $message .= "View in admin: " . admin_url('post.php?post=' . $post_id . '&action=edit') . "\n\n";
+        $message .= "Regards,\nMediCompare System";
+
+        wp_mail($admin_email, $subject, $message);
+    }
+
+    /* ---------------------------------------------------------
        RENDER CLAIM FORM
     --------------------------------------------------------- */
     public function render_claim_form() {
@@ -130,7 +147,7 @@ class MediCompare_Pharmacy_Claim {
         ob_start();
 
         if (isset($_GET['claimed']) && $_GET['claimed'] == '1') {
-            echo '<div class="mc-success">Your account has been created. You can now log in.</div>';
+            echo '<div class="mc-success">Your account has been created. You can now log in once verified.</div>';
             return ob_get_clean();
         }
 
@@ -289,21 +306,8 @@ class MediCompare_Pharmacy_Claim {
         update_post_meta($post_id, '_mc_gphc_number', sanitize_text_field($_POST['mc_gphc_number']));
         update_post_meta($post_id, '_mc_contact_name', sanitize_text_field($_POST['mc_contact_name']));
 
-        // Status + trial (only if not already set)
-        $status = get_post_meta($post_id, '_mc_status', true);
-        if (!$status) {
-            update_post_meta($post_id, '_mc_status', 'pending_verification');
-        }
-
-        $trial_start = get_post_meta($post_id, '_mc_trial_start', true);
-        $trial_end   = get_post_meta($post_id, '_mc_trial_end', true);
-
-        if (!$trial_start) {
-            update_post_meta($post_id, '_mc_trial_start', time());
-        }
-        if (!$trial_end) {
-            update_post_meta($post_id, '_mc_trial_end', strtotime('+30 days'));
-        }
+        // Status: move to pending_verification (trial will start on admin verification)
+        update_post_meta($post_id, '_mc_status', 'pending_verification');
 
         // Link user → pharmacy
         update_user_meta($user_id, '_mc_pharmacy_id', $post_id);
@@ -311,6 +315,9 @@ class MediCompare_Pharmacy_Claim {
         // Invalidate token
         delete_post_meta($post_id, '_mc_claim_token');
         delete_post_meta($post_id, '_mc_claim_token_expiry');
+
+        // Notify admin that a pharmacy is awaiting verification
+        $this->send_admin_notification_email($post_id);
 
         // Redirect
         wp_redirect(add_query_arg('claimed', '1', remove_query_arg(['token'])));

@@ -9,7 +9,7 @@ class MediCompare_Pharmacy_CPT {
 
         // Meta boxes
         add_action('add_meta_boxes', [$this, 'add_pharmacy_meta_boxes']);
-        add_action('save_post_mc_pharmacy', [$this, 'save_pharmacy_meta']);
+        add_action('save_post_mc_pharmacy', [$this, 'save_pharmacy_meta'], 20, 2);
 
         // Admin columns
         add_filter('manage_mc_pharmacy_posts_columns', [$this, 'add_pharmacy_columns']);
@@ -138,10 +138,9 @@ class MediCompare_Pharmacy_CPT {
                 <th><label>Status</label></th>
                 <td>
                     <select name="mc_status">
-                        <option value="active" <?php selected($values['status'], 'active'); ?>>Active</option>
-                        <option value="inactive" <?php selected($values['status'], 'inactive'); ?>>Inactive</option>
-                        <option value="suspended" <?php selected($values['status'], 'suspended'); ?>>Suspended</option>
+                        <option value="pending_setup" <?php selected($values['status'], 'pending_setup'); ?>>Pending Setup</option>
                         <option value="pending_verification" <?php selected($values['status'], 'pending_verification'); ?>>Pending Verification</option>
+                        <option value="suspended" <?php selected($values['status'], 'suspended'); ?>>Suspended</option>
                     </select>
                 </td>
             </tr>
@@ -154,7 +153,7 @@ class MediCompare_Pharmacy_CPT {
     /* ---------------------------------------------------------
        SAVE META
     --------------------------------------------------------- */
-    public function save_pharmacy_meta($post_id) {
+    public function save_pharmacy_meta($post_id, $post) {
 
         if (!isset($_POST['mc_pharmacy_meta_nonce']) ||
             !wp_verify_nonce($_POST['mc_pharmacy_meta_nonce'], 'mc_save_pharmacy_meta')) {
@@ -162,6 +161,13 @@ class MediCompare_Pharmacy_CPT {
         }
 
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+
+        // Set default status ONLY on new posts
+        if ($post->post_status === 'auto-draft' || $post->post_date === $post->post_modified) {
+            if (!get_post_meta($post_id, '_mc_status', true)) {
+                update_post_meta($post_id, '_mc_status', 'pending_setup');
+            }
+        }
 
         $fields = [
             'mc_pharmacy_code'  => '_mc_pharmacy_code',

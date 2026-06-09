@@ -10,6 +10,8 @@ class MediCompare_Admin_Menu {
 
         // Load verification logic on all admin requests
         require_once plugin_dir_path(__FILE__) . 'admin-pages/pharmacy-verification.php';
+        require_once plugin_dir_path(__FILE__) . 'admin-pages/admin-dashboard-widget.php';
+
     }
 
     public function register_menu() {
@@ -176,8 +178,16 @@ class MediCompare_Admin_Menu {
     }
 
     public function dashboard_page() {
-        echo '<div class="wrap"><h1>MediCompare Dashboard</h1><p>Welcome to the MediCompare admin panel.</p></div>';
+    echo '<div class="wrap">';
+    echo '<h1>MediCompare Dashboard</h1>';
+    echo '<p>Welcome to the MediCompare admin panel.</p>';
+
+    // Show pending verification widget
+    MediCompare_Admin_Dashboard_Widget::render_inline_widget();
+
+    echo '</div>';
     }
+
 
     public function reports_page() {
         echo '<div class="wrap"><h1>Reports</h1><p>Reports module coming soon.</p></div>';

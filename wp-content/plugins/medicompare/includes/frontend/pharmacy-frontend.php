@@ -34,9 +34,15 @@ class MediCompare_Pharmacy_Frontend {
     }
 
     /* ---------------------------------------------------------
-       DASHBOARD (NO REDIRECTS)
+       DASHBOARD
     --------------------------------------------------------- */
     public function render_dashboard() {
+
+        // Protect dashboard
+        if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+            wp_redirect(site_url('/pharmacy/login/'));
+            exit;
+        }
 
         $pharmacy = $this->get_current_pharmacy();
         if (!$pharmacy) {
@@ -56,10 +62,18 @@ class MediCompare_Pharmacy_Frontend {
         $trial_start_readable = $trial_start ? date('d M Y', $trial_start) : 'N/A';
         $trial_end_readable   = $trial_end ? date('d M Y', $trial_end) : 'N/A';
 
+        $current_user = wp_get_current_user();
+
         ob_start();
         ?>
 
         <div class="mc-dashboard">
+
+            <!-- Header Bar -->
+            <div class="mc-dashboard-header">
+                <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
+                <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
+            </div>
 
             <h1>Pharmacy Dashboard</h1>
 
@@ -94,9 +108,14 @@ class MediCompare_Pharmacy_Frontend {
     }
 
     /* ---------------------------------------------------------
-       EDIT DETAILS (FORM, NO REDIRECTS)
+       EDIT DETAILS
     --------------------------------------------------------- */
     public function render_edit_details() {
+
+        if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+            wp_redirect(site_url('/pharmacy/login/'));
+            exit;
+        }
 
         $pharmacy = $this->get_current_pharmacy();
         if (!$pharmacy) {
@@ -114,8 +133,15 @@ class MediCompare_Pharmacy_Frontend {
 
         $updated = isset($_GET['updated']) && $_GET['updated'] === '1';
 
+        $current_user = wp_get_current_user();
+
         ob_start();
         ?>
+
+        <div class="mc-dashboard-header">
+            <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
+            <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
+        </div>
 
         <div class="mc-edit-details">
             <h1>Edit Pharmacy Details</h1>
@@ -170,7 +196,7 @@ class MediCompare_Pharmacy_Frontend {
     }
 
     /* ---------------------------------------------------------
-       EDIT DETAILS HANDLER (REDIRECT OK HERE)
+       EDIT DETAILS HANDLER
     --------------------------------------------------------- */
     public function handle_edit_details_submit() {
 
@@ -211,17 +237,29 @@ class MediCompare_Pharmacy_Frontend {
     }
 
     /* ---------------------------------------------------------
-       SEARCH / COMPARISON PLACEHOLDER (NO REDIRECTS)
+       SEARCH / COMPARISON
     --------------------------------------------------------- */
     public function render_search() {
+
+        if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+            wp_redirect(site_url('/pharmacy/login/'));
+            exit;
+        }
 
         $pharmacy = $this->get_current_pharmacy();
         if (!$pharmacy) {
             return '<p>You must be logged in as a pharmacy user to search products.</p>';
         }
 
+        $current_user = wp_get_current_user();
+
         ob_start();
         ?>
+
+        <div class="mc-dashboard-header">
+            <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
+            <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
+        </div>
 
         <div class="mc-search">
             <h1>Search Products & Compare Suppliers</h1>

@@ -216,6 +216,25 @@ class MediCompare_Pharmacy_Registration {
         // Link user → pharmacy
         update_user_meta($user_id, '_mc_pharmacy_id', $post_id);
 
+        /* ---------------------------------------------------------
+        SEND ADMIN NOTIFICATION EMAIL
+        --------------------------------------------------------- */
+        $admin_email = get_option('admin_email');
+
+        $subject = 'New Pharmacy Registration – Verification Required';
+
+        $message  = "Hello Admin,\n\n";
+        $message .= "A new pharmacy has registered and is awaiting verification.\n\n";
+        $message .= "Pharmacy Name: " . sanitize_text_field($_POST['mc_pharmacy_name']) . "\n";
+        $message .= "Email: " . $email . "\n";
+        $message .= "GPhC Number: " . sanitize_text_field($_POST['mc_gphc_number']) . "\n\n";
+        $message .= "View in admin:\n";
+        $message .= admin_url("post.php?post={$post_id}&action=edit") . "\n\n";
+        $message .= "Regards,\nMediCompare System";
+
+        wp_mail($admin_email, $subject, $message);
+
+
         // Redirect
         wp_redirect(add_query_arg('registered', '1', wp_get_referer()));
         exit;

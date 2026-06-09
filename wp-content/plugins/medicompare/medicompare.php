@@ -22,6 +22,9 @@ class MediCompare {
         // Load CPTs early
         add_action('init', [$this, 'load_cpts'], 1);
 
+        // Register custom roles
+        add_action('init', [$this, 'register_roles'], 2);
+
         // Load admin menu
         require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
 
@@ -30,8 +33,20 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-claim.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-login.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
+    }
 
+    /**
+     * Register the pharmacy_user role so WP does NOT strip it from users.
+     */
+    public function register_roles() {
 
+        add_role(
+            'pharmacy_user',
+            'Pharmacy User',
+            [
+                'read' => true,
+            ]
+        );
     }
 
     public function load_cpts() {

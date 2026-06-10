@@ -451,65 +451,71 @@ class MediCompare_Admin_Menu {
     --------------------------------------------------------- */
     public function insert_or_update_product_from_row($row) {
 
-        $product_code = trim($row['product_code']);
-        $product_name = trim($row['product_name']);
-        $category     = trim($row['category']);
-        $strength     = trim($row['strength']);
-        $pack_size    = trim($row['pack_size']);
-        $description  = trim($row['description']);
+    $product_code = trim($row['product_code']);
+    $product_name = trim($row['product_name']);
+    $category     = trim($row['category']);
+    $strength     = trim($row['strength']);
+    $pack_size    = trim($row['pack_size']);
+    $description  = trim($row['description']);
 
-        if ($product_code === '' || $product_name === '') {
-            return 'skipped';
-        }
+    if ($product_code === '' || $product_name === '') {
+        return 'skipped';
+    }
 
-        $existing = get_posts([
-            'post_type'      => 'mc_product',
-            'post_status'    => 'any',
-            'meta_key'       => '_mc_product_code',
-            'meta_value'     => $product_code,
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
+    // IMPORTANT: use correct meta key (no underscore)
+    $existing = get_posts([
+        'post_type'      => 'mc_product',
+        'post_status'    => 'any',
+        'meta_key'       => 'mc_product_code',
+        'meta_value'     => $product_code,
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+    ]);
+
+    // UPDATE
+    if (!empty($existing)) {
+
+        $product_id = $existing[0];
+
+        wp_update_post([
+            'ID'          => $product_id,
+            'post_title'  => $product_name,
+            'post_name'   => sanitize_title($product_code),
+            'post_status' => 'publish',   // ensure published
+            'post_author' => 1,
         ]);
 
-        if (!empty($existing)) {
-            $product_id = $existing[0];
+        update_post_meta($product_id, 'mc_product_code', $product_code);
+        update_post_meta($product_id, 'mc_category', $category);
+        update_post_meta($product_id, 'mc_strength', $strength);
+        update_post_meta($product_id, 'mc_pack_size', $pack_size);
+        update_post_meta($product_id, 'mc_description', $description);
 
-            wp_update_post([
-                'ID'         => $product_id,
-                'post_title' => $product_name,
-                'post_name'  => sanitize_title($product_code),
-            ]);
-
-            update_post_meta($product_id, '_mc_product_code', $product_code);
-            update_post_meta($product_id, '_mc_category', $category);
-            update_post_meta($product_id, '_mc_strength', $strength);
-            update_post_meta($product_id, '_mc_pack_size', $pack_size);
-            update_post_meta($product_id, '_mc_description', $description);
-
-            return 'updated';
-
-        } else {
-
-            $product_id = wp_insert_post([
-                'post_title'  => $product_name,
-                'post_name'   => sanitize_title($product_code),
-                'post_type'   => 'mc_product',
-                'post_status' => 'publish'
-            ]);
-
-            if (is_wp_error($product_id) || !$product_id) {
-                return 'skipped';
-            }
-
-            update_post_meta($product_id, '_mc_product_code', $product_code);
-            update_post_meta($product_id, '_mc_category', $category);
-            update_post_meta($product_id, '_mc_strength', $strength);
-            update_post_meta($product_id, '_mc_pack_size', $pack_size);
-            update_post_meta($product_id, '_mc_description', $description);
-
-            return 'inserted';
-        }
+        return 'updated';
     }
+
+    // INSERT
+    $product_id = wp_insert_post([
+        'post_title'  => $product_name,
+        'post_name'   => sanitize_title($product_code),
+        'post_type'   => 'mc_product',
+        'post_status' => 'publish',
+        'post_author' => 1,
+    ]);
+
+    if (is_wp_error($product_id) || !$product_id) {
+        return 'skipped';
+    }
+
+    update_post_meta($product_id, 'mc_product_code', $product_code);
+    update_post_meta($product_id, 'mc_category', $category);
+    update_post_meta($product_id, 'mc_strength', $strength);
+    update_post_meta($product_id, 'mc_pack_size', $pack_size);
+    update_post_meta($product_id, 'mc_description', $description);
+
+    return 'inserted';
+}
+
 
     /* ---------------------------------------------------------
        INSERT / UPDATE PHARMACY

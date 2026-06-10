@@ -81,3 +81,162 @@
     color: #777;
 }
 
+/* Layout */
+.mc-search-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.mc-search-left,
+.mc-search-right {
+    flex: 1;
+}
+
+/* Search bar */
+.mc-search-bar {
+    margin-bottom: 15px;
+}
+
+#mc-search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Search results */
+.mc-search-results {
+    margin-top: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    background: #fff;
+}
+
+.mc-search-results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mc-search-results-table th,
+.mc-search-results-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+
+.mc-search-row {
+    cursor: pointer;
+}
+
+.mc-search-row:hover {
+    background: #f5f5f5;
+}
+
+.mc-search-row-selected {
+    background: #e3f2fd;
+}
+
+/* Selected item */
+.mc-selected-item {
+    margin-top: 15px;
+}
+
+.mc-selected-item-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+    background: #fafafa;
+}
+
+/* Order tabs */
+.mc-order-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.mc-order-tab {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.mc-order-tab-active {
+    background: #1976d2;
+    color: #fff;
+    border-color: #1976d2;
+}
+
+/* Order panels */
+.mc-order-panel {
+    display: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background: #fff;
+    min-height: 150px;
+}
+
+.mc-order-panel-active {
+    display: block;
+}
+
+/* Pending order tables */
+.mc-pending-supplier-block {
+    margin-bottom: 15px;
+}
+
+.mc-pending-order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mc-pending-order-table th,
+.mc-pending-order-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+
+.mc-remove-pending-item {
+    border: none;
+    background: transparent;
+    color: #c62828;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Totals */
+.mc-supplier-total,
+.mc-overall-total {
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+/* Transfer button */
+.mc-order-actions {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.mc-transfer-btn {
+    padding: 8px 14px;
+    background: #2e7d32;
+    color: #fff;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.mc-transfer-btn:hover {
+    background: #1b5e20;
+}

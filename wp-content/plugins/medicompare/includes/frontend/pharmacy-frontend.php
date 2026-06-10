@@ -253,37 +253,69 @@ class MediCompare_Pharmacy_Frontend {
 
         $current_user = wp_get_current_user();
 
+        // Enqueue JS (simple inline enqueue for now)
+        wp_enqueue_script(
+            'mc-pharmacy-comparison',
+            plugin_dir_url(dirname(__DIR__)) . 'js/pharmacy-comparison.js',
+            ['jquery'],
+            '1.0',
+            true
+        );
+
+         wp_localize_script('mc-pharmacy-comparison', 'mcComparison', [
+            'ajaxUrl'     => admin_url('admin-ajax.php'),
+            'nonce'       => wp_create_nonce('mc_comparison_nonce'),
+        ]);
+
         ob_start();
         ?>
+
 
         <div class="mc-dashboard-header">
             <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
             <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
         </div>
 
-        <div class="mc-search">
-            <h1>Search Products & Compare Suppliers</h1>
+        <div class="mc-search-layout">
 
-            <form method="get" action="">
-                <p>
-                    <label>Product name or code</label><br>
-                    <input type="text" name="q" value="<?php echo isset($_GET['q']) ? esc_attr($_GET['q']) : ''; ?>" required>
-                    <button type="submit">Search</button>
-                </p>
-            </form>
+            <div class="mc-search-left">
+                <h1>Search Products & Compare Suppliers</h1>
 
-            <?php if (!empty($_GET['q'])): ?>
-                <h2>Results for "<?php echo esc_html($_GET['q']); ?>"</h2>
-                <p>This is a placeholder. Here we will show:</p>
-                <ul>
-                    <li>All matching products</li>
-                    <li>All suppliers with price, pack size, stock</li>
-                    <li>Buttons to select supplier and add to basket</li>
-                </ul>
-                <p>Next step: implement the comparison engine and basket flow.</p>
-            <?php endif; ?>
+                <div class="mc-search-bar">
+                    <label for="mc-search-input">Product name or code</label><br>
+                    <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
+                </div>
 
-            <p><a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>">Back to dashboard</a></p>
+                <div id="mc-search-results" class="mc-search-results">
+                    <!-- AJAX search results will be injected here -->
+                </div>
+
+                <div id="mc-selected-item" class="mc-selected-item">
+                    <!-- Selected product + supplier + quantity + add button -->
+                </div>
+
+                <p><a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>">Back to dashboard</a></p>
+            </div>
+
+            <div class="mc-search-right">
+                <div class="mc-order-tabs">
+                    <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">Pending Order</button>
+                    <button type="button" class="mc-order-tab" data-tab="transferred">Transferred Orders</button>
+                </div>
+
+                <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active">
+                    <!-- Pending order items will be injected here via AJAX -->
+                </div>
+
+                <div id="mc-transferred-orders" class="mc-order-panel">
+                    <!-- Transferred orders will be injected here via AJAX -->
+                </div>
+
+                <div class="mc-order-actions">
+                    <button type="button" id="mc-transfer-order-btn" class="mc-transfer-btn">Transfer Pending Order</button>
+                </div>
+            </div>
+
         </div>
 
         <?php

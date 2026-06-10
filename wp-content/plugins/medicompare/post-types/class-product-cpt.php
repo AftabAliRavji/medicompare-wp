@@ -143,34 +143,39 @@ class MediCompare_Product_CPT {
     --------------------------------------------------------- */
     public function save_product_details($post_id) {
 
-        if (!isset($_POST['mc_product_details_nonce']) ||
-            !wp_verify_nonce($_POST['mc_product_details_nonce'], 'mc_save_product_details')) {
-            return;
-        }
-
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (!current_user_can('edit_post', $post_id)) return;
-
-        if (isset($_POST['mc_product_code'])) {
-            update_post_meta($post_id, '_mc_product_code', sanitize_text_field($_POST['mc_product_code']));
-        }
-
-        if (isset($_POST['mc_category'])) {
-            update_post_meta($post_id, '_mc_category', sanitize_text_field($_POST['mc_category']));
-        }
-
-        if (isset($_POST['mc_strength'])) {
-            update_post_meta($post_id, '_mc_strength', sanitize_text_field($_POST['mc_strength']));
-        }
-
-        if (isset($_POST['mc_pack_size'])) {
-            update_post_meta($post_id, '_mc_pack_size', sanitize_text_field($_POST['mc_pack_size']));
-        }
-
-        if (isset($_POST['mc_description'])) {
-            update_post_meta($post_id, '_mc_description', sanitize_textarea_field($_POST['mc_description']));
-        }
+    // Nonce check
+    if (!isset($_POST['mc_product_details_nonce']) ||
+        !wp_verify_nonce($_POST['mc_product_details_nonce'], 'mc_save_product_details')) {
+        return;
     }
+
+    // Autosave / permissions
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (!current_user_can('edit_post', $post_id)) return;
+
+    // Sanitize fields
+    $product_code = isset($_POST['mc_product_code']) ? sanitize_text_field($_POST['mc_product_code']) : '';
+    $category     = isset($_POST['mc_category']) ? sanitize_text_field($_POST['mc_category']) : '';
+    $strength     = isset($_POST['mc_strength']) ? sanitize_text_field($_POST['mc_strength']) : '';
+    $pack_size    = isset($_POST['mc_pack_size']) ? sanitize_text_field($_POST['mc_pack_size']) : '';
+    $description  = isset($_POST['mc_description']) ? sanitize_textarea_field($_POST['mc_description']) : '';
+
+    // Ensure product is published
+    wp_update_post([
+        'ID'          => $post_id,
+        'post_status' => 'publish',
+        'post_author' => get_current_user_id(),
+        'post_name'   => sanitize_title($product_code), // slug = product_code
+    ]);
+
+    // Save meta using correct keys (NO leading underscore)
+    update_post_meta($post_id, 'mc_product_code', $product_code);
+    update_post_meta($post_id, 'mc_category', $category);
+    update_post_meta($post_id, 'mc_strength', $strength);
+    update_post_meta($post_id, 'mc_pack_size', $pack_size);
+    update_post_meta($post_id, 'mc_description', $description);
+}
+
 
     /* ---------------------------------------------------------
        ADMIN LIST COLUMNS

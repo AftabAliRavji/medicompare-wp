@@ -18,6 +18,7 @@ class MediCompare {
 
         // Plugin activation
         register_activation_hook(__FILE__, [$this, 'activate']);
+        register_activation_hook(__FILE__, [$this, 'run_migrations']);
 
         // Load CPTs early
         add_action('init', [$this, 'load_cpts'], 1);
@@ -29,10 +30,13 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
 
         // Front-end registration + claim flows
+        require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-protect.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-registration.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-claim.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-login.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-comparison.php';
+
     }
 
     /**
@@ -80,6 +84,19 @@ class MediCompare {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
     }
+
+    public function run_migrations() {
+    global $wpdb;
+
+    $migration_dir = plugin_dir_path(__FILE__) . 'migrations/';
+
+    foreach (glob($migration_dir . '*.sql') as $file) {
+        $sql = file_get_contents($file);
+        $wpdb->query($sql);
+    }
+}
+
+
 }
 
 new MediCompare();

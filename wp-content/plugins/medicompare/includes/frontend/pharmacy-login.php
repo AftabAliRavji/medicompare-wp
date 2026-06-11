@@ -59,17 +59,20 @@ class MediCompare_Pharmacy_Login {
 
         mc_debug("Login handler triggered");
 
-        // Only run on POST submit
-        if (!isset($_POST['mc_login_submit'])) {
-            mc_debug("No POST submit detected");
+        // FIX 1: Detect ANY POST submission (Enter key OR button)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            mc_debug("Not a POST request");
             return;
         }
 
-        mc_debug("POST detected: " . print_r($_POST, true));
+        // FIX 2: Ensure this is the login form (avoid collisions with other POSTs)
+        if (!isset($_POST['mc_pharmacy_login_nonce'])) {
+            mc_debug("Login nonce missing → not our form");
+            return;
+        }
 
         // Verify nonce
         if (
-            !isset($_POST['mc_pharmacy_login_nonce']) ||
             !wp_verify_nonce($_POST['mc_pharmacy_login_nonce'], 'mc_pharmacy_login')
         ) {
             mc_debug("Nonce failed");
@@ -90,9 +93,9 @@ class MediCompare_Pharmacy_Login {
             }
         }
 
-        // Get POST values
+        // FIX 3: DO NOT SANITIZE PASSWORDS (sanitize_text_field breaks them)
         $email    = sanitize_email($_POST['mc_login_email']);
-        $password = sanitize_text_field($_POST['mc_login_password']);
+        $password = $_POST['mc_login_password'];
 
         mc_debug("Email received: $email");
         mc_debug("Password length: " . strlen($password));
@@ -150,6 +153,7 @@ class MediCompare_Pharmacy_Login {
         wp_redirect(site_url('/pharmacy/dashboard/'));
         exit;
     }
+
 
 
     public function handle_logout() {

@@ -393,59 +393,71 @@ class MediCompare_Admin_Menu {
        INSERT OR UPDATE SUPPLIER PRODUCT ROW
     --------------------------------------------------------- */
     public function insert_supplier_product_row($supplier_id, $row) {
-        global $wpdb;
+    global $wpdb;
 
-        $table = $wpdb->prefix . 'medi_supplier_products';
+    $table = $wpdb->prefix . 'medi_supplier_products';
 
-        $product = get_page_by_title($row['product_code'], OBJECT, 'mc_product');
+    $product_code = trim($row['product_code']);
 
-        if (!$product) {
-            $product_id = wp_insert_post([
-                'post_title'  => $row['product_code'],
-                'post_type'   => 'mc_product',
-                'post_status' => 'publish'
-            ]);
-        } else {
-            $product_id = $product->ID;
-        }
+    if ($product_code === '') {
+        return 'skipped';
+    }
 
-        $existing = $wpdb->get_row($wpdb->prepare(
-            "SELECT id FROM $table WHERE supplier_id = %d AND product_id = %d",
-            $supplier_id,
-            $product_id
-        ));
+    // Find existing product by mc_product_code (the canonical source of truth)
+    $product_ids = get_posts([
+        'post_type'      => 'mc_product',
+        'post_status'    => 'any',
+        'meta_key'       => 'mc_product_code',
+        'meta_value'     => $product_code,
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+    ]);
 
-        if ($existing) {
+    if (empty($product_ids)) {
+        // Product does not exist – do NOT create it here
+        return 'skipped';
+    }
 
-            $wpdb->update(
-                $table,
-                [
-                    'price'        => $row['price'],
-                    'stock'        => $row['stock'],
-                    'last_updated' => current_time('mysql')
-                ],
-                ['id' => $existing->id],
-                ['%f', '%d', '%s'],
-                ['%d']
-            );
+    $product_id = $product_ids[0];
 
-            return 'updated';
-        }
+    // Check if supplier/product row already exists
+    $existing = $wpdb->get_row($wpdb->prepare(
+        "SELECT id FROM {$table} WHERE supplier_id = %d AND product_id = %d",
+        $supplier_id,
+        $product_id
+    ));
 
-        $wpdb->insert(
+    if ($existing) {
+        $wpdb->update(
             $table,
             [
-                'supplier_id'  => $supplier_id,
-                'product_id'   => $product_id,
-                'price'        => $row['price'],
-                'stock'        => $row['stock'],
-                'last_updated' => current_time('mysql')
+                'price'        => (float) $row['price'],
+                'stock'        => (int) $row['stock'],
+                'last_updated' => current_time('mysql'),
             ],
-            ['%d', '%d', '%f', '%d', '%s']
+            ['id' => $existing->id],
+            ['%f', '%d', '%s'],
+            ['%d']
         );
 
-        return 'inserted';
+        return 'updated';
     }
+
+    $wpdb->insert(
+        $table,
+        [
+            'supplier_id'  => (int) $supplier_id,
+            'product_id'   => (int) $product_id,
+            'price'        => (float) $row['price'],
+            'stock'        => (int) $row['stock'],
+            'last_updated' => current_time('mysql'),
+        ],
+        ['%d', '%d', '%f', '%d', '%s']
+    );
+
+    return 'inserted';
+}
+
     /* ---------------------------------------------------------
        INSERT / UPDATE PRODUCT
     --------------------------------------------------------- */
@@ -992,7 +1004,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       GET SUPPLIER PRODUCTS (NEW)
+        GET SUPPLIER PRODUCTS (UPDATED WITH STRENGTH + PACK SIZE)
     --------------------------------------------------------- */
     public function get_supplier_products($supplier_id) {
         global $wpdb;
@@ -1003,15 +1015,27 @@ class MediCompare_Admin_Menu {
         $table = $wpdb->prefix . 'medi_supplier_products';
 
         $sql = $wpdb->prepare("
-            SELECT sp.*, p.post_title AS product_title
+            SELECT 
+                sp.*,
+                p.post_title AS product_title,
+                pm_strength.meta_value AS strength,
+                pm_pack.meta_value AS pack_size
             FROM {$table} sp
-            LEFT JOIN {$wpdb->posts} p ON sp.product_id = p.ID
+            LEFT JOIN {$wpdb->posts} p 
+                   ON sp.product_id = p.ID
+            LEFT JOIN {$wpdb->postmeta} pm_strength 
+                   ON pm_strength.post_id = sp.product_id 
+                  AND pm_strength.meta_key = 'mc_strength'
+            LEFT JOIN {$wpdb->postmeta} pm_pack 
+                   ON pm_pack.post_id = sp.product_id 
+                  AND pm_pack.meta_key = 'mc_pack_size'
             WHERE sp.supplier_id = %d
             ORDER BY p.post_title ASC
         ", $supplier_id);
 
         return $wpdb->get_results($sql, ARRAY_A);
     }
+
 
     public function pharmacy_verification_page() {
      mc_render_pharmacy_verification_page();

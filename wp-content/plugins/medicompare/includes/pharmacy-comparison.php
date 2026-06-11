@@ -60,102 +60,121 @@ class MediCompare_Pharmacy_Comparison {
        AJAX: SEARCH PRODUCTS
     --------------------------------------------------------- */
 
-    public function ajax_search_products() {
-        check_ajax_referer('mc_comparison_nonce', 'nonce');
+    /* ---------------------------------------------------------
+   AJAX: SEARCH PRODUCTS (UPDATED)
+--------------------------------------------------------- */
 
-        $pharmacy_id = $this->get_current_pharmacy_id();
-        if (!$pharmacy_id) wp_send_json_error(['message' => 'Not authorised.']);
+public function ajax_search_products() {
+    check_ajax_referer('mc_comparison_nonce', 'nonce');
 
-        $q = isset($_POST['q']) ? trim(wp_unslash($_POST['q'])) : '';
-        if (strlen($q) < 3) wp_send_json_error(['message' => 'Type at least 3 characters.']);
+    $pharmacy_id = $this->get_current_pharmacy_id();
+    if (!$pharmacy_id) wp_send_json_error(['message' => 'Not authorised.']);
 
-        global $wpdb;
+    $q = isset($_POST['q']) ? trim(wp_unslash($_POST['q'])) : '';
+    if (strlen($q) < 3) wp_send_json_error(['message' => 'Type at least 3 characters.']);
 
-        $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
-        $posts_table             = $wpdb->posts;
-        $postmeta_table          = $wpdb->postmeta;
+    global $wpdb;
 
-        $sql = "
-            SELECT
-                sp.id AS supplier_product_id,
-                sp.supplier_id,
-                sp.product_id,
-                sp.price,
-                sp.stock,
-                p.post_title AS product_name,
-                s.post_title AS supplier_name,
-                MAX(CASE WHEN pm.meta_key = 'mc_strength' THEN pm.meta_value END) AS strength,
-                MAX(CASE WHEN pm.meta_key = 'mc_pack_size' THEN pm.meta_value END) AS pack_size,
-                MAX(CASE WHEN pm.meta_key = 'mc_description' THEN pm.meta_value END) AS description
-            FROM {$supplier_products_table} sp
-            INNER JOIN {$posts_table} p ON p.ID = sp.product_id
-            LEFT JOIN {$postmeta_table} pm ON pm.post_id = sp.product_id
-            INNER JOIN {$posts_table} s ON s.ID = sp.supplier_id
-            WHERE p.post_type = 'mc_product'
-              AND p.post_status = 'publish'
-              AND (
-                    p.post_title LIKE %s
-                    OR EXISTS (
-                        SELECT 1 FROM {$postmeta_table} pm2
-                        WHERE pm2.post_id = sp.product_id
-                          AND pm2.meta_key = 'mc_product_code'
-                          AND pm2.meta_value LIKE %s
-                    )
-                  )
-            GROUP BY sp.id
-            ORDER BY sp.price ASC
-            LIMIT 50
-        ";
+    $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
+    $posts_table             = $wpdb->posts;
+    $postmeta_table          = $wpdb->postmeta;
 
-        $like = '%' . $wpdb->esc_like($q) . '%';
+    $sql = "
+        SELECT
+            sp.id AS supplier_product_id,
+            sp.supplier_id,
+            sp.product_id,
+            sp.price,
+            sp.stock,
+            p.post_title AS product_name,
+            s.post_title AS supplier_name,
+            MAX(CASE WHEN pm.meta_key = 'mc_strength' THEN pm.meta_value END) AS strength,
+            MAX(CASE WHEN pm.meta_key = 'mc_pack_size' THEN pm.meta_value END) AS pack_size,
+            MAX(CASE WHEN pm.meta_key = 'mc_description' THEN pm.meta_value END) AS description
+        FROM {$supplier_products_table} sp
+        INNER JOIN {$posts_table} p ON p.ID = sp.product_id
+        LEFT JOIN {$postmeta_table} pm ON pm.post_id = sp.product_id
+        INNER JOIN {$posts_table} s ON s.ID = sp.supplier_id
+        WHERE p.post_type = 'mc_product'
+          AND p.post_status = 'publish'
+          AND (
+                p.post_title LIKE %s
+                OR EXISTS (
+                    SELECT 1 FROM {$postmeta_table} pm2
+                    WHERE pm2.post_id = sp.product_id
+                      AND pm2.meta_key = 'mc_product_code'
+                      AND pm2.meta_value LIKE %s
+                )
+              )
+        GROUP BY sp.id
+        ORDER BY sp.price ASC
+        LIMIT 50
+    ";
 
-        $rows = $wpdb->get_results($wpdb->prepare($sql, $like, $like), ARRAY_A);
+    $like = '%' . $wpdb->esc_like($q) . '%';
 
-        if (!$rows) wp_send_json_success(['html' => '<p>No matching products found.</p>']);
+    $rows = $wpdb->get_results($wpdb->prepare($sql, $like, $like), ARRAY_A);
 
-        ob_start();
-        ?>
-        <table class="mc-search-results-table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Details</th>
-                    <th>Supplier</th>
-                    <th>Unit Price</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($rows as $row): ?>
-                <tr class="mc-search-row"
-                    data-supplier-product-id="<?php echo esc_attr($row['supplier_product_id']); ?>"
-                    data-product-id="<?php echo esc_attr($row['product_id']); ?>"
-                    data-supplier-id="<?php echo esc_attr($row['supplier_id']); ?>"
-                    data-unit-price="<?php echo esc_attr($row['price']); ?>">
+    if (!$rows) wp_send_json_success(['html' => '<p>No matching products found.</p>']);
 
-                    <td><?php echo esc_html($row['product_name']); ?></td>
+    ob_start();
+    ?>
+    <table class="mc-search-results-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Description</th>
+                <th>Supplier</th>
+                <th>Unit Price</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($rows as $row): ?>
 
-                    <td>
-                        <?php
-                        $details = [];
-                        if ($row['strength'])   $details[] = esc_html($row['strength']);
-                        if ($row['pack_size'])  $details[] = esc_html($row['pack_size']);
-                        if ($row['description']) $details[] = esc_html($row['description']);
-                        echo implode(' | ', $details);
-                        ?>
-                    </td>
+            <?php
+            // Build product name with pack size + strength
+            $name_parts = [];
 
-                    <td><?php echo esc_html($row['supplier_name']); ?></td>
-                    <td>£<?php echo number_format((float) $row['price'], 2); ?></td>
-                    <td><?php echo (int) $row['stock']; ?></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-        <?php
+            if (!empty($row['pack_size'])) {
+                $name_parts[] = $row['pack_size'];
+            }
+            if (!empty($row['strength'])) {
+                $name_parts[] = $row['strength'];
+            }
 
-        wp_send_json_success(['html' => ob_get_clean()]);
-    }
+            $suffix = '';
+            if (!empty($name_parts)) {
+                $suffix = ' (' . implode(', ', $name_parts) . ')';
+            }
+
+            $full_name = $row['product_name'] . $suffix;
+            ?>
+
+            <tr class="mc-search-row"
+                data-supplier-product-id="<?php echo esc_attr($row['supplier_product_id']); ?>"
+                data-product-id="<?php echo esc_attr($row['product_id']); ?>"
+                data-supplier-id="<?php echo esc_attr($row['supplier_id']); ?>"
+                data-unit-price="<?php echo esc_attr($row['price']); ?>">
+
+                <td><?php echo esc_html($full_name); ?></td>
+
+                <td>
+                    <?php echo esc_html($row['description']); ?>
+                </td>
+
+                <td><?php echo esc_html($row['supplier_name']); ?></td>
+                <td>£<?php echo number_format((float) $row['price'], 2); ?></td>
+                <td><?php echo (int) $row['stock']; ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php
+
+    wp_send_json_success(['html' => ob_get_clean()]);
+}
+
     /* ---------------------------------------------------------
        AJAX: ADD ITEM TO PENDING ORDER
     --------------------------------------------------------- */

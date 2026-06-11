@@ -37,6 +37,9 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
         require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-comparison.php';
 
+        // ⭐ NEW: Hide theme header/footer for MediCompare pages
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/hide-theme-ui.php';
+
     }
 
     /**
@@ -86,17 +89,15 @@ class MediCompare {
     }
 
     public function run_migrations() {
-    global $wpdb;
+        global $wpdb;
 
-    $migration_dir = plugin_dir_path(__FILE__) . 'migrations/';
+        $migration_dir = plugin_dir_path(__FILE__) . 'migrations/';
 
-    foreach (glob($migration_dir . '*.sql') as $file) {
-        $sql = file_get_contents($file);
-        $wpdb->query($sql);
+        foreach (glob($migration_dir . '*.sql') as $file) {
+            $sql = file_get_contents($file);
+            $wpdb->query($sql);
+        }
     }
-}
-
-
 }
 
 new MediCompare();

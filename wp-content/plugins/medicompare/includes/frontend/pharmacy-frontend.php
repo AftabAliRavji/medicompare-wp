@@ -239,88 +239,111 @@ class MediCompare_Pharmacy_Frontend {
     /* ---------------------------------------------------------
        SEARCH / COMPARISON
     --------------------------------------------------------- */
-    public function render_search() {
+    /* ---------------------------------------------------------
+   SEARCH / COMPARISON
+--------------------------------------------------------- */
+public function render_search() {
 
-        if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
-            wp_redirect(site_url('/pharmacy/login/'));
-            exit;
-        }
-
-        $pharmacy = $this->get_current_pharmacy();
-        if (!$pharmacy) {
-            return '<p>You must be logged in as a pharmacy user to search products.</p>';
-        }
-
-        $current_user = wp_get_current_user();
-
-        // Enqueue JS (simple inline enqueue for now)
-        wp_enqueue_script(
-            'mc-pharmacy-comparison',
-            plugin_dir_url(dirname(__DIR__)) . 'js/pharmacy-comparison.js',
-            ['jquery'],
-            '1.0',
-            true
-        );
-
-         wp_localize_script('mc-pharmacy-comparison', 'mcComparison', [
-            'ajaxUrl'     => admin_url('admin-ajax.php'),
-            'nonce'       => wp_create_nonce('mc_comparison_nonce'),
-        ]);
-
-        ob_start();
-        ?>
-
-
-        <div class="mc-dashboard-header">
-            <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
-            <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
-        </div>
-
-        <div class="mc-search-layout">
-
-            <div class="mc-search-left">
-                <h1>Search Products & Compare Suppliers</h1>
-
-                <div class="mc-search-bar">
-                    <label for="mc-search-input">Product name or code</label><br>
-                    <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
-                </div>
-
-                <div id="mc-search-results" class="mc-search-results">
-                    <!-- AJAX search results will be injected here -->
-                </div>
-
-                <div id="mc-selected-item" class="mc-selected-item">
-                    <!-- Selected product + supplier + quantity + add button -->
-                </div>
-
-                <p><a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>">Back to dashboard</a></p>
-            </div>
-
-            <div class="mc-search-right">
-                <div class="mc-order-tabs">
-                    <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">Pending Order</button>
-                    <button type="button" class="mc-order-tab" data-tab="transferred">Transferred Orders</button>
-                </div>
-
-                <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active">
-                    <!-- Pending order items will be injected here via AJAX -->
-                </div>
-
-                <div id="mc-transferred-orders" class="mc-order-panel">
-                    <!-- Transferred orders will be injected here via AJAX -->
-                </div>
-
-                <div class="mc-order-actions">
-                    <button type="button" id="mc-transfer-order-btn" class="mc-transfer-btn">Transfer Pending Order</button>
-                </div>
-            </div>
-
-        </div>
-
-        <?php
-        return ob_get_clean();
+    if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+        wp_redirect(site_url('/pharmacy/login/'));
+        exit;
     }
+
+    $pharmacy = $this->get_current_pharmacy();
+    if (!$pharmacy) {
+        return '<p>You must be logged in as a pharmacy user to search products.</p>';
+    }
+
+    $current_user = wp_get_current_user();
+
+    // Enqueue JS
+    wp_enqueue_script(
+        'mc-pharmacy-comparison',
+        plugin_dir_url(__DIR__) . '../assets/js/pharmacy-comparison.js',
+        ['jquery'],
+        '1.0',
+        true
+    );
+
+    wp_localize_script('mc-pharmacy-comparison', 'mcComparison', [
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('mc_comparison_nonce'),
+    ]);
+
+    ob_start();
+    ?>
+
+    <!-- NEW TOP BAR -->
+    <div class="mc-topbar">
+        <div class="mc-topbar-left">
+            <span class="mc-welcome">Welcome, <?php echo esc_html($current_user->user_email); ?></span>
+        </div>
+
+        <div class="mc-topbar-right">
+            <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" class="mc-logout-btn">
+                <span class="mc-logout-icon">⎋</span> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="mc-search-layout">
+
+        <!-- LEFT SIDE -->
+        <div class="mc-search-left">
+
+            <!-- CLEAN MODERN SECTION TITLE -->
+            <h2 class="mc-section-title">Search Products & Compare Suppliers</h2>
+
+            <div class="mc-search-bar">
+                <label for="mc-search-input">Product name or code</label><br>
+                <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
+            </div>
+
+            <div id="mc-search-results" class="mc-search-results">
+                <!-- AJAX search results -->
+            </div>
+
+            <div id="mc-selected-item" class="mc-selected-item">
+                <!-- Selected product -->
+            </div>
+
+            <p><a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>">Back to dashboard</a></p>
+        </div>
+
+        <!-- RIGHT SIDE (BEHAVIOUR UNCHANGED, UI IMPROVED) -->
+        <div class="mc-search-right">
+
+            <div class="mc-order-tabs">
+                <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">
+                    Pending Order
+                </button>
+                <button type="button" class="mc-order-tab" data-tab="transferred">
+                    Transferred Orders
+                </button>
+            </div>
+
+            <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active">
+                <!-- Pending order items -->
+            </div>
+
+            <div id="mc-transferred-orders" class="mc-order-panel">
+                <!-- Transferred orders -->
+            </div>
+
+            <div class="mc-order-actions">
+                <button type="button" id="mc-transfer-order-btn" class="mc-transfer-btn">
+                    Transfer Pending Order
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <?php
+    return ob_get_clean();
+  }
+
 }
 
 new MediCompare_Pharmacy_Frontend();

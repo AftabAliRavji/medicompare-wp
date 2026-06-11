@@ -26,7 +26,7 @@ jQuery(function ($) {
     }
 
     /* ---------------------------------------------------------
-       LOAD TRANSFERRED ORDERS (REAL IMPLEMENTATION)
+       LOAD TRANSFERRED ORDERS
     --------------------------------------------------------- */
     function loadTransferredOrders() {
         $.post(mcComparison.ajaxUrl, {
@@ -45,52 +45,90 @@ jQuery(function ($) {
        RENDER SELECTED ITEM
     --------------------------------------------------------- */
     function renderSelectedItem(row) {
-        var productId   = row.data('product-id');
-        var supplierId  = row.data('supplier-id');
-        var unitPrice   = parseFloat(row.data('unit-price'));
-        var productName = row.find('td').eq(0).text();
-        var details     = row.find('td').eq(1).text();
-        var supplier    = row.find('td').eq(2).text();
 
-        var html = '' +
-            '<div class="mc-selected-item-card">' +
-                '<h2>Selected Product</h2>' +
-                '<p><strong>Product:</strong> ' + productName + '</p>' +
-                '<p><strong>Details:</strong> ' + details + '</p>' +
-                '<p><strong>Supplier:</strong> ' + supplier + '</p>' +
-                '<p><strong>Unit Price:</strong> £' + unitPrice.toFixed(2) + '</p>' +
-                '<p>' +
-                    '<label>Quantity</label><br>' +
-                    '<input type="number" id="mc-selected-qty" value="1" min="1" step="1">' +
-                '</p>' +
-                '<p>' +
-                    '<button type="button" id="mc-add-to-pending" ' +
-                        'data-product-id="' + productId + '" ' +
-                        'data-supplier-id="' + supplierId + '" ' +
-                        'data-unit-price="' + unitPrice + '">' +
-                        'Add to pending order ✓' +
-                    '</button>' +
-                '</p>' +
-            '</div>';
+    // Hide search results
+    $('#mc-search-results').removeClass('active').hide();
 
-        $selectedItem.html(html);
-    }
+    var productName = row.find('td').eq(0).text();
+    var description = row.find('td').eq(1).text();
+    var supplier    = row.find('td').eq(2).text();
+    var unitPrice   = parseFloat(row.data('unit-price'));
+    var productId   = row.data('product-id');
+    var supplierId  = row.data('supplier-id');
+
+    var html = `
+        <div class="mc-selected-card">
+
+            <div class="mc-selected-headings">
+                <div>Product</div>
+                <div>Description</div>
+                <div>Supplier</div>
+                <div>Unit Price</div>
+                <div>Qty</div>
+                <div>Actions</div>
+            </div>
+
+            <div class="mc-selected-row">
+                <div class="mc-selected-value">${productName}</div>
+                <div class="mc-selected-value">${description}</div>
+                <div class="mc-selected-value">${supplier}</div>
+                <div class="mc-selected-value">£${unitPrice.toFixed(2)}</div>
+
+                <div>
+                    <input type="number" id="mc-selected-qty" value="1" min="1" step="1" class="mc-qty-input">
+                </div>
+
+                <div class="mc-selected-actions">
+                    <button 
+                        type="button" 
+                        id="mc-add-to-pending"
+                        class="mc-add-basket-btn"
+                        data-product-id="${productId}"
+                        data-supplier-id="${supplierId}"
+                        data-unit-price="${unitPrice}"
+                    >
+                        🧺 Add
+                    </button>
+
+                    <button 
+                        type="button"
+                        class="mc-cancel-btn"
+                        id="mc-cancel-selection"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    $('#mc-selected-item').html(html).show();
+  }
+
+    // Cancel selection
+    $('#mc-selected-item').on('click', '#mc-cancel-selection', function () {
+        $('#mc-selected-item').empty().hide();
+        $('#mc-search-results').show().addClass('active');
+        $('#mc-search-input').val('').focus();
+    });
 
     /* ---------------------------------------------------------
-       SEARCH INPUT (DEBOUNCED)
+       SEARCH INPUT (DEBOUNCED + HIDE RESULTS UNTIL TYPING)
     --------------------------------------------------------- */
     $searchInput.on('keyup', function () {
         var q = $.trim($searchInput.val());
 
         if (debounceTimer) clearTimeout(debounceTimer);
 
-        if (q.length < 3) {
-            $searchResults.html('<p>Type at least 3 characters to search.</p>');
+        if (q.length < 2) {
+            $searchResults.removeClass('active').html('');
             return;
         }
 
+        $searchResults.addClass('active').html('<p>Searching...</p>');
+
         debounceTimer = setTimeout(function () {
-            $searchResults.html('<p>Searching...</p>');
 
             $.post(mcComparison.ajaxUrl, {
                 action: 'mc_search_products',
@@ -103,6 +141,7 @@ jQuery(function ($) {
                     $searchResults.html('<p>' + (resp.data?.message || 'Search error.') + '</p>');
                 }
             });
+
         }, 300);
     });
 
@@ -191,12 +230,10 @@ jQuery(function ($) {
             if (resp.success) {
                 alert('Order transferred successfully.');
 
-                // Clear UI
                 $selectedItem.empty();
                 loadPendingOrder();
                 loadTransferredOrders();
 
-                // Switch to transferred tab
                 $('.mc-order-tab[data-tab="transferred"]').click();
 
             } else {

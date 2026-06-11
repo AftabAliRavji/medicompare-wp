@@ -71,11 +71,12 @@ class MediCompare_Product_CPT {
     --------------------------------------------------------- */
     public function render_product_details_meta_box($post) {
 
-        $product_code = get_post_meta($post->ID, '_mc_product_code', true);
-        $category     = get_post_meta($post->ID, '_mc_category', true);
-        $strength     = get_post_meta($post->ID, '_mc_strength', true);
-        $pack_size    = get_post_meta($post->ID, '_mc_pack_size', true);
-        $description  = get_post_meta($post->ID, '_mc_description', true);
+        // Load correct meta keys (NO underscores)
+        $product_code = get_post_meta($post->ID, 'mc_product_code', true);
+        $category     = get_post_meta($post->ID, 'mc_category', true);
+        $strength     = get_post_meta($post->ID, 'mc_strength', true);
+        $pack_size    = get_post_meta($post->ID, 'mc_pack_size', true);
+        $description  = get_post_meta($post->ID, 'mc_description', true);
 
         wp_nonce_field('mc_save_product_details', 'mc_product_details_nonce');
         ?>
@@ -89,8 +90,15 @@ class MediCompare_Product_CPT {
                            name="mc_product_code"
                            value="<?php echo esc_attr($product_code); ?>"
                            class="regular-text"
-                           readonly>
-                    <p class="description">Unique identifier. Imported from CSV. Cannot be changed.</p>
+                           required>
+
+                    <?php if ($product_code): ?>
+                        <p class="description" style="color:#d63638;">
+                            Changing the product code may affect supplier product links.
+                        </p>
+                    <?php else: ?>
+                        <p class="description">Enter a unique product code.</p>
+                    <?php endif; ?>
                 </td>
             </tr>
 
@@ -143,14 +151,21 @@ class MediCompare_Product_CPT {
     --------------------------------------------------------- */
     public function save_product_details($post_id) {
 
+    // Prevent recursion
+    if (defined('MC_SAVING_PRODUCT') && MC_SAVING_PRODUCT) {
+        return;
+    }
+
     // Nonce check
     if (!isset($_POST['mc_product_details_nonce']) ||
         !wp_verify_nonce($_POST['mc_product_details_nonce'], 'mc_save_product_details')) {
         return;
     }
 
-    // Autosave / permissions
+    // Autosave / revisions / permissions
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (wp_is_post_revision($post_id)) return;
+    if (wp_is_post_autosave($post_id)) return;
     if (!current_user_can('edit_post', $post_id)) return;
 
     // Sanitize fields
@@ -160,6 +175,27 @@ class MediCompare_Product_CPT {
     $pack_size    = isset($_POST['mc_pack_size']) ? sanitize_text_field($_POST['mc_pack_size']) : '';
     $description  = isset($_POST['mc_description']) ? sanitize_textarea_field($_POST['mc_description']) : '';
 
+    if ($product_code === '') {
+        return; // product code required
+    }
+
+    // Prevent duplicate product codes
+    $existing = get_posts([
+        'post_type'      => 'mc_product',
+        'post_status'    => 'any',
+        'meta_key'       => 'mc_product_code',
+        'meta_value'     => $product_code,
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+    ]);
+
+    if (!empty($existing) && $existing[0] != $post_id) {
+        wp_die('A product with this product code already exists.');
+    }
+
+    // Prevent recursion during wp_update_post()
+    define('MC_SAVING_PRODUCT', true);
+
     // Ensure product is published
     wp_update_post([
         'ID'          => $post_id,
@@ -168,12 +204,15 @@ class MediCompare_Product_CPT {
         'post_name'   => sanitize_title($product_code), // slug = product_code
     ]);
 
-    // Save meta using correct keys (NO leading underscore)
+    // Save meta using correct keys
     update_post_meta($post_id, 'mc_product_code', $product_code);
     update_post_meta($post_id, 'mc_category', $category);
     update_post_meta($post_id, 'mc_strength', $strength);
     update_post_meta($post_id, 'mc_pack_size', $pack_size);
     update_post_meta($post_id, 'mc_description', $description);
+
+    // End recursion guard
+    define('MC_SAVING_PRODUCT', false);
 }
 
 
@@ -201,23 +240,23 @@ class MediCompare_Product_CPT {
         switch ($column) {
 
             case 'product_code':
-                echo esc_html(get_post_meta($post_id, '_mc_product_code', true));
+                echo esc_html(get_post_meta($post_id, 'mc_product_code', true));
                 break;
 
             case 'category':
-                echo esc_html(get_post_meta($post_id, '_mc_category', true));
+                echo esc_html(get_post_meta($post_id, 'mc_category', true));
                 break;
 
             case 'strength':
-                echo esc_html(get_post_meta($post_id, '_mc_strength', true));
+                echo esc_html(get_post_meta($post_id, 'mc_strength', true));
                 break;
 
             case 'pack_size':
-                echo esc_html(get_post_meta($post_id, '_mc_pack_size', true));
+                echo esc_html(get_post_meta($post_id, 'mc_pack_size', true));
                 break;
 
             case 'description':
-                echo esc_html(get_post_meta($post_id, '_mc_description', true));
+                echo esc_html(get_post_meta($post_id, 'mc_description', true));
                 break;
         }
     }

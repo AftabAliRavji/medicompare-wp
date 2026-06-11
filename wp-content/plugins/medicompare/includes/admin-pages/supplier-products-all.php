@@ -37,7 +37,14 @@
                     <?php foreach ($products as $row): ?>
                         <tr>
                             <td><?php echo esc_html($row['product_id']); ?></td>
-                            <td><?php echo esc_html($row['product_title']); ?></td>
+                            <?php
+                            $display_name = $row['product_title'];
+
+                            if (!empty($row['strength']) || !empty($row['pack_size'])) {
+                                $display_name .= " (" . $row['strength'] . " · " . $row['pack_size'] . ")";
+                            }
+                            ?>
+                            <td><?php echo esc_html($display_name); ?></td>
                             <td><?php echo esc_html($row['price']); ?></td>
                             <td><?php echo esc_html($row['stock']); ?></td>
                             <td><?php echo esc_html($row['last_updated']); ?></td>

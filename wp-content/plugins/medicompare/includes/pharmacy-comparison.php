@@ -213,117 +213,133 @@ public function ajax_search_products() {
     }
 
     /* ---------------------------------------------------------
-       RENDER PENDING ORDER HTML
-    --------------------------------------------------------- */
+   RENDER PENDING ORDER HTML
+--------------------------------------------------------- */
 
-    private function render_pending_order_html($pharmacy_id) {
-        global $wpdb;
+private function render_pending_order_html($pharmacy_id) {
+    global $wpdb;
 
-        $pending_orders_table = $wpdb->prefix . 'medi_pending_orders';
-        $pending_items_table  = $wpdb->prefix . 'medi_pending_order_items';
-        $posts_table          = $wpdb->posts;
+    $pending_orders_table = $wpdb->prefix . 'medi_pending_orders';
+    $pending_items_table  = $wpdb->prefix . 'medi_pending_order_items';
+    $posts_table          = $wpdb->posts;
 
-        $pending_order_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$pending_orders_table} WHERE pharmacy_id = %d LIMIT 1",
-            $pharmacy_id
-        ));
+    $pending_order_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT id FROM {$pending_orders_table} WHERE pharmacy_id = %d LIMIT 1",
+        $pharmacy_id
+    ));
 
-        if (!$pending_order_id) {
-            return '<p>No pending order. Add items from the search results.</p>';
-        }
-
-        $sql = "
-            SELECT
-                i.id,
-                i.product_id,
-                i.supplier_id,
-                i.quantity,
-                i.unit_price,
-                i.line_total,
-                p.post_title AS product_name,
-                s.post_title AS supplier_name
-            FROM {$pending_items_table} i
-            INNER JOIN {$posts_table} p ON p.ID = i.product_id
-            INNER JOIN {$posts_table} s ON s.ID = i.supplier_id
-            WHERE i.pending_order_id = %d
-            ORDER BY s.post_title ASC, p.post_title ASC
-        ";
-
-        $items = $wpdb->get_results($wpdb->prepare($sql, $pending_order_id), ARRAY_A);
-
-        if (!$items) {
-            return '<p>No items in pending order.</p>';
-        }
-
-        // Group by supplier
-        $grouped = [];
-        $overall_total = 0;
-
-        foreach ($items as $item) {
-            $sid = $item['supplier_id'];
-
-            if (!isset($grouped[$sid])) {
-                $grouped[$sid] = [
-                    'supplier_name' => $item['supplier_name'],
-                    'items'         => [],
-                    'supplier_total'=> 0,
-                ];
-            }
-
-            $grouped[$sid]['items'][] = $item;
-            $grouped[$sid]['supplier_total'] += $item['line_total'];
-            $overall_total += $item['line_total'];
-        }
-
-        ob_start();
-        ?>
-        <div class="mc-pending-order-wrapper">
-            <?php foreach ($grouped as $supplier_id => $data): ?>
-                <div class="mc-pending-supplier-block">
-                    <h3><?php echo esc_html($data['supplier_name']); ?></h3>
-
-                    <table class="mc-pending-order-table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Qty</th>
-                                <th>Unit Price</th>
-                                <th>Line Total</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($data['items'] as $item): ?>
-                            <tr>
-                                <td><?php echo esc_html($item['product_name']); ?></td>
-                                <td><?php echo (int) $item['quantity']; ?></td>
-                                <td>£<?php echo number_format($item['unit_price'], 2); ?></td>
-                                <td>£<?php echo number_format($item['line_total'], 2); ?></td>
-                                <td>
-                                    <button class="mc-remove-pending-item"
-                                            data-item-id="<?php echo esc_attr($item['id']); ?>">
-                                        ✕
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-
-                    <p class="mc-supplier-total">
-                        Supplier total: £<?php echo number_format($data['supplier_total'], 2); ?>
-                    </p>
-                </div>
-            <?php endforeach; ?>
-
-            <p class="mc-overall-total">
-                Overall total: £<?php echo number_format($overall_total, 2); ?>
-            </p>
-        </div>
-        <?php
-
-        return ob_get_clean();
+    if (!$pending_order_id) {
+        return '<p>No pending order. Add items from the search results.</p>';
     }
+
+    $sql = "
+        SELECT
+            i.id,
+            i.product_id,
+            i.supplier_id,
+            i.quantity,
+            i.unit_price,
+            i.line_total,
+            p.post_title AS product_name,
+            s.post_title AS supplier_name
+        FROM {$pending_items_table} i
+        INNER JOIN {$posts_table} p ON p.ID = i.product_id
+        INNER JOIN {$posts_table} s ON s.ID = i.supplier_id
+        WHERE i.pending_order_id = %d
+        ORDER BY s.post_title ASC, p.post_title ASC
+    ";
+
+    $items = $wpdb->get_results($wpdb->prepare($sql, $pending_order_id), ARRAY_A);
+
+    if (!$items) {
+        return '<p>No items in pending order.</p>';
+    }
+
+    // Group by supplier
+    $grouped = [];
+    $overall_total = 0;
+
+    foreach ($items as $item) {
+        $sid = $item['supplier_id'];
+
+        if (!isset($grouped[$sid])) {
+            $grouped[$sid] = [
+                'supplier_name' => $item['supplier_name'],
+                'items'         => [],
+                'supplier_total'=> 0,
+            ];
+        }
+
+        $grouped[$sid]['items'][] = $item;
+        $grouped[$sid]['supplier_total'] += $item['line_total'];
+        $overall_total += $item['line_total'];
+    }
+
+    ob_start();
+    ?>
+    <div class="mc-pending-order-wrapper">
+
+        <h3 class="mc-pending-order-title">
+            Pending Order #<?php echo $pending_order_id; ?>
+        </h3>
+
+        <table class="mc-pending-order-table mc-table-clean">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Supplier</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Supplier Line Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach ($grouped as $supplier_id => $data): ?>
+
+                <?php foreach ($data['items'] as $item): ?>
+                    <tr>
+                        <td><?php echo esc_html($item['product_name']); ?></td>
+                        <td><?php echo esc_html($data['supplier_name']); ?></td>
+                        <td><?php echo (int) $item['quantity']; ?></td>
+                        <td>£<?php echo number_format($item['unit_price'], 2); ?></td>
+                        <td>£<?php echo number_format($item['line_total'], 2); ?></td>
+                        <td>
+                            <button class="mc-remove-pending-item"
+                                    data-item-id="<?php echo esc_attr($item['id']); ?>">
+                                ✕
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+
+                <!-- Supplier subtotal row -->
+                <tr class="mc-supplier-subtotal-row">
+                    <td colspan="4" style="text-align:right; font-weight:600;">
+                        <?php echo esc_html($data['supplier_name']); ?> Total:
+                    </td>
+                    <td style="font-weight:600;">
+                        £<?php echo number_format($data['supplier_total'], 2); ?>
+                    </td>
+                    <td></td>
+                </tr>
+
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <p class="mc-overall-total">
+            <strong>Order Total:</strong>
+            £<?php echo number_format($overall_total, 2); ?>
+        </p>
+
+    </div>
+    <?php
+
+    return ob_get_clean();
+}
+
 
     /* ---------------------------------------------------------
        AJAX: GET PENDING ORDER

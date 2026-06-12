@@ -44,74 +44,77 @@ jQuery(function ($) {
     /* ---------------------------------------------------------
        RENDER SELECTED ITEM
     --------------------------------------------------------- */
-    function renderSelectedItem(row) {
-
-    // Hide search results
+   function renderSelectedItem(row) {
     $('#mc-search-results').removeClass('active').hide();
 
     var productName = row.find('td').eq(0).text();
     var description = row.find('td').eq(1).text();
     var supplier    = row.find('td').eq(2).text();
     var unitPrice   = parseFloat(row.data('unit-price'));
+    var stock       = row.find('td').eq(4).text();   // NEW
     var productId   = row.data('product-id');
     var supplierId  = row.data('supplier-id');
 
     var html = `
         <div class="mc-selected-card">
-
-            <div class="mc-selected-headings">
-                <div>Product</div>
-                <div>Description</div>
-                <div>Supplier</div>
-                <div>Unit Price</div>
-                <div>Qty</div>
-                <div>Actions</div>
-            </div>
-
-            <div class="mc-selected-row">
-                <div class="mc-selected-value">${productName}</div>
-                <div class="mc-selected-value">${description}</div>
-                <div class="mc-selected-value">${supplier}</div>
-                <div class="mc-selected-value">£${unitPrice.toFixed(2)}</div>
-
-                <div>
-                    <input type="number" id="mc-selected-qty" value="1" min="1" step="1" class="mc-qty-input">
-                </div>
-
-                <div class="mc-selected-actions">
-                    <button 
-                        type="button" 
-                        id="mc-add-to-pending"
-                        class="mc-add-basket-btn"
-                        data-product-id="${productId}"
-                        data-supplier-id="${supplierId}"
-                        data-unit-price="${unitPrice}"
-                    >
-                        🧺 Add
-                    </button>
-
-                    <button 
-                        type="button"
-                        class="mc-cancel-btn"
-                        id="mc-cancel-selection"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-
+            <div class="mc-selected-title">Selected item</div>
+            <table class="mc-search-results-table mc-selected-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Description</th>
+                        <th>Supplier</th>
+                        <th>Unit Price</th>
+                        <th>Stock</th>     <!-- NEW -->
+                        <th>Qty</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mc-selected-value">${productName}</td>
+                        <td class="mc-selected-value">${description}</td>
+                        <td class="mc-selected-value">${supplier}</td>
+                        <td class="mc-selected-value">£${unitPrice.toFixed(2)}</td>
+                        <td class="mc-selected-value">${stock}</td> <!-- NEW -->
+                        <td>
+                            <input type="number" id="mc-selected-qty" value="1" min="1" max="${stock}" step="1" class="mc-qty-input">
+                        </td>
+                        <td class="mc-selected-actions">
+                            <button 
+                                type="button" 
+                                id="mc-add-to-pending"
+                                class="mc-add-basket-btn"
+                                data-product-id="${productId}"
+                                data-supplier-id="${supplierId}"
+                                data-unit-price="${unitPrice}"
+                            >
+                                Add
+                            </button>
+                            <button 
+                                type="button"
+                                class="mc-cancel-btn"
+                                id="mc-cancel-selection"
+                            >
+                                Cancel
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     `;
 
     $('#mc-selected-item').html(html).show();
-  }
+}
 
     // Cancel selection
     $('#mc-selected-item').on('click', '#mc-cancel-selection', function () {
-        $('#mc-selected-item').empty().hide();
-        $('#mc-search-results').show().addClass('active');
-        $('#mc-search-input').val('').focus();
+    $('#mc-selected-item').empty().hide();
+    $('#mc-search-results').show().addClass('active');
+    $('#mc-search-input').val('').focus();
     });
+
 
     /* ---------------------------------------------------------
        SEARCH INPUT (DEBOUNCED + HIDE RESULTS UNTIL TYPING)

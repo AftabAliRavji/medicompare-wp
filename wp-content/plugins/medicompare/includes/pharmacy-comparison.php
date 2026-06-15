@@ -57,8 +57,36 @@ class MediCompare_Pharmacy_Comparison {
     }
 
     /* ---------------------------------------------------------
-       AJAX: SEARCH PRODUCTS
-    --------------------------------------------------------- */
+   BUILD FULL PRODUCT LABEL (NAME + PACK SIZE + STRENGTH)
+--------------------------------------------------------- */
+private function mc_get_full_product_label($product_id) {
+    $name      = get_the_title($product_id);
+    $pack_size = get_post_meta($product_id, 'mc_pack_size', true);
+    $strength  = get_post_meta($product_id, 'mc_strength', true);
+
+    $label = $name;
+
+    if ($pack_size || $strength) {
+        $label .= ' (';
+
+        if ($pack_size) {
+            $label .= $pack_size;
+        }
+
+        if ($pack_size && $strength) {
+            $label .= ', ';
+        }
+
+        if ($strength) {
+            $label .= $strength;
+        }
+
+        $label .= ')';
+    }
+
+    return $label;
+ }
+
 
     /* ---------------------------------------------------------
    AJAX: SEARCH PRODUCTS (UPDATED)
@@ -216,6 +244,12 @@ public function ajax_search_products() {
    RENDER PENDING ORDER HTML
 --------------------------------------------------------- */
 
+/* ---------------------------------------------------------
+   RENDER PENDING ORDER HTML
+--------------------------------------------------------- */
+/* ---------------------------------------------------------
+   RENDER PENDING ORDER HTML
+--------------------------------------------------------- */
 private function render_pending_order_html($pharmacy_id) {
     global $wpdb;
 
@@ -299,8 +333,11 @@ private function render_pending_order_html($pharmacy_id) {
             <?php foreach ($grouped as $supplier_id => $data): ?>
 
                 <?php foreach ($data['items'] as $item): ?>
+                    <?php
+                        $full_label = $this->mc_get_full_product_label($item['product_id']);
+                    ?>
                     <tr>
-                        <td><?php echo esc_html($item['product_name']); ?></td>
+                        <td><?php echo esc_html($full_label); ?></td>
                         <td><?php echo esc_html($data['supplier_name']); ?></td>
                         <td><?php echo (int) $item['quantity']; ?></td>
                         <td>£<?php echo number_format($item['unit_price'], 2); ?></td>
@@ -339,6 +376,7 @@ private function render_pending_order_html($pharmacy_id) {
 
     return ob_get_clean();
 }
+
 
 
     /* ---------------------------------------------------------
@@ -391,193 +429,439 @@ private function render_pending_order_html($pharmacy_id) {
 
         wp_send_json_success(['message' => 'Item removed.']);
     }
+
+
+   /* ---------------------------------------------------------
+   AJAX: TRANSFER ORDER (WITH MASTER ORDER NUMBERING + SUB-ORDER TABLE + AUTO EMAILS)
+--------------------------------------------------------- */
+/* ---------------------------------------------------------
+   AJAX: TRANSFER ORDER (WITH MASTER ORDER NUMBERING + SUB-ORDER TABLE + AUTO EMAILS)
+--------------------------------------------------------- */
+public function ajax_transfer_order() {
+    check_ajax_referer('mc_comparison_nonce', 'nonce');
+
+    $pharmacy_id = $this->get_current_pharmacy_id();
+    if (!$pharmacy_id) {
+        wp_send_json_error(['message' => 'Not authorised.']);
+    }
+
+    global $wpdb;
+
+    $pending_orders_table     = $wpdb->prefix . 'medi_pending_orders';
+    $pending_items_table      = $wpdb->prefix . 'medi_pending_order_items';
+    $orders_table             = $wpdb->prefix . 'medi_orders';
+    $order_items_table        = $wpdb->prefix . 'medi_order_items';
+    $supplier_summary_table   = $wpdb->prefix . 'medi_order_supplier_summary';
+    $suborders_table          = $wpdb->prefix . 'medi_order_suborders';
+    $postmeta_table           = $wpdb->postmeta;
+
     /* ---------------------------------------------------------
-       AJAX: TRANSFER ORDER
+       GET PENDING ORDER
     --------------------------------------------------------- */
+    $pending_order_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT id FROM {$pending_orders_table} WHERE pharmacy_id = %d LIMIT 1",
+        $pharmacy_id
+    ));
 
-    public function ajax_transfer_order() {
-        check_ajax_referer('mc_comparison_nonce', 'nonce');
+    if (!$pending_order_id) {
+        wp_send_json_error(['message' => 'No pending order to transfer.']);
+    }
 
-        $pharmacy_id = $this->get_current_pharmacy_id();
-        if (!$pharmacy_id) {
-            wp_send_json_error(['message' => 'Not authorised.']);
+    /* ---------------------------------------------------------
+       GET PENDING ITEMS
+    --------------------------------------------------------- */
+    $items = $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM {$pending_items_table} WHERE pending_order_id = %d",
+        $pending_order_id
+    ), ARRAY_A);
+
+    if (!$items) {
+        wp_send_json_error(['message' => 'Pending order is empty.']);
+    }
+
+    /* ---------------------------------------------------------
+       CALCULATE TOTALS
+    --------------------------------------------------------- */
+    $overall_total   = 0;
+    $supplier_totals = [];
+
+    foreach ($items as $item) {
+        $overall_total += (float) $item['line_total'];
+
+        $sid = (int) $item['supplier_id'];
+        if (!isset($supplier_totals[$sid])) {
+            $supplier_totals[$sid] = 0;
         }
+        $supplier_totals[$sid] += (float) $item['line_total'];
+    }
 
-        global $wpdb;
+    /* ---------------------------------------------------------
+       GENERATE NEXT MASTER ORDER NUMBER
+    --------------------------------------------------------- */
+    $last_order_number = (int) $wpdb->get_var("SELECT MAX(order_number) FROM {$orders_table}");
+    $new_order_number  = $last_order_number ? $last_order_number + 1 : 10001;
 
-        $pending_orders_table     = $wpdb->prefix . 'medi_pending_orders';
-        $pending_items_table      = $wpdb->prefix . 'medi_pending_order_items';
-        $orders_table             = $wpdb->prefix . 'medi_orders';
-        $order_items_table        = $wpdb->prefix . 'medi_order_items';
-        $supplier_summary_table   = $wpdb->prefix . 'medi_order_supplier_summary';
+    /* ---------------------------------------------------------
+       CREATE MASTER ORDER
+    --------------------------------------------------------- */
+    $wpdb->insert($orders_table, [
+        'pharmacy_id'  => $pharmacy_id,
+        'order_number' => $new_order_number,
+        'total_amount' => $overall_total,
+        'status'       => 'transferred',
+        'created_at'   => current_time('mysql'),
+    ]);
 
-        // Get pending order
-        $pending_order_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$pending_orders_table} WHERE pharmacy_id = %d LIMIT 1",
-            $pharmacy_id
+    $order_id = (int) $wpdb->insert_id;
+
+    /* ---------------------------------------------------------
+       MOVE ITEMS INTO FINAL ORDER
+    --------------------------------------------------------- */
+    foreach ($items as $item) {
+        $wpdb->insert($order_items_table, [
+            'order_id'            => $order_id,
+            'product_id'          => (int) $item['product_id'],
+            'supplier_id'         => (int) $item['supplier_id'],
+            'quantity'            => (int) $item['quantity'],
+            'unit_price'          => (float) $item['unit_price'],
+            'line_total'          => (float) $item['line_total'],
+            'supplier_cost_price' => null,
+            'supplier_profit'     => null,
+        ]);
+    }
+
+    /* ---------------------------------------------------------
+       CREATE SUPPLIER SUMMARY + SUB-ORDERS
+    --------------------------------------------------------- */
+    foreach ($supplier_totals as $supplier_id => $supplier_total) {
+
+        // Get supplier code (no underscore in meta key)
+        $supplier_code = $wpdb->get_var($wpdb->prepare(
+            "SELECT meta_value FROM {$postmeta_table}
+             WHERE post_id = %d AND meta_key = %s LIMIT 1",
+            $supplier_id,
+            'mc_supplier_code'
         ));
 
-        if (!$pending_order_id) {
-            wp_send_json_error(['message' => 'No pending order to transfer.']);
+        if (!$supplier_code) {
+            $supplier_code = 'SUP' . $supplier_id;
         }
 
-        // Get items
-        $items = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$pending_items_table} WHERE pending_order_id = %d",
-            $pending_order_id
-        ), ARRAY_A);
+        // Build sub-order number
+        $suborder_number = $new_order_number . '-' . $supplier_code;
 
-        if (!$items) {
-            wp_send_json_error(['message' => 'Pending order is empty.']);
-        }
-
-        // Calculate totals
-        $overall_total = 0;
-        $supplier_totals = [];
-
-        foreach ($items as $item) {
-            $overall_total += (float) $item['line_total'];
-
-            $sid = (int) $item['supplier_id'];
-            if (!isset($supplier_totals[$sid])) {
-                $supplier_totals[$sid] = 0;
-            }
-            $supplier_totals[$sid] += (float) $item['line_total'];
-        }
-
-        // Create final order
-        $wpdb->insert($orders_table, [
-            'pharmacy_id'  => $pharmacy_id,
-            'total_amount' => $overall_total,
-            'status'       => 'transferred',
-            'created_at'   => current_time('mysql'),
+        /* ---------------------------------------------------------
+           INSERT INTO SUPPLIER SUMMARY TABLE
+        --------------------------------------------------------- */
+        $wpdb->insert($supplier_summary_table, [
+            'order_id'              => $order_id,
+            'supplier_id'           => $supplier_id,
+            'suborder_number'       => $suborder_number,
+            'supplier_total_amount' => $supplier_total,
+            'platform_fee_percent'  => 0.00,
+            'platform_fee_amount'   => 0.00,
+            'supplier_order_status' => 'pending',
+            'created_at'            => current_time('mysql'),
         ]);
 
-        $order_id = (int) $wpdb->insert_id;
-
-        // Move items into final order
-        foreach ($items as $item) {
-            $wpdb->insert($order_items_table, [
-                'order_id'    => $order_id,
-                'product_id'  => (int) $item['product_id'],
-                'supplier_id' => (int) $item['supplier_id'],
-                'quantity'    => (int) $item['quantity'],
-                'unit_price'  => (float) $item['unit_price'],
-                'line_total'  => (float) $item['line_total'],
-                'supplier_cost_price' => null,
-                'supplier_profit'     => null,
-            ]);
-        }
-
-        // Create supplier summaries
-        foreach ($supplier_totals as $supplier_id => $supplier_total) {
-            $wpdb->insert($supplier_summary_table, [
-                'order_id'              => $order_id,
-                'supplier_id'           => $supplier_id,
-                'supplier_total_amount' => $supplier_total,
-                'platform_fee_percent'  => 0.00,
-                'platform_fee_amount'   => 0.00,
-                'supplier_order_status' => 'pending',
-                'created_at'            => current_time('mysql'),
-            ]);
-        }
-
-        // Clear pending order + items
-        $wpdb->delete($pending_items_table, ['pending_order_id' => $pending_order_id]);
-        $wpdb->delete($pending_orders_table, ['id' => $pending_order_id]);
-
-        wp_send_json_success(['message' => 'Order transferred successfully.']);
+        /* ---------------------------------------------------------
+           INSERT INTO SUB-ORDER TABLE
+        --------------------------------------------------------- */
+        $wpdb->insert($suborders_table, [
+            'order_id'              => $order_id,
+            'supplier_id'           => $supplier_id,
+            'suborder_number'       => $suborder_number,
+            'supplier_order_status' => 'pending',
+            'email_sent'            => 0,
+            'email_sent_at'         => null,
+            'created_at'            => current_time('mysql'),
+            'updated_at'            => null,
+        ]);
     }
+
     /* ---------------------------------------------------------
-       AJAX: GET TRANSFERRED ORDERS (NEW)
+       AUTO-SEND EMAILS (SUPPLIER + PHARMACY + ADMIN)
     --------------------------------------------------------- */
 
-    public function ajax_get_transferred_orders() {
-        check_ajax_referer('mc_comparison_nonce', 'nonce');
+    require_once plugin_dir_path(__FILE__) . 'email-functions.php';
+    $email_engine = new MediCompare_Email_Engine();
 
-        $pharmacy_id = $this->get_current_pharmacy_id();
-        if (!$pharmacy_id) {
-            wp_send_json_error(['message' => 'Not authorised.']);
-        }
+    /* PHARMACY DETAILS — CORRECT META KEYS */
+    $pharmacy_post = get_post($pharmacy_id);
 
-        global $wpdb;
+    $address_line_1 = get_post_meta($pharmacy_id, '_mc_address_line_1', true);
+    $address_line_2 = get_post_meta($pharmacy_id, '_mc_address_line_2', true);
+    $city           = get_post_meta($pharmacy_id, '_mc_city', true);
+    $postcode       = get_post_meta($pharmacy_id, '_mc_postcode', true);
 
-        $orders_table            = $wpdb->prefix . 'medi_orders';
-        $supplier_summary_table  = $wpdb->prefix . 'medi_order_supplier_summary';
-        $posts_table             = $wpdb->posts;
+    $full_address = trim(
+        $address_line_1 . ' ' .
+        $address_line_2 . ', ' .
+        $city . ', ' .
+        $postcode
+    );
 
-        // Fetch transferred orders
-        $orders = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, total_amount, created_at
-             FROM {$orders_table}
-             WHERE pharmacy_id = %d
-               AND status = 'transferred'
-             ORDER BY created_at DESC
-             LIMIT 20",
-            $pharmacy_id
-        ), ARRAY_A);
+    $pharmacy = [
+        'id'      => $pharmacy_id,
+        'name'    => $pharmacy_post->post_title,
+        'email'   => get_post_meta($pharmacy_id, '_mc_email', true),
+        'phone'   => get_post_meta($pharmacy_id, '_mc_phone', true),
+        'address' => $full_address,
+    ];
 
-        if (!$orders) {
-            wp_send_json_success(['html' => '<p>No transferred orders yet.</p>']);
-        }
 
-        ob_start();
-        ?>
-        <div class="mc-transferred-orders-wrapper">
-            <?php foreach ($orders as $order): ?>
-                <div class="mc-transferred-order-card">
+    /* SUPPLIER SUMMARY */
+    $suppliers = $wpdb->get_results($wpdb->prepare(
+        "SELECT supplier_id, suborder_number, supplier_total_amount
+         FROM {$supplier_summary_table}
+         WHERE order_id = %d",
+        $order_id
+    ), ARRAY_A);
 
-                    <h3>Order #<?php echo esc_html($order['id']); ?></h3>
+    /* ITEMS GROUPED BY SUPPLIER */
+    $items_by_supplier = [];
+    foreach ($items as $item) {
+        $product_name = get_the_title($item['product_id']);
+        $items_by_supplier[$item['supplier_id']][] = [
+            'product_id'   => (int) $item['product_id'],   // ✅ needed for full label
+            'product_name' => $product_name,
+            'quantity'     => $item['quantity'],
+            'unit_price'   => $item['unit_price'],
+            'line_total'   => $item['line_total']
+        ];
+    }
 
-                    <p><strong>Date:</strong>
+    /* SEND SUPPLIER EMAILS */
+    $email_engine->send_supplier_emails(
+        $order_id,
+        $new_order_number,
+        $pharmacy,
+        $suppliers,
+        $items_by_supplier
+    );
+
+    /* SEND PHARMACY CONFIRMATION */
+    $email_engine->send_pharmacy_confirmation(
+        $new_order_number,
+        $pharmacy,
+        $suppliers,
+        $items
+    );
+
+    /* SEND ADMIN NOTIFICATION */
+    $email_engine->send_admin_notification(
+        $new_order_number,
+        $pharmacy,
+        $suppliers
+    );
+
+    /* ---------------------------------------------------------
+       CLEAR PENDING ORDER + ITEMS
+    --------------------------------------------------------- */
+    $wpdb->delete($pending_items_table, ['pending_order_id' => $pending_order_id]);
+    $wpdb->delete($pending_orders_table, ['id' => $pending_order_id]);
+
+    wp_send_json_success(['message' => 'Order transferred successfully.']);
+ }
+
+
+/* ---------------------------------------------------------
+   AJAX: GET TRANSFERRED ORDERS (COLLAPSIBLE UI + SUB-ORDER DATA + UI ENHANCEMENTS)
+--------------------------------------------------------- */
+public function ajax_get_transferred_orders() {
+    check_ajax_referer('mc_comparison_nonce', 'nonce');
+
+    $pharmacy_id = $this->get_current_pharmacy_id();
+    if (!$pharmacy_id) {
+        wp_send_json_error(['message' => 'Not authorised.']);
+    }
+
+    global $wpdb;
+
+    $orders_table           = $wpdb->prefix . 'medi_orders';
+    $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
+    $suborders_table        = $wpdb->prefix . 'medi_order_suborders';
+    $order_items_table      = $wpdb->prefix . 'medi_order_items';
+    $posts_table            = $wpdb->posts;
+
+    // Fetch transferred orders
+    $orders = $wpdb->get_results($wpdb->prepare(
+        "SELECT id, order_number, total_amount, created_at
+         FROM {$orders_table}
+         WHERE pharmacy_id = %d
+           AND status = 'transferred'
+         ORDER BY created_at DESC
+         LIMIT 20",
+        $pharmacy_id
+    ), ARRAY_A);
+
+    if (!$orders) {
+        wp_send_json_success(['html' => '<p>No transferred orders yet.</p>']);
+    }
+
+    ob_start();
+    ?>
+    <div class="mc-transferred-orders-wrapper">
+        <?php foreach ($orders as $order): ?>
+
+            <div class="mc-transferred-order-card mc-order-collapsed">
+
+                <!-- COLLAPSIBLE HEADER -->
+                <div class="mc-order-collapse-header" data-order-toggle>
+                    <span>Order #<?php echo esc_html($order['order_number']); ?></span>
+                    <span class="mc-order-collapse-arrow">▼</span>
+                </div>
+
+                <!-- COLLAPSIBLE CONTENT -->
+                <div class="mc-order-collapse-content">
+
+                    <p>
+                        <strong>Date:</strong>
                         <?php echo esc_html(date('d M Y H:i', strtotime($order['created_at']))); ?>
                     </p>
 
-                    <p><strong>Total:</strong>
+                    <p>
+                        <strong>Total:</strong>
                         £<?php echo number_format((float) $order['total_amount'], 2); ?>
                     </p>
 
-                    <details>
-                        <summary>Supplier Breakdown</summary>
+                    <?php
+                    // Fetch supplier summary (totals + suborder_number)
+                    $suppliers = $wpdb->get_results($wpdb->prepare(
+                        "SELECT supplier_id, suborder_number, supplier_total_amount
+                         FROM {$supplier_summary_table}
+                         WHERE order_id = %d",
+                        $order['id']
+                    ), ARRAY_A);
+                    ?>
 
-                        <?php
-                        $suppliers = $wpdb->get_results($wpdb->prepare(
-                            "SELECT supplier_id, supplier_total_amount
-                             FROM {$supplier_summary_table}
-                             WHERE order_id = %d",
-                            $order['id']
-                        ), ARRAY_A);
+                    <?php if ($suppliers): ?>
+                        <div class="mc-transferred-suppliers">
 
-                        if ($suppliers):
-                        ?>
-                            <ul>
-                                <?php foreach ($suppliers as $s): ?>
-                                    <?php
-                                    // Get supplier name
-                                    $supplier_name = $wpdb->get_var($wpdb->prepare(
-                                        "SELECT post_title FROM {$posts_table} WHERE ID = %d",
-                                        $s['supplier_id']
-                                    ));
-                                    ?>
-                                    <li>
-                                        <?php echo esc_html($supplier_name ?: 'Supplier #' . $s['supplier_id']); ?>
-                                        — £<?php echo number_format((float) $s['supplier_total_amount'], 2); ?>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php else: ?>
-                            <p>No supplier breakdown available.</p>
-                        <?php endif; ?>
+                            <?php foreach ($suppliers as $s): ?>
 
-                    </details>
+                                <?php
+                                // Supplier name
+                                $supplier_name = $wpdb->get_var($wpdb->prepare(
+                                    "SELECT post_title FROM {$posts_table} WHERE ID = %d",
+                                    $s['supplier_id']
+                                ));
 
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <?php
+                                // Fetch sub-order record (status + email tracking)
+                                $suborder = $wpdb->get_row($wpdb->prepare(
+                                    "SELECT supplier_order_status, email_sent, email_sent_at, created_at
+                                     FROM {$suborders_table}
+                                     WHERE suborder_number = %s
+                                     LIMIT 1",
+                                    $s['suborder_number']
+                                ), ARRAY_A);
 
-        wp_send_json_success(['html' => ob_get_clean()]);
-    }
+                                $suborder_status = $suborder ? strtolower($suborder['supplier_order_status']) : 'pending';
+                                $email_sent      = $suborder ? (int) $suborder['email_sent'] : 0;
+                                $email_sent_at   = $suborder && $suborder['email_sent_at']
+                                                    ? date('d M Y H:i', strtotime($suborder['email_sent_at']))
+                                                    : null;
+
+                                // Fetch items for this supplier
+                                $items = $wpdb->get_results($wpdb->prepare(
+                                    "SELECT oi.product_id, oi.quantity, oi.unit_price, oi.line_total,
+                                            p.post_title AS product_name
+                                     FROM {$order_items_table} oi
+                                     INNER JOIN {$posts_table} p ON p.ID = oi.product_id
+                                     WHERE oi.order_id = %d
+                                       AND oi.supplier_id = %d
+                                     ORDER BY p.post_title ASC",
+                                    $order['id'],
+                                    $s['supplier_id']
+                                ), ARRAY_A);
+                                ?>
+
+                                <div class="mc-suborder-block">
+
+                                    <div class="mc-suborder-header">
+                                        <div>
+                                            <strong><?php echo esc_html($supplier_name ?: 'Supplier #' . $s['supplier_id']); ?></strong><br>
+                                            <span class="mc-suborder-ref">
+                                                Sub-order: <?php echo esc_html($s['suborder_number']); ?>
+                                            </span>
+                                        </div>
+
+                                        <div class="mc-suborder-status">
+
+                                            <!-- STATUS BADGE -->
+                                            <span class="mc-suborder-status-badge mc-status-<?php echo esc_attr($suborder_status); ?>">
+                                                <?php echo esc_html(ucfirst($suborder_status)); ?>
+                                            </span>
+
+                                            <!-- SUPPLIER TOTAL -->
+                                            <span class="mc-suborder-total">
+                                                Supplier Total: £<?php echo number_format((float) $s['supplier_total_amount'], 2); ?>
+                                            </span>
+
+                                            <!-- EMAIL INDICATOR -->
+                                            <span class="mc-email-indicator">
+                                                Email:
+                                                <?php if ($email_sent): ?>
+                                                    <strong>Sent</strong>
+                                                    <?php if ($email_sent_at): ?>
+                                                        (<?php echo esc_html($email_sent_at); ?>)
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <strong>Not Sent</strong>
+                                                <?php endif; ?>
+                                            </span>
+
+                                        </div>
+                                    </div>
+
+                                    <?php if ($items): ?>
+                                        <table class="mc-suborder-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Qty</th>
+                                                    <th>Unit Price</th>
+                                                    <th>Supplier Line Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($items as $item): ?>
+                                                    <?php
+                                                        $full_label = $this->mc_get_full_product_label($item['product_id']);
+                                                    ?>
+                                                    <tr>
+                                                        <td><?php echo esc_html($full_label); ?></td>
+                                                        <td><?php echo (int) $item['quantity']; ?></td>
+                                                        <td>£<?php echo number_format((float) $item['unit_price'], 2); ?></td>
+                                                        <td>£<?php echo number_format((float) $item['line_total'], 2); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    <?php else: ?>
+                                        <p>No items found for this supplier.</p>
+                                    <?php endif; ?>
+
+                                </div>
+
+                            <?php endforeach; ?>
+
+                        </div>
+                    <?php else: ?>
+                        <p>No supplier breakdown available.</p>
+                    <?php endif; ?>
+
+                </div> <!-- END COLLAPSE CONTENT -->
+
+            </div>
+
+        <?php endforeach; ?>
+    </div>
+    <?php
+
+    wp_send_json_success(['html' => ob_get_clean()]);
+ }
+
 
 } // END CLASS
 

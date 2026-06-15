@@ -10,6 +10,22 @@ jQuery(function ($) {
     var debounceTimer = null;
 
     /* ---------------------------------------------------------
+       ENABLE / DISABLE TRANSFER BUTTON
+    --------------------------------------------------------- */
+    function mc_updateTransferButton(hasPending) {
+        const btn = document.getElementById('mc-transfer-order-btn');
+        if (!btn) return;
+
+        if (hasPending) {
+            btn.classList.remove('mc-transfer-btn-disabled');
+            btn.disabled = false;
+        } else {
+            btn.classList.add('mc-transfer-btn-disabled');
+            btn.disabled = true;
+        }
+    }
+
+    /* ---------------------------------------------------------
        LOAD PENDING ORDER
     --------------------------------------------------------- */
     function loadPendingOrder() {
@@ -19,8 +35,14 @@ jQuery(function ($) {
         }).done(function (resp) {
             if (resp.success) {
                 $pendingOrderPanel.html(resp.data.html);
+
+                // Check if pending order exists
+                const hasPending = !resp.data.html.includes("No pending order");
+                mc_updateTransferButton(hasPending);
+
             } else {
                 $pendingOrderPanel.html('<p>' + (resp.data?.message || 'Error loading pending order.') + '</p>');
+                mc_updateTransferButton(false);
             }
         });
     }
@@ -35,89 +57,104 @@ jQuery(function ($) {
         }).done(function (resp) {
             if (resp.success) {
                 $transferredPanel.html(resp.data.html);
+
+                // Collapse all cards by default
+                $('.mc-transferred-order-card').addClass('mc-order-collapsed');
+
+                // Disable transfer button when viewing transferred orders
+                mc_updateTransferButton(false);
+
             } else {
                 $transferredPanel.html('<p>' + (resp.data?.message || 'Error loading transferred orders.') + '</p>');
+                mc_updateTransferButton(false);
             }
         });
     }
 
     /* ---------------------------------------------------------
+       COLLAPSE / EXPAND TRANSFERRED ORDER CARDS
+    --------------------------------------------------------- */
+    $(document).on('click', '[data-order-toggle]', function () {
+        const card = $(this).closest('.mc-transferred-order-card');
+        card.toggleClass('mc-order-expanded mc-order-collapsed');
+    });
+
+    /* ---------------------------------------------------------
        RENDER SELECTED ITEM
     --------------------------------------------------------- */
-   function renderSelectedItem(row) {
-    $('#mc-search-results').removeClass('active').hide();
+    function renderSelectedItem(row) {
+        $('#mc-search-results').removeClass('active').hide();
 
-    var productName = row.find('td').eq(0).text();
-    var description = row.find('td').eq(1).text();
-    var supplier    = row.find('td').eq(2).text();
-    var unitPrice   = parseFloat(row.data('unit-price'));
-    var stock       = row.find('td').eq(4).text();   // NEW
-    var productId   = row.data('product-id');
-    var supplierId  = row.data('supplier-id');
+        var productName = row.find('td').eq(0).text();
+        var description = row.find('td').eq(1).text();
+        var supplier    = row.find('td').eq(2).text();
+        var unitPrice   = parseFloat(row.data('unit-price'));
+        var stock       = row.find('td').eq(4).text();
+        var productId   = row.data('product-id');
+        var supplierId  = row.data('supplier-id');
 
-    var html = `
-        <div class="mc-selected-card">
-            <div class="mc-selected-title">Selected item</div>
-            <table class="mc-search-results-table mc-selected-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Description</th>
-                        <th>Supplier</th>
-                        <th>Unit Price</th>
-                        <th>Stock</th>     <!-- NEW -->
-                        <th>Qty</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="mc-selected-value">${productName}</td>
-                        <td class="mc-selected-value">${description}</td>
-                        <td class="mc-selected-value">${supplier}</td>
-                        <td class="mc-selected-value">£${unitPrice.toFixed(2)}</td>
-                        <td class="mc-selected-value">${stock}</td> <!-- NEW -->
-                        <td>
-                            <input type="number" id="mc-selected-qty" value="1" min="1" max="${stock}" step="1" class="mc-qty-input">
-                        </td>
-                        <td class="mc-selected-actions">
-                            <button 
-                                type="button" 
-                                id="mc-add-to-pending"
-                                class="mc-add-basket-btn"
-                                data-product-id="${productId}"
-                                data-supplier-id="${supplierId}"
-                                data-unit-price="${unitPrice}"
-                            >
-                                Add
-                            </button>
-                            <button 
-                                type="button"
-                                class="mc-cancel-btn"
-                                id="mc-cancel-selection"
-                            >
-                                Cancel
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    `;
+        var html = `
+            <div class="mc-selected-card">
+                <div class="mc-selected-title">Selected item</div>
+                <table class="mc-search-results-table mc-selected-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Description</th>
+                            <th>Supplier</th>
+                            <th>Unit Price</th>
+                            <th>Stock</th>
+                            <th>Qty</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="mc-selected-value">${productName}</td>
+                            <td class="mc-selected-value">${description}</td>
+                            <td class="mc-selected-value">${supplier}</td>
+                            <td class="mc-selected-value">£${unitPrice.toFixed(2)}</td>
+                            <td class="mc-selected-value">${stock}</td>
+                            <td>
+                                <input type="number" id="mc-selected-qty" value="1" min="1" max="${stock}" step="1" class="mc-qty-input">
+                            </td>
+                            <td class="mc-selected-actions">
+                                <button 
+                                    type="button" 
+                                    id="mc-add-to-pending"
+                                    class="mc-add-basket-btn"
+                                    data-product-id="${productId}"
+                                    data-supplier-id="${supplierId}"
+                                    data-unit-price="${unitPrice}"
+                                >
+                                    Add
+                                </button>
+                                <button 
+                                    type="button"
+                                    class="mc-cancel-btn"
+                                    id="mc-cancel-selection"
+                                >
+                                    Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
 
-    $('#mc-selected-item').html(html).show();
-}
+        $('#mc-selected-item').html(html).show();
+    }
 
     // Cancel selection
     $('#mc-selected-item').on('click', '#mc-cancel-selection', function () {
-    $('#mc-selected-item').empty().hide();
-    $('#mc-search-results').show().addClass('active');
-    $('#mc-search-input').val('').focus();
+        $('#mc-selected-item').empty().hide();
+        $('#mc-search-results').show().addClass('active');
+        $('#mc-search-input').val('').focus();
     });
 
-
     /* ---------------------------------------------------------
-       SEARCH INPUT (DEBOUNCED + HIDE RESULTS UNTIL TYPING)
+       SEARCH INPUT (DEBOUNCED)
     --------------------------------------------------------- */
     $searchInput.on('keyup', function () {
         var q = $.trim($searchInput.val());
@@ -246,7 +283,7 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
-       TAB SWITCHING
+       TAB SWITCHING (UPDATED)
     --------------------------------------------------------- */
     $('.mc-order-tabs').on('click', '.mc-order-tab', function () {
         var tab = $(this).data('tab');
@@ -258,9 +295,11 @@ jQuery(function ($) {
 
         if (tab === 'pending') {
             $('#mc-pending-order').addClass('mc-order-panel-active');
+            loadPendingOrder(); // auto-updates button
         } else {
             $('#mc-transferred-orders').addClass('mc-order-panel-active');
             loadTransferredOrders();
+            mc_updateTransferButton(false);
         }
     });
 
@@ -268,4 +307,5 @@ jQuery(function ($) {
        INITIAL LOAD
     --------------------------------------------------------- */
     loadPendingOrder();
+
 });

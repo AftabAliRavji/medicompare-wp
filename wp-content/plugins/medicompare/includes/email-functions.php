@@ -67,71 +67,85 @@ class MediCompare_Email_Engine {
     }
 
     /* ---------------------------------------------------------
-       SEND SUPPLIER EMAILS
-    --------------------------------------------------------- */
-    public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppliers, $items_by_supplier) {
-        global $wpdb;
+   SEND SUPPLIER EMAILS (UPDATED WITH STATUS FLOW)
+--------------------------------------------------------- */
+public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppliers, $items_by_supplier) {
+    global $wpdb;
 
-        $suborders_table = $wpdb->prefix . 'medi_order_suborders';
+    $suborders_table = $wpdb->prefix . 'medi_order_suborders';
 
-        $template = $this->load_template('supplier-email-template.php');
+    // Load supplier email template
+    $template = $this->load_template('supplier-email-template.php');
 
-        foreach ($suppliers as $supplier) {
+    foreach ($suppliers as $supplier) {
 
-            $supplier_id      = $supplier['supplier_id'];
-            $suborder_number  = $supplier['suborder_number'];
-            $supplier_total   = number_format((float)$supplier['supplier_total_amount'], 2);
+        $supplier_id      = $supplier['supplier_id'];
+        $suborder_number  = $supplier['suborder_number'];
+        $supplier_total   = number_format((float)$supplier['supplier_total_amount'], 2);
 
-            // Correct supplier email meta key
-            $supplier_email = get_post_meta($supplier_id, 'mc_supplier_email', true);
-            if (!$supplier_email) continue;
+        // Correct supplier email meta key
+        $supplier_email = get_post_meta($supplier_id, 'mc_supplier_email', true);
+        if (!$supplier_email) continue;
 
-            // Build items table
-            $rows = '';
-            foreach ($items_by_supplier[$supplier_id] as $item) {
+        /* ---------------------------------------------------------
+           BUILD ITEMS TABLE
+        --------------------------------------------------------- */
+        $rows = '';
+        foreach ($items_by_supplier[$supplier_id] as $item) {
 
-                $full_label = $this->mc_get_full_product_label($item['product_id']);
+            $full_label = $this->mc_get_full_product_label($item['product_id']);
 
-                $rows .= '<tr>
-                    <td>' . esc_html($full_label) . '</td>
-                    <td>' . (int)$item['quantity'] . '</td>
-                    <td>£' . number_format((float)$item['unit_price'], 2) . '</td>
-                    <td>£' . number_format((float)$item['line_total'], 2) . '</td>
-                </tr>';
-            }
+            $rows .= '<tr>
+                <td>' . esc_html($full_label) . '</td>
+                <td>' . (int)$item['quantity'] . '</td>
+                <td>£' . number_format((float)$item['unit_price'], 2) . '</td>
+                <td>£' . number_format((float)$item['line_total'], 2) . '</td>
+            </tr>';
+        }
 
-            // Fill template
-            $body = $this->fill_template($template, [
-                'suborder_number' => $suborder_number,
-                'order_number'    => $order_number,
-                'order_date'      => date('d M Y H:i'),
-                'pharmacy_name'   => $pharmacy['name'],
-                'pharmacy_address'=> $pharmacy['address'],
-                'pharmacy_email'  => $pharmacy['email'],
-                'pharmacy_phone'  => $pharmacy['phone'],
-                'items_table'     => $rows,
-                'supplier_total'  => $supplier_total
-            ]);
+        /* ---------------------------------------------------------
+           FILL TEMPLATE
+        --------------------------------------------------------- */
+        $body = $this->fill_template($template, [
+            'suborder_number' => $suborder_number,
+            'order_number'    => $order_number,
+            'order_date'      => date('d M Y H:i'),
+            'pharmacy_name'   => $pharmacy['name'],
+            'pharmacy_address'=> $pharmacy['address'],
+            'pharmacy_email'  => $pharmacy['email'],
+            'pharmacy_phone'  => $pharmacy['phone'],
+            'items_table'     => $rows,
+            'supplier_total'  => $supplier_total
+        ]);
 
-            // Send email
-            wp_mail(
-                $supplier_email,
-                "New Order — Sub‑Order {$suborder_number}",
-                $body,
-                ['Content-Type: text/html; charset=UTF-8']
-            );
+        /* ---------------------------------------------------------
+           SEND EMAIL
+        --------------------------------------------------------- */
+        $sent = wp_mail(
+            $supplier_email,
+            "New Order — Sub‑Order {$suborder_number}",
+            $body,
+            ['Content-Type: text/html; charset=UTF-8']
+        );
 
-            // Update email_sent flag
+        /* ---------------------------------------------------------
+           UPDATE SUB-ORDER STATUS IF EMAIL SENT
+        --------------------------------------------------------- */
+        if ($sent) {
             $wpdb->update(
                 $suborders_table,
                 [
-                    'email_sent'    => 1,
-                    'email_sent_at' => current_time('mysql')
+                    'supplier_order_status' => 'sent',          // NEW
+                    'email_sent'            => 1,
+                    'email_sent_at'         => current_time('mysql'),
+                    'updated_at'            => current_time('mysql')
                 ],
                 ['suborder_number' => $suborder_number]
             );
         }
     }
+  }
+
 
     /* ---------------------------------------------------------
        SEND PHARMACY CONFIRMATION EMAIL

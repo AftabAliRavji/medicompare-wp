@@ -454,3 +454,584 @@
     display: block;
     opacity: 0.8;
 }
+/* ORDER-LEVEL STATUS BADGES */
+.mc-order-status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+    color: #fff;
+}
+
+.mc-status-pending {
+    background: #777;
+}
+
+.mc-status-transferred {
+    background: #d98c00;
+}
+
+.mc-status-sent {
+    background: #2e8b57;
+}
+
+/* SUB-ORDER STATUS BADGES */
+.mc-suborder-status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.mc-status-pending {
+    background: #777;
+}
+
+.mc-status-sent {
+    background: #0073aa;
+}
+
+.mc-status-shipped {
+    background: #2e8b57;
+}
+
+.mc-status-cancelled {
+    background: #cc0000;
+}
+
+.mc-update-row:hover {
+    background: #b3b3b3;
+}
+
+.mc-update-row:hover {
+    background: #1e874b;
+}
+.mc-actions button {
+    margin-right: 6px;
+}
+/* Pending order qty input (smaller than selected-item qty) */
+.mc-edit-qty {
+    width: 55px;        /* smaller */
+    padding: 4px 6px;   /* tighter */
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.mc-remove-pending-item {
+    background: #cc0000;   /* red */
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.mc-remove-pending-item:hover {
+    background: #a30000;
+}
+.mc-update-row {
+    background: #27ae60;
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mc-update-row:hover {
+    background: #1e874b;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+}
+.mc-remove-pending-item {
+    background: #cc0000;
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mc-remove-pending-item:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+}
+.mc-edit-qty {
+    width: 55px;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa;
+    background: #eef7ff;
+    outline: none;
+}
+/* Base style for both action buttons */
+.mc-actions button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+/* ✔ green */
+.mc-update-row {
+    background: #27ae60;
+    color: #fff;
+}
+.mc-update-row:hover {
+    background: #1e874b;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+/* ❌ red */
+.mc-remove-pending-item {
+    background: #cc0000;
+    color: #fff;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+.mc-edit-qty {
+    width: 55px;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 2px solid #d0d0d0;
+    border-radius: 6px;
+    background: #fafafa;
+    transition: 
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+/* Focus state — very clear */
+.mc-edit-qty:focus {
+    border-color: #0073aa;
+    background: #eef7ff;
+    box-shadow: 0 0 4px rgba(0, 115, 170, 0.4);
+    outline: none;
+}
+/* ---------------------------------------------------------
+   FINAL OVERRIDES — CLEAN, COLLISION-FREE
+--------------------------------------------------------- */
+
+/* Make ✔ and ❌ identical action buttons */
+.mc-actions button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    margin-right: 6px;
+}
+
+/* ✔ green button */
+.mc-update-row {
+    background: #27ae60;
+    color: #fff;
+}
+.mc-update-row:hover {
+    background: #1e874b;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+/* ❌ red button */
+.mc-remove-pending-item {
+    background: #cc0000;
+    color: #fff;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+/* QTY input — compact + clearly editable */
+.mc-edit-qty {
+    width: 55px;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 2px solid #d0d0d0;
+    border-radius: 6px;
+    background: #fafafa;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa;
+    background: #eef7ff;
+    box-shadow: 0 0 4px rgba(0,115,170,0.4);
+    outline: none;
+}
+/* ---------------------------------------------------------
+   OVERRIDES TO BEAT THE THEME'S style.css
+--------------------------------------------------------- */
+
+/* Make ✔ and ❌ proper buttons (override theme's transparent button) */
+.mc-actions button,
+.mc-update-row,
+.mc-remove-pending-item {
+    background: none !important;
+    border: none !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+/* ✔ green */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+}
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* QTY input — override theme input styles */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 4px 6px !important;
+    font-size: 13px !important;
+    border: 2px solid #d0d0d0 !important;
+    border-radius: 6px !important;
+    background: #fafafa !important;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 4px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+/* ---------------------------------------------------------
+   FINAL UI FIXES — OVERRIDE THEME COLLISIONS
+--------------------------------------------------------- */
+
+/* Base style for both action buttons */
+.mc-actions button,
+.mc-update-row,
+.mc-remove-pending-item {
+    padding: 6px 10px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+    margin-right: 6px !important;
+}
+
+/* ✔ green button */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+}
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red button */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* QTY input — modern SaaS style */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 5px 6px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #fdfdfd !important;
+    transition: 
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+/* Focus state — clear, modern, obvious */
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+/* ---------------------------------------------------------
+   FINAL OVERRIDES — BEAT style.css AND INTERNAL COLLISIONS
+--------------------------------------------------------- */
+
+/* Base style for both action buttons */
+.mc-actions button,
+.mc-update-row,
+.mc-remove-pending-item {
+    padding: 6px 10px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    margin-right: 6px !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+/* ✔ green */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+}
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* QTY input — modern SaaS style */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 5px 6px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #fdfdfd !important;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+/* ---------------------------------------------------------
+   PENDING ORDER — SaaS QTY + BUTTON IMPROVEMENTS ONLY
+--------------------------------------------------------- */
+
+/* QTY input — clear, modern, obviously editable */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #fdfdfd !important;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+
+/* ✔ green button — solid + sharp hover */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red button — solid + sharp hover */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   FINAL-FINAL OVERRIDES — GUARANTEED TO APPLY
+--------------------------------------------------------- */
+
+/* QTY input — SaaS editable style */
+.mc-pending-order-table td .mc-edit-qty {
+    width: 55px !important;
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+.mc-pending-order-table td .mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+
+/* ✔ green button — guaranteed override */
+.mc-pending-order-table td .mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-pending-order-table td .mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red button — guaranteed override */
+.mc-pending-order-table td .mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-pending-order-table td .mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   PENDING ORDER — Final polish for ✔ and ❌
+--------------------------------------------------------- */
+
+/* Add spacing between tick and cross */
+.mc-pending-order-table td .mc-update-row {
+    margin-right: 8px !important; /* more breathing room */
+}
+
+/* Stronger, darker red for ❌ */
+.mc-pending-order-table td .mc-remove-pending-item {
+    background: #b00000 !important;   /* deeper red */
+    color: #fff !important;
+}
+
+/* Even sharper hover for ❌ */
+.mc-pending-order-table td .mc-remove-pending-item:hover {
+    background: #7a0000 !important;   /* darker hover */
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   PENDING ORDER — Stronger ❌ + More spacing (unbeatable)
+--------------------------------------------------------- */
+
+/* Add more spacing between ✔ and ❌ */
+.mc-pending-order-table td .mc-update-row {
+    margin-right: 12px !important; /* increased spacing */
+}
+
+/* Stronger red cross — deeper, more visible */
+.mc-pending-order-table td .mc-remove-pending-item,
+.mc-pending-order-table td button.mc-remove-pending-item {
+    background: #8b0000 !important;   /* deep red */
+    color: #ffffff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+/* Sharper hover for ❌ */
+.mc-pending-order-table td .mc-remove-pending-item:hover,
+.mc-pending-order-table td button.mc-remove-pending-item:hover {
+    background: #5a0000 !important;   /* darker hover */
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   ALWAYS SHOW SPINNER ARROWS ON QTY INPUT (Chrome/Safari)
+--------------------------------------------------------- */
+
+.mc-pending-order-table td .mc-edit-qty {
+    -webkit-appearance: number-input !important;
+    appearance: number-input !important;
+}
+
+/* Force both up/down arrows to always show */
+.mc-pending-order-table td .mc-edit-qty::-webkit-inner-spin-button,
+.mc-pending-order-table td .mc-edit-qty::-webkit-outer-spin-button {
+    opacity: 1 !important;
+    display: block !important;
+}
+

@@ -254,6 +254,35 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
+       UPDATE QTY (✔️ BUTTON)
+    --------------------------------------------------------- */
+    $pendingOrderPanel.on('click', '.mc-update-row', function () {
+        var itemId = parseInt($(this).data('item-id'), 10);
+        if (!itemId) return;
+
+        var row = $(this).closest('tr');
+        var qty = parseInt(row.find('.mc-edit-qty').val(), 10);
+
+        if (!qty || qty < 1) {
+            alert('Please enter a valid quantity.');
+            return;
+        }
+
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_update_pending_qty',
+            nonce: mcComparison.nonce,
+            item_id: itemId,
+            qty: qty
+        }).done(function (resp) {
+            if (resp.success) {
+                loadPendingOrder();
+            } else {
+                alert(resp.data?.message || 'Error updating quantity.');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
        TRANSFER ORDER
     --------------------------------------------------------- */
     $transferBtn.on('click', function () {

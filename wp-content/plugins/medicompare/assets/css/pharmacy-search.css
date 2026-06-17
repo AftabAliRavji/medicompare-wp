@@ -1034,4 +1034,50 @@
     opacity: 1 !important;
     display: block !important;
 }
+/* ---------------------------------------------------------
+   TRANSFERRED ORDERS — Limit height + scroll after 5 orders
+--------------------------------------------------------- */
+
+.mc-transferred-orders-wrapper {
+    max-height: 600px;        /* fits ~5 orders comfortably */
+    overflow-y: auto;         /* scrolls when more than 5 */
+    padding-right: 6px;       /* avoid scrollbar overlap */
+}
+
+/* Optional: nicer scrollbar (Chrome/Edge/Safari) */
+.mc-transferred-orders-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 6px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+/* ---------------------------------------------------------
+   TRANSFERRED ORDERS — Show only 5 orders, scroll the rest
+--------------------------------------------------------- */
+
+.mc-transferred-orders-wrapper {
+    height: 520px !important;      /* fixed height = ~5 cards */
+    overflow-y: auto !important;   /* scroll when more */
+    padding-right: 6px !important; /* avoid scrollbar overlap */
+}
+
+/* Optional: nicer scrollbar */
+.mc-transferred-orders-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 6px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
 

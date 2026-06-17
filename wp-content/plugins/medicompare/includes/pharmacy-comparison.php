@@ -508,197 +508,275 @@ class MediCompare_Pharmacy_Comparison {
     }
 
     /* ---------------------------------------------------------
-       AJAX: TRANSFER ORDER (WITH MASTER ORDER NUMBERING + SUB-ORDER TABLE + AUTO EMAILS)
-    --------------------------------------------------------- */
-    public function ajax_transfer_order() {
-        check_ajax_referer('mc_comparison_nonce', 'nonce');
+   AJAX: TRANSFER ORDER (WITH MASTER ORDER NUMBERING + SUB-ORDER TABLE + AUTO EMAILS)
+   + SUPPLIER STOCK DEDUCTION + NEGATIVE STOCK PREVENTION
+--------------------------------------------------------- */
+public function ajax_transfer_order() {
+    check_ajax_referer('mc_comparison_nonce', 'nonce');
 
-        $pharmacy_id = $this->get_current_pharmacy_id();
-        if (!$pharmacy_id) {
-            wp_send_json_error(['message' => 'Not authorised.']);
+    $pharmacy_id = $this->get_current_pharmacy_id();
+    if (!$pharmacy_id) {
+        wp_send_json_error(['message' => 'Not authorised.']);
+    }
+
+    global $wpdb;
+
+    $pending_orders_table     = $wpdb->prefix . 'medi_pending_orders';
+    $pending_items_table      = $wpdb->prefix . 'medi_pending_order_items';
+    $orders_table             = $wpdb->prefix . 'medi_orders';
+    $order_items_table        = $wpdb->prefix . 'medi_order_items';
+    $supplier_summary_table   = $wpdb->prefix . 'medi_order_supplier_summary';
+    $suborders_table          = $wpdb->prefix . 'medi_order_suborders';
+    $postmeta_table           = $wpdb->postmeta;
+    $supplier_products_table  = $wpdb->prefix . 'medi_supplier_products'; // NEW
+
+    $pending_order_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT id FROM {$pending_orders_table} WHERE pharmacy_id = %d LIMIT 1",
+        $pharmacy_id
+    ));
+
+    if (!$pending_order_id) {
+        wp_send_json_error(['message' => 'No pending order to transfer.']);
+    }
+
+    $items = $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM {$pending_items_table} WHERE pending_order_id = %d",
+        $pending_order_id
+    ), ARRAY_A);
+
+    if (!$items) {
+        wp_send_json_error(['message' => 'Pending order is empty.']);
+    }
+
+    /* ---------------------------------------------
+       1) VALIDATE SUPPLIER STOCK (PREVENT NEGATIVE)
+    --------------------------------------------- */
+    $insufficient = [];
+
+    foreach ($items as $item) {
+        $supplier_id = (int) $item['supplier_id'];
+        $product_id  = (int) $item['product_id'];
+        $qty         = (int) $item['quantity'];
+
+        // Get current stock
+        $current_stock = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT stock FROM {$supplier_products_table}
+                 WHERE supplier_id = %d AND product_id = %d",
+                $supplier_id,
+                $product_id
+            )
+        );
+
+        // If no row, treat as 0 stock
+        if ($current_stock === null) {
+            $current_stock = 0;
         }
 
-        global $wpdb;
+        if ($current_stock < $qty) {
+            $product_name = get_the_title($product_id);
+            $insufficient[] = sprintf(
+                '%s (Supplier ID %d) — required %d, available %d',
+                $product_name,
+                $supplier_id,
+                $qty,
+                $current_stock
+            );
+        }
+    }
 
-        $pending_orders_table     = $wpdb->prefix . 'medi_pending_orders';
-        $pending_items_table      = $wpdb->prefix . 'medi_pending_order_items';
-        $orders_table             = $wpdb->prefix . 'medi_orders';
-        $order_items_table        = $wpdb->prefix . 'medi_order_items';
-        $supplier_summary_table   = $wpdb->prefix . 'medi_order_supplier_summary';
-        $suborders_table          = $wpdb->prefix . 'medi_order_suborders';
-        $postmeta_table           = $wpdb->postmeta;
+    if (!empty($insufficient)) {
+        wp_send_json_error([
+            'message' => "Cannot transfer order. Insufficient supplier stock for:\n" . implode("\n", $insufficient)
+        ]);
+    }
 
-        $pending_order_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$pending_orders_table} WHERE pharmacy_id = %d LIMIT 1",
-            $pharmacy_id
+    /* ---------------------------------------------
+       2) NORMAL ORDER CREATION LOGIC
+    --------------------------------------------- */
+
+    $overall_total   = 0;
+    $supplier_totals = [];
+
+    foreach ($items as $item) {
+        $overall_total += (float) $item['line_total'];
+
+        $sid = (int) $item['supplier_id'];
+        if (!isset($supplier_totals[$sid])) {
+            $supplier_totals[$sid] = 0;
+        }
+        $supplier_totals[$sid] += (float) $item['line_total'];
+    }
+
+    $last_order_number = (int) $wpdb->get_var("SELECT MAX(order_number) FROM {$orders_table}");
+    $new_order_number  = $last_order_number ? $last_order_number + 1 : 10001;
+
+    $wpdb->insert($orders_table, [
+        'pharmacy_id'  => $pharmacy_id,
+        'order_number' => $new_order_number,
+        'total_amount' => $overall_total,
+        'status'       => 'TRANSFERRED',
+        'created_at'   => current_time('mysql'),
+    ]);
+
+    $order_id = (int) $wpdb->insert_id;
+
+    foreach ($items as $item) {
+        $wpdb->insert($order_items_table, [
+            'order_id'            => $order_id,
+            'product_id'          => (int) $item['product_id'],
+            'supplier_id'         => (int) $item['supplier_id'],
+            'quantity'            => (int) $item['quantity'],
+            'unit_price'          => (float) $item['unit_price'],
+            'line_total'          => (float) $item['line_total'],
+            'supplier_cost_price' => null,
+            'supplier_profit'     => null,
+        ]);
+    }
+
+    foreach ($supplier_totals as $supplier_id => $supplier_total) {
+
+        $supplier_code = $wpdb->get_var($wpdb->prepare(
+            "SELECT meta_value FROM {$postmeta_table}
+             WHERE post_id = %d AND meta_key = %s LIMIT 1",
+            $supplier_id,
+            'mc_supplier_code'
         ));
 
-        if (!$pending_order_id) {
-            wp_send_json_error(['message' => 'No pending order to transfer.']);
+        if (!$supplier_code) {
+            $supplier_code = 'SUP' . $supplier_id;
         }
 
-        $items = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$pending_items_table} WHERE pending_order_id = %d",
-            $pending_order_id
-        ), ARRAY_A);
+        $suborder_number = $new_order_number . '-' . $supplier_code;
 
-        if (!$items) {
-            wp_send_json_error(['message' => 'Pending order is empty.']);
-        }
-
-        $overall_total   = 0;
-        $supplier_totals = [];
-
-        foreach ($items as $item) {
-            $overall_total += (float) $item['line_total'];
-
-            $sid = (int) $item['supplier_id'];
-            if (!isset($supplier_totals[$sid])) {
-                $supplier_totals[$sid] = 0;
-            }
-            $supplier_totals[$sid] += (float) $item['line_total'];
-        }
-
-        $last_order_number = (int) $wpdb->get_var("SELECT MAX(order_number) FROM {$orders_table}");
-        $new_order_number  = $last_order_number ? $last_order_number + 1 : 10001;
-
-        $wpdb->insert($orders_table, [
-            'pharmacy_id'  => $pharmacy_id,
-            'order_number' => $new_order_number,
-            'total_amount' => $overall_total,
-            'status'       => 'TRANSFERRED',
-            'created_at'   => current_time('mysql'),
+        $wpdb->insert($supplier_summary_table, [
+            'order_id'              => $order_id,
+            'supplier_id'           => $supplier_id,
+            'suborder_number'       => $suborder_number,
+            'supplier_total_amount' => $supplier_total,
+            'platform_fee_percent'  => 0.00,
+            'platform_fee_amount'   => 0.00,
+            'supplier_order_status' => 'pending',
+            'created_at'            => current_time('mysql'),
         ]);
 
-        $order_id = (int) $wpdb->insert_id;
-
-        foreach ($items as $item) {
-            $wpdb->insert($order_items_table, [
-                'order_id'            => $order_id,
-                'product_id'          => (int) $item['product_id'],
-                'supplier_id'         => (int) $item['supplier_id'],
-                'quantity'            => (int) $item['quantity'],
-                'unit_price'          => (float) $item['unit_price'],
-                'line_total'          => (float) $item['line_total'],
-                'supplier_cost_price' => null,
-                'supplier_profit'     => null,
-            ]);
-        }
-
-        foreach ($supplier_totals as $supplier_id => $supplier_total) {
-
-            $supplier_code = $wpdb->get_var($wpdb->prepare(
-                "SELECT meta_value FROM {$postmeta_table}
-                 WHERE post_id = %d AND meta_key = %s LIMIT 1",
-                $supplier_id,
-                'mc_supplier_code'
-            ));
-
-            if (!$supplier_code) {
-                $supplier_code = 'SUP' . $supplier_id;
-            }
-
-            $suborder_number = $new_order_number . '-' . $supplier_code;
-
-            $wpdb->insert($supplier_summary_table, [
-                'order_id'              => $order_id,
-                'supplier_id'           => $supplier_id,
-                'suborder_number'       => $suborder_number,
-                'supplier_total_amount' => $supplier_total,
-                'platform_fee_percent'  => 0.00,
-                'platform_fee_amount'   => 0.00,
-                'supplier_order_status' => 'pending',
-                'created_at'            => current_time('mysql'),
-            ]);
-
-            $wpdb->insert($suborders_table, [
-                'order_id'              => $order_id,
-                'supplier_id'           => $supplier_id,
-                'suborder_number'       => $suborder_number,
-                'supplier_order_status' => 'pending',
-                'email_sent'            => 0,
-                'email_sent_at'         => null,
-                'created_at'            => current_time('mysql'),
-                'updated_at'            => null,
-            ]);
-        }
-
-        require_once plugin_dir_path(__FILE__) . 'email-functions.php';
-        $email_engine = new MediCompare_Email_Engine();
-
-        $pharmacy_post = get_post($pharmacy_id);
-
-        $address_line_1 = get_post_meta($pharmacy_id, '_mc_address_line_1', true);
-        $address_line_2 = get_post_meta($pharmacy_id, '_mc_address_line_2', true);
-        $city           = get_post_meta($pharmacy_id, '_mc_city', true);
-        $postcode       = get_post_meta($pharmacy_id, '_mc_postcode', true);
-
-        $full_address = trim(
-            $address_line_1 . ' ' .
-            $address_line_2 . ', ' .
-            $city . ', ' .
-            $postcode
-        );
-
-        $pharmacy = [
-            'id'      => $pharmacy_id,
-            'name'    => $pharmacy_post->post_title,
-            'email'   => get_post_meta($pharmacy_id, '_mc_email', true),
-            'phone'   => get_post_meta($pharmacy_id, '_mc_phone', true),
-            'address' => $full_address,
-        ];
-
-        $suppliers = $wpdb->get_results($wpdb->prepare(
-            "SELECT supplier_id, suborder_number, supplier_total_amount
-             FROM {$supplier_summary_table}
-             WHERE order_id = %d",
-            $order_id
-        ), ARRAY_A);
-
-        $items_by_supplier = [];
-        foreach ($items as $item) {
-            $product_name = get_the_title($item['product_id']);
-            $items_by_supplier[$item['supplier_id']][] = [
-                'product_id'   => (int) $item['product_id'],
-                'product_name' => $product_name,
-                'quantity'     => $item['quantity'],
-                'unit_price'   => $item['unit_price'],
-                'line_total'   => $item['line_total']
-            ];
-        }
-
-        $email_engine->send_supplier_emails(
-            $order_id,
-            $new_order_number,
-            $pharmacy,
-            $suppliers,
-            $items_by_supplier
-        );
-
-        $email_engine->send_pharmacy_confirmation(
-            $new_order_number,
-            $pharmacy,
-            $suppliers,
-            $items
-        );
-
-        $email_engine->send_admin_notification(
-            $new_order_number,
-            $pharmacy,
-            $suppliers
-        );
-
-        $wpdb->update(
-            $orders_table,
-            ['status' => 'SENT'],
-            ['id' => $order_id]
-        );
-
-        $wpdb->delete($pending_items_table, ['pending_order_id' => $pending_order_id]);
-        $wpdb->delete($pending_orders_table, ['id' => $pending_order_id]);
-
-        wp_send_json_success(['message' => 'Order transferred successfully.']);
+        $wpdb->insert($suborders_table, [
+            'order_id'              => $order_id,
+            'supplier_id'           => $supplier_id,
+            'suborder_number'       => $suborder_number,
+            'supplier_order_status' => 'pending',
+            'email_sent'            => 0,
+            'email_sent_at'         => null,
+            'created_at'            => current_time('mysql'),
+            'updated_at'            => null,
+        ]);
     }
+
+    /* ---------------------------------------------
+       3) DEDUCT SUPPLIER STOCK (SAFE, NO NEGATIVE)
+    --------------------------------------------- */
+
+    foreach ($items as $item) {
+        $supplier_id = (int) $item['supplier_id'];
+        $product_id  = (int) $item['product_id'];
+        $qty         = (int) $item['quantity'];
+
+        // Deduct stock, never below 0, update last_updated
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$supplier_products_table}
+                 SET stock = GREATEST(stock - %d, 0),
+                     last_updated = %s
+                 WHERE supplier_id = %d AND product_id = %d",
+                $qty,
+                current_time('mysql'),
+                $supplier_id,
+                $product_id
+            )
+        );
+    }
+
+    /* ---------------------------------------------
+       4) EMAILS + STATUS + CLEANUP
+    --------------------------------------------- */
+
+    require_once plugin_dir_path(__FILE__) . 'email-functions.php';
+    $email_engine = new MediCompare_Email_Engine();
+
+    $pharmacy_post = get_post($pharmacy_id);
+
+    $address_line_1 = get_post_meta($pharmacy_id, '_mc_address_line_1', true);
+    $address_line_2 = get_post_meta($pharmacy_id, '_mc_address_line_2', true);
+    $city           = get_post_meta($pharmacy_id, '_mc_city', true);
+    $postcode       = get_post_meta($pharmacy_id, '_mc_postcode', true);
+
+    $full_address = trim(
+        $address_line_1 . ' ' .
+        $address_line_2 . ', ' .
+        $city . ', ' .
+        $postcode
+    );
+
+    $pharmacy = [
+        'id'      => $pharmacy_id,
+        'name'    => $pharmacy_post->post_title,
+        'email'   => get_post_meta($pharmacy_id, '_mc_email', true),
+        'phone'   => get_post_meta($pharmacy_id, '_mc_phone', true),
+        'address' => $full_address,
+    ];
+
+    $suppliers = $wpdb->get_results($wpdb->prepare(
+        "SELECT supplier_id, suborder_number, supplier_total_amount
+         FROM {$supplier_summary_table}
+         WHERE order_id = %d",
+        $order_id
+    ), ARRAY_A);
+
+    $items_by_supplier = [];
+    foreach ($items as $item) {
+        $product_name = get_the_title($item['product_id']);
+        $items_by_supplier[$item['supplier_id']][] = [
+            'product_id'   => (int) $item['product_id'],
+            'product_name' => $product_name,
+            'quantity'     => $item['quantity'],
+            'unit_price'   => $item['unit_price'],
+            'line_total'   => $item['line_total']
+        ];
+    }
+
+    $email_engine->send_supplier_emails(
+        $order_id,
+        $new_order_number,
+        $pharmacy,
+        $suppliers,
+        $items_by_supplier
+    );
+
+    $email_engine->send_pharmacy_confirmation(
+        $new_order_number,
+        $pharmacy,
+        $suppliers,
+        $items
+    );
+
+    $email_engine->send_admin_notification(
+        $new_order_number,
+        $pharmacy,
+        $suppliers
+    );
+
+    $wpdb->update(
+        $orders_table,
+        ['status' => 'SENT'],
+        ['id' => $order_id]
+    );
+
+    $wpdb->delete($pending_items_table, ['pending_order_id' => $pending_order_id]);
+    $wpdb->delete($pending_orders_table, ['id' => $pending_order_id]);
+
+    wp_send_json_success(['message' => 'Order transferred successfully.']);
+}
+
 
     /* ---------------------------------------------------------
        AJAX: GET TRANSFERRED ORDERS (WITH STATUS BADGES + UI ENHANCEMENTS)

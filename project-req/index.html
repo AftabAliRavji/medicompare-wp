@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Medicompare Requirements & Kanban</title>
@@ -16,7 +18,6 @@
         font-weight: bold;
     }
 
-    /* New Task Button */
     .new-task-btn {
         display: block;
         margin: 20px auto;
@@ -29,7 +30,6 @@
         cursor: pointer;
     }
 
-    /* Modal Background */
     .modal-bg {
         display: none;
         position: fixed;
@@ -41,7 +41,6 @@
         z-index: 9999;
     }
 
-    /* Modal Box */
     .modal-box {
         background: #fff;
         padding: 25px;
@@ -50,10 +49,7 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
-    .modal-box h2 {
-        margin-top: 0;
-        text-align: center;
-    }
+    .modal-box h2 { margin-top: 0; text-align: center; }
 
     .modal-box label {
         font-weight: bold;
@@ -71,10 +67,7 @@
         border: 1px solid #ccc;
     }
 
-    .modal-actions {
-        margin-top: 20px;
-        text-align: right;
-    }
+    .modal-actions { margin-top: 20px; text-align: right; }
 
     .modal-actions button {
         padding: 10px 16px;
@@ -87,7 +80,6 @@
     .btn-add { background: #0073aa; color: #fff; }
     .btn-cancel { background: #999; color: #fff; }
 
-    /* Kanban */
     .kanban-wrapper {
         padding: 30px;
         display: flex;
@@ -121,7 +113,6 @@
         position: relative;
     }
 
-    /* Delete Button */
     .delete-btn {
         position: absolute;
         right: 8px;
@@ -139,7 +130,6 @@
 
     .kanban-item.dragging { opacity: 0.5; }
 
-    /* Requirements Section */
     .section {
         background: #fff;
         margin: 30px auto;
@@ -149,7 +139,6 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    /* Section Divider */
     .section-divider {
         width: 100%;
         height: 2px;
@@ -157,32 +146,14 @@
         margin: 40px 0;
     }
 
-    /* Priority Colours */
     .priority-high { color: #d9534f; font-weight: bold; }
     .priority-med { color: #f0ad4e; font-weight: bold; }
     .priority-low { color: #5cb85c; font-weight: bold; }
 
-    /* Kanban Priority Colours */
-    .kanban-item.high {
-        border-left: 4px solid #d9534f;
-        background: #fbeaea;
-    }
-    .kanban-item.med {
-        border-left: 4px solid #f0ad4e;
-        background: #fff5e6;
-    }
-    .kanban-item.low {
-        border-left: 4px solid #5cb85c;
-        background: #e9f7ec;
-    }
+    .kanban-item.high { border-left: 4px solid #d9534f; background: #fbeaea; }
+    .kanban-item.med { border-left: 4px solid #f0ad4e; background: #fff5e6; }
+    .kanban-item.low { border-left: 4px solid #5cb85c; background: #e9f7ec; }
 
-    .delete-btn {
-    pointer-events: auto !important;
-    z-index: 9999;
-}
-
-
-    /* Highlight Animation */
     .highlight {
         animation: highlightFlash 2s ease-out;
     }
@@ -195,11 +166,11 @@
     html { scroll-behavior: smooth; }
 </style>
 </head>
+
 <body>
 
 <div class="header">Medicompare Requirements & Kanban Board</div>
 
-<!-- NEW TASK BUTTON -->
 <button class="new-task-btn" id="openModalBtn">+ New Task</button>
 
 <!-- MODAL -->
@@ -210,7 +181,6 @@
         <label>Main Section</label>
         <select id="mainSectionSelect"></select>
 
-        <!-- This input MUST exist for new main sections -->
         <input type="text" id="newMainSectionInput"
                placeholder="Enter new main section title"
                style="display:none; margin-top:10px;">
@@ -221,7 +191,6 @@
             <option value="bullet">Bullet Point Under Existing Subsection</option>
         </select>
 
-        <!-- INSERT PRIORITY SELECT HERE -->
         <label>Priority</label>
         <select id="prioritySelect">
             <option value="high">High Priority</option>
@@ -244,703 +213,16 @@
         </div>
     </div>
 </div>
-<!-- KANBAN BOARD -->
-<div class="kanban-wrapper">
 
-    <div class="kanban-column" id="todo">
-        <div class="kanban-title">To Do</div>
+<!-- EMPTY KANBAN WRAPPER (DB will fill this) -->
+<div class="kanban-wrapper"></div>
 
-        <div class="kanban-item" draggable="true" data-target="#req-1-3">
-            Deduct Supplier Stock (High)
-        </div>
+<!-- EMPTY REQUIREMENTS SECTION (DB will fill this) -->
+<div class="section" id="requirements"></div>
 
-        <div class="kanban-item" draggable="true" data-target="#req-1-4">
-            Pharmacy Order History Screen (Med/High)
-        </div>
+<!-- LOAD JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="requirements-board.js"></script>
 
-        <div class="kanban-item" draggable="true" data-target="#req-2-1">
-            Pharmacy Dashboard Enhancements (Med/High)
-        </div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-5">
-            Admin Orders Section (Med/High)
-        </div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-4-2">
-            Supplier Stock Update CSV/GUI (Med/High)
-        </div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-8">
-            Additions to Requirements Board (Low)
-        </div>
-    </div>
-
-    <div class="kanban-column" id="inprogress">
-        <div class="kanban-title">In Progress</div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-1-4">
-            Transferred Orders Scroll UI
-        </div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-1-1">
-            Pending Order UI Enhancements
-        </div>
-    </div>
-
-    <div class="kanban-column" id="done">
-        <div class="kanban-title">Done</div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-1-1">
-            Pending Order QTY + Buttons
-        </div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-1-4">
-            Transferred Orders Layout
-        </div>
-
-        <div class="kanban-item" draggable="true" data-target="#req-6">
-            Search + Selected Product UI
-        </div>
-    </div>
-
-</div>
-<!-- REQUIREMENTS SECTION -->
-<div class="section" id="requirements">
-
-    <h2>1. Order Workflow Enhancements</h2>
-
-    <h3 id="req-1-1">1.1 Order Section Improvements <span class="priority-low">LOW PRIORITY</span></h3>
-    <ul>
-        <li>Improve order detail layout</li>
-        <li>Group supplier sub-orders more clearly</li>
-        <li>Standardise status badges</li>
-        <li>Improve totals layout</li>
-        <li>Optional: collapsible supplier sections</li>
-    </ul>
-
-    <h3 id="req-1-2">1.2 Supplier Order Status Updates <span class="priority-low">LOW PRIORITY</span></h3>
-    <ul>
-        <li>Supplier can update: Sent, Processing, Shipped, Delivered, Cancelled</li>
-        <li>Pharmacy and Admin see updates in real time</li>
-    </ul>
-
-    <h3 id="req-1-3">1.3 Deduct Supplier Stock <span class="priority-high">HIGH PRIORITY</span></h3>
-    <ul>
-        <li>Deduct supplier stock when pharmacy places order</li>
-        <li>Prevent negative stock</li>
-        <li>Show updated stock in supplier dashboard</li>
-    </ul>
-
-    <h3 id="req-1-4">1.4 Pharmacy Order History <span class="priority-med">MED/HIGH PRIORITY</span></h3>
-    <ul>
-        <li>Show all past orders</li>
-        <li>Filter by supplier, date, status</li>
-        <li>Show transferred orders with scroll</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>2. Dashboard Enhancements</h2>
-
-    <h3 id="req-2-1">2.1 Pharmacy Dashboard Enhancements <span class="priority-med">MED/HIGH PRIORITY</span></h3>
-    <ul>
-        <li>Show pending orders</li>
-        <li>Show supplier updates</li>
-        <li>Show low stock alerts</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>3. Supplier Admin</h2>
-
-    <h3 id="req-3-1">3.1 Supplier Dashboard Improvements</h3>
-    <ul>
-        <li>Show incoming pharmacy orders</li>
-        <li>Show stock levels</li>
-        <li>Show order history</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>4. Supplier Stock Management</h2>
-
-    <h3 id="req-4-1">4.1 Supplier Stock Page</h3>
-    <ul>
-        <li>View all products</li>
-        <li>Edit stock levels</li>
-        <li>Bulk update options</li>
-    </ul>
-
-    <h3 id="req-4-2">4.2 Supplier Stock Update CSV/GUI <span class="priority-med">MED/HIGH PRIORITY</span></h3>
-    <ul>
-        <li>Upload CSV to update stock</li>
-        <li>GUI option for manual updates</li>
-        <li>Validate product codes</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>5. Admin Orders Section</h2>
-
-    <h3 id="req-5">5.1 Admin Orders Section <span class="priority-med">MED/HIGH PRIORITY</span></h3>
-    <ul>
-        <li>View all pharmacy orders</li>
-        <li>Filter by supplier, date, status</li>
-        <li>Override supplier status if needed</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>6. Product Search Enhancements</h2>
-
-    <h3 id="req-6">6.1 Search + Selected Product UI</h3>
-    <ul>
-        <li>Improve search speed</li>
-        <li>Improve product selection UI</li>
-        <li>Show product details clearly</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>7. System Enhancements</h2>
-
-    <h3 id="req-7">7.1 System Performance</h3>
-    <ul>
-        <li>Improve load times</li>
-        <li>Optimise database queries</li>
-        <li>Reduce server load</li>
-    </ul>
-
-    <div class="section-divider"></div>
-
-    <h2>8. Additions to Requirements Board</h2>
-
-    <h3 id="req-8">8.1 Additions to Requirements Board <span class="priority-low">LOW PRIORITY</span></h3>
-    <ul>
-        <li>Allow adding new tasks</li>
-        <li>Allow deleting tasks</li>
-        <li>Allow dragging tasks</li>
-    </ul>
-
-</div>
-<script>
-/* ---------------------------
-   INITIAL SETUP + LOCALSTORAGE
----------------------------- */
-
-document.addEventListener("DOMContentLoaded", () => {
-    restoreState();
-    ensureDeleteButtonsOnAllCards(); // NEW
-    enableDragAndDrop();
-    attachKanbanClickHandlers();
-    populateMainSectionDropdown();
-    applyPriorityColoursToExistingCards();
-});
-
- document.addEventListener("click", (e) => {
-    if (!e.target.classList.contains("delete-btn")) return;
-
-    e.stopPropagation(); // prevent card click / scroll
-
-    const card = e.target.closest(".kanban-item");
-    if (!card) return;
-
-    const target = card.dataset.target;
-
-    // Remove card from Kanban
-    card.remove();
-
-    // If linked to a requirement, delete it
-    if (target && target.startsWith("#req-")) {
-        const h3 = document.querySelector(target);
-
-        if (h3) {
-            const ul = h3.nextElementSibling;
-            h3.remove();
-            if (ul && ul.tagName === "UL") ul.remove();
-            cleanupEmptyMainSections && cleanupEmptyMainSections();
-        }
-    }
-
-    saveState && saveState();
-});
-
-
-/* ---------------------------
-   MODAL OPEN/CLOSE
----------------------------- */
-
-const modalBg = document.getElementById("modalBg");
-document.getElementById("openModalBtn").onclick = () => {
-    // Reset form fields
-    document.getElementById("taskTitle").value = "";
-    document.getElementById("taskDetails").value = "";
-    document.getElementById("newMainSectionInput").value = "";
-    document.getElementById("addTypeSelect").value = "subsection";
-    document.getElementById("prioritySelect").value = "low";
-
-    // Refresh dropdowns (CRITICAL FIX)
-    populateMainSectionDropdown();
-
-    // Show modal
-    document.getElementById("modalBg").style.display = "flex";
-};
-document.getElementById("cancelModalBtn").onclick = () => modalBg.style.display = "none";
-
-/* ---------------------------
-   POPULATE MAIN SECTION DROPDOWN
----------------------------- */
-
-function populateMainSectionDropdown() {
-    const mainSelect = document.getElementById("mainSectionSelect");
-    mainSelect.innerHTML = "";
-
-    // ADD THIS FIRST
-    const newOpt = document.createElement("option");
-    newOpt.value = "__new__";
-    newOpt.textContent = "Not There (Create New Main Section)";
-    mainSelect.appendChild(newOpt);
-
-    // THEN ADD EXISTING SECTIONS
-    const sections = document.querySelectorAll("#requirements h2");
-
-    sections.forEach(sec => {
-        const opt = document.createElement("option");
-        opt.value = sec.textContent.trim();
-        opt.textContent = sec.textContent.trim();
-        mainSelect.appendChild(opt);
-    });
-
-    populateSubsectionDropdown();
-}
-
-
-/* ---------------------------
-   POPULATE SUBSECTION DROPDOWN
----------------------------- */
-
-document.getElementById("addTypeSelect").addEventListener("change", populateSubsectionDropdown);
-document.getElementById("mainSectionSelect").addEventListener("change", populateSubsectionDropdown);
-document.getElementById("mainSectionSelect").addEventListener("change", () => {
-    const sel = document.getElementById("mainSectionSelect").value;
-    const input = document.getElementById("newMainSectionInput");
-
-    if (sel === "__new__") {
-        input.style.display = "block";
-    } else {
-        input.style.display = "none";
-    }
-});
-
-
-function populateSubsectionDropdown() {
-    const addType = document.getElementById("addTypeSelect").value;
-    const mainSel = document.getElementById("mainSectionSelect").value;
-
-    const subsectionLabel = document.getElementById("subsectionLabel");
-    const subsectionSelect = document.getElementById("subsectionSelect");
-    const newMainInput = document.getElementById("newMainSectionInput");
-
-    // NEW MAIN SECTION MODE
-    if (mainSel === "__new__") {
-        // Hide subsection UI
-        subsectionLabel.style.display = "none";
-        subsectionSelect.style.display = "none";
-
-        // Always show the new main section input
-        newMainInput.style.display = "block";
-        return; // STOP HERE — do NOT run normal logic
-    }
-
-    // NORMAL MODE
-    newMainInput.style.display = "none";
-
-    if (addType === "bullet") {
-        subsectionLabel.style.display = "block";
-        subsectionSelect.style.display = "block";
-
-        const subsections = findSubsections(mainSel);
-        subsectionSelect.innerHTML = "";
-
-        subsections.forEach(h3 => {
-            const opt = document.createElement("option");
-            opt.value = h3.id;
-            opt.textContent = h3.textContent.replace(/<[^>]*>/g, "").trim();
-            subsectionSelect.appendChild(opt);
-        });
-
-    } else {
-        subsectionLabel.style.display = "none";
-        subsectionSelect.style.display = "none";
-    }
-}
-
-
-/* ---------------------------
-   FIND SUBSECTIONS UNDER A MAIN SECTION
----------------------------- */
-
-function findSubsections(sectionTitle) {
-    const h2s = [...document.querySelectorAll("#requirements h2")];
-    let startIndex = h2s.findIndex(h => h.textContent.trim() === sectionTitle);
-
-    if (startIndex === -1) return [];
-
-    const startNode = h2s[startIndex];
-    const nextH2 = h2s[startIndex + 1];
-
-    let subsections = [];
-    let node = startNode.nextElementSibling;
-
-    while (node && node !== nextH2) {
-        if (node.tagName === "H3") subsections.push(node);
-        node = node.nextElementSibling;
-    }
-
-    return subsections;
-}
-
-/* ---------------------------
-   ADD TASK BUTTON HANDLER
----------------------------- */
-
-document.getElementById("addTaskBtn").onclick = () => {
-    const mainSection = document.getElementById("mainSectionSelect").value;
-    const addType = document.getElementById("addTypeSelect").value;
-    const title = document.getElementById("taskTitle").value.trim();
-    const details = document.getElementById("taskDetails").value.trim();
-
-    if (!title) return alert("Please enter a title.");
-
-    if (mainSection === "__new__") {
-    const newTitle = document.getElementById("newMainSectionInput").value.trim();
-    if (!newTitle) return alert("Please enter a main section title.");
-
-        createNewMainSection(newTitle, title, details);
-
-    } else if (addType === "subsection") {
-        addNewSubsection(mainSection, title, details);
-
-    } else {
-        const subsectionId = document.getElementById("subsectionSelect").value;
-        addBulletPoint(subsectionId, title, details);
-    }
-
-    modalBg.style.display = "none";
-    saveState();
-};
-
-/* ---------------------------
-   ADD NEW SUBSECTION (PART 1)
----------------------------- */
-
-function addNewSubsection(mainSection, title, details) {
-    const subsections = findSubsections(mainSection);
-
-    let nextNumber = 1;
-    if (subsections.length > 0) {
-        const last = subsections[subsections.length - 1];
-        const match = last.id.match(/req-(\d+)-(\d+)/);
-        if (match) nextNumber = parseInt(match[2]) + 1;
-    }
-
-    const sectionNumber = findSectionNumber(mainSection);
-    const newId = `req-${sectionNumber}-${nextNumber}`;
-    const newHeading = `${sectionNumber}.${nextNumber} ${title}`;
-
-    const h3 = document.createElement("h3");
-    h3.id = newId;
-    const priority = document.getElementById("prioritySelect").value;
-
-    let prioritySpan = "";
-    if (priority === "high") prioritySpan = ` <span class="priority-high">HIGH PRIORITY</span>`;
-    if (priority === "med")  prioritySpan = ` <span class="priority-med">MED/HIGH PRIORITY</span>`;
-    if (priority === "low")  prioritySpan = ` <span class="priority-low">LOW PRIORITY</span>`;
-
-    h3.innerHTML = `${newHeading}${prioritySpan}`;
-
-
-    const ul = document.createElement("ul");
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${title}</strong> → ${details}`;
-    ul.appendChild(li);
-
-    const lastSub = subsections[subsections.length - 1];
-    if (lastSub) {
-        lastSub.nextElementSibling.insertAdjacentElement("afterend", ul);
-        ul.insertAdjacentElement("beforebegin", h3);
-    } else {
-        const h2s = [...document.querySelectorAll("#requirements h2")];
-        const h2 = h2s.find(h => h.textContent.trim() === mainSection);
-        h2.insertAdjacentElement("afterend", h3);
-        h3.insertAdjacentElement("afterend", ul);
-    }
-
-    createKanbanCard(title, `#${newId}`);
-}
-/* ---------------------------
-   FIND SECTION NUMBER
----------------------------- */
-
-function findSectionNumber(sectionTitle) {
-    const h2s = [...document.querySelectorAll("#requirements h2")];
-    return h2s.findIndex(h => h.textContent.trim() === sectionTitle) + 1;
-}
-
-/* ---------------------------
-   ADD BULLET POINT
----------------------------- */
-
-function addBulletPoint(subsectionId, title, details) {
-    const h3 = document.getElementById(subsectionId);
-    const ul = h3.nextElementSibling;
-
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${title}</strong> → ${details}`;
-    ul.appendChild(li);
-
-    createKanbanCard(title, `#${subsectionId}`);
-}
-
-/* ---------------------------
-   CREATE KANBAN CARD
----------------------------- */
-
-function createKanbanCard(title, target) {
-    const card = document.createElement("div");
-    card.className = "kanban-item";
-    card.draggable = true;
-    card.dataset.target = target;
-    card.textContent = title;
-
-    // Detect priority from requirement heading
-    const req = document.querySelector(target);
-    if (req) {
-        if (req.innerHTML.includes("priority-high")) card.classList.add("high");
-        if (req.innerHTML.includes("priority-med")) card.classList.add("med");
-        if (req.innerHTML.includes("priority-low")) card.classList.add("low");
-    }
-
-    const del = document.createElement("button");
-    del.className = "delete-btn";
-    del.textContent = "X";
-    card.appendChild(del);
-
-    card.appendChild(del);
-
-    document.getElementById("todo").appendChild(card);
-
-    enableDragAndDrop();
-    attachKanbanClickHandlers();
-}
-
-/* ---------------------------
-   DELETE KANBAN ITEM + REQUIREMENT
----------------------------- */
-
-function deleteKanbanItem(e) {
-    e.stopPropagation();
-
-    const card = e.target.closest(".kanban-item");
-    const target = card.dataset.target;
-
-    // Remove Kanban card
-    card.remove();
-
-    // If linked to a requirement, delete it
-    if (target && target.startsWith("#req-")) {
-        const h3 = document.querySelector(target);
-
-        if (h3) {
-            const ul = h3.nextElementSibling;
-
-            // Remove subsection
-            h3.remove();
-            if (ul && ul.tagName === "UL") ul.remove();
-
-            // If this was the ONLY subsection under a main section, remove the main section too
-            cleanupEmptyMainSections();
-        }
-    }
-
-    saveState();
-}
-
-
-/* ---------------------------
-   KANBAN CLICK → SCROLL + HIGHLIGHT
----------------------------- */
-
-function attachKanbanClickHandlers() {
-    document.querySelectorAll(".kanban-item").forEach(item => {
-        item.onclick = (e) => {
-            if (e.target.classList.contains("delete-btn")) return;
-
-            const target = item.dataset.target;
-            const el = document.querySelector(target);
-            if (!el) return;
-
-            el.classList.add("highlight");
-            setTimeout(() => el.classList.remove("highlight"), 2000);
-
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-        };
-    });
-}
-
-/* ---------------------------
-   DRAG & DROP
----------------------------- */
-
-function enableDragAndDrop() {
-    const items = document.querySelectorAll(".kanban-item");
-    const columns = document.querySelectorAll(".kanban-column");
-
-    items.forEach(item => {
-        item.addEventListener("dragstart", () => item.classList.add("dragging"));
-        item.addEventListener("dragend", () => {
-            item.classList.remove("dragging");
-            saveState();
-        });
-    });
-
-    columns.forEach(col => {
-        col.addEventListener("dragover", e => {
-            e.preventDefault();
-            const dragging = document.querySelector(".dragging");
-            col.appendChild(dragging);
-        });
-    });
-}
-
-/* ---------------------------
-   SAVE + RESTORE STATE
----------------------------- */
-
-function saveState() {
-    localStorage.setItem("kanbanHTML", document.querySelector(".kanban-wrapper").innerHTML);
-    localStorage.setItem("requirementsHTML", document.getElementById("requirements").innerHTML);
-}
-
-function restoreState() {
-    const kanban = localStorage.getItem("kanbanHTML");
-    const req = localStorage.getItem("requirementsHTML");
-
-    if (kanban) document.querySelector(".kanban-wrapper").innerHTML = kanban;
-    if (req) document.getElementById("requirements").innerHTML = req;
-
-    // NEW: ensure all cards have delete buttons
-    ensureDeleteButtonsOnAllCards();
-
-    // Reattach handlers
-    enableDragAndDrop();
-    attachKanbanClickHandlers();
-}
-
-
-/* ---------------------------
-   APPLY PRIORITY COLOURS TO EXISTING CARDS
----------------------------- */
-
-function applyPriorityColoursToExistingCards() {
-    document.querySelectorAll(".kanban-item").forEach(card => {
-        const target = card.dataset.target;
-        const req = document.querySelector(target);
-        if (!req) return;
-
-        if (req.innerHTML.includes("priority-high")) card.classList.add("high");
-        if (req.innerHTML.includes("priority-med")) card.classList.add("med");
-        if (req.innerHTML.includes("priority-low")) card.classList.add("low");
-    });
-}
-
-/* ---------------------------
-   CREATE NEW MAIN SECTION
----------------------------- */
-
-function createNewMainSection(sectionTitle, firstSubTitle, details) {
-
-    // Determine next main section number
-    const h2s = [...document.querySelectorAll("#requirements h2")];
-    const nextMainNumber = h2s.length + 1;
-
-    // Create <h2>
-    const h2 = document.createElement("h2");
-    h2.textContent = `${nextMainNumber}. ${sectionTitle}`;
-
-    // Create first subsection ID
-    const newId = `req-${nextMainNumber}-1`;
-
-    // Get selected priority
-    const priority = document.getElementById("prioritySelect").value;
-
-    let prioritySpan = "";
-    if (priority === "high") prioritySpan = ` <span class="priority-high">HIGH PRIORITY</span>`;
-    if (priority === "med")  prioritySpan = ` <span class="priority-med">MED/HIGH PRIORITY</span>`;
-    if (priority === "low")  prioritySpan = ` <span class="priority-low">LOW PRIORITY</span>`;
-
-    // Create <h3> with priority
-    const h3 = document.createElement("h3");
-    h3.id = newId;
-    h3.innerHTML = `${nextMainNumber}.1 ${firstSubTitle}${prioritySpan}`;
-
-
-    // Create <ul><li>
-    const ul = document.createElement("ul");
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${firstSubTitle}</strong> → ${details}`;
-    ul.appendChild(li);
-
-    // Insert at bottom of requirements
-    const req = document.getElementById("requirements");
-    req.appendChild(document.createElement("div")).className = "section-divider";
-    req.appendChild(h2);
-    req.appendChild(h3);
-    req.appendChild(ul);
-
-    // Create Kanban card
-    createKanbanCard(firstSubTitle, `#${newId}`);
-
-    saveState();
-    populateMainSectionDropdown();
-}
-
-function cleanupEmptyMainSections() {
-    const h2s = document.querySelectorAll("#requirements h2");
-
-    h2s.forEach(h2 => {
-        let next = h2.nextElementSibling;
-
-        // If next element is NOT an H3, this main section is empty
-        if (!next || next.tagName !== "H3") {
-            // Remove divider before it (if exists)
-            const prev = h2.previousElementSibling;
-            if (prev && prev.classList.contains("section-divider")) {
-                prev.remove();
-            }
-
-            h2.remove();
-        }
-    });
-}
-
-function ensureDeleteButtonsOnAllCards() {
-    document.querySelectorAll(".kanban-item").forEach(card => {
-
-        // If card already has a delete button, skip
-        if (card.querySelector(".delete-btn")) return;
-
-        // Create delete button
-        const del = document.createElement("button");
-        del.className = "delete-btn";
-        del.textContent = "X";
-        card.appendChild(del);
-
-        // Append to card
-        card.appendChild(del);
-    });
-}
-
-</script>
 </body>
 </html>

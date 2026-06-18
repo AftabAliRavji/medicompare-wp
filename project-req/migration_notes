@@ -1,0 +1,6 @@
+To run the migration script from local storage to DB, following steps - 
+1. rename index18062026.html to index.html
+2. load it in browser
+3. in console run migrateLocalStorageToDB();
+4. should see success and this will be in the DB
+5. when migrating the DB table itself onto environment we will need a script for this.

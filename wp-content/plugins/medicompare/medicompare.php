@@ -40,6 +40,9 @@ class MediCompare {
         // ⭐ NEW: Hide theme header/footer for MediCompare pages
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/hide-theme-ui.php';
 
+        // ADD THIS ONE
+        require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
+
     }
 
     /**

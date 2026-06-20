@@ -128,9 +128,9 @@
         z-index: 9999 !important;
     }
 
-    .task-edit-btn,
-    .work-edit-btn {
+    .edit-btn {
         position: absolute;
+        right: 40px;
         top: 8px;
         background: #5bc0de;
         color: #fff;
@@ -140,9 +140,6 @@
         cursor: pointer;
         font-size: 12px;
     }
-
-    .task-edit-btn { right: 40px; }
-    .work-edit-btn { right: 90px; }
 
     .kanban-item.dragging { opacity: 0.5; }
 
@@ -252,7 +249,7 @@
     </div>
 </div>
 
-<!-- COMPLETION SUMMARY MODAL (Mark as Done) -->
+<!-- COMPLETION SUMMARY MODAL -->
 <div class="modal-bg" id="completionModalBg">
     <div class="modal-box">
         <h2>Mark Task as Done</h2>
@@ -275,38 +272,13 @@
     </div>
 </div>
 
-<!-- EDIT TASK MODAL (Title, Description, Priority, Subsection) -->
-<div class="modal-bg" id="taskEditModalBg">
+<!-- EDIT TASK MODAL -->
+<div class="modal-bg" id="editModalBg">
     <div class="modal-box">
         <h2>Edit Task</h2>
 
         <label>Title</label>
-        <input type="text" id="taskEditTitleInput">
-
-        <label>Description</label>
-        <textarea id="taskEditDescriptionInput" rows="3"></textarea>
-
-        <label>Priority</label>
-        <select id="taskEditPrioritySelect">
-            <option value="high">High Priority</option>
-            <option value="med">Medium Priority</option>
-            <option value="low">Low Priority</option>
-        </select>
-
-        <label>Move To Subsection</label>
-        <select id="taskEditSubsectionSelect"></select>
-
-        <div class="modal-actions">
-            <button class="btn-cancel" id="taskEditCancelBtn">Cancel</button>
-            <button class="btn-add" id="taskEditSaveBtn">Save</button>
-        </div>
-    </div>
-</div>
-
-<!-- EDIT WORK DONE MODAL -->
-<div class="modal-bg" id="editModalBg">
-    <div class="modal-box">
-        <h2>Edit Work Done</h2>
+        <input type="text" id="editTitleInput">
 
         <label>Summary of Work Done (if any)</label>
         <textarea id="editSummaryInput" rows="3"></textarea>
@@ -323,6 +295,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- EMPTY KANBAN WRAPPER (DB will fill this) -->
 <div class="kanban-wrapper"></div>

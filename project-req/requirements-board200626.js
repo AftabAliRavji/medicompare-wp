@@ -191,7 +191,6 @@ function populateSubsectionDropdown() {
         subsectionSelect.style.display = "none";
     }
 }
-
 /* -----------------------------------------
    FIND SUBSECTIONS
 ----------------------------------------- */
@@ -244,10 +243,6 @@ document.getElementById("addTaskBtn").onclick = () => {
     saveStateToDB();
 };
 
-/* -----------------------------------------
-   ADD NEW SUBSECTION
------------------------------------------ */
-
 function addNewSubsection(mainSection, title, details) {
     const subsections = findSubsections(mainSection);
 
@@ -275,8 +270,13 @@ function addNewSubsection(mainSection, title, details) {
 
     const ul = document.createElement("ul");
     const li = document.createElement("li");
-    li.innerHTML = `<strong>${title}</strong> → ${details}`;
-    li.dataset.cardTitle = title;
+
+    // ⭐ CLEAN BULLET FORMAT — NO BOLD, NO ARROW, NO DETAILS
+    li.textContent = title;
+
+    // ⭐ Keep your matching rule (first word)
+    li.dataset.cardTitle = title.split(/\s+/)[0].toLowerCase();
+
     ul.appendChild(li);
 
     const lastSub = subsections[subsections.length - 1];
@@ -292,6 +292,7 @@ function addNewSubsection(mainSection, title, details) {
 
     createKanbanCard(title, `#${newId}`);
 }
+
 
 /* -----------------------------------------
    FIND SECTION NUMBER
@@ -311,12 +312,18 @@ function addBulletPoint(subsectionId, title, details) {
     const ul = h3.nextElementSibling;
 
     const li = document.createElement("li");
-    li.innerHTML = `<strong>${title}</strong> → ${details}`;
-    li.dataset.cardTitle = title;
+
+    // ⭐ Clean bullet: no bold, no arrow, no details
+    li.textContent = title;
+
+    // ⭐ Correct matching rule: first word only
+    li.dataset.cardTitle = title.split(/\s+/)[0].toLowerCase();
+
     ul.appendChild(li);
 
     createKanbanCard(title, `#${subsectionId}`);
 }
+
 
 /* -----------------------------------------
    CREATE NEW MAIN SECTION
@@ -392,7 +399,6 @@ function createKanbanCard(title, target) {
     enableDragAndDrop();
     attachKanbanClickHandlers();
 }
-
 /* -----------------------------------------
    KANBAN CLICK → SCROLL + HIGHLIGHT
 ----------------------------------------- */
@@ -411,6 +417,7 @@ function attachKanbanClickHandlers() {
 
             el.scrollIntoView({ behavior: "smooth", block: "center" });
 
+            // Auto-expand Work Done when clicking a DONE card
             if (item.parentElement.id === "done") {
                 const req = document.querySelector(item.dataset.target);
                 const ul = req.nextElementSibling;
@@ -453,6 +460,13 @@ function enableDragAndDrop() {
             item.classList.remove("dragging");
 
             const col = item.parentElement.id;
+
+            // Jira behaviour: leaving DONE removes Work Done
+            if (col !== "done") {
+                removeWorkDoneForCard(item);
+            }
+
+            // Entering DONE triggers completion modal if no summary exists
             if (col === "done" && !item.dataset.summary) {
                 openCompletionModal(item);
             }
@@ -471,16 +485,53 @@ function enableDragAndDrop() {
 }
 
 /* -----------------------------------------
+   REMOVE WORK DONE WHEN MOVING OUT OF DONE
+----------------------------------------- */
+
+function removeWorkDoneForCard(card) {
+    const req = document.querySelector(card.dataset.target);
+    if (!req) return;
+
+    const ul = req.nextElementSibling;
+    if (!ul || ul.tagName !== "UL") return;
+
+    const title = card.childNodes[0].textContent.trim()
+    ul.querySelectorAll("li").forEach(li => {
+        if (li.dataset.cardTitle === title) {
+            const next = li.nextElementSibling;
+            if (next && next.classList.contains("completed-box")) {
+                next.remove();
+            }
+        }
+    });
+
+    // Clear metadata
+    card.dataset.summary = "";
+    card.dataset.files = "";
+    card.dataset.notes = "";
+}
+/* -----------------------------------------
    COMPLETION MODAL LOGIC
 ----------------------------------------- */
 
 function openCompletionModal(card) {
     currentCompletionCard = card;
 
+    // Extract the card title safely
+    const title = card.childNodes[0].textContent.trim();
+
+    // Show the title in the modal
+    const titleEl = document.getElementById("completionTaskTitle");
+    if (titleEl) {
+        titleEl.textContent = title;
+    }
+
+    // Clear inputs
     document.getElementById("completionSummaryInput").value = "";
     document.getElementById("completionFilesInput").value = "";
     document.getElementById("completionNotesInput").value = "";
 
+    // Show modal
     document.getElementById("completionModalBg").style.display = "flex";
 }
 
@@ -504,9 +555,15 @@ document.getElementById("completionSaveBtn").onclick = () => {
     saveStateToDB();
 };
 
+
+/* -----------------------------------------
+   APPLY COMPLETION DATA (CREATE WORK DONE BOX)
+----------------------------------------- */
+
 function applyCompletionData(card, summary, files, notes) {
     const completedDate = new Date().toISOString().split("T")[0];
 
+    // Save metadata on card
     card.dataset.summary = summary;
     card.dataset.files = files;
     card.dataset.notes = notes;
@@ -515,15 +572,10 @@ function applyCompletionData(card, summary, files, notes) {
     const req = document.querySelector(card.dataset.target);
     if (!req) return;
 
-    req.dataset.summary = summary;
-    req.dataset.files = files;
-    req.dataset.notes = notes;
-    req.dataset.completed = completedDate;
-
     const ul = req.nextElementSibling;
     if (!ul || ul.tagName !== "UL") return;
 
-    const title = card.firstChild.nodeValue.trim();
+    const title = card.childNodes[0].textContent.trim();
     let matchingLi = null;
 
     ul.querySelectorAll("li").forEach(li => {
@@ -534,11 +586,13 @@ function applyCompletionData(card, summary, files, notes) {
 
     if (!matchingLi) return;
 
+    // Remove old Work Done box if exists
     const next = matchingLi.nextElementSibling;
-    if (next && next.classList && next.classList.contains("completed-box")) {
+    if (next && next.classList.contains("completed-box")) {
         next.remove();
     }
 
+    // Create new Work Done box
     const box = document.createElement("div");
     box.className = "completed-box";
 
@@ -566,7 +620,7 @@ function applyCompletionData(card, summary, files, notes) {
 }
 
 /* -----------------------------------------
-   COMPLETED BOX HANDLERS
+   COMPLETED BOX HANDLERS (EXPAND/COLLAPSE)
 ----------------------------------------- */
 
 function attachCompletedBoxHandlers() {
@@ -576,9 +630,7 @@ function attachCompletedBoxHandlers() {
             if (!content) return;
 
             content.style.display =
-                (content.style.display === "none" || !content.style.display)
-                ? "block"
-                : "none";
+                content.style.display === "none" ? "block" : "none";
         };
     });
 }
@@ -593,7 +645,8 @@ function openEditModal(card) {
     const req = document.querySelector(card.dataset.target);
     if (!req) return;
 
-    const rawTitle = card.firstChild.nodeValue.trim();
+    const rawTitle = card.childNodes[0].textContent.trim();
+
     document.getElementById("editTitleInput").value = rawTitle;
 
     document.getElementById("editSummaryInput").value = card.dataset.summary || "";
@@ -616,6 +669,12 @@ document.getElementById("editSaveBtn").onclick = () => {
     const newFiles = document.getElementById("editFilesInput").value.trim();
     const newNotes = document.getElementById("editNotesInput").value.trim();
 
+    const oldTitle = currentEditCard.childNodes[0].textContent.trim();
+
+
+    /* -------------------------
+       UPDATE TITLE
+    ------------------------- */
     if (newTitle) {
         currentEditCard.firstChild.nodeValue = newTitle;
 
@@ -625,47 +684,30 @@ document.getElementById("editSaveBtn").onclick = () => {
             const text = req.textContent;
             const match = text.match(/^(\d+(\.\d+)*)\s+/);
             const prefix = match ? match[1] : "";
+
             req.innerHTML = `${prefix} ${newTitle}${span ? " " + span.outerHTML : ""}`;
 
             const ul = req.nextElementSibling;
             if (ul && ul.tagName === "UL") {
                 ul.querySelectorAll("li").forEach(li => {
-                    if (li.dataset.cardTitle === currentEditCard.dataset.oldTitle) {
+                    if (li.dataset.cardTitle === oldTitle) {
                         li.dataset.cardTitle = newTitle;
+                        const strong = li.querySelector("strong");
+                        if (strong) strong.textContent = newTitle;
                     }
                 });
             }
         }
     }
 
+    /* -------------------------
+       UPDATE WORK DONE
+    ------------------------- */
     if (newSummary || newFiles || newNotes) {
-        applyCompletionData(
-            currentEditCard,
-            newSummary,
-            newFiles,
-            newNotes
-        );
+        applyCompletionData(currentEditCard, newSummary, newFiles, newNotes);
     } else {
-        currentEditCard.dataset.summary = "";
-        currentEditCard.dataset.files = "";
-        currentEditCard.dataset.notes = "";
-
-        const req = document.querySelector(currentEditCard.dataset.target);
-        if (req) {
-            req.dataset.summary = "";
-            req.dataset.files = "";
-            req.dataset.notes = "";
-
-            const ul = req.nextElementSibling;
-            if (ul && ul.tagName === "UL") {
-                ul.querySelectorAll("li").forEach(li => {
-                    const next = li.nextElementSibling;
-                    if (next && next.classList.contains("completed-box")) {
-                        next.remove();
-                    }
-                });
-            }
-        }
+        // Clear Work Done
+        removeWorkDoneForCard(currentEditCard);
     }
 
     document.getElementById("editModalBg").style.display = "none";

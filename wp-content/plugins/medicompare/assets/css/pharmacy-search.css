@@ -1081,3 +1081,81 @@
     background: #a8a8a8;
 }
 
+.mc-product-row:hover,
+.mc-supplier-row:hover {
+    background: #dce9ff;
+    border-left: 4px solid #2a6df4;
+}
+.mc-suggestion-item {
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: background 0.15s ease;
+}
+
+.mc-suggestion-item:hover {
+    background: #f0f6ff;
+    border-left: 4px solid #2a6df4;
+}
+/* Suggestion container */
+.mc-suggestions {
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 0;
+    border: 1px solid #d9e2ef;
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+/* Each suggestion row */
+.mc-suggestion-item {
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1a1a1a;
+    border-bottom: 1px solid #eef2f7;
+    transition: background 0.15s ease, padding-left 0.15s ease;
+}
+
+/* Last item should not have a border */
+.mc-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Hover effect */
+.mc-suggestion-item:hover {
+    background: #f5f9ff;
+    padding-left: 18px;
+    border-left: 4px solid #2a6df4;
+}
+
+/* Selected (when clicked) */
+.mc-suggestion-item.mc-search-row-selected {
+    background: #e8f0ff;
+    border-left: 4px solid #2a6df4;
+    font-weight: 600;
+}
+/* Wrapper text above suggestions */
+.mc-search-results-message {
+    font-size: 14px;
+    color: #4a5568; /* soft grey */
+    margin: 6px 0 4px 2px;
+    padding-left: 2px;
+}
+
+/* “No exact matches found.” */
+.mc-search-results-message strong {
+    color: #c53030; /* soft red */
+    font-weight: 600;
+}
+
+/* “Did you mean:” */
+.mc-search-results-suggest {
+    font-size: 13px;
+    color: #2a4365; /* deep blue */
+    margin: 4px 0 8px 2px;
+    padding-left: 2px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}

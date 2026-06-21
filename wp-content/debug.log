@@ -1728,3 +1728,1419 @@
 [21-Jun-2026 14:09:56 UTC] MediCompare: load_cpts() fired
 [21-Jun-2026 14:09:56 UTC] MC_LOGIN_DEBUG: Login handler triggered
 [21-Jun-2026 14:09:56 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:11:12 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:12 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:12 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:12 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:11:12 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:12 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:12 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:12 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:11:43 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:43 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:43 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:43 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:11:46 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:46 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:46 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:46 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:11:46 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:46 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:46 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:46 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:11:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:47 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:11:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Nonce OK
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Email received: fate@fatem.com
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Password length: 9
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: User found: ID 3, login fate@fatem.com
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: User has pharmacy_user role
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Pharmacy ID: 54, Status: active
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Pharmacy active → attempting wp_signon
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: wp_signon SUCCESS → redirecting to dashboard
+[21-Jun-2026 14:11:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:11:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:11:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:11:54 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:12:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:12:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:12:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:12:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:17 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:12:27 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:27 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:27 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:27 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:12:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:12:42 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:12:42 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:12:42 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:12:42 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:13:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:13:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:13:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:13:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:30:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:30:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:30:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:30:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:30:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:30:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:30:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:30:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:14 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:38:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:15 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:15 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:38:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:26 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:26 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:26 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:26 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:36 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:36 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:36 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:36 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:38:45 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:38:45 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:38:45 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:38:45 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:39:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:39:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:39:30 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:30 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:30 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:30 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:39:31 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:31 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:31 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:31 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:39:41 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:41 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:41 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:41 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:39:50 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:50 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:50 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:50 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:39:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:39:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:39:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:39:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:40:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:40:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:40:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:40:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:40:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:40:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:40:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:40:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:40:32 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:40:32 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:40:32 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:40:32 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:42:33 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:42:33 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:42:33 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:42:33 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:42:33 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:42:33 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:42:33 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:42:33 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:44:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:44:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:44:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:44:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:44:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:44:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:44:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:44:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:46:35 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:46:35 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:46:35 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:46:35 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:46:35 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:46:35 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:46:35 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:46:35 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:48:36 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:48:36 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:48:36 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:48:36 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:48:36 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:48:36 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:48:36 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:48:36 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:50:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:50:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:50:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:50:37 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:50:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:50:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:50:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:50:37 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:18 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:54:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:19 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 14:54:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:23 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:23 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:28 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:28 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:28 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:28 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:28 UTC] PHP Notice:  Function wpdb::prepare was called <strong>incorrectly</strong>. The query does not contain the correct number of placeholders (4) for the number of arguments passed (2). Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 4.8.3.) in C:\Users\aravji\Local Sites\medicompare\app\public\wp-includes\functions.php on line 6170
+[21-Jun-2026 14:54:30 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:30 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:30 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:30 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:30 UTC] PHP Notice:  Function wpdb::prepare was called <strong>incorrectly</strong>. The query does not contain the correct number of placeholders (4) for the number of arguments passed (2). Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 4.8.3.) in C:\Users\aravji\Local Sites\medicompare\app\public\wp-includes\functions.php on line 6170
+[21-Jun-2026 14:54:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:54:38 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:54:38 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:54:38 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:54:38 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:55:11 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:55:11 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:55:11 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:55:11 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:55:12 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:55:12 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:55:12 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:55:12 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:55:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:55:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:55:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:55:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:55:31 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:55:31 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:55:31 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:55:31 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:55:41 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:55:41 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:55:41 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:55:41 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:55:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:55:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:55:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:55:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:57:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:57:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:57:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:57:52 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:57:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:57:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:57:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:57:52 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:59:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:59:53 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:59:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:59:53 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 14:59:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 14:59:53 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 14:59:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 14:59:53 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:01:09 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:09 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:09 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:09 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:01:09 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:09 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:09 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:09 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:01:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:13 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:01:28 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:28 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:28 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:28 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:01:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:01:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:52 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:01:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:01:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:01:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:01:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:02:05 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:02:05 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:02:05 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:02:05 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:02:05 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:02:05 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:02:05 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:02:05 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:02:16 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:02:16 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:02:16 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:02:16 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:04:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:04:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:04:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:04:17 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:04:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:04:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:04:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:04:17 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:06:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:06:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:06:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:06:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:06:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:06:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:06:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:06:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:08:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:08:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:08:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:08:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:08:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:08:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:08:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:08:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:10:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:10:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:10:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:10:20 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:10:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:10:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:10:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:10:20 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:11:32 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:11:32 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:11:32 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:11:32 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:11:32 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:11:32 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:11:32 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:11:32 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:11:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:11:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:11:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:11:34 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:11:42 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:11:42 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:11:42 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:11:42 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:11:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:11:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:11:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:11:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:11:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:11:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:11:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:11:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:04 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:04 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:04 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:04 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:08 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:08 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:08 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:08 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:17 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:29 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:29 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:29 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:29 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:32 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:32 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:32 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:32 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:35 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:35 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:35 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:35 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:44 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:12:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:47 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:12:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:55 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:12:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:12:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:55 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:12:59 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:12:59 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:12:59 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:12:59 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:11 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:11 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:11 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:11 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:11 UTC] PHP Notice:  Function wpdb::prepare was called <strong>incorrectly</strong>. The query does not contain the correct number of placeholders (4) for the number of arguments passed (2). Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 4.8.3.) in C:\Users\aravji\Local Sites\medicompare\app\public\wp-includes\functions.php on line 6170
+[21-Jun-2026 15:13:11 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:11 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:11 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:11 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:20 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:22 UTC] PHP Notice:  Function wpdb::prepare was called <strong>incorrectly</strong>. The query does not contain the correct number of placeholders (4) for the number of arguments passed (2). Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 4.8.3.) in C:\Users\aravji\Local Sites\medicompare\app\public\wp-includes\functions.php on line 6170
+[21-Jun-2026 15:13:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:23 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:23 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:23 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:23 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:29 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:29 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:29 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:29 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:30 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:30 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:30 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:30 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:30 UTC] PHP Notice:  Function wpdb::prepare was called <strong>incorrectly</strong>. The query does not contain the correct number of placeholders (4) for the number of arguments passed (2). Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 4.8.3.) in C:\Users\aravji\Local Sites\medicompare\app\public\wp-includes\functions.php on line 6170
+[21-Jun-2026 15:13:41 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:41 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:41 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:41 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:13:48 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:13:48 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:13:48 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:13:48 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:14:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:14:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:14:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:14:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:15:49 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:15:49 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:15:49 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:15:49 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:15:49 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:15:49 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:15:49 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:15:49 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:17:33 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:17:33 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:17:33 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:17:33 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:17:33 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:17:33 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:17:33 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:17:33 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:17:48 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:17:48 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:17:48 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:17:48 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:17:50 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:17:50 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:17:50 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:17:50 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:18:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:18:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:18:01 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:18:01 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:18:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:18:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:18:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:18:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:18:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:18:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:18:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:18:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:20:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:20:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:20:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:20:52 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:20:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:20:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:20:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:20:52 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:22:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:22:53 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:22:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:22:53 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:22:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:22:53 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:22:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:22:53 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:24:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:24:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:24:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:24:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:24:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:24:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:24:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:24:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:26:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:26:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:26:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:26:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:26:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:26:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:26:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:26:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:28:56 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:28:56 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:28:56 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:28:56 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:28:56 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:28:56 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:28:56 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:28:56 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:17 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:29:17 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:17 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:17 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:17 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:18 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:29:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:26 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:26 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:26 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:26 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:27 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:27 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:27 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:27 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:28 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:28 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:28 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:28 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:35 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:35 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:35 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:35 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:39 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:39 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:39 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:39 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:45 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:45 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:45 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:45 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:47 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:48 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:48 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:48 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:48 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:50 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:50 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:50 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:50 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:29:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:29:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:29:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:29:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:14 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:37:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:15 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:15 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:15 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:15 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:15 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:15 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:15 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:15 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:37:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:20 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:29 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:29 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:29 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:29 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:35 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:35 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:35 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:35 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:36 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:36 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:36 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:36 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:37 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:41 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:41 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:41 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:41 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:42 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:42 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:42 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:42 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:42 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:42 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:43 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:43 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:45 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:45 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:45 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:45 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:37:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:37:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:37:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:37:47 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:40:59 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:40:59 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:40:59 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:40:59 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:40:59 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:40:59 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:40:59 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:40:59 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:41:00 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:41:00 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:41:00 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:41:00 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:41:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:41:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:41:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:41:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:41:04 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:41:04 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:41:04 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:41:04 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:41:05 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:41:05 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:41:05 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:41:05 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:41:05 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:41:05 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:41:05 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:41:05 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:45:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:45:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:45:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:45:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:45:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:45:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:45:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:45:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:45:55 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:46:10 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:10 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:10 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:10 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:10 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:10 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:10 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:10 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:12 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:12 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:12 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:12 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:41 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:41 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:41 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:41 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:43 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:43 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:43 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:43 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:46:45 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:46:45 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:46:45 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:46:45 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:14 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:14 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:14 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:59:15 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:15 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:15 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:15 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:15 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:15 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:15 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:15 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:15 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:15 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:15 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:15 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 15:59:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:23 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:23 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:26 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:26 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:26 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:26 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 15:59:36 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 15:59:36 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 15:59:36 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 15:59:36 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:04:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:04:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:04:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:04:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:04:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:04:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:04:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:04:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:04:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:04:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:04:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:04:47 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:04:48 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:04:48 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:04:48 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:04:48 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:04:58 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:04:58 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:04:58 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:04:58 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:05:08 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:05:08 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:05:08 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:05:08 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:05:08 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:05:08 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:05:08 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:05:08 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:05:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:05:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:05:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:05:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:07:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:07:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:07:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:07:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:07:19 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:07:19 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:07:19 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:07:19 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:09:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:09:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:09:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:09:20 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:09:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:09:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:09:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:09:20 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:20 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:20 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:20 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:20 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:11:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:21 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:11:21 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:21 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:25 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:25 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:25 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:25 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:25 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:25 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:25 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:25 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:26 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:26 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:26 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:26 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:27 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:27 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:27 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:27 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:28 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:28 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:28 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:28 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:28 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:28 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:28 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:28 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:30 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:30 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:30 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:30 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:37 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:42 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:42 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:42 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:42 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:42 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:42 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:42 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:42 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:43 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:43 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:43 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:43 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:45 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:45 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:45 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:45 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:48 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:48 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:48 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:48 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:49 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:49 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:49 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:49 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:11:57 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:11:57 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:11:57 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:11:57 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:01 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:01 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:08 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:08 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:08 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:08 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:08 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:08 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:08 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:08 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:09 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:09 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:09 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:09 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:12:10 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:12:10 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:12:10 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:12:10 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:27 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:27 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:27 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:27 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:37 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:38 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:38 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:38 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:38 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:40 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:40 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:40 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:40 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:13:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:13:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:13:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:13:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:15:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:15:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:15:23 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:15:23 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:15:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:15:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:15:23 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:15:23 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:23 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:23 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:16:24 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:24 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:24 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:24 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:16:24 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:24 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:24 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:54 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:55 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:55 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:55 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:55 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:16:59 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:16:59 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:16:59 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:16:59 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:01 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:01 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:01 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:01 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:10 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:10 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:10 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:10 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:10 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:10 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:10 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:10 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:10 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:10 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:10 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:10 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:12 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:12 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:12 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:12 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:25 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:25 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:25 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:25 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:26 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:26 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:26 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:26 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:27 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:27 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:27 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:27 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:28 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:28 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:28 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:28 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:30 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:30 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:30 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:30 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:17:38 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:17:38 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:17:38 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:17:38 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:20:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:01 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:01 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:20:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:20:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:20:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:02 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:20:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:20:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:20:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:20:22 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:20:22 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:20:22 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:20:22 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:21:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:21:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:21:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:21:52 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:21:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:21:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:21:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:21:52 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:21:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:21:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:21:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:21:53 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:21:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:21:53 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:21:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:21:53 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:21:56 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:21:56 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:21:56 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:21:56 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:21:56 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:21:56 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:21:56 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:21:56 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:22:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:22:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:22:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:22:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:22:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:22:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:22:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:22:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:22:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:22:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:22:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:22:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:22:41 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:22:41 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:22:41 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:22:41 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:22:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:22:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:22:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:22:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:23:57 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:23:57 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:23:57 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:23:57 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:23:57 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:23:57 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:23:57 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:23:57 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:25:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:25:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:25:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:25:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:25:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:25:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:25:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:25:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:43 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:43 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:43 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:43 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:44 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:44 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:44 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:44 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:52 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:52 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:52 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:52 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:27:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:27:53 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:27:53 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:27:53 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:06 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:06 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:06 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:06 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:07 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:07 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:07 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:07 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:08 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:09 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:09 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:09 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:11 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:11 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:11 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:11 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:13 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:13 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:36 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:36 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:36 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:36 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:46 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:46 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:46 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:46 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:53 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:54 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:54 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:54 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:28:56 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:28:56 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:28:56 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:28:56 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:18 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:18 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:18 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:18 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:32 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:32 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:32 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:32 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:38 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:38 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:38 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:38 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:47 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:29:47 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:29:47 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:29:47 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:29:47 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:30:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:30:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:30:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:30:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:30:51 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:30:51 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:30:51 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:30:51 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:31:01 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:31:01 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:31:01 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:31:01 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:31:59 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:31:59 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:31:59 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:31:59 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:32:00 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:32:00 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:32:00 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:32:00 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:32:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:32:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:32:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:32:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:32:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:32:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:32:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:32:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:32:04 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:32:04 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:32:04 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:32:04 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:33:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:33:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:33:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:33:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:33:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:33:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:33:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:33:03 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:34:32 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:34:32 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:34:33 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:34:33 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:34:33 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:34:33 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:34:33 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:34:33 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:34:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:34:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:34:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:34:37 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:34:37 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:34:37 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:34:37 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:34:37 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:34:50 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:34:50 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:34:50 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:34:50 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:38:34 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:38:34 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:38:34 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:38:34 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:38:35 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:38:35 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:38:35 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:38:35 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:40:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:40:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:40:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:40:02 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:40:02 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:40:02 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:40:02 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:40:02 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[21-Jun-2026 16:40:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:40:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:40:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:40:03 UTC] MC_LOGIN_DEBUG: Not a POST request
+[21-Jun-2026 16:40:03 UTC] REQ ENDPOINT LOADED
+[21-Jun-2026 16:40:03 UTC] MediCompare: load_cpts() fired
+[21-Jun-2026 16:40:03 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[21-Jun-2026 16:40:03 UTC] MC_LOGIN_DEBUG: Not a POST request

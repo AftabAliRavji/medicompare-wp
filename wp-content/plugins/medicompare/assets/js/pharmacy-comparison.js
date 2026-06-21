@@ -36,7 +36,6 @@ jQuery(function ($) {
             if (resp.success) {
                 $pendingOrderPanel.html(resp.data.html);
 
-                // Check if pending order exists
                 const hasPending = !resp.data.html.includes("No pending order");
                 mc_updateTransferButton(hasPending);
 
@@ -58,10 +57,8 @@ jQuery(function ($) {
             if (resp.success) {
                 $transferredPanel.html(resp.data.html);
 
-                // Collapse all cards by default
                 $('.mc-transferred-order-card').addClass('mc-order-collapsed');
 
-                // Disable transfer button when viewing transferred orders
                 mc_updateTransferButton(false);
 
             } else {
@@ -80,7 +77,7 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
-       RENDER SELECTED ITEM
+       RENDER SELECTED ITEM (SUPPLIER ROW → CARD)
     --------------------------------------------------------- */
     function renderSelectedItem(row) {
         $('#mc-search-results').removeClass('active').hide();
@@ -154,19 +151,19 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
-       SEARCH INPUT (DEBOUNCED)
+       SEARCH INPUT (DEBOUNCED) → PRODUCT LIST
     --------------------------------------------------------- */
     $searchInput.on('keyup', function () {
         var q = $.trim($searchInput.val());
 
         if (debounceTimer) clearTimeout(debounceTimer);
 
-        if (q.length < 2) {
+        if (q.length < 3) {
             $searchResults.removeClass('active').html('');
             return;
         }
 
-        $searchResults.addClass('active').html('<p>Searching...</p>');
+        $searchResults.addClass('active').html('<p>Searching products...</p>');
 
         debounceTimer = setTimeout(function () {
 
@@ -186,11 +183,74 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
-       CLICK SEARCH RESULT ROW
+       FUZZY SUGGESTION HOVER + CLICK HANDLERS (OPTION 3)
     --------------------------------------------------------- */
-    $searchResults.on('click', '.mc-search-row', function () {
+
+    // Hover highlight
+    $(document).on('mouseenter', '.mc-suggestion-item', function () {
+        $(this).addClass('hover');
+    }).on('mouseleave', '.mc-suggestion-item', function () {
+        $(this).removeClass('hover');
+    });
+
+    // Click handler for fuzzy suggestions (Option 3)
+    $(document).on('click', '.mc-suggestion-item', function () {
+        const productId = $(this).data('product-id');
+        if (!productId) return;
+
+        // Show loading message
+        $searchResults
+            .addClass('active')
+            .html('<p>Loading product...</p>');
+
+        // Re-run exact search internally using productId
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_search_products',
+            nonce: mcComparison.nonce,
+            q: productId, // backend will detect numeric ID and return exact match
+            force_product_id: productId
+        }).done(function (resp) {
+            if (resp.success) {
+                $searchResults.html(resp.data.html);
+            } else {
+                $searchResults.html('<p>' + (resp.data?.message || 'Search error.') + '</p>');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
+       CLICK PRODUCT ROW → LOAD SUPPLIER COMPARISON
+    --------------------------------------------------------- */
+    $searchResults.on('click', '.mc-product-row', function () {
+        var $row       = $(this);
+        var productId  = parseInt($row.data('product-id'), 10);
+
+        if (!productId) return;
+
+        $searchResults.find('.mc-product-row').removeClass('mc-search-row-selected');
+        $row.addClass('mc-search-row-selected');
+
+        $searchResults.addClass('active').html('<p>Loading supplier comparison...</p>');
+
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_get_product_suppliers',
+            nonce: mcComparison.nonce,
+            product_id: productId
+        }).done(function (resp) {
+            if (resp.success) {
+                $searchResults.html(resp.data.html);
+            } else {
+                $searchResults.html('<p>' + (resp.data?.message || 'Error loading suppliers.') + '</p>');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
+       CLICK SUPPLIER ROW → SELECTED ITEM
+    --------------------------------------------------------- */
+    $searchResults.on('click', '.mc-supplier-row', function () {
         var $row = $(this);
-        $searchResults.find('.mc-search-row').removeClass('mc-search-row-selected');
+        $searchResults.find('.mc-supplier-row').removeClass('mc-search-row-selected');
         $row.addClass('mc-search-row-selected');
         renderSelectedItem($row);
     });
@@ -324,7 +384,7 @@ jQuery(function ($) {
 
         if (tab === 'pending') {
             $('#mc-pending-order').addClass('mc-order-panel-active');
-            loadPendingOrder(); // auto-updates button
+            loadPendingOrder();
         } else {
             $('#mc-transferred-orders').addClass('mc-order-panel-active');
             loadTransferredOrders();

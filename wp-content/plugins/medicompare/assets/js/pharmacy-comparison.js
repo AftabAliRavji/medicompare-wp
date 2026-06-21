@@ -1,734 +1,340 @@
-/* -----------------------------------------
-   CONFIG
------------------------------------------ */
+jQuery(function ($) {
 
-const ajaxurl = "/wp-admin/admin-ajax.php";
+    var $searchInput       = $('#mc-search-input');
+    var $searchResults     = $('#mc-search-results');
+    var $selectedItem      = $('#mc-selected-item');
+    var $pendingOrderPanel = $('#mc-pending-order');
+    var $transferredPanel  = $('#mc-transferred-orders');
+    var $transferBtn       = $('#mc-transfer-order-btn');
 
-let currentCompletionCard = null;
-let currentEditCard = null;
+    var debounceTimer = null;
 
-/* -----------------------------------------
-   ON LOAD
------------------------------------------ */
+    /* ---------------------------------------------------------
+       ENABLE / DISABLE TRANSFER BUTTON
+    --------------------------------------------------------- */
+    function mc_updateTransferButton(hasPending) {
+        const btn = document.getElementById('mc-transfer-order-btn');
+        if (!btn) return;
 
-document.addEventListener("DOMContentLoaded", () => {
-    restoreStateFromDB();
-});
+        if (hasPending) {
+            btn.classList.remove('mc-transfer-btn-disabled');
+            btn.disabled = false;
+        } else {
+            btn.classList.add('mc-transfer-btn-disabled');
+            btn.disabled = true;
+        }
+    }
 
-/* -----------------------------------------
-   SAVE TO DATABASE
------------------------------------------ */
+    /* ---------------------------------------------------------
+       LOAD PENDING ORDER
+    --------------------------------------------------------- */
+    function loadPendingOrder() {
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_get_pending_order',
+            nonce: mcComparison.nonce
+        }).done(function (resp) {
+            if (resp.success) {
+                $pendingOrderPanel.html(resp.data.html);
 
-function saveStateToDB() {
-    const board = {
-        kanbanHTML: document.querySelector(".kanban-wrapper").innerHTML,
-        requirementsHTML: document.getElementById("requirements").innerHTML
-    };
+                // Check if pending order exists
+                const hasPending = !resp.data.html.includes("No pending order");
+                mc_updateTransferButton(hasPending);
 
-    jQuery.post(ajaxurl, {
-        action: "save_requirements_board",
-        board_json: JSON.stringify(board)
+            } else {
+                $pendingOrderPanel.html('<p>' + (resp.data?.message || 'Error loading pending order.') + '</p>');
+                mc_updateTransferButton(false);
+            }
+        });
+    }
+
+    /* ---------------------------------------------------------
+       LOAD TRANSFERRED ORDERS
+    --------------------------------------------------------- */
+    function loadTransferredOrders() {
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_get_transferred_orders',
+            nonce: mcComparison.nonce
+        }).done(function (resp) {
+            if (resp.success) {
+                $transferredPanel.html(resp.data.html);
+
+                // Collapse all cards by default
+                $('.mc-transferred-order-card').addClass('mc-order-collapsed');
+
+                // Disable transfer button when viewing transferred orders
+                mc_updateTransferButton(false);
+
+            } else {
+                $transferredPanel.html('<p>' + (resp.data?.message || 'Error loading transferred orders.') + '</p>');
+                mc_updateTransferButton(false);
+            }
+        });
+    }
+
+    /* ---------------------------------------------------------
+       COLLAPSE / EXPAND TRANSFERRED ORDER CARDS
+    --------------------------------------------------------- */
+    $(document).on('click', '[data-order-toggle]', function () {
+        const card = $(this).closest('.mc-transferred-order-card');
+        card.toggleClass('mc-order-expanded mc-order-collapsed');
     });
-}
 
-/* -----------------------------------------
-   LOAD FROM DATABASE
------------------------------------------ */
+    /* ---------------------------------------------------------
+       RENDER SELECTED ITEM
+    --------------------------------------------------------- */
+    function renderSelectedItem(row) {
+        $('#mc-search-results').removeClass('active').hide();
 
-function restoreStateFromDB() {
-    jQuery.post(ajaxurl, { action: "load_requirements_board" }, function(response) {
-        if (response.success && response.data.board_json) {
-            const board = JSON.parse(response.data.board_json);
+        var productName = row.find('td').eq(0).text();
+        var description = row.find('td').eq(1).text();
+        var supplier    = row.find('td').eq(2).text();
+        var unitPrice   = parseFloat(row.data('unit-price'));
+        var stock       = row.find('td').eq(4).text();
+        var productId   = row.data('product-id');
+        var supplierId  = row.data('supplier-id');
 
-            document.querySelector(".kanban-wrapper").innerHTML = board.kanbanHTML;
-            document.getElementById("requirements").innerHTML = board.requirementsHTML;
+        var html = `
+            <div class="mc-selected-card">
+                <div class="mc-selected-title">Selected item</div>
+                <table class="mc-search-results-table mc-selected-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Description</th>
+                            <th>Supplier</th>
+                            <th>Unit Price</th>
+                            <th>Stock</th>
+                            <th>Qty</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="mc-selected-value">${productName}</td>
+                            <td class="mc-selected-value">${description}</td>
+                            <td class="mc-selected-value">${supplier}</td>
+                            <td class="mc-selected-value">£${unitPrice.toFixed(2)}</td>
+                            <td class="mc-selected-value">${stock}</td>
+                            <td>
+                                <input type="number" id="mc-selected-qty" value="1" min="1" max="${stock}" step="1" class="mc-qty-input">
+                            </td>
+                            <td class="mc-selected-actions">
+                                <button 
+                                    type="button" 
+                                    id="mc-add-to-pending"
+                                    class="mc-add-basket-btn"
+                                    data-product-id="${productId}"
+                                    data-supplier-id="${supplierId}"
+                                    data-unit-price="${unitPrice}"
+                                >
+                                    Add
+                                </button>
+                                <button 
+                                    type="button"
+                                    class="mc-cancel-btn"
+                                    id="mc-cancel-selection"
+                                >
+                                    Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        $('#mc-selected-item').html(html).show();
+    }
+
+    // Cancel selection
+    $('#mc-selected-item').on('click', '#mc-cancel-selection', function () {
+        $('#mc-selected-item').empty().hide();
+        $('#mc-search-results').show().addClass('active');
+        $('#mc-search-input').val('').focus();
+    });
+
+    /* ---------------------------------------------------------
+       SEARCH INPUT (DEBOUNCED)
+    --------------------------------------------------------- */
+    $searchInput.on('keyup', function () {
+        var q = $.trim($searchInput.val());
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+
+        if (q.length < 2) {
+            $searchResults.removeClass('active').html('');
+            return;
         }
 
-        ensureDeleteButtonsOnAllCards();
-        enableDragAndDrop();
-        attachKanbanClickHandlers();
-        populateMainSectionDropdown();
-        applyPriorityColoursToExistingCards();
-        attachCompletedBoxHandlers();
-    });
-}
+        $searchResults.addClass('active').html('<p>Searching...</p>');
 
-/* -----------------------------------------
-   GLOBAL CLICK HANDLER (DELETE + EDIT)
------------------------------------------ */
+        debounceTimer = setTimeout(function () {
 
-document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("delete-btn")) {
-        e.stopPropagation();
-
-        const card = e.target.closest(".kanban-item");
-        const target = card.dataset.target;
-
-        card.remove();
-
-        if (target && target.startsWith("#req-")) {
-            const h3 = document.querySelector(target);
-            if (h3) {
-                const ul = h3.nextElementSibling;
-
-                if (ul && ul.tagName === "UL") {
-                    ul.querySelectorAll("li").forEach(li => {
-                        const next = li.nextElementSibling;
-                        if (next && next.classList.contains("completed-box")) {
-                            next.remove();
-                        }
-                    });
+            $.post(mcComparison.ajaxUrl, {
+                action: 'mc_search_products',
+                nonce: mcComparison.nonce,
+                q: q
+            }).done(function (resp) {
+                if (resp.success) {
+                    $searchResults.html(resp.data.html);
+                } else {
+                    $searchResults.html('<p>' + (resp.data?.message || 'Search error.') + '</p>');
                 }
+            });
 
-                h3.remove();
-                if (ul && ul.tagName === "UL") ul.remove();
-                cleanupEmptyMainSections();
-            }
+        }, 300);
+    });
+
+    /* ---------------------------------------------------------
+       CLICK SEARCH RESULT ROW
+    --------------------------------------------------------- */
+    $searchResults.on('click', '.mc-search-row', function () {
+        var $row = $(this);
+        $searchResults.find('.mc-search-row').removeClass('mc-search-row-selected');
+        $row.addClass('mc-search-row-selected');
+        renderSelectedItem($row);
+    });
+
+    /* ---------------------------------------------------------
+       ADD ITEM TO PENDING ORDER
+    --------------------------------------------------------- */
+    $selectedItem.on('click', '#mc-add-to-pending', function () {
+        var $btn        = $(this);
+        var productId   = parseInt($btn.data('product-id'), 10);
+        var supplierId  = parseInt($btn.data('supplier-id'), 10);
+        var unitPrice   = parseFloat($btn.data('unit-price'));
+        var qty         = parseInt($('#mc-selected-qty').val(), 10);
+
+        if (!productId || !supplierId || !unitPrice || !qty || qty < 1) {
+            alert('Please enter a valid quantity.');
+            return;
         }
 
-        saveStateToDB();
-        return;
-    }
+        $btn.prop('disabled', true).text('Adding...');
 
-    if (e.target.classList.contains("edit-btn")) {
-        e.stopPropagation();
-        const card = e.target.closest(".kanban-item");
-        openEditModal(card);
-        return;
-    }
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_add_pending_item',
+            nonce: mcComparison.nonce,
+            product_id: productId,
+            supplier_id: supplierId,
+            unit_price: unitPrice,
+            quantity: qty
+        }).done(function (resp) {
+            $btn.prop('disabled', false).text('Add to pending order ✓');
+
+            if (resp.success) {
+                $selectedItem.html('<p>Item added to pending order.</p>');
+                loadPendingOrder();
+            } else {
+                alert(resp.data?.message || 'Error adding item.');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
+       REMOVE ITEM FROM PENDING ORDER
+    --------------------------------------------------------- */
+    $pendingOrderPanel.on('click', '.mc-remove-pending-item', function () {
+        var itemId = parseInt($(this).data('item-id'), 10);
+        if (!itemId) return;
+
+        if (!confirm('Remove this item from pending order?')) return;
+
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_remove_pending_item',
+            nonce: mcComparison.nonce,
+            item_id: itemId
+        }).done(function (resp) {
+            if (resp.success) {
+                loadPendingOrder();
+            } else {
+                alert(resp.data?.message || 'Error removing item.');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
+       UPDATE QTY (✔️ BUTTON)
+    --------------------------------------------------------- */
+    $pendingOrderPanel.on('click', '.mc-update-row', function () {
+        var itemId = parseInt($(this).data('item-id'), 10);
+        if (!itemId) return;
+
+        var row = $(this).closest('tr');
+        var qty = parseInt(row.find('.mc-edit-qty').val(), 10);
+
+        if (!qty || qty < 1) {
+            alert('Please enter a valid quantity.');
+            return;
+        }
+
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_update_pending_qty',
+            nonce: mcComparison.nonce,
+            item_id: itemId,
+            qty: qty
+        }).done(function (resp) {
+            if (resp.success) {
+                loadPendingOrder();
+            } else {
+                alert(resp.data?.message || 'Error updating quantity.');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
+       TRANSFER ORDER
+    --------------------------------------------------------- */
+    $transferBtn.on('click', function () {
+        if (!confirm('Transfer this pending order and place it?')) return;
+
+        $transferBtn.prop('disabled', true).text('Transferring...');
+
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_transfer_order',
+            nonce: mcComparison.nonce
+        }).done(function (resp) {
+            $transferBtn.prop('disabled', false).text('Transfer Pending Order');
+
+            if (resp.success) {
+                alert('Order transferred successfully.');
+
+                $selectedItem.empty();
+                loadPendingOrder();
+                loadTransferredOrders();
+
+                $('.mc-order-tab[data-tab="transferred"]').click();
+
+            } else {
+                alert(resp.data?.message || 'Error transferring order.');
+            }
+        });
+    });
+
+    /* ---------------------------------------------------------
+       TAB SWITCHING (UPDATED)
+    --------------------------------------------------------- */
+    $('.mc-order-tabs').on('click', '.mc-order-tab', function () {
+        var tab = $(this).data('tab');
+
+        $('.mc-order-tab').removeClass('mc-order-tab-active');
+        $(this).addClass('mc-order-tab-active');
+
+        $('.mc-order-panel').removeClass('mc-order-panel-active');
+
+        if (tab === 'pending') {
+            $('#mc-pending-order').addClass('mc-order-panel-active');
+            loadPendingOrder(); // auto-updates button
+        } else {
+            $('#mc-transferred-orders').addClass('mc-order-panel-active');
+            loadTransferredOrders();
+            mc_updateTransferButton(false);
+        }
+    });
+
+    /* ---------------------------------------------------------
+       INITIAL LOAD
+    --------------------------------------------------------- */
+    loadPendingOrder();
+
 });
-
-/* -----------------------------------------
-   ADD TASK MODAL
------------------------------------------ */
-
-const modalBg = document.getElementById("modalBg");
-
-document.getElementById("openModalBtn").onclick = () => {
-    document.getElementById("taskTitle").value = "";
-    document.getElementById("taskDetails").value = "";
-    document.getElementById("newMainSectionInput").value = "";
-    document.getElementById("addTypeSelect").value = "subsection";
-    document.getElementById("prioritySelect").value = "low";
-
-    populateMainSectionDropdown();
-    modalBg.style.display = "flex";
-};
-
-document.getElementById("cancelModalBtn").onclick = () => {
-    modalBg.style.display = "none";
-};
-
-/* -----------------------------------------
-   MAIN SECTION DROPDOWN
------------------------------------------ */
-
-function populateMainSectionDropdown() {
-    const mainSelect = document.getElementById("mainSectionSelect");
-    mainSelect.innerHTML = "";
-
-    const newOpt = document.createElement("option");
-    newOpt.value = "__new__";
-    newOpt.textContent = "Not There (Create New Main Section)";
-    mainSelect.appendChild(newOpt);
-
-    const sections = document.querySelectorAll("#requirements h2");
-    sections.forEach(sec => {
-        const opt = document.createElement("option");
-        opt.value = sec.textContent.trim();
-        opt.textContent = sec.textContent.trim();
-        mainSelect.appendChild(opt);
-    });
-
-    populateSubsectionDropdown();
-}
-
-/* -----------------------------------------
-   SUBSECTION DROPDOWN
------------------------------------------ */
-
-document.getElementById("addTypeSelect").addEventListener("change", populateSubsectionDropdown);
-document.getElementById("mainSectionSelect").addEventListener("change", populateSubsectionDropdown);
-document.getElementById("mainSectionSelect").addEventListener("change", () => {
-    const sel = document.getElementById("mainSectionSelect").value;
-    const input = document.getElementById("newMainSectionInput");
-    input.style.display = sel === "__new__" ? "block" : "none";
-});
-
-function populateSubsectionDropdown() {
-    const addType = document.getElementById("addTypeSelect").value;
-    const mainSel = document.getElementById("mainSectionSelect").value;
-
-    const subsectionLabel = document.getElementById("subsectionLabel");
-    const subsectionSelect = document.getElementById("subsectionSelect");
-    const newMainInput = document.getElementById("newMainSectionInput");
-
-    if (mainSel === "__new__") {
-        subsectionLabel.style.display = "none";
-        subsectionSelect.style.display = "none";
-        newMainInput.style.display = "block";
-        return;
-    }
-
-    newMainInput.style.display = "none";
-
-    if (addType === "bullet") {
-        subsectionLabel.style.display = "block";
-        subsectionSelect.style.display = "block";
-
-        const subsections = findSubsections(mainSel);
-        subsectionSelect.innerHTML = "";
-
-        subsections.forEach(h3 => {
-            const opt = document.createElement("option");
-            opt.value = h3.id;
-            opt.textContent = h3.textContent.replace(/<[^>]*>/g, "").trim();
-            subsectionSelect.appendChild(opt);
-        });
-
-    } else {
-        subsectionLabel.style.display = "none";
-        subsectionSelect.style.display = "none";
-    }
-}
-
-/* -----------------------------------------
-   FIND SUBSECTIONS
------------------------------------------ */
-
-function findSubsections(sectionTitle) {
-    const h2s = [...document.querySelectorAll("#requirements h2")];
-    let startIndex = h2s.findIndex(h => h.textContent.trim() === sectionTitle);
-    if (startIndex === -1) return [];
-
-    const startNode = h2s[startIndex];
-    const nextH2 = h2s[startIndex + 1];
-
-    let subsections = [];
-    let node = startNode.nextElementSibling;
-
-    while (node && node !== nextH2) {
-        if (node.tagName === "H3") subsections.push(node);
-        node = node.nextElementSibling;
-    }
-
-    return subsections;
-}
-
-/* -----------------------------------------
-   ADD TASK
------------------------------------------ */
-
-document.getElementById("addTaskBtn").onclick = () => {
-    const mainSection = document.getElementById("mainSectionSelect").value;
-    const addType = document.getElementById("addTypeSelect").value;
-    const title = document.getElementById("taskTitle").value.trim();
-    const details = document.getElementById("taskDetails").value.trim();
-
-    if (!title) return alert("Please enter a title.");
-
-    if (mainSection === "__new__") {
-        const newTitle = document.getElementById("newMainSectionInput").value.trim();
-        if (!newTitle) return alert("Please enter a main section title.");
-        createNewMainSection(newTitle, title, details);
-
-    } else if (addType === "subsection") {
-        addNewSubsection(mainSection, title, details);
-
-    } else {
-        const subsectionId = document.getElementById("subsectionSelect").value;
-        addBulletPoint(subsectionId, title, details);
-    }
-
-    modalBg.style.display = "none";
-    saveStateToDB();
-};
-
-/* -----------------------------------------
-   ADD NEW SUBSECTION
------------------------------------------ */
-
-function addNewSubsection(mainSection, title, details) {
-    const subsections = findSubsections(mainSection);
-
-    let nextNumber = 1;
-    if (subsections.length > 0) {
-        const last = subsections[subsections.length - 1];
-        const match = last.id.match(/req-(\d+)-(\d+)/);
-        if (match) nextNumber = parseInt(match[2]) + 1;
-    }
-
-    const sectionNumber = findSectionNumber(mainSection);
-    const newId = `req-${sectionNumber}-${nextNumber}`;
-    const newHeading = `${sectionNumber}.${nextNumber} ${title}`;
-
-    const h3 = document.createElement("h3");
-    h3.id = newId;
-
-    const priority = document.getElementById("prioritySelect").value;
-    let prioritySpan = "";
-    if (priority === "high") prioritySpan = ` <span class="priority-high">HIGH PRIORITY</span>`;
-    if (priority === "med")  prioritySpan = ` <span class="priority-med">MED/HIGH PRIORITY</span>`;
-    if (priority === "low")  prioritySpan = ` <span class="priority-low">LOW PRIORITY</span>`;
-
-    h3.innerHTML = `${newHeading}${prioritySpan}`;
-
-    const ul = document.createElement("ul");
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${title}</strong> → ${details}`;
-    li.dataset.cardTitle = title;
-    ul.appendChild(li);
-
-    const lastSub = subsections[subsections.length - 1];
-    if (lastSub) {
-        lastSub.nextElementSibling.insertAdjacentElement("afterend", ul);
-        ul.insertAdjacentElement("beforebegin", h3);
-    } else {
-        const h2s = [...document.querySelectorAll("#requirements h2")];
-        const h2 = h2s.find(h => h.textContent.trim() === mainSection);
-        h2.insertAdjacentElement("afterend", h3);
-        h3.insertAdjacentElement("afterend", ul);
-    }
-
-    createKanbanCard(title, `#${newId}`);
-}
-
-/* -----------------------------------------
-   FIND SECTION NUMBER
------------------------------------------ */
-
-function findSectionNumber(sectionTitle) {
-    const h2s = [...document.querySelectorAll("#requirements h2")];
-    return h2s.findIndex(h => h.textContent.trim() === sectionTitle) + 1;
-}
-
-/* -----------------------------------------
-   ADD BULLET POINT
------------------------------------------ */
-
-function addBulletPoint(subsectionId, title, details) {
-    const h3 = document.getElementById(subsectionId);
-    const ul = h3.nextElementSibling;
-
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${title}</strong> → ${details}`;
-    li.dataset.cardTitle = title;
-    ul.appendChild(li);
-
-    createKanbanCard(title, `#${subsectionId}`);
-}
-
-/* -----------------------------------------
-   CREATE NEW MAIN SECTION
------------------------------------------ */
-
-function createNewMainSection(sectionTitle, firstSubTitle, details) {
-    const h2s = [...document.querySelectorAll("#requirements h2")];
-    const nextMainNumber = h2s.length + 1;
-
-    const h2 = document.createElement("h2");
-    h2.textContent = `${nextMainNumber}. ${sectionTitle}`;
-
-    const newId = `req-${nextMainNumber}-1`;
-
-    const priority = document.getElementById("prioritySelect").value;
-    let prioritySpan = "";
-    if (priority === "high") prioritySpan = ` <span class="priority-high">HIGH PRIORITY</span>`;
-    if (priority === "med")  prioritySpan = ` <span class="priority-med">MED/HIGH PRIORITY</span>`;
-    if (priority === "low")  prioritySpan = ` <span class="priority-low">LOW PRIORITY</span>`;
-
-    const h3 = document.createElement("h3");
-    h3.id = newId;
-    h3.innerHTML = `${nextMainNumber}.1 ${firstSubTitle}${prioritySpan}`;
-
-    const ul = document.createElement("ul");
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${firstSubTitle}</strong> → ${details}`;
-    li.dataset.cardTitle = firstSubTitle;
-    ul.appendChild(li);
-
-    const req = document.getElementById("requirements");
-    req.appendChild(document.createElement("div")).className = "section-divider";
-    req.appendChild(h2);
-    req.appendChild(h3);
-    req.appendChild(ul);
-
-    createKanbanCard(firstSubTitle, `#${newId}`);
-
-    saveStateToDB();
-    populateMainSectionDropdown();
-}
-
-/* -----------------------------------------
-   CREATE KANBAN CARD
------------------------------------------ */
-
-function createKanbanCard(title, target) {
-    const card = document.createElement("div");
-    card.className = "kanban-item";
-    card.draggable = true;
-    card.dataset.target = target;
-    card.textContent = title;
-
-    const req = document.querySelector(target);
-    if (req) {
-        if (req.innerHTML.includes("priority-high")) card.classList.add("high");
-        if (req.innerHTML.includes("priority-med")) card.classList.add("med");
-        if (req.innerHTML.includes("priority-low")) card.classList.add("low");
-    }
-
-    const del = document.createElement("button");
-    del.className = "delete-btn";
-    del.textContent = "X";
-    card.appendChild(del);
-
-    const edit = document.createElement("button");
-    edit.className = "edit-btn";
-    edit.textContent = "Edit";
-    card.appendChild(edit);
-
-    document.getElementById("todo").appendChild(card);
-
-    enableDragAndDrop();
-    attachKanbanClickHandlers();
-}
-
-/* -----------------------------------------
-   KANBAN CLICK → SCROLL + HIGHLIGHT
------------------------------------------ */
-
-function attachKanbanClickHandlers() {
-    document.querySelectorAll(".kanban-item").forEach(item => {
-        item.onclick = (e) => {
-            if (e.target.classList.contains("delete-btn") || e.target.classList.contains("edit-btn")) return;
-
-            const target = item.dataset.target;
-            const el = document.querySelector(target);
-            if (!el) return;
-
-            el.classList.add("highlight");
-            setTimeout(() => el.classList.remove("highlight"), 2000);
-
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-            if (item.parentElement.id === "done") {
-                const req = document.querySelector(item.dataset.target);
-                const ul = req.nextElementSibling;
-                if (!ul || ul.tagName !== "UL") return;
-
-                const title = item.firstChild.nodeValue.trim();
-                let matchingLi = null;
-
-                ul.querySelectorAll("li").forEach(li => {
-                    if (li.dataset.cardTitle === title) {
-                        matchingLi = li;
-                    }
-                });
-
-                if (matchingLi) {
-                    const box = matchingLi.nextElementSibling;
-                    if (box && box.classList.contains("completed-box")) {
-                        const content = box.querySelector(".completed-content");
-                        if (content) content.style.display = "block";
-                        box.classList.add("highlight");
-                        setTimeout(() => box.classList.remove("highlight"), 2000);
-                    }
-                }
-            }
-        };
-    });
-}
-
-/* -----------------------------------------
-   DRAG & DROP
------------------------------------------ */
-
-function enableDragAndDrop() {
-    const items = document.querySelectorAll(".kanban-item");
-    const columns = document.querySelectorAll(".kanban-column");
-
-    items.forEach(item => {
-        item.addEventListener("dragstart", () => item.classList.add("dragging"));
-        item.addEventListener("dragend", () => {
-            item.classList.remove("dragging");
-
-            const col = item.parentElement.id;
-            if (col === "done" && !item.dataset.summary) {
-                openCompletionModal(item);
-            }
-
-            saveStateToDB();
-        });
-    });
-
-    columns.forEach(col => {
-        col.addEventListener("dragover", e => {
-            e.preventDefault();
-            const dragging = document.querySelector(".dragging");
-            if (dragging) col.appendChild(dragging);
-        });
-    });
-}
-
-/* -----------------------------------------
-   COMPLETION MODAL LOGIC
------------------------------------------ */
-
-function openCompletionModal(card) {
-    currentCompletionCard = card;
-
-    document.getElementById("completionSummaryInput").value = "";
-    document.getElementById("completionFilesInput").value = "";
-    document.getElementById("completionNotesInput").value = "";
-
-    document.getElementById("completionModalBg").style.display = "flex";
-}
-
-document.getElementById("completionCancelBtn").onclick = () => {
-    currentCompletionCard = null;
-    document.getElementById("completionModalBg").style.display = "none";
-};
-
-document.getElementById("completionSaveBtn").onclick = () => {
-    if (!currentCompletionCard) return;
-
-    const summary = document.getElementById("completionSummaryInput").value.trim();
-    const files = document.getElementById("completionFilesInput").value.trim();
-    const notes = document.getElementById("completionNotesInput").value.trim();
-
-    applyCompletionData(currentCompletionCard, summary, files, notes);
-
-    document.getElementById("completionModalBg").style.display = "none";
-    currentCompletionCard = null;
-
-    saveStateToDB();
-};
-
-function applyCompletionData(card, summary, files, notes) {
-    const completedDate = new Date().toISOString().split("T")[0];
-
-    card.dataset.summary = summary;
-    card.dataset.files = files;
-    card.dataset.notes = notes;
-    card.dataset.completed = completedDate;
-
-    const req = document.querySelector(card.dataset.target);
-    if (!req) return;
-
-    req.dataset.summary = summary;
-    req.dataset.files = files;
-    req.dataset.notes = notes;
-    req.dataset.completed = completedDate;
-
-    const ul = req.nextElementSibling;
-    if (!ul || ul.tagName !== "UL") return;
-
-    const title = card.firstChild.nodeValue.trim();
-    let matchingLi = null;
-
-    ul.querySelectorAll("li").forEach(li => {
-        if (li.dataset.cardTitle === title) {
-            matchingLi = li;
-        }
-    });
-
-    if (!matchingLi) return;
-
-    const next = matchingLi.nextElementSibling;
-    if (next && next.classList && next.classList.contains("completed-box")) {
-        next.remove();
-    }
-
-    const box = document.createElement("div");
-    box.className = "completed-box";
-
-    const header = document.createElement("div");
-    header.className = "completed-header";
-    header.textContent = "Work Done (click to expand)";
-
-    const content = document.createElement("div");
-    content.className = "completed-content";
-    content.style.display = "none";
-
-    content.innerHTML = `
-        <p><strong>Summary:</strong> ${summary || "—"}</p>
-        <p><strong>Files Changed:</strong> ${files || "—"}</p>
-        <p><strong>Date:</strong> ${completedDate}</p>
-        ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ""}
-    `;
-
-    box.appendChild(header);
-    box.appendChild(content);
-
-    matchingLi.insertAdjacentElement("afterend", box);
-
-    attachCompletedBoxHandlers();
-}
-
-/* -----------------------------------------
-   COMPLETED BOX HANDLERS
------------------------------------------ */
-
-function attachCompletedBoxHandlers() {
-    document.querySelectorAll(".completed-box .completed-header").forEach(header => {
-        header.onclick = () => {
-            const content = header.nextElementSibling;
-            if (!content) return;
-
-            content.style.display =
-                (content.style.display === "none" || !content.style.display)
-                ? "block"
-                : "none";
-        };
-    });
-}
-
-/* -----------------------------------------
-   EDIT MODAL LOGIC
------------------------------------------ */
-
-function openEditModal(card) {
-    currentEditCard = card;
-
-    const req = document.querySelector(card.dataset.target);
-    if (!req) return;
-
-    const rawTitle = card.firstChild.nodeValue.trim();
-    document.getElementById("editTitleInput").value = rawTitle;
-
-    document.getElementById("editSummaryInput").value = card.dataset.summary || "";
-    document.getElementById("editFilesInput").value = card.dataset.files || "";
-    document.getElementById("editNotesInput").value = card.dataset.notes || "";
-
-    document.getElementById("editModalBg").style.display = "flex";
-}
-
-document.getElementById("editCancelBtn").onclick = () => {
-    currentEditCard = null;
-    document.getElementById("editModalBg").style.display = "none";
-};
-
-document.getElementById("editSaveBtn").onclick = () => {
-    if (!currentEditCard) return;
-
-    const newTitle = document.getElementById("editTitleInput").value.trim();
-    const newSummary = document.getElementById("editSummaryInput").value.trim();
-    const newFiles = document.getElementById("editFilesInput").value.trim();
-    const newNotes = document.getElementById("editNotesInput").value.trim();
-
-    if (newTitle) {
-        currentEditCard.firstChild.nodeValue = newTitle;
-
-        const req = document.querySelector(currentEditCard.dataset.target);
-        if (req) {
-            const span = req.querySelector("span");
-            const text = req.textContent;
-            const match = text.match(/^(\d+(\.\d+)*)\s+/);
-            const prefix = match ? match[1] : "";
-            req.innerHTML = `${prefix} ${newTitle}${span ? " " + span.outerHTML : ""}`;
-
-            const ul = req.nextElementSibling;
-            if (ul && ul.tagName === "UL") {
-                ul.querySelectorAll("li").forEach(li => {
-                    if (li.dataset.cardTitle === currentEditCard.dataset.oldTitle) {
-                        li.dataset.cardTitle = newTitle;
-                    }
-                });
-            }
-        }
-    }
-
-    if (newSummary || newFiles || newNotes) {
-        applyCompletionData(
-            currentEditCard,
-            newSummary,
-            newFiles,
-            newNotes
-        );
-    } else {
-        currentEditCard.dataset.summary = "";
-        currentEditCard.dataset.files = "";
-        currentEditCard.dataset.notes = "";
-
-        const req = document.querySelector(currentEditCard.dataset.target);
-        if (req) {
-            req.dataset.summary = "";
-            req.dataset.files = "";
-            req.dataset.notes = "";
-
-            const ul = req.nextElementSibling;
-            if (ul && ul.tagName === "UL") {
-                ul.querySelectorAll("li").forEach(li => {
-                    const next = li.nextElementSibling;
-                    if (next && next.classList.contains("completed-box")) {
-                        next.remove();
-                    }
-                });
-            }
-        }
-    }
-
-    document.getElementById("editModalBg").style.display = "none";
-    currentEditCard = null;
-
-    saveStateToDB();
-};
-
-/* -----------------------------------------
-   PRIORITY COLOURS
------------------------------------------ */
-
-function applyPriorityColoursToExistingCards() {
-    document.querySelectorAll(".kanban-item").forEach(card => {
-        const target = card.dataset.target;
-        const req = document.querySelector(target);
-        if (!req) return;
-
-        if (req.innerHTML.includes("priority-high")) card.classList.add("high");
-        if (req.innerHTML.includes("priority-med")) card.classList.add("med");
-        if (req.innerHTML.includes("priority-low")) card.classList.add("low");
-    });
-}
-
-/* -----------------------------------------
-   CLEANUP EMPTY MAIN SECTIONS
------------------------------------------ */
-
-function cleanupEmptyMainSections() {
-    const h2s = document.querySelectorAll("#requirements h2");
-
-    h2s.forEach(h2 => {
-        let next = h2.nextElementSibling;
-
-        if (!next || next.tagName !== "H3") {
-            const prev = h2.previousElementSibling;
-            if (prev && prev.classList.contains("section-divider")) {
-                prev.remove();
-            }
-
-            h2.remove();
-        }
-    });
-}
-
-/* -----------------------------------------
-   ENSURE DELETE + EDIT BUTTONS
------------------------------------------ */
-
-function ensureDeleteButtonsOnAllCards() {
-    document.querySelectorAll(".kanban-item").forEach(card => {
-        if (!card.querySelector(".delete-btn")) {
-            const del = document.createElement("button");
-            del.className = "delete-btn";
-            del.textContent = "X";
-            card.appendChild(del);
-        }
-
-        if (!card.querySelector(".edit-btn")) {
-            const edit = document.createElement("button");
-            edit.className = "edit-btn";
-            edit.textContent = "Edit";
-            card.appendChild(edit);
-        }
-    });
-}

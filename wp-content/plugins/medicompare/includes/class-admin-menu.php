@@ -7,12 +7,45 @@ class MediCompare_Admin_Menu {
     public function __construct() {
         add_action('admin_menu', [$this, 'register_menu']);
         add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+
+        add_action('admin_enqueue_scripts', function($hook){
+    error_log("HOOK: " . $hook);
+});
+
+
 
         // Load verification logic on all admin requests
         require_once plugin_dir_path(__FILE__) . 'admin-pages/pharmacy-verification.php';
         require_once plugin_dir_path(__FILE__) . 'admin-pages/admin-dashboard-widget.php';
 
     }
+
+    public function enqueue_admin_assets($hook) {
+
+        // Load CSS on all MediCompare admin pages
+        if (strpos($hook, 'medicompare') !== false) {
+            wp_enqueue_style(
+                'medicompare-admin-css',
+                plugin_dir_url(__FILE__) . '../assets/css/admin.css',
+                [],
+                filemtime(plugin_dir_path(__FILE__) . '../assets/css/admin.css')
+            );
+        }
+
+        // Load JS ONLY on Transferred Orders page
+        if ($hook === 'medicompare_page_medicompare-transferred-orders') {
+
+            wp_enqueue_script(
+                'mc-admin-order-transfer',
+                plugin_dir_url(__FILE__) . '../assets/js/admin-order-transfer.js',
+                [],
+                filemtime(plugin_dir_path(__FILE__) . '../assets/js/admin-order-transfer.js'),
+                true
+            );
+        }
+    }
+
 
     public function register_menu() {
 
@@ -148,6 +181,16 @@ class MediCompare_Admin_Menu {
             'medicompare-pharmacy-verification',
             [$this, 'pharmacy_verification_page']
         );
+
+        add_submenu_page(
+            'medicompare',
+            'Transferred Orders',
+            'Transferred Orders',
+            'manage_options',
+            'medicompare-transferred-orders',
+            [$this, 'transferred_orders_page']
+        );
+
 
 
         /* ---------------------------------------------------------
@@ -1041,6 +1084,343 @@ class MediCompare_Admin_Menu {
      mc_render_pharmacy_verification_page();
     }
 
+        /* ---------------------------------------------------------
+       TRANSFERRED ORDERS ADMIN PAGE
+       - Filter by supplier, pharmacy, date range
+       - Shows per-supplier totals + commission placeholder
+    --------------------------------------------------------- */
+    public function transferred_orders_page() {
+    global $wpdb;
+
+    $orders_table           = $wpdb->prefix . 'medi_orders';
+    $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
+    $suborders_table        = $wpdb->prefix . 'medi_order_suborders';
+    $order_items_table      = $wpdb->prefix . 'medi_order_items';
+    $posts_table            = $wpdb->posts;
+
+    // Suppliers
+    $suppliers = $this->get_suppliers();
+
+    // Pharmacies
+    $pharmacies_posts = get_posts([
+        'post_type'      => 'mc_pharmacy',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+        'fields'         => 'ids',
+    ]);
+
+    $pharmacies = [];
+    foreach ($pharmacies_posts as $pid) {
+        $pharmacies[$pid] = get_the_title($pid);
+    }
+
+    // Filters
+    $selected_supplier = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
+    $selected_pharmacy = isset($_GET['pharmacy_id']) ? (int) $_GET['pharmacy_id'] : 0;
+    $date_from         = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '';
+    $date_to           = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
+    $order_number      = isset($_GET['order_number']) ? (int) $_GET['order_number'] : 0;
+
+    $where   = ["1=1"];
+    $params  = [];
+
+    if ($selected_pharmacy) {
+        $where[]  = "o.pharmacy_id = %d";
+        $params[] = $selected_pharmacy;
+    }
+
+    if ($selected_supplier) {
+        $where[]  = "oss.supplier_id = %d";
+        $params[] = $selected_supplier;
+    }
+
+    if ($date_from) {
+        $where[]  = "o.created_at >= %s";
+        $params[] = $date_from . ' 00:00:00';
+    }
+
+    if ($date_to) {
+        $where[]  = "o.created_at <= %s";
+        $params[] = $date_to . ' 23:59:59';
+    }
+
+    if ($order_number) {
+        $where[]  = "o.order_number = %d";
+        $params[] = $order_number;
+    }
+
+    // Only transferred/sent
+    $where[] = "o.status IN ('TRANSFERRED','SENT')";
+
+    $where_sql = implode(' AND ', $where);
+
+    $sql = "
+        SELECT
+            o.id AS order_id,
+            o.order_number,
+            o.pharmacy_id,
+            o.total_amount,
+            o.status,
+            o.created_at,
+            oss.supplier_id,
+            oss.suborder_number,
+            oss.supplier_total_amount,
+            oss.platform_fee_percent,
+            oss.platform_fee_amount
+        FROM {$orders_table} o
+        INNER JOIN {$supplier_summary_table} oss
+                ON oss.order_id = o.id
+        WHERE {$where_sql}
+        ORDER BY o.created_at DESC, o.order_number DESC
+        LIMIT 100
+    ";
+
+    $filters_applied = $selected_supplier || $selected_pharmacy || $date_from || $date_to || $order_number;
+
+    $rows = [];
+    if ($filters_applied) {
+        $prepared = $params ? $wpdb->prepare($sql, $params) : $sql;
+        $rows     = $wpdb->get_results($prepared, ARRAY_A);
+    }
+
+    ?>
+    <div class="wrap">
+        <h1>Transferred Orders</h1>
+
+        <form method="get" class="mc-admin-filters">
+            <input type="hidden" name="page" value="medicompare-transferred-orders" />
+
+            <label>
+                <span>Supplier:</span>
+                <select name="supplier_id">
+                    <option value="0">All suppliers</option>
+                    <?php foreach ($suppliers as $sid => $sname): ?>
+                        <option value="<?php echo esc_attr($sid); ?>" <?php selected($selected_supplier, $sid); ?>>
+                            <?php echo esc_html($sname); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
+            <label>
+                <span>Pharmacy:</span>
+                <select name="pharmacy_id">
+                    <option value="0">All pharmacies</option>
+                    <?php foreach ($pharmacies as $pid => $pname): ?>
+                        <option value="<?php echo esc_attr($pid); ?>" <?php selected($selected_pharmacy, $pid); ?>>
+                            <?php echo esc_html($pname); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
+            <label>
+                <span>Date from:</span>
+                <input type="date" name="date_from" value="<?php echo esc_attr($date_from); ?>" />
+            </label>
+
+            <label>
+                <span>Date to:</span>
+                <input type="date" name="date_to" value="<?php echo esc_attr($date_to); ?>" />
+            </label>
+
+            <label>
+                <span>Order Number:</span>
+                <input type="number" name="order_number" value="<?php echo esc_attr($order_number); ?>" />
+            </label>
+
+            <button class="button button-primary" type="submit">Filter</button>
+        </form>
+
+        <?php if ($filters_applied && $rows): ?>
+            <div class="mc-admin-results-count">
+                Showing <?php echo count($rows); ?> transferred orders
+            </div>
+        <?php endif; ?>
+
+
+        <?php if (!$filters_applied): ?>
+            <p class="mc-muted">Use the filters above to view transferred orders.</p>
+
+        <?php elseif ($filters_applied && !$rows): ?>
+            <p>No transferred orders found for the selected filters.</p>
+
+        <?php else: ?>
+
+            <?php
+            $grouped = [];
+            foreach ($rows as $r) {
+                $grouped[$r['order_id']][] = $r;
+            }
+            ?>
+
+            <div class="mc-admin-transferred-orders-wrapper">
+                <div class="mc-admin-transferred-orders">
+                    <?php foreach ($grouped as $order_id => $subrows): ?>
+                        <?php
+                        $first         = $subrows[0];
+                        $pharmacy_id   = (int) $first['pharmacy_id'];
+                        $pharmacy_name = get_the_title($pharmacy_id);
+                        $order_status  = strtolower($first['status']);
+                        $order_date    = $first['created_at'];
+                        $order_number  = $first['order_number'];
+                        $order_total   = $first['total_amount'];
+                        ?>
+                        <div class="mc-transferred-order-card mc-order-collapsed">
+
+                            <div class="mc-order-collapse-header" data-order-toggle>
+                                <span>
+                                    Order #<?php echo esc_html($order_number); ?>
+                                    <span class="mc-order-status-badge mc-status-<?php echo esc_attr($order_status); ?>">
+                                        <?php echo esc_html(ucfirst($order_status)); ?>
+                                    </span>
+                                </span>
+                                <span>
+                                    <span class="mc-admin-order-date">
+                                        <?php echo esc_html(date('d M Y H:i', strtotime($order_date))); ?>
+                                    </span>
+                                    <span class="mc-admin-order-total">
+                                        Total: £<?php echo number_format((float) $order_total, 2); ?>
+                                    </span>
+                                    <span class="mc-order-collapse-arrow">▼</span>
+                                </span>
+                            </div>
+
+                            <div class="mc-order-collapse-content">
+                                <p>
+                                    <strong>Pharmacy:</strong>
+                                    <?php echo esc_html($pharmacy_name ?: ('ID ' . $pharmacy_id)); ?>
+                                </p>
+
+                                <?php foreach ($subrows as $row): ?>
+                                    <?php
+                                    $supplier_id    = (int) $row['supplier_id'];
+                                    $supplier_name  = get_the_title($supplier_id);
+                                    $supplier_total = (float) $row['supplier_total_amount'];
+                                    $fee_percent    = (float) $row['platform_fee_percent'];
+                                    $fee_amount     = (float) $row['platform_fee_amount'];
+
+                                    if ($fee_amount == 0 && $fee_percent > 0) {
+                                        $fee_amount = round($supplier_total * $fee_percent / 100, 2);
+                                    }
+
+                                    $suborder = $wpdb->get_row($wpdb->prepare(
+                                        "SELECT supplier_order_status, email_sent, email_sent_at
+                                         FROM {$suborders_table}
+                                         WHERE order_id = %d
+                                           AND supplier_id = %d
+                                           AND suborder_number = %s
+                                         LIMIT 1",
+                                        $order_id,
+                                        $supplier_id,
+                                        $row['suborder_number']
+                                    ), ARRAY_A);
+
+                                    $sub_status    = $suborder ? strtolower($suborder['supplier_order_status']) : 'pending';
+                                    $email_sent    = $suborder ? (int) $suborder['email_sent'] : 0;
+                                    $email_sent_at = ($suborder && $suborder['email_sent_at'])
+                                        ? date('d M Y H:i', strtotime($suborder['email_sent_at']))
+                                        : null;
+
+                                    $items = $wpdb->get_results($wpdb->prepare(
+                                        "SELECT oi.product_id, oi.quantity, oi.unit_price, oi.line_total
+                                         FROM {$order_items_table} oi
+                                         WHERE oi.order_id = %d
+                                           AND oi.supplier_id = %d
+                                         ORDER BY oi.product_id ASC",
+                                        $order_id,
+                                        $supplier_id
+                                    ), ARRAY_A);
+                                    ?>
+                                    <div class="mc-suborder-block">
+                                        <div class="mc-suborder-header">
+                                            <div>
+                                                <strong><?php echo esc_html($supplier_name ?: ('Supplier #' . $supplier_id)); ?></strong><br>
+                                                <span class="mc-suborder-ref">
+                                                    Sub-order: <?php echo esc_html($row['suborder_number']); ?>
+                                                </span>
+                                            </div>
+                                            <div class="mc-suborder-status">
+                                                <span class="mc-suborder-status-badge mc-status-<?php echo esc_attr($sub_status); ?>">
+                                                    <?php echo esc_html(ucfirst($sub_status)); ?>
+                                                </span><br>
+                                                <span class="mc-suborder-total">
+                                                    Supplier Total: £<?php echo number_format($supplier_total, 2); ?>
+                                                </span><br>
+                                                <span class="mc-suborder-commission">
+                                                    Commission: £<?php echo number_format($fee_amount, 2); ?>
+                                                    <?php if ($fee_percent > 0): ?>
+                                                        (<?php echo number_format($fee_percent, 2); ?>%)
+                                                    <?php endif; ?>
+                                                </span><br>
+                                                <span class="mc-email-indicator">
+                                                    Email:
+                                                    <?php if ($email_sent): ?>
+                                                        <strong>Sent</strong>
+                                                        <?php if ($email_sent_at): ?>
+                                                            (<?php echo esc_html($email_sent_at); ?>)
+                                                        <?php endif; ?>
+                                                    <?php else: ?>
+                                                        <strong>Not Sent</strong>
+                                                    <?php endif; ?>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <?php if ($items): ?>
+                                            <table class="mc-suborder-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product</th>
+                                                        <th>Qty</th>
+                                                        <th>Unit Price</th>
+                                                        <th>Line Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($items as $item): ?>
+                                                        <?php $product_label = get_the_title($item['product_id']); ?>
+                                                        <tr>
+                                                            <td><?php echo esc_html($product_label); ?></td>
+                                                            <td><?php echo (int) $item['quantity']; ?></td>
+                                                            <td>£<?php echo number_format((float) $item['unit_price'], 2); ?></td>
+                                                            <td>£<?php echo number_format((float) $item['line_total'], 2); ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        <?php else: ?>
+                                            <p>No items found for this supplier.</p>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <script>
+            document.addEventListener('click', function (e) {
+                const header = e.target.closest('[data-order-toggle]');
+                if (!header) return;
+
+                const card = header.closest('.mc-transferred-order-card');
+                if (!card) return;
+
+                // Toggle only this card
+                card.classList.toggle('mc-order-collapsed');
+                card.classList.toggle('mc-order-expanded');
+            });
+            </script>
+
+        <?php endif; ?>
+    </div>
+    <?php
+  }
 
 }
 

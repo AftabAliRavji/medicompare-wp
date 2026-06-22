@@ -5,57 +5,50 @@ if (!defined('ABSPATH')) exit;
 class MediCompare_Admin_Dashboard_Widget {
 
     public static function render_inline_widget() {
+        global $wpdb;
 
-        echo '<h2>Pending Pharmacy Verifications</h2>';
-
-        $pending = new WP_Query([
+        // Pending pharmacy verifications (mc_pharmacy with _mc_status = pending_verification)
+        $pending_count = (int) (new WP_Query([
             'post_type'      => 'mc_pharmacy',
-            'posts_per_page' => 20,
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
             'meta_query'     => [
                 [
                     'key'   => '_mc_status',
                     'value' => 'pending_verification'
                 ]
             ]
-        ]);
+        ]))->found_posts;
 
-        if (!$pending->have_posts()) {
-            echo '<p>No pharmacies awaiting verification.</p>';
-            return;
-        }
+        // Transferred orders (all orders that have left pending state)
+        $orders_table = $wpdb->prefix . 'medi_orders';
+        $transferred_count = (int) $wpdb->get_var("
+            SELECT COUNT(*) 
+            FROM {$orders_table}
+            WHERE status IN ('TRANSFERRED','SENT')
+        ");
 
-        echo '<table class="widefat striped" style="margin-top:15px;">';
-        echo '<thead>
-                <tr>
-                    <th>Pharmacy</th>
-                    <th>Email</th>
-                    <th>GPhC</th>
-                    <th>City</th>
-                    <th>Action</th>
-                </tr>
-              </thead>';
-        echo '<tbody>';
+        // Admin URLs
+        $pending_url    = admin_url('admin.php?page=medicompare-pharmacy-verification');
+        $orders_url     = admin_url('admin.php?page=medicompare-transferred-orders');
+        ?>
 
-        while ($pending->have_posts()) {
-            $pending->the_post();
-            $id = get_the_ID();
+        <div class="mc-admin-dashboard-cards">
 
-            $email = get_post_meta($id, '_mc_email', true);
-            $gphc  = get_post_meta($id, '_mc_gphc_number', true);
-            $city  = get_post_meta($id, '_mc_city', true);
+            <a href="<?php echo esc_url($pending_url); ?>" class="mc-admin-card mc-admin-card-warning">
+                <div class="mc-admin-card-label">Pending Pharmacy Verifications</div>
+                <div class="mc-admin-card-value"><?php echo esc_html($pending_count); ?></div>
+                <div class="mc-admin-card-footer">View pending verifications →</div>
+            </a>
 
-            echo '<tr>';
-            echo '<td>' . esc_html(get_the_title()) . '</td>';
-            echo '<td>' . esc_html($email) . '</td>';
-            echo '<td>' . esc_html($gphc) . '</td>';
-            echo '<td>' . esc_html($city) . '</td>';
-            echo '<td><a class="button button-primary" href="' . admin_url("post.php?post={$id}&action=edit") . '">Verify Now</a></td>';
-            echo '</tr>';
-        }
+            <a href="<?php echo esc_url($orders_url); ?>" class="mc-admin-card mc-admin-card-primary">
+                <div class="mc-admin-card-label">Transferred Orders</div>
+                <div class="mc-admin-card-value"><?php echo esc_html($transferred_count); ?></div>
+                <div class="mc-admin-card-footer">View transferred orders →</div>
+            </a>
 
-        echo '</tbody>';
-        echo '</table>';
+        </div>
 
-        wp_reset_postdata();
+        <?php
     }
 }

@@ -329,12 +329,6 @@ class MediCompare_Pharmacy_Comparison {
     wp_send_json_success(['html' => ob_get_clean()]);
  }
 
-
-
-
-
-
-
     /* ---------------------------------------------------------
        AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT
        - returns comparison table (cheapest first)

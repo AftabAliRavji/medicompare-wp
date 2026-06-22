@@ -4931,3 +4931,19 @@ Stack trace:
 [22-Jun-2026 15:38:12 UTC] MediCompare: load_cpts() fired
 [22-Jun-2026 15:38:12 UTC] MC_LOGIN_DEBUG: Login handler triggered
 [22-Jun-2026 15:38:12 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[22-Jun-2026 15:39:13 UTC] REQ ENDPOINT LOADED
+[22-Jun-2026 15:39:13 UTC] MediCompare: load_cpts() fired
+[22-Jun-2026 15:39:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[22-Jun-2026 15:39:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[22-Jun-2026 15:39:13 UTC] REQ ENDPOINT LOADED
+[22-Jun-2026 15:39:13 UTC] MediCompare: load_cpts() fired
+[22-Jun-2026 15:39:13 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[22-Jun-2026 15:39:13 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[22-Jun-2026 15:40:14 UTC] REQ ENDPOINT LOADED
+[22-Jun-2026 15:40:14 UTC] MediCompare: load_cpts() fired
+[22-Jun-2026 15:40:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[22-Jun-2026 15:40:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form
+[22-Jun-2026 15:40:14 UTC] REQ ENDPOINT LOADED
+[22-Jun-2026 15:40:14 UTC] MediCompare: load_cpts() fired
+[22-Jun-2026 15:40:14 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[22-Jun-2026 15:40:14 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form

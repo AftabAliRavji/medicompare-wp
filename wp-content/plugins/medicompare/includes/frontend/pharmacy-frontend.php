@@ -236,10 +236,11 @@ class MediCompare_Pharmacy_Frontend {
         exit;
     }
 
-    /* ---------------------------------------------------------
-       SEARCH / COMPARISON
-    --------------------------------------------------------- */
-    /* ---------------------------------------------------------
+    
+ /* ---------------------------------------------------------
+   SEARCH / COMPARISON
+--------------------------------------------------------- */
+/* ---------------------------------------------------------
    SEARCH / COMPARISON
 --------------------------------------------------------- */
 public function render_search() {
@@ -273,76 +274,85 @@ public function render_search() {
     ob_start();
     ?>
 
-    <!-- NEW TOP BAR -->
-    <div class="mc-topbar">
-        <div class="mc-topbar-left">
-            <span class="mc-welcome">Welcome, <?php echo esc_html($current_user->user_email); ?></span>
-        </div>
+    <!-- FORCE FULL-WIDTH WRAPPER TO BREAK OUT OF BLOCK THEME CONSTRAINTS -->
+    <div class="wp-block-group alignfull" style="padding:0;margin:0;">
 
-        <div class="mc-topbar-right">
-            <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" class="mc-logout-btn">
-                <span class="mc-logout-icon">⎋</span> Logout
-            </a>
-        </div>
-    </div>
+        <!-- SHARED PAGE CONTAINER -->
+        <div class="mc-page-container">
 
-    <div class="mc-search-layout">
+            <!-- TOP BAR -->
+            <div class="mc-topbar-inner">
 
-        <!-- LEFT SIDE -->
-        <div class="mc-search-left">
+                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
+                class="mc-topbar-btn mc-back-btn">
+                    ← Back to Dashboard
+                </a>
 
-            <!-- CLEAN MODERN SECTION TITLE -->
-            <h2 class="mc-section-title">Search Products & Compare Suppliers</h2>
+                <div class="mc-topbar-right">
+                    <span class="mc-topbar-badge mc-welcome-badge">
+                        Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
 
-            <div class="mc-search-bar">
-                <label for="mc-search-input">Product name or code</label><br>
-                <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
+                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
+                    class="mc-topbar-btn mc-logout-btn">
+                        Logout
+                    </a>
+                </div>
+
             </div>
 
-            <div id="mc-search-results" class="mc-search-results">
-                <!-- AJAX search results -->
-            </div>
+            <!-- SEARCH + RIGHT PANEL -->
+            <div class="mc-search-layout">
 
-            <div id="mc-selected-item" class="mc-selected-item">
-                <!-- Selected product -->
-            </div>
+                <!-- LEFT SIDE -->
+                <div class="mc-search-left">
 
-            <p><a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>">Back to dashboard</a></p>
-        </div>
+                    <h2 class="mc-section-title">Search Products & Compare Suppliers</h2>
 
-        <!-- RIGHT SIDE (BEHAVIOUR UNCHANGED, UI IMPROVED) -->
-        <div class="mc-search-right">
+                    <div class="mc-search-bar">
+                        <label for="mc-search-input">Product name or code</label><br>
+                        <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
+                    </div>
 
-            <div class="mc-order-tabs">
-                <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">
-                    Pending Order
-                </button>
-                <button type="button" class="mc-order-tab" data-tab="transferred">
-                    Transferred Orders
-                </button>
-            </div>
+                    <div id="mc-search-results" class="mc-search-results"></div>
 
-            <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active">
-                <!-- Pending order items -->
-            </div>
+                    <div id="mc-selected-item" class="mc-selected-item"></div>
 
-            <div id="mc-transferred-orders" class="mc-order-panel">
-                <!-- Transferred orders -->
-            </div>
+                </div>
 
-            <div class="mc-order-actions">
-                <button type="button" id="mc-transfer-order-btn" class="mc-transfer-btn">
-                    Transfer Pending Order
-                </button>
-            </div>
+                <!-- RIGHT SIDE -->
+                <div class="mc-search-right">
 
-        </div>
+                    <div class="mc-order-tabs">
+                        <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">
+                            Pending Order
+                        </button>
+                        <button type="button" class="mc-order-tab" data-tab="transferred">
+                            Transferred Orders
+                        </button>
+                    </div>
 
-    </div>
+                    <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active"></div>
+
+                    <div id="mc-transferred-orders" class="mc-order-panel"></div>
+
+                    <div class="mc-order-actions">
+                        <button type="button" id="mc-transfer-order-btn" class="mc-transfer-btn">
+                            Transfer Pending Order
+                        </button>
+                    </div>
+
+                </div>
+
+            </div><!-- end .mc-search-layout -->
+
+        </div><!-- end .mc-page-container -->
+
+    </div><!-- end alignfull wrapper -->
 
     <?php
     return ob_get_clean();
-  }
+ }
 
 }
 

@@ -1,5 +1,76 @@
 /* ---------------------------------------------------------
-   GLOBAL LAYOUT — LEFT + RIGHT PANELS
+   GLOBAL PAGE WRAPPER
+--------------------------------------------------------- */
+
+.mc-pharmacy-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* ---------------------------------------------------------
+   FULL-WIDTH TOP BAR — SaaS Medium Height
+--------------------------------------------------------- */
+
+.mc-topbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+    padding: 14px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+
+    position: relative;
+    z-index: 10;
+}
+
+/* Shared style for all three items */
+.mc-topbar-btn,
+.mc-topbar-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    line-height: 1.3;
+}
+
+/* Back button */
+.mc-back-btn {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+    text-decoration: none;
+}
+.mc-back-btn:hover {
+    background: #195a8c;
+}
+
+/* Welcome badge */
+.mc-welcome-badge {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* Logout button */
+.mc-logout-btn {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff !important;
+    text-decoration: none;
+}
+.mc-logout-btn:hover {
+    background: #b91c1c;
+}
+
+
+/* ---------------------------------------------------------
+   TWO-COLUMN LAYOUT (NO LEFT OFFSET)
 --------------------------------------------------------- */
 
 .mc-search-layout {
@@ -8,24 +79,9 @@
     gap: 24px;
     align-items: flex-start;
     margin-top: 20px;
-    position: relative;
-    left: -250px; /* your chosen offset */
 }
 
-.mc-topbar {
-    position: relative;
-    left: 0; /* ensure top bar stays aligned */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffffff;
-    padding: 12px 18px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-}
-
-
+/* Panels */
 .mc-search-left,
 .mc-search-right {
     background: #fff;
@@ -49,6 +105,8 @@
     width: 100%;
     margin-bottom: 20px;
 }
+
+
 
 /* ---------------------------------------------------------
    SEARCH RESULTS TABLE
@@ -1159,3 +1217,356 @@
     font-weight: 600;
     letter-spacing: 0.2px;
 }
+.mc-pharmacy-nav {
+    margin-bottom: 20px;
+}
+
+.mc-pharmacy-nav-link {
+    display: inline-block;
+    padding: 8px 14px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.mc-pharmacy-nav-link:hover {
+    background: #195a8c;
+}
+.mc-pharmacy-nav-link {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.mc-pharmacy-nav-link:hover {
+    background: #195a8c;
+}
+/* FORCE Back to Dashboard button styling */
+.mc-pharmacy-nav-link {
+    display: inline-block !important;
+    padding: 8px 14px !important;
+    background: #2271b1 !important;
+    color: #fff !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+/* ---------------------------------------------------------
+   FULL-WIDTH TOP BAR — OVERRIDE THEME COMPLETELY
+--------------------------------------------------------- */
+
+body .mc-topbar {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    background: #ffffff !important;
+    padding: 14px 24px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+
+    position: relative !important;
+    z-index: 50 !important;
+}
+
+/* Shared style for all three items */
+body .mc-topbar-btn,
+body .mc-topbar-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 10px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+    line-height: 1.3 !important;
+    text-decoration: none !important;
+}
+
+/* Back button */
+body .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+body .mc-back-btn:hover {
+    background: #195a8c !important;
+}
+
+/* Welcome badge */
+body .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+body .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+body .mc-logout-btn:hover {
+    background: #b91c1c !important;
+}
+.page-pharmacy-search .entry-content,
+.page-pharmacy-search .wp-block-post-content,
+.page-pharmacy-search .is-layout-constrained,
+.page-pharmacy-search .has-global-padding {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+/* ---------------------------------------------------------
+   OVERRIDE WORDPRESS GLOBAL STYLES FOR TOP BAR
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    background: #ffffff !important;
+    padding: 16px 28px !important;
+    margin: 0 !important;
+
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+
+    position: relative !important;
+    z-index: 100 !important;
+}
+
+/* Shared style for all three items */
+.entry-content .mc-topbar-btn,
+.entry-content .mc-topbar-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+
+    text-decoration: none !important;
+    line-height: 1.3 !important;
+}
+
+/* Back button */
+.entry-content .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+.entry-content .mc-back-btn:hover {
+    background: #195a8c !important;
+}
+
+/* Welcome badge */
+.entry-content .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+.entry-content .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+.entry-content .mc-logout-btn:hover {
+    background: #b91c1c !important;
+}
+/* ---------------------------------------------------------
+   TOP BAR — CENTERED, SHRUNK, SAAS STYLE
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar {
+    width: 100% !important;
+    background: #ffffff !important;
+    padding: 16px 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+
+/* Inner container: 60% width (20% margin on each side) */
+.entry-content .mc-topbar-inner {
+    width: 60% !important;
+    margin: 0 auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* Group welcome + logout */
+.entry-content .mc-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important; /* brings logout closer */
+}
+
+/* Shared button/badge styles */
+.entry-content .mc-topbar-btn,
+.entry-content .mc-topbar-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 10px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+    text-decoration: none !important;
+}
+
+/* Back button */
+.entry-content .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+
+/* Welcome badge */
+.entry-content .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+.entry-content .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+.entry-content .mc-topbar-inner {
+    width: 80% !important;          /* wider than search layout */
+    margin: 0 auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+/* Search layout aligned under Back, narrower than top bar */
+.entry-content .mc-search-layout {
+    width: 70% !important;          /* narrower than 80% top bar */
+    margin: 24px auto !important;   /* centers it under the bar */
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important;  /* wider left, same right */
+    gap: 32px !important;
+}
+.entry-content .mc-section-title,
+.entry-content .mc-search-left label,
+.entry-content .mc-search-left input {
+    font-size: 16px !important;
+}
+/* ---------------------------------------------------------
+   SHARED PAGE CONTAINER — CONTROLS ALL ALIGNMENT
+--------------------------------------------------------- */
+
+.entry-content .mc-page-container {
+    width: 80% !important;       /* shared width for top bar + search layout */
+    margin: 0 auto !important;   /* center on page */
+}
+
+/* ---------------------------------------------------------
+   TOP BAR — ALIGNS WITH SEARCH LAYOUT
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar-inner {
+    width: 100% !important;      /* inherits 80% from container */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Group welcome + logout */
+.entry-content .mc-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+/* ---------------------------------------------------------
+   SEARCH LAYOUT — ALIGNS UNDER TOP BAR
+--------------------------------------------------------- */
+
+.entry-content .mc-search-layout {
+    width: 100% !important;      /* same width as top bar inner */
+    margin-top: 24px !important;
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important; /* left grows, right fixed */
+    gap: 32px !important;
+}
+
+/* ---------------------------------------------------------
+   BUTTONS + BADGES
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar-btn,
+.entry-content .mc-topbar-badge {
+    padding: 10px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+    text-decoration: none !important;
+}
+
+/* Back button */
+.entry-content .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+
+/* Welcome badge */
+.entry-content .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+.entry-content .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+/* FORCE SEARCH LAYOUT TO ALIGN UNDER TOP BAR */
+.entry-content .mc-search-layout {
+    width: 100% !important;      /* fill the shared container */
+    max-width: 100% !important;
+    margin: 0 !important;        /* remove centering */
+    padding: 0 !important;
+
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important; /* left wide, right fixed */
+    gap: 32px !important;
+}
+.entry-content .mc-search-right {
+    width: 100% !important;   /* let grid control width */
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* REMOVE OLD CENTERING + WIDTH LIMITS */
+.entry-content .mc-pharmacy-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+

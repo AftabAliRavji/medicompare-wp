@@ -81,14 +81,14 @@ class MediCompare_Pharmacy_Login {
 
         mc_debug("Nonce OK");
 
-        // If already logged in as pharmacy user, go to dashboard
+        // If already logged in as pharmacy user, go to search
         if (is_user_logged_in()) {
             $current = wp_get_current_user();
             mc_debug("Already logged in as: " . print_r($current->roles, true));
 
             if (in_array('pharmacy_user', $current->roles)) {
                 mc_debug("Already pharmacy user → redirecting");
-                wp_redirect(site_url('/pharmacy/dashboard/'));
+                wp_redirect(site_url('/pharmacy/search/'));
                 exit;
             }
         }
@@ -148,9 +148,9 @@ class MediCompare_Pharmacy_Login {
             exit;
         }
 
-        mc_debug("wp_signon SUCCESS → redirecting to dashboard");
+        mc_debug("wp_signon SUCCESS → redirecting to search");
 
-        wp_redirect(site_url('/pharmacy/dashboard/'));
+        wp_redirect(site_url('/pharmacy/search/'));
         exit;
     }
 

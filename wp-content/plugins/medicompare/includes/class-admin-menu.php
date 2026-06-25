@@ -1084,12 +1084,13 @@ class MediCompare_Admin_Menu {
      mc_render_pharmacy_verification_page();
     }
 
-        /* ---------------------------------------------------------
-       TRANSFERRED ORDERS ADMIN PAGE
-       - Filter by supplier, pharmacy, date range
-       - Shows per-supplier totals + commission placeholder
-    --------------------------------------------------------- */
-    public function transferred_orders_page() {
+  /* ---------------------------------------------------------
+   TRANSFERRED ORDERS ADMIN PAGE
+   - Filter by supplier, pharmacy, date range, order number
+   - Shows per-supplier totals + commission + email status
+   - FIXED: No duplicates, correct filtering, matches pharmacy
+--------------------------------------------------------- */
+public function transferred_orders_page() {
     global $wpdb;
 
     $orders_table           = $wpdb->prefix . 'medi_orders';
@@ -1098,10 +1099,14 @@ class MediCompare_Admin_Menu {
     $order_items_table      = $wpdb->prefix . 'medi_order_items';
     $posts_table            = $wpdb->posts;
 
-    // Suppliers
+    /* ------------------------------
+       LOAD SUPPLIERS
+    ------------------------------ */
     $suppliers = $this->get_suppliers();
 
-    // Pharmacies
+    /* ------------------------------
+       LOAD PHARMACIES
+    ------------------------------ */
     $pharmacies_posts = get_posts([
         'post_type'      => 'mc_pharmacy',
         'post_status'    => 'publish',
@@ -1116,36 +1121,45 @@ class MediCompare_Admin_Menu {
         $pharmacies[$pid] = get_the_title($pid);
     }
 
-    // Filters
+    /* ------------------------------
+       FILTER INPUTS
+    ------------------------------ */
     $selected_supplier = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
     $selected_pharmacy = isset($_GET['pharmacy_id']) ? (int) $_GET['pharmacy_id'] : 0;
     $date_from         = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '';
     $date_to           = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
     $order_number      = isset($_GET['order_number']) ? (int) $_GET['order_number'] : 0;
 
+    /* ------------------------------
+       BUILD WHERE CLAUSE
+    ------------------------------ */
     $where   = ["1=1"];
     $params  = [];
 
+    // Pharmacy filter
     if ($selected_pharmacy) {
         $where[]  = "o.pharmacy_id = %d";
         $params[] = $selected_pharmacy;
     }
 
+    // Supplier filter
     if ($selected_supplier) {
         $where[]  = "oss.supplier_id = %d";
         $params[] = $selected_supplier;
     }
 
+    // Date range filter
     if ($date_from) {
-        $where[]  = "o.created_at >= %s";
-        $params[] = $date_from . ' 00:00:00';
+        $where[]  = "DATE(o.created_at) >= %s";
+        $params[] = $date_from;
     }
 
     if ($date_to) {
-        $where[]  = "o.created_at <= %s";
-        $params[] = $date_to . ' 23:59:59';
+        $where[]  = "DATE(o.created_at) <= %s";
+        $params[] = $date_to;
     }
 
+    // Order number filter
     if ($order_number) {
         $where[]  = "o.order_number = %d";
         $params[] = $order_number;
@@ -1156,8 +1170,12 @@ class MediCompare_Admin_Menu {
 
     $where_sql = implode(' AND ', $where);
 
+    /* ------------------------------
+       FIXED SQL — NO DUPLICATES
+       One row per supplier per order
+    ------------------------------ */
     $sql = "
-        SELECT
+        SELECT DISTINCT
             o.id AS order_id,
             o.order_number,
             o.pharmacy_id,
@@ -1174,7 +1192,7 @@ class MediCompare_Admin_Menu {
                 ON oss.order_id = o.id
         WHERE {$where_sql}
         ORDER BY o.created_at DESC, o.order_number DESC
-        LIMIT 100
+        LIMIT 200
     ";
 
     $filters_applied = $selected_supplier || $selected_pharmacy || $date_from || $date_to || $order_number;
@@ -1184,11 +1202,11 @@ class MediCompare_Admin_Menu {
         $prepared = $params ? $wpdb->prepare($sql, $params) : $sql;
         $rows     = $wpdb->get_results($prepared, ARRAY_A);
     }
-
     ?>
     <div class="wrap">
         <h1>Transferred Orders</h1>
 
+        <!-- FILTER FORM -->
         <form method="get" class="mc-admin-filters">
             <input type="hidden" name="page" value="medicompare-transferred-orders" />
 
@@ -1234,11 +1252,23 @@ class MediCompare_Admin_Menu {
             <button class="button button-primary" type="submit">Filter</button>
         </form>
 
-        <?php if ($filters_applied && $rows): ?>
-            <div class="mc-admin-results-count">
-                Showing <?php echo count($rows); ?> transferred orders
-            </div>
-        <?php endif; ?>
+        <?php if ($filters_applied): ?>
+    <div class="mc-admin-results-count" style="margin: 15px 0; font-weight: 600;">
+        <?php
+            // Count unique orders
+            $order_count = 0;
+            if (!empty($rows)) {
+                $unique_orders = [];
+                foreach ($rows as $r) {
+                    $unique_orders[$r['order_id']] = true;
+                }
+                $order_count = count($unique_orders);
+            }
+        ?>
+
+        Showing <?php echo $order_count; ?> transferred order<?php echo ($order_count === 1 ? '' : 's'); ?>
+    </div>
+<?php endif; ?>
 
 
         <?php if (!$filters_applied): ?>
@@ -1250,6 +1280,7 @@ class MediCompare_Admin_Menu {
         <?php else: ?>
 
             <?php
+            // Group rows by order
             $grouped = [];
             foreach ($rows as $r) {
                 $grouped[$r['order_id']][] = $r;
@@ -1258,6 +1289,7 @@ class MediCompare_Admin_Menu {
 
             <div class="mc-admin-transferred-orders-wrapper">
                 <div class="mc-admin-transferred-orders">
+
                     <?php foreach ($grouped as $order_id => $subrows): ?>
                         <?php
                         $first         = $subrows[0];
@@ -1268,6 +1300,7 @@ class MediCompare_Admin_Menu {
                         $order_number  = $first['order_number'];
                         $order_total   = $first['total_amount'];
                         ?>
+
                         <div class="mc-transferred-order-card mc-order-collapsed">
 
                             <div class="mc-order-collapse-header" data-order-toggle>
@@ -1334,6 +1367,7 @@ class MediCompare_Admin_Menu {
                                         $supplier_id
                                     ), ARRAY_A);
                                     ?>
+
                                     <div class="mc-suborder-block">
                                         <div class="mc-suborder-header">
                                             <div>
@@ -1395,11 +1429,13 @@ class MediCompare_Admin_Menu {
                                             <p>No items found for this supplier.</p>
                                         <?php endif; ?>
                                     </div>
+
                                 <?php endforeach; ?>
                             </div>
 
                         </div>
                     <?php endforeach; ?>
+
                 </div>
             </div>
 
@@ -1411,7 +1447,6 @@ class MediCompare_Admin_Menu {
                 const card = header.closest('.mc-transferred-order-card');
                 if (!card) return;
 
-                // Toggle only this card
                 card.classList.toggle('mc-order-collapsed');
                 card.classList.toggle('mc-order-expanded');
             });

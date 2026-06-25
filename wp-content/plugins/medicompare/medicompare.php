@@ -20,6 +20,9 @@ class MediCompare {
         register_activation_hook(__FILE__, [$this, 'activate']);
         register_activation_hook(__FILE__, [$this, 'run_migrations']);
 
+        // ⭐ NEW: Auto-create pharmacy pages (safe, non-destructive)
+        register_activation_hook(__FILE__, [$this, 'create_pharmacy_pages']);
+
         // Load CPTs early
         add_action('init', [$this, 'load_cpts'], 1);
 
@@ -37,13 +40,73 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
         require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-comparison.php';
 
-        // ⭐ NEW: Hide theme header/footer for MediCompare pages
+        // Hide theme header/footer for MediCompare pages
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/hide-theme-ui.php';
 
-        // ADD THIS ONE
+        // Requirements board
         require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
-
     }
+
+    /**
+     * ⭐ NEW: Auto-create pharmacy pages safely
+     * This will NOT override existing pages.
+     */
+    public function create_pharmacy_pages() {
+
+        // Parent page ID for /pharmacy/
+        $parent_id = 45;
+
+        // Correct existing slugs and titles
+        $pages = [
+            'pharmacy-registration' => [
+                'title'   => 'Pharmacy Registration',
+                'content' => '[mc_pharmacy_registration]'
+            ],
+            'edit-details' => [
+                'title'   => 'Edit Pharmacy Details',
+                'content' => '[mc_pharmacy_edit_details]'
+            ],
+            'dashboard' => [
+                'title'   => 'Pharmacy Dashboard',
+                'content' => '[mc_pharmacy_dashboard]'
+            ],
+            'login' => [
+                'title'   => 'Pharmacy Login',
+                'content' => '[mc_pharmacy_login]'
+            ],
+            'search' => [
+                'title'   => 'Search Products',
+                'content' => '[mc_pharmacy_search]'
+            ],
+
+            // ⭐ NEW PAGE — ONLY THIS ONE SHOULD BE CREATED
+            'orders' => [
+                'title'   => 'Pharmacy Orders',
+                'content' => '[mc_pharmacy_orders]'
+            ],
+        ];
+
+        foreach ($pages as $slug => $page) {
+
+            // Check if the page already exists under ANY parent
+            $existing = get_page_by_path('pharmacy/' . $slug);
+
+            if ($existing) {
+                continue; // SAFE — do not override or duplicate
+            }
+
+            // Create the missing page under /pharmacy/
+            wp_insert_post([
+                'post_title'   => $page['title'],
+                'post_name'    => $slug,
+                'post_content' => $page['content'],
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+                'post_parent'  => $parent_id
+            ]);
+        }
+    }
+
 
     /**
      * Register the pharmacy_user role so WP does NOT strip it from users.

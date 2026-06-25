@@ -443,6 +443,7 @@
     padding: 6px 8px;
     font-size: 13px;
     border-bottom: 1px solid #e5e7eb;
+    font-weight: 300;
 }
 .mc-transfer-btn-disabled {
     background: #cc0000 !important;
@@ -472,6 +473,7 @@
 .mc-order-collapse-content {
     display: none;
     padding: 10px 0;
+    font-size: 16px;
 }
 
 .mc-order-expanded .mc-order-collapse-content {
@@ -979,6 +981,7 @@
     width: 55px !important;
     padding: 6px 8px !important;
     font-size: 14px !important;
+    font-weight: 300;
     border: 2px solid #c8c8c8 !important;
     border-radius: 6px !important;
     background: #ffffff !important;
@@ -1468,7 +1471,7 @@ body .mc-logout-btn:hover {
 .entry-content .mc-section-title,
 .entry-content .mc-search-left label,
 .entry-content .mc-search-left input {
-    font-size: 16px !important;
+    font-size: 24px !important;
 }
 /* ---------------------------------------------------------
    SHARED PAGE CONTAINER — CONTROLS ALL ALIGNMENT
@@ -1567,6 +1570,37 @@ body .mc-logout-btn:hover {
     margin: 0 !important;
     padding: 0 !important;
 }
+
+/* Force correct grid layout */
+body.page-id-71 .mc-search-layout {
+    display: grid !important;
+    grid-template-columns: 1.6fr 1fr !important;
+    gap: 24px !important;
+    align-items: start !important;
+}
+
+/* Align top edges */
+body.page-id-71 .mc-search-left,
+body.page-id-71 .mc-search-right {
+    margin-top: 0 !important;
+}
+
+
+/* 1. Remove the gap between the two columns */
+body.page-id-71 .mc-search-layout {
+    display: flex;              /* or grid, doesn't matter for this trick */
+    gap: 0 !important;
+}
+
+/* 2. Recreate the spacing using margin on the left column */
+body.page-id-71 .mc-search-left {
+    margin-right: 24px !important;  /* adjust to taste */
+}
+
+
+
+
+
 
 
 

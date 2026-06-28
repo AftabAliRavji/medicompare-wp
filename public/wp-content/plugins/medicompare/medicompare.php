@@ -4,6 +4,7 @@
  * Description: Core functionality for the MediCompare platform.
  * Version: 0.2.0
  * Author: Aftab
+ * Deployment test - June 28
  */
 
 if (!session_id()) {

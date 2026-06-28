@@ -1,0 +1,38 @@
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp-deploy:
+    name: FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Upload child theme, plugin, and project-req
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+
+          # LOCAL PATHS (inside your repo)
+          local-dir: public/
+
+          # REMOTE PATHS (InfinityFree)
+          server-dir: /htdocs/
+
+          # Only upload these folders
+          exclude: |
+            **/*
+            !wp-content/
+            !wp-content/themes/
+            !wp-content/themes/twentytwentyfive-child/**
+            !wp-content/plugins/
+            !wp-content/plugins/medicompare/**
+            !project-req/**

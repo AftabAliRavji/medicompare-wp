@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Medicompare Requirements & Kanban</title>
+
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f9; }
+    h1, h2, h3 { color: #333; }
+    a { color: #0073aa; text-decoration: none; }
+
+    .header {
+        background: #0073aa;
+        color: #fff;
+        padding: 25px;
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .new-task-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 12px 20px;
+        background: #0073aa;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .modal-bg {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modal-box {
+        background: #fff;
+        padding: 25px;
+        width: 420px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .modal-box h2 { margin-top: 0; text-align: center; }
+
+    .modal-box label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+    }
+
+    .modal-box select,
+    .modal-box input,
+    .modal-box textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .modal-actions { margin-top: 20px; text-align: right; }
+
+    .modal-actions button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .btn-add { background: #0073aa; color: #fff; }
+    .btn-cancel { background: #999; color: #fff; }
+
+    .kanban-wrapper {
+        padding: 30px;
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .kanban-column {
+        width: 30%;
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        min-height: 300px;
+    }
+
+    .kanban-title {
+        text-align: center;
+        font-size: 20px;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .kanban-item {
+        background: #eef3ff;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        border-left: 4px solid #0073aa;
+        cursor: grab;
+        position: relative;
+    }
+
+    .delete-btn {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        background: #d9534f;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 2px 6px;
+        cursor: pointer;
+        font-size: 12px;
+        pointer-events: auto !important;
+        z-index: 9999 !important;
+    }
+
+    .edit-btn {
+        position: absolute;
+        right: 40px;
+        top: 8px;
+        background: #5bc0de;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 2px 8px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .kanban-item.dragging { opacity: 0.5; }
+
+    .section {
+        background: #fff;
+        margin: 30px auto;
+        padding: 25px;
+        width: 80%;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .section-divider {
+        width: 100%;
+        height: 2px;
+        background: #e0e0e0;
+        margin: 40px 0;
+    }
+
+    .priority-high { color: #d9534f; font-weight: bold; }
+    .priority-med { color: #f0ad4e; font-weight: bold; }
+    .priority-low { color: #5cb85c; font-weight: bold; }
+
+    .kanban-item.high { border-left: 4px solid #d9534f; background: #fbeaea; }
+    .kanban-item.med { border-left: 4px solid #f0ad4e; background: #fff5e6; }
+    .kanban-item.low { border-left: 4px solid #5cb85c; background: #e9f7ec; }
+
+    .highlight {
+        animation: highlightFlash 2s ease-out;
+    }
+
+    @keyframes highlightFlash {
+        0% { background-color: #fff3cd; }
+        100% { background-color: #ffffff; }
+    }
+
+    /* COMPLETED WORK BOX */
+    .completed-box {
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fafafa;
+    }
+
+    .completed-header {
+        padding: 8px 10px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #e9ecef;
+        border-radius: 6px 6px 0 0;
+    }
+
+    .completed-content {
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        display: none;
+    }
+
+    html { scroll-behavior: smooth; }
+</style>
+</head>
+
+<body>
+
+<div class="header">Medicompare Requirements & Kanban Board</div>
+
+<button class="new-task-btn" id="openModalBtn">+ New Task</button>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-bg" id="modalBg">
+    <div class="modal-box">
+        <h2>Add New Task</h2>
+
+        <label>Main Section</label>
+        <select id="mainSectionSelect"></select>
+
+        <input type="text" id="newMainSectionInput"
+               placeholder="Enter new main section title"
+               style="display:none; margin-top:10px;">
+
+        <label>Add As</label>
+        <select id="addTypeSelect">
+            <option value="subsection">New Subsection</option>
+            <option value="bullet">Bullet Point Under Existing Subsection</option>
+        </select>
+
+        <label>Priority</label>
+        <select id="prioritySelect">
+            <option value="high">High Priority</option>
+            <option value="med">Medium Priority</option>
+            <option value="low" selected>Low Priority</option>
+        </select>
+
+        <label id="subsectionLabel" style="display:none;">Choose Subsection</label>
+        <select id="subsectionSelect" style="display:none;"></select>
+
+        <label>Title</label>
+        <input type="text" id="taskTitle">
+
+        <label>Details</label>
+        <textarea id="taskDetails" rows="3"></textarea>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" id="cancelModalBtn">Cancel</button>
+            <button class="btn-add" id="addTaskBtn">Add</button>
+        </div>
+    </div>
+</div>
+
+<!-- COMPLETION SUMMARY MODAL -->
+<div class="modal-bg" id="completionModalBg">
+    <div class="modal-box">
+        <h2>Mark Task as Done</h2>
+        <h3 id="completionTaskTitle" style="margin-top:-10px; opacity:0.8;"></h3>
+
+        <label>Summary of Work Done</label>
+        <textarea id="completionSummaryInput" rows="3"></textarea>
+
+        <label>Files Changed</label>
+        <textarea id="completionFilesInput" rows="2"
+                  placeholder="e.g. order.php, stock.php"></textarea>
+
+        <label>Notes (optional)</label>
+        <textarea id="completionNotesInput" rows="2"></textarea>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" id="completionCancelBtn">Cancel</button>
+            <button class="btn-add" id="completionSaveBtn">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT TASK MODAL -->
+<div class="modal-bg" id="editModalBg">
+    <div class="modal-box">
+        <h2>Edit Task</h2>
+
+        <label>Title</label>
+        <input type="text" id="editTitleInput">
+
+        <label>Summary of Work Done (if any)</label>
+        <textarea id="editSummaryInput" rows="3"></textarea>
+
+        <label>Files Changed (if any)</label>
+        <textarea id="editFilesInput" rows="2"></textarea>
+
+        <label>Notes (optional)</label>
+        <textarea id="editNotesInput" rows="2"></textarea>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" id="editCancelBtn">Cancel</button>
+            <button class="btn-add" id="editSaveBtn">Save</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- EMPTY KANBAN WRAPPER (DB will fill this) -->
+<div class="kanban-wrapper"></div>
+
+<!-- EMPTY REQUIREMENTS SECTION (DB will fill this) -->
+<div class="section" id="requirements"></div>
+
+<!-- LOAD JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="requirements-board.js"></script>
+
+</body>
+</html>

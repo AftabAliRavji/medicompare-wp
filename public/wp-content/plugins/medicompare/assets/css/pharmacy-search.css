@@ -1,0 +1,1606 @@
+/* ---------------------------------------------------------
+   GLOBAL PAGE WRAPPER
+--------------------------------------------------------- */
+
+.mc-pharmacy-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* ---------------------------------------------------------
+   FULL-WIDTH TOP BAR — SaaS Medium Height
+--------------------------------------------------------- */
+
+.mc-topbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+    padding: 14px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+
+    position: relative;
+    z-index: 10;
+}
+
+/* Shared style for all three items */
+.mc-topbar-btn,
+.mc-topbar-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    line-height: 1.3;
+}
+
+/* Back button */
+.mc-back-btn {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+    text-decoration: none;
+}
+.mc-back-btn:hover {
+    background: #195a8c;
+}
+
+/* Welcome badge */
+.mc-welcome-badge {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* Logout button */
+.mc-logout-btn {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff !important;
+    text-decoration: none;
+}
+.mc-logout-btn:hover {
+    background: #b91c1c;
+}
+
+
+/* ---------------------------------------------------------
+   TWO-COLUMN LAYOUT (NO LEFT OFFSET)
+--------------------------------------------------------- */
+
+.mc-search-layout {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+/* Panels */
+.mc-search-left,
+.mc-search-right {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.mc-search-left {
+    min-width: 580px;
+}
+
+.mc-search-right {
+    min-width: 380px;
+}
+
+/* Shared spacing */
+.mc-search-bar,
+#mc-search-results,
+#mc-selected-item {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+
+
+/* ---------------------------------------------------------
+   SEARCH RESULTS TABLE
+--------------------------------------------------------- */
+
+.mc-search-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* allow natural column widths */
+}
+
+.mc-search-results-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f7f7f7;
+    border-bottom: 1px solid #ddd;
+    text-transform: uppercase;
+}
+
+.mc-search-results-table td {
+    padding: 10px 10px;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+}
+
+/* ---------------------------------------------------------
+   SELECTED PRODUCT — TABLE LAYOUT (EXACT MATCH)
+--------------------------------------------------------- */
+
+.mc-selected-card {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-top: 20px;
+}
+
+.mc-selected-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.mc-selected-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* match search results naturally */
+}
+
+.mc-selected-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.mc-selected-table td {
+    padding: 10px 10px;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
+
+.mc-selected-value {
+    color: #005a9e;
+    font-weight: 600;
+}
+
+/* Stock column centered */
+.mc-selected-table th:nth-child(5),
+.mc-selected-table td:nth-child(5) {
+    text-align: center;
+}
+
+/* Quantity input */
+.mc-qty-input {
+    width: 70px;
+    padding: 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* Actions column */
+.mc-selected-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mc-add-basket-btn {
+    background: #27ae60;
+    color: #fff;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.mc-add-basket-btn:hover {
+    background: #1e874b;
+}
+
+.mc-cancel-btn {
+    background: #ccc;
+    color: #333;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.mc-cancel-btn:hover {
+    background: #b3b3b3;
+}
+
+/* ---------------------------------------------------------
+   ORDER PANEL
+--------------------------------------------------------- */
+
+.mc-order-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.mc-order-tab {
+    flex: 1;
+    padding: 10px 12px;
+    background: #f2f2f2;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.mc-order-tab-active {
+    background: #0073aa;
+    color: #fff;
+}
+
+.mc-order-panel {
+    background: #fafafa;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 180px;
+}
+
+.mc-order-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.mc-transfer-btn {
+    background: #27ae60;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.mc-transfer-btn:hover {
+    background: #1e874b;
+}
+/* Always hide results until JS activates them */
+#mc-search-results {
+    display: none !important;
+}
+
+#mc-search-results.active {
+    display: block !important;
+}
+/* Pending Order Table */
+.mc-pending-order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.mc-pending-order-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f7f7f7;
+    border-bottom: 2px solid #e5e5e5;
+    text-transform: uppercase;
+}
+
+.mc-pending-order-table td {
+    padding: 10px 10px;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.mc-pending-order-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.mc-overall-total {
+    font-size: 15px;
+    font-weight: 600;
+    text-align: right;
+    margin-top: 10px;
+}
+
+.mc-remove-pending-item {
+    background: #ccc;
+    color: #333;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.mc-remove-pending-item:hover {
+    background: #b3b3b3;
+}
+/* Make pending order panel wider and more comfortable */
+.mc-search-right {
+    min-width: 480px;   /* was 380px */
+}
+.mc-supplier-subtotal-row td {
+    background: #f2f8ff;
+    font-size: 14px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-top: 2px solid #d9e7f7;
+}
+
+.mc-transferred-orders-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mc-transferred-order-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    margin-bottom: 8px;
+}
+
+.mc-transferred-order-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.mc-transferred-suppliers {
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.mc-suborder-block {
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #e3e8f0;
+}
+
+.mc-suborder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.mc-suborder-ref {
+    font-size: 12px;
+    color: #666;
+}
+
+.mc-suborder-status {
+    text-align: right;
+    font-size: 13px;
+}
+
+.mc-suborder-status-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: #e5f4ff;
+    color: #005a9e;
+    font-size: 12px;
+}
+
+.mc-suborder-total {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.mc-suborder-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+}
+
+.mc-suborder-table th {
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    border-bottom: 1px solid #d9e2ec;
+    text-transform: uppercase;
+}
+
+.mc-suborder-table td {
+    padding: 6px 8px;
+    font-size: 13px;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 300;
+}
+.mc-transfer-btn-disabled {
+    background: #cc0000 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+.mc-order-collapse-header {
+    background: #e8f1fb;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.mc-order-collapse-arrow {
+    transition: transform 0.2s ease;
+}
+
+.mc-order-collapsed .mc-order-collapse-arrow {
+    transform: rotate(-90deg);
+}
+
+.mc-order-collapse-content {
+    display: none;
+    padding: 10px 0;
+    font-size: 16px;
+}
+
+.mc-order-expanded .mc-order-collapse-content {
+    display: block;
+}
+.mc-suborder-status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.mc-status-pending {
+    background: #f0ad4e;
+}
+
+.mc-status-sent {
+    background: #5cb85c;
+}
+
+.mc-status-processing {
+    background: #0275d8;
+}
+
+.mc-status-delivered {
+    background: #5cb85c;
+}
+
+.mc-status-cancelled {
+    background: #d9534f;
+}
+
+.mc-email-indicator {
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+    opacity: 0.8;
+}
+/* ORDER-LEVEL STATUS BADGES */
+.mc-order-status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+    color: #fff;
+}
+
+.mc-status-pending {
+    background: #777;
+}
+
+.mc-status-transferred {
+    background: #d98c00;
+}
+
+.mc-status-sent {
+    background: #2e8b57;
+}
+
+/* SUB-ORDER STATUS BADGES */
+.mc-suborder-status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.mc-status-pending {
+    background: #777;
+}
+
+.mc-status-sent {
+    background: #0073aa;
+}
+
+.mc-status-shipped {
+    background: #2e8b57;
+}
+
+.mc-status-cancelled {
+    background: #cc0000;
+}
+
+.mc-update-row:hover {
+    background: #b3b3b3;
+}
+
+.mc-update-row:hover {
+    background: #1e874b;
+}
+.mc-actions button {
+    margin-right: 6px;
+}
+/* Pending order qty input (smaller than selected-item qty) */
+.mc-edit-qty {
+    width: 55px;        /* smaller */
+    padding: 4px 6px;   /* tighter */
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.mc-remove-pending-item {
+    background: #cc0000;   /* red */
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.mc-remove-pending-item:hover {
+    background: #a30000;
+}
+.mc-update-row {
+    background: #27ae60;
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mc-update-row:hover {
+    background: #1e874b;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+}
+.mc-remove-pending-item {
+    background: #cc0000;
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mc-remove-pending-item:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+}
+.mc-edit-qty {
+    width: 55px;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa;
+    background: #eef7ff;
+    outline: none;
+}
+/* Base style for both action buttons */
+.mc-actions button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+/* ✔ green */
+.mc-update-row {
+    background: #27ae60;
+    color: #fff;
+}
+.mc-update-row:hover {
+    background: #1e874b;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+/* ❌ red */
+.mc-remove-pending-item {
+    background: #cc0000;
+    color: #fff;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+.mc-edit-qty {
+    width: 55px;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 2px solid #d0d0d0;
+    border-radius: 6px;
+    background: #fafafa;
+    transition: 
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+/* Focus state — very clear */
+.mc-edit-qty:focus {
+    border-color: #0073aa;
+    background: #eef7ff;
+    box-shadow: 0 0 4px rgba(0, 115, 170, 0.4);
+    outline: none;
+}
+/* ---------------------------------------------------------
+   FINAL OVERRIDES — CLEAN, COLLISION-FREE
+--------------------------------------------------------- */
+
+/* Make ✔ and ❌ identical action buttons */
+.mc-actions button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    margin-right: 6px;
+}
+
+/* ✔ green button */
+.mc-update-row {
+    background: #27ae60;
+    color: #fff;
+}
+.mc-update-row:hover {
+    background: #1e874b;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+/* ❌ red button */
+.mc-remove-pending-item {
+    background: #cc0000;
+    color: #fff;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+/* QTY input — compact + clearly editable */
+.mc-edit-qty {
+    width: 55px;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 2px solid #d0d0d0;
+    border-radius: 6px;
+    background: #fafafa;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa;
+    background: #eef7ff;
+    box-shadow: 0 0 4px rgba(0,115,170,0.4);
+    outline: none;
+}
+/* ---------------------------------------------------------
+   OVERRIDES TO BEAT THE THEME'S style.css
+--------------------------------------------------------- */
+
+/* Make ✔ and ❌ proper buttons (override theme's transparent button) */
+.mc-actions button,
+.mc-update-row,
+.mc-remove-pending-item {
+    background: none !important;
+    border: none !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+/* ✔ green */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+}
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* QTY input — override theme input styles */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 4px 6px !important;
+    font-size: 13px !important;
+    border: 2px solid #d0d0d0 !important;
+    border-radius: 6px !important;
+    background: #fafafa !important;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 4px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+/* ---------------------------------------------------------
+   FINAL UI FIXES — OVERRIDE THEME COLLISIONS
+--------------------------------------------------------- */
+
+/* Base style for both action buttons */
+.mc-actions button,
+.mc-update-row,
+.mc-remove-pending-item {
+    padding: 6px 10px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+    margin-right: 6px !important;
+}
+
+/* ✔ green button */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+}
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red button */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* QTY input — modern SaaS style */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 5px 6px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #fdfdfd !important;
+    transition: 
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+/* Focus state — clear, modern, obvious */
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+/* ---------------------------------------------------------
+   FINAL OVERRIDES — BEAT style.css AND INTERNAL COLLISIONS
+--------------------------------------------------------- */
+
+/* Base style for both action buttons */
+.mc-actions button,
+.mc-update-row,
+.mc-remove-pending-item {
+    padding: 6px 10px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    margin-right: 6px !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+/* ✔ green */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+}
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* QTY input — modern SaaS style */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 5px 6px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #fdfdfd !important;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+/* ---------------------------------------------------------
+   PENDING ORDER — SaaS QTY + BUTTON IMPROVEMENTS ONLY
+--------------------------------------------------------- */
+
+/* QTY input — clear, modern, obviously editable */
+.mc-edit-qty {
+    width: 55px !important;
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #fdfdfd !important;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+.mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+
+/* ✔ green button — solid + sharp hover */
+.mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red button — solid + sharp hover */
+.mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   FINAL-FINAL OVERRIDES — GUARANTEED TO APPLY
+--------------------------------------------------------- */
+
+/* QTY input — SaaS editable style */
+.mc-pending-order-table td .mc-edit-qty {
+    width: 55px !important;
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+    font-weight: 300;
+    border: 2px solid #c8c8c8 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+.mc-pending-order-table td .mc-edit-qty:focus {
+    border-color: #0073aa !important;
+    background: #eef7ff !important;
+    box-shadow: 0 0 6px rgba(0,115,170,0.4) !important;
+    outline: none !important;
+}
+
+/* ✔ green button — guaranteed override */
+.mc-pending-order-table td .mc-update-row {
+    background: #27ae60 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-pending-order-table td .mc-update-row:hover {
+    background: #1e874b !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ❌ red button — guaranteed override */
+.mc-pending-order-table td .mc-remove-pending-item {
+    background: #cc0000 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.mc-pending-order-table td .mc-remove-pending-item:hover {
+    background: #a30000 !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   PENDING ORDER — Final polish for ✔ and ❌
+--------------------------------------------------------- */
+
+/* Add spacing between tick and cross */
+.mc-pending-order-table td .mc-update-row {
+    margin-right: 8px !important; /* more breathing room */
+}
+
+/* Stronger, darker red for ❌ */
+.mc-pending-order-table td .mc-remove-pending-item {
+    background: #b00000 !important;   /* deeper red */
+    color: #fff !important;
+}
+
+/* Even sharper hover for ❌ */
+.mc-pending-order-table td .mc-remove-pending-item:hover {
+    background: #7a0000 !important;   /* darker hover */
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   PENDING ORDER — Stronger ❌ + More spacing (unbeatable)
+--------------------------------------------------------- */
+
+/* Add more spacing between ✔ and ❌ */
+.mc-pending-order-table td .mc-update-row {
+    margin-right: 12px !important; /* increased spacing */
+}
+
+/* Stronger red cross — deeper, more visible */
+.mc-pending-order-table td .mc-remove-pending-item,
+.mc-pending-order-table td button.mc-remove-pending-item {
+    background: #8b0000 !important;   /* deep red */
+    color: #ffffff !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+/* Sharper hover for ❌ */
+.mc-pending-order-table td .mc-remove-pending-item:hover,
+.mc-pending-order-table td button.mc-remove-pending-item:hover {
+    background: #5a0000 !important;   /* darker hover */
+    box-shadow: 0 0 6px rgba(0,0,0,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+/* ---------------------------------------------------------
+   ALWAYS SHOW SPINNER ARROWS ON QTY INPUT (Chrome/Safari)
+--------------------------------------------------------- */
+
+.mc-pending-order-table td .mc-edit-qty {
+    -webkit-appearance: number-input !important;
+    appearance: number-input !important;
+}
+
+/* Force both up/down arrows to always show */
+.mc-pending-order-table td .mc-edit-qty::-webkit-inner-spin-button,
+.mc-pending-order-table td .mc-edit-qty::-webkit-outer-spin-button {
+    opacity: 1 !important;
+    display: block !important;
+}
+/* ---------------------------------------------------------
+   TRANSFERRED ORDERS — Limit height + scroll after 5 orders
+--------------------------------------------------------- */
+
+.mc-transferred-orders-wrapper {
+    max-height: 600px;        /* fits ~5 orders comfortably */
+    overflow-y: auto;         /* scrolls when more than 5 */
+    padding-right: 6px;       /* avoid scrollbar overlap */
+}
+
+/* Optional: nicer scrollbar (Chrome/Edge/Safari) */
+.mc-transferred-orders-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 6px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+/* ---------------------------------------------------------
+   TRANSFERRED ORDERS — Show only 5 orders, scroll the rest
+--------------------------------------------------------- */
+
+.mc-transferred-orders-wrapper {
+    height: 520px !important;      /* fixed height = ~5 cards */
+    overflow-y: auto !important;   /* scroll when more */
+    padding-right: 6px !important; /* avoid scrollbar overlap */
+}
+
+/* Optional: nicer scrollbar */
+.mc-transferred-orders-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 6px;
+}
+
+.mc-transferred-orders-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.mc-product-row:hover,
+.mc-supplier-row:hover {
+    background: #dce9ff;
+    border-left: 4px solid #2a6df4;
+}
+.mc-suggestion-item {
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: background 0.15s ease;
+}
+
+.mc-suggestion-item:hover {
+    background: #f0f6ff;
+    border-left: 4px solid #2a6df4;
+}
+/* Suggestion container */
+.mc-suggestions {
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 0;
+    border: 1px solid #d9e2ef;
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+/* Each suggestion row */
+.mc-suggestion-item {
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1a1a1a;
+    border-bottom: 1px solid #eef2f7;
+    transition: background 0.15s ease, padding-left 0.15s ease;
+}
+
+/* Last item should not have a border */
+.mc-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Hover effect */
+.mc-suggestion-item:hover {
+    background: #f5f9ff;
+    padding-left: 18px;
+    border-left: 4px solid #2a6df4;
+}
+
+/* Selected (when clicked) */
+.mc-suggestion-item.mc-search-row-selected {
+    background: #e8f0ff;
+    border-left: 4px solid #2a6df4;
+    font-weight: 600;
+}
+/* Wrapper text above suggestions */
+.mc-search-results-message {
+    font-size: 14px;
+    color: #4a5568; /* soft grey */
+    margin: 6px 0 4px 2px;
+    padding-left: 2px;
+}
+
+/* “No exact matches found.” */
+.mc-search-results-message strong {
+    color: #c53030; /* soft red */
+    font-weight: 600;
+}
+
+/* “Did you mean:” */
+.mc-search-results-suggest {
+    font-size: 13px;
+    color: #2a4365; /* deep blue */
+    margin: 4px 0 8px 2px;
+    padding-left: 2px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+.mc-pharmacy-nav {
+    margin-bottom: 20px;
+}
+
+.mc-pharmacy-nav-link {
+    display: inline-block;
+    padding: 8px 14px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.mc-pharmacy-nav-link:hover {
+    background: #195a8c;
+}
+.mc-pharmacy-nav-link {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.mc-pharmacy-nav-link:hover {
+    background: #195a8c;
+}
+/* FORCE Back to Dashboard button styling */
+.mc-pharmacy-nav-link {
+    display: inline-block !important;
+    padding: 8px 14px !important;
+    background: #2271b1 !important;
+    color: #fff !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+/* ---------------------------------------------------------
+   FULL-WIDTH TOP BAR — OVERRIDE THEME COMPLETELY
+--------------------------------------------------------- */
+
+body .mc-topbar {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    background: #ffffff !important;
+    padding: 14px 24px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+
+    position: relative !important;
+    z-index: 50 !important;
+}
+
+/* Shared style for all three items */
+body .mc-topbar-btn,
+body .mc-topbar-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 10px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+    line-height: 1.3 !important;
+    text-decoration: none !important;
+}
+
+/* Back button */
+body .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+body .mc-back-btn:hover {
+    background: #195a8c !important;
+}
+
+/* Welcome badge */
+body .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+body .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+body .mc-logout-btn:hover {
+    background: #b91c1c !important;
+}
+.page-pharmacy-search .entry-content,
+.page-pharmacy-search .wp-block-post-content,
+.page-pharmacy-search .is-layout-constrained,
+.page-pharmacy-search .has-global-padding {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+/* ---------------------------------------------------------
+   OVERRIDE WORDPRESS GLOBAL STYLES FOR TOP BAR
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    background: #ffffff !important;
+    padding: 16px 28px !important;
+    margin: 0 !important;
+
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+
+    position: relative !important;
+    z-index: 100 !important;
+}
+
+/* Shared style for all three items */
+.entry-content .mc-topbar-btn,
+.entry-content .mc-topbar-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+
+    text-decoration: none !important;
+    line-height: 1.3 !important;
+}
+
+/* Back button */
+.entry-content .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+.entry-content .mc-back-btn:hover {
+    background: #195a8c !important;
+}
+
+/* Welcome badge */
+.entry-content .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+.entry-content .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+.entry-content .mc-logout-btn:hover {
+    background: #b91c1c !important;
+}
+/* ---------------------------------------------------------
+   TOP BAR — CENTERED, SHRUNK, SAAS STYLE
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar {
+    width: 100% !important;
+    background: #ffffff !important;
+    padding: 16px 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+
+/* Inner container: 60% width (20% margin on each side) */
+.entry-content .mc-topbar-inner {
+    width: 60% !important;
+    margin: 0 auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* Group welcome + logout */
+.entry-content .mc-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important; /* brings logout closer */
+}
+
+/* Shared button/badge styles */
+.entry-content .mc-topbar-btn,
+.entry-content .mc-topbar-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 10px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+    text-decoration: none !important;
+}
+
+/* Back button */
+.entry-content .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+
+/* Welcome badge */
+.entry-content .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+.entry-content .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+.entry-content .mc-topbar-inner {
+    width: 80% !important;          /* wider than search layout */
+    margin: 0 auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+/* Search layout aligned under Back, narrower than top bar */
+.entry-content .mc-search-layout {
+    width: 70% !important;          /* narrower than 80% top bar */
+    margin: 24px auto !important;   /* centers it under the bar */
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important;  /* wider left, same right */
+    gap: 32px !important;
+}
+.entry-content .mc-section-title,
+.entry-content .mc-search-left label,
+.entry-content .mc-search-left input {
+    font-size: 24px !important;
+}
+/* ---------------------------------------------------------
+   SHARED PAGE CONTAINER — CONTROLS ALL ALIGNMENT
+--------------------------------------------------------- */
+
+.entry-content .mc-page-container {
+    width: 80% !important;       /* shared width for top bar + search layout */
+    margin: 0 auto !important;   /* center on page */
+}
+
+/* ---------------------------------------------------------
+   TOP BAR — ALIGNS WITH SEARCH LAYOUT
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar-inner {
+    width: 100% !important;      /* inherits 80% from container */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Group welcome + logout */
+.entry-content .mc-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+/* ---------------------------------------------------------
+   SEARCH LAYOUT — ALIGNS UNDER TOP BAR
+--------------------------------------------------------- */
+
+.entry-content .mc-search-layout {
+    width: 100% !important;      /* same width as top bar inner */
+    margin-top: 24px !important;
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important; /* left grows, right fixed */
+    gap: 32px !important;
+}
+
+/* ---------------------------------------------------------
+   BUTTONS + BADGES
+--------------------------------------------------------- */
+
+.entry-content .mc-topbar-btn,
+.entry-content .mc-topbar-badge {
+    padding: 10px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid #d0d7de !important;
+    text-decoration: none !important;
+}
+
+/* Back button */
+.entry-content .mc-back-btn {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+
+/* Welcome badge */
+.entry-content .mc-welcome-badge {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Logout button */
+.entry-content .mc-logout-btn {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+}
+/* FORCE SEARCH LAYOUT TO ALIGN UNDER TOP BAR */
+.entry-content .mc-search-layout {
+    width: 100% !important;      /* fill the shared container */
+    max-width: 100% !important;
+    margin: 0 !important;        /* remove centering */
+    padding: 0 !important;
+
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important; /* left wide, right fixed */
+    gap: 32px !important;
+}
+.entry-content .mc-search-right {
+    width: 100% !important;   /* let grid control width */
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* REMOVE OLD CENTERING + WIDTH LIMITS */
+.entry-content .mc-pharmacy-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Force correct grid layout */
+body.page-id-71 .mc-search-layout {
+    display: grid !important;
+    grid-template-columns: 1.6fr 1fr !important;
+    gap: 24px !important;
+    align-items: start !important;
+}
+
+/* Align top edges */
+body.page-id-71 .mc-search-left,
+body.page-id-71 .mc-search-right {
+    margin-top: 0 !important;
+}
+
+
+/* 1. Remove the gap between the two columns */
+body.page-id-71 .mc-search-layout {
+    display: flex;              /* or grid, doesn't matter for this trick */
+    gap: 0 !important;
+}
+
+/* 2. Recreate the spacing using margin on the left column */
+body.page-id-71 .mc-search-left {
+    margin-right: 24px !important;  /* adjust to taste */
+}
+
+
+
+
+
+
+
+

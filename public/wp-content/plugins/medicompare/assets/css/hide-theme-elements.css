@@ -1,0 +1,10 @@
+/* Hide theme header + footer for MediCompare app pages */
+body.medicompare-app header,
+body.medicompare-app .site-header,
+body.medicompare-app footer,
+body.medicompare-app .site-footer,
+body.medicompare-app #colophon,
+body.medicompare-app .footer,
+body.medicompare-app .wp-block-template-part {
+    display: none !important;
+}

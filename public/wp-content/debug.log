@@ -12581,3 +12581,7 @@ ADD COLUMN suborder_number VARCHAR(50) AFTER supplier_id;
 [25-Jun-2026 14:30:57 UTC] MediCompare: load_cpts() fired
 [25-Jun-2026 14:30:57 UTC] MC_LOGIN_DEBUG: Login handler triggered
 [25-Jun-2026 14:30:57 UTC] MC_LOGIN_DEBUG: Not a POST request
+[28-Jun-2026 15:29:08 UTC] REQ ENDPOINT LOADED
+[28-Jun-2026 15:29:08 UTC] MediCompare: load_cpts() fired
+[28-Jun-2026 15:29:08 UTC] MC_LOGIN_DEBUG: Login handler triggered
+[28-Jun-2026 15:29:08 UTC] MC_LOGIN_DEBUG: Login nonce missing → not our form

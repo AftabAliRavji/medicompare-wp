@@ -1,4 +1,6 @@
 <?php
+error_log("Child theme functions.php loaded");
+
 add_action('wp_enqueue_scripts', function() {
     wp_enqueue_style(
         'twentytwentyfive-child',
@@ -7,3 +9,4 @@ add_action('wp_enqueue_scripts', function() {
         '1.0'
     );
 });
+

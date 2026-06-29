@@ -1,6 +1,8 @@
 <?php
 
-// Add body class to MediCompare pages
+/**
+ * Add body class to MediCompare pages
+ */
 add_filter('body_class', function($classes) {
 
     global $post;
@@ -15,20 +17,21 @@ add_filter('body_class', function($classes) {
         $parent_slug = $post->post_parent ? get_post_field('post_name', $post->post_parent) : null;
 
         // Detect pharmacy pages by slug, not ID
-        if ($slug === 'login' && $parent_slug === 'pharmacy') {
-            $classes[] = 'medicompare-app';
-        }
+        if ($parent_slug === 'pharmacy') {
 
-        if ($slug === 'register' && $parent_slug === 'pharmacy') {
-            $classes[] = 'medicompare-app';
-        }
+            $pharmacy_pages = [
+                'login',
+                'register',
+                'dashboard',
+                'search',
+                'edit-details',
+                'pharmacy-registration',
+                'orders'
+            ];
 
-        if ($slug === 'dashboard' && $parent_slug === 'pharmacy') {
-            $classes[] = 'medicompare-app';
-        }
-
-        if ($slug === 'search' && $parent_slug === 'pharmacy') {
-            $classes[] = 'medicompare-app';
+            if (in_array($slug, $pharmacy_pages)) {
+                $classes[] = 'medicompare-app';
+            }
         }
     }
 
@@ -41,7 +44,9 @@ add_filter('body_class', function($classes) {
 });
 
 
-// Load CSS for hiding theme UI + pharmacy search UI
+/**
+ * Load CSS for hiding theme UI + pharmacy search UI + pharmacy portal UI
+ */
 add_action('wp_enqueue_scripts', function() {
 
     // 1. Hide theme header/footer
@@ -60,4 +65,39 @@ add_action('wp_enqueue_scripts', function() {
         filemtime(plugin_dir_path(__FILE__) . '../../assets/css/pharmacy-search.css')
     );
 
+
+    // 3. Pharmacy portal CSS (⭐ FINAL WORKING VERSION)
+    wp_enqueue_style(
+        'mc-pharmacy-portal',
+        plugin_dir_url(dirname(__FILE__, 2)) . 'assets/css/pharmacy-portal.css',
+        [],
+        filemtime(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/css/pharmacy-portal.css')
+    );
+
+
+});
+
+
+/**
+ * Redirect pharmacy login → pharmacy portal
+ */
+add_action('template_redirect', function () {
+
+    // If user visits /pharmacy/login → redirect to /pharmacy/
+    if (is_page('pharmacy/login')) {
+        wp_redirect('/pharmacy/');
+        exit;
+    }
+});
+
+
+/**
+ * Redirect logged-in users away from /pharmacy/login
+ */
+add_action('template_redirect', function () {
+
+    if (is_user_logged_in() && is_page('pharmacy/login')) {
+        wp_redirect('/pharmacy/dashboard/');
+        exit;
+    }
 });

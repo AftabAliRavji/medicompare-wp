@@ -38,6 +38,7 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-registration.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-claim.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-login.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-portal.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
         require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-comparison.php';
 
@@ -49,15 +50,44 @@ class MediCompare {
     }
 
     /**
-     * ⭐ NEW: Auto-create pharmacy pages safely
+     * ⭐ Auto-create pharmacy parent + child pages safely
      * This will NOT override existing pages.
-     */
+    */
     public function create_pharmacy_pages() {
 
-        // Parent page ID for /pharmacy/
-        $parent_id = 45;
+        //
+        // 1️⃣ Ensure parent /pharmacy/ page exists
+        //
+        $parent = get_page_by_path('pharmacy');
 
-        // Correct existing slugs and titles
+        if (!$parent) {
+
+            // Create the parent page
+            $parent_id = wp_insert_post([
+                'post_title'   => 'Pharmacy',
+                'post_name'    => 'pharmacy',
+                'post_content' => '[mc_pharmacy_portal]',   // ⭐ main portal shortcode
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+            ]);
+
+        } else {
+
+            $parent_id = $parent->ID;
+
+            // Ensure the parent page contains the portal shortcode
+            if (strpos($parent->post_content, '[mc_pharmacy_portal]') === false) {
+                wp_update_post([
+                    'ID'           => $parent_id,
+                    'post_content' => '[mc_pharmacy_portal]'
+                ]);
+            }
+        }
+
+
+        //
+        // 2️⃣ Auto-create child pages under /pharmacy/
+        //
         $pages = [
             'pharmacy-registration' => [
                 'title'   => 'Pharmacy Registration',
@@ -79,8 +109,6 @@ class MediCompare {
                 'title'   => 'Search Products',
                 'content' => '[mc_pharmacy_search]'
             ],
-
-            // ⭐ NEW PAGE — ONLY THIS ONE SHOULD BE CREATED
             'orders' => [
                 'title'   => 'Pharmacy Orders',
                 'content' => '[mc_pharmacy_orders]'
@@ -107,6 +135,7 @@ class MediCompare {
             ]);
         }
     }
+
 
 
     /**
@@ -165,6 +194,7 @@ class MediCompare {
             $wpdb->query($sql);
         }
     }
+
 }
 
 new MediCompare();

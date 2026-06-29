@@ -25,9 +25,9 @@ jQuery(function ($) {
         }
     }
 
-    /* ---------------------------------------------------------
-       LOAD PENDING ORDER
-    --------------------------------------------------------- */
+  /* ---------------------------------------------------------
+   LOAD PENDING ORDER
+--------------------------------------------------------- */
     function loadPendingOrder() {
         $.post(mcComparison.ajaxUrl, {
             action: 'mc_get_pending_order',
@@ -39,12 +39,48 @@ jQuery(function ($) {
                 const hasPending = !resp.data.html.includes("No pending order");
                 mc_updateTransferButton(hasPending);
 
+                // ⭐ FIX: show / hide + enable / disable buttons based on pending state
+                if (hasPending) {
+                    $('#mc-cancel-order-btn')
+                        .removeClass('mc-disabled')
+                        .prop('disabled', false)
+                        .show();
+
+                    $('#mc-transfer-order-btn')
+                        .removeClass('mc-disabled mc-transfer-btn-disabled')
+                        .prop('disabled', false)
+                        .show();
+                } else {
+                    // No pending order → both buttons should look and behave disabled
+                    $('#mc-cancel-order-btn')
+                        .addClass('mc-disabled')
+                        .prop('disabled', true)
+                        .show();
+
+                    $('#mc-transfer-order-btn')
+                        .addClass('mc-disabled mc-transfer-btn-disabled')
+                        .prop('disabled', true)
+                        .show();
+                }
+
             } else {
                 $pendingOrderPanel.html('<p>' + (resp.data?.message || 'Error loading pending order.') + '</p>');
                 mc_updateTransferButton(false);
+
+                // On error, treat as no pending order: disable both buttons
+                $('#mc-cancel-order-btn')
+                    .addClass('mc-disabled')
+                    .prop('disabled', true)
+                    .show();
+
+                $('#mc-transfer-order-btn')
+                    .addClass('mc-disabled mc-transfer-btn-disabled')
+                    .prop('disabled', true)
+                    .show();
             }
         });
     }
+
 
     /* ---------------------------------------------------------
        LOAD TRANSFERRED ORDERS
@@ -314,6 +350,38 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
+   CANCEL ENTIRE PENDING ORDER
+--------------------------------------------------------- */
+    $(document).on('click', '#mc-cancel-order-btn', function () {
+
+        if (!confirm("Are you sure you want to cancel the entire pending order?")) {
+            return;
+        }
+
+        $.post(mcComparison.ajaxUrl, {
+            action: 'mc_cancel_pending_order',
+            nonce: mcComparison.nonce
+        }).done(function (resp) {
+            if (resp.success) {
+
+                // Reload both panels
+                loadPendingOrder();
+                loadTransferredOrders();
+
+                // Clear selected item
+                $('#mc-selected-item').empty().hide();
+
+                // Disable transfer button
+                mc_updateTransferButton(false);
+
+            } else {
+                alert(resp.data?.message || 'Error cancelling pending order.');
+            }
+        });
+    });
+
+
+    /* ---------------------------------------------------------
        UPDATE QTY (✔️ BUTTON)
     --------------------------------------------------------- */
     $pendingOrderPanel.on('click', '.mc-update-row', function () {
@@ -390,7 +458,17 @@ jQuery(function ($) {
             loadTransferredOrders();
             mc_updateTransferButton(false);
         }
+
+        // Disable cancel button when viewing transferred orders
+        if (tab === 'transferred') {
+            $('#mc-cancel-order-btn').addClass('mc-disabled').prop('disabled', true);
+            $('#mc-transfer-order-btn').addClass('mc-disabled').prop('disabled', true);
+        } else {
+            $('#mc-cancel-order-btn').removeClass('mc-disabled').prop('disabled', false);
+            $('#mc-transfer-order-btn').removeClass('mc-disabled').prop('disabled', false);
+        }
     });
+
 
     /* ---------------------------------------------------------
        INITIAL LOAD

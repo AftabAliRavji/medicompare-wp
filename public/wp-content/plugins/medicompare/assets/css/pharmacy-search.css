@@ -687,6 +687,39 @@
     box-shadow: 0 0 4px rgba(0, 115, 170, 0.4);
     outline: none;
 }
+
+/* ---------------------------------------------------------
+   CANCEL PENDING ORDER BUTTON (NEW)
+--------------------------------------------------------- */
+
+.mc-cancel-order-btn {
+    background: #cc0000;        /* strong red */
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 12px;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mc-cancel-order-btn:hover {
+    background: #a30000;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+}
+
+.mc-cancel-order-btn.mc-disabled {
+    background: #f3d6d6;
+    color: #7a0000;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
 /* ---------------------------------------------------------
    FINAL OVERRIDES — CLEAN, COLLISION-FREE
 --------------------------------------------------------- */
@@ -1596,6 +1629,125 @@ body.page-id-71 .mc-search-layout {
 body.page-id-71 .mc-search-left {
     margin-right: 24px !important;  /* adjust to taste */
 }
+
+.mc-order-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+/* left button */
+.mc-order-actions .mc-cancel-order-btn {
+    flex: 0 0 auto;
+    min-width: 180px;
+}
+
+/* right button */
+.mc-order-actions .mc-transfer-btn {
+    flex: 0 0 auto;
+    min-width: 180px;
+    margin-left: auto;      /* pushes it to the right edge */
+}
+
+/* make sure neither is full-width */
+.mc-cancel-order-btn,
+.mc-transfer-btn {
+    width: auto;
+}
+/* Make both buttons identical height + padding */
+.mc-cancel-order-btn,
+.mc-transfer-btn {
+    padding: 10px 20px;     /* identical vertical + horizontal padding */
+    line-height: 1.2;       /* consistent text height */
+    height: auto;           /* prevent weird stretching */
+    display: inline-flex;   /* ensures perfect vertical alignment */
+    align-items: center;    /* centers text vertically */
+}
+.mc-cancel-order-btn,
+.mc-transfer-btn {
+    min-width: 180px;
+}
+/* Layout: left + right on same row */
+.mc-order-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.mc-order-actions .mc-cancel-order-btn {
+    flex: 0 0 auto;
+    min-width: 180px;
+}
+
+.mc-order-actions .mc-transfer-btn {
+    flex: 0 0 auto;
+    min-width: 180px;
+    margin-left: auto;
+}
+
+/* Force both buttons to have identical padding + no extra top margin */
+.mc-order-actions .mc-cancel-order-btn,
+.mc-order-actions .mc-transfer-btn {
+    padding: 10px 20px !important;
+    margin-top: 0 !important;
+    line-height: 1.2;
+    height: auto;
+    display: inline-flex;
+    align-items: center;
+}
+/* FIX BUTTON ALIGNMENT */
+.mc-order-actions .mc-transfer-btn {
+    margin-left: auto !important;   /* push to right edge properly */
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.mc-order-actions .mc-cancel-order-btn {
+    margin: 0 !important;           /* remove bottom margin */
+}
+
+/* Ensure identical padding + height */
+.mc-order-actions .mc-cancel-order-btn,
+.mc-order-actions .mc-transfer-btn {
+    padding: 10px 20px !important;
+    min-width: 180px !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* Keep them on one row */
+.mc-order-actions {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.mc-transfer-btn.mc-disabled {
+    background: #f3d6d6;
+    color: #7a0000;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+/* FINAL FIX — match cancel button disabled colour */
+.mc-transfer-btn.mc-disabled,
+.mc-transfer-btn.mc-disabled.mc-transfer-btn-disabled {
+    background: #f3d6d6 !important;
+    color: #7a0000 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+    box-shadow: none !important;
+}
+.mc-cancel-order-btn,
+.mc-transfer-btn,
+.mc-cancel-order-btn.mc-disabled,
+.mc-transfer-btn.mc-disabled {
+    font-weight: 600;
+}
+
+
+
 
 
 

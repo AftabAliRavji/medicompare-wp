@@ -14,6 +14,9 @@ class MediCompare_Pharmacy_Comparison {
         add_action('wp_ajax_mc_add_pending_item', [$this, 'ajax_add_pending_item']);
         add_action('wp_ajax_mc_get_pending_order', [$this, 'ajax_get_pending_order']);
         add_action('wp_ajax_mc_remove_pending_item', [$this, 'ajax_remove_pending_item']);
+        // AJAX: Cancel entire pending order (NEW)
+        add_action('wp_ajax_mc_cancel_pending_order', [$this, 'ajax_cancel_pending_order']);
+
 
         // NEW: Update qty in pending order
         add_action('wp_ajax_mc_update_pending_qty', [$this, 'ajax_update_pending_qty']);
@@ -729,6 +732,33 @@ class MediCompare_Pharmacy_Comparison {
     }
 
     /* ---------------------------------------------------------
+   AJAX: CANCEL ENTIRE PENDING ORDER (NEW)
+--------------------------------------------------------- */
+    public function ajax_cancel_pending_order() {
+
+        check_ajax_referer('mc_comparison_nonce', 'nonce');
+
+        $pharmacy_id = $this->get_current_pharmacy_id();
+        if (!$pharmacy_id) {
+            wp_send_json_error(['message' => 'Not authorised.']);
+        }
+
+        global $wpdb;
+
+        $orders_table = $wpdb->prefix . 'medi_pending_orders';
+        $items_table  = $wpdb->prefix . 'medi_pending_order_items';
+
+        // Delete all items for this pharmacy
+        $wpdb->delete($items_table, ['pharmacy_id' => $pharmacy_id]);
+
+        // Delete the pending order header
+        $wpdb->delete($orders_table, ['pharmacy_id' => $pharmacy_id]);
+
+        wp_send_json_success();
+    }
+
+
+    /* ---------------------------------------------------------
        AJAX: TRANSFER ORDER (WITH MASTER ORDER NUMBERING + SUB-ORDER TABLE + AUTO EMAILS)
        + SUPPLIER STOCK DEDUCTION + NEGATIVE STOCK PREVENTION
     --------------------------------------------------------- */
@@ -959,12 +989,13 @@ class MediCompare_Pharmacy_Comparison {
             $items_by_supplier
         );
 
-        $email_engine->send_pharmacy_confirmation(
-            $new_order_number,
-            $pharmacy,
-            $suppliers,
-            $items
-        );
+        //IF want to send pharmacy email in future the uncomment
+        // $email_engine->send_pharmacy_confirmation(
+        //     $new_order_number,
+        //     $pharmacy,
+        //     $suppliers,
+        //     $items
+        // );
 
         $email_engine->send_admin_notification(
             $new_order_number,

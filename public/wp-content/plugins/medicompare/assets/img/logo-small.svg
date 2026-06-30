@@ -1,0 +1,16 @@
+<svg width="140" height="60" viewBox="0 0 140 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pillOutlineSmall" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#0066CC"/>
+      <stop offset="100%" stop-color="#00A67A"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="5" y="5" width="130" height="50" rx="25" fill="white" stroke="url(#pillOutlineSmall)" stroke-width="3"/>
+  <rect x="5" y="5" width="65" height="50" rx="25" fill="#0066CC"/>
+  <rect x="70" y="5" width="65" height="50" rx="25" fill="#00A67A"/>
+
+  <rect x="45" y="18" width="8" height="24" rx="3" fill="white"/>
+  <rect x="60" y="14" width="8" height="32" rx="3" fill="white"/>
+  <rect x="75" y="18" width="8" height="24" rx="3" fill="white"/>
+</svg>

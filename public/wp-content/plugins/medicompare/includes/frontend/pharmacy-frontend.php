@@ -37,8 +37,12 @@ class MediCompare_Pharmacy_Frontend {
 
     /* ---------------------------------------------------------
        DASHBOARD
-    --------------------------------------------------------- */
-    public function render_dashboard() {
+--------------------------------------------------------- */
+public function render_dashboard() {
+
+    if (is_admin()) {
+        return '<div class="mc-admin-preview">Pharmacy Dashboard Preview</div>';
+    }
 
     // Protect dashboard
     if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
@@ -68,6 +72,11 @@ class MediCompare_Pharmacy_Frontend {
     $current_user = wp_get_current_user();
 
     ob_start();
+
+    /* ⭐ ADD HEADER + ASSET PATH HERE */
+    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+    /* ⭐ END HEADER */
     ?>
 
     <div class="mc-dashboard">
@@ -131,15 +140,15 @@ class MediCompare_Pharmacy_Frontend {
             </section>
 
             <!-- SUPPORT CARD -->
-        <section class="mc-card-pro mc-card-purple" onclick="mcOpenSupportModal();">
-            <div class="mc-card-icon">💬</div>
-            <h2>Support</h2>
-            <p>Contact MediCompare support for help.</p>
-        </section>
+            <section class="mc-card-pro mc-card-purple" onclick="mcOpenSupportModal();">
+                <div class="mc-card-icon">💬</div>
+                <h2>Support</h2>
+                <p>Contact MediCompare support for help.</p>
+            </section>
 
         </div><!-- end .mc-dashboard-grid -->
-     
-       <!-- SUPPORT MODAL -->
+
+        <!-- SUPPORT MODAL -->
         <div id="mc-support-modal" class="mc-modal">
             <div class="mc-modal-content">
                 <span class="mc-modal-close" onclick="mcCloseSupportModal();">&times;</span>
@@ -166,7 +175,7 @@ class MediCompare_Pharmacy_Frontend {
     <!-- SUCCESS TOAST -->
     <div id="mc-toast" class="mc-toast">Message sent successfully</div>
 
-        <script>
+    <script>
         /* ------------------------------
            OPEN / CLOSE SUPPORT MODAL
         ------------------------------ */
@@ -230,13 +239,17 @@ class MediCompare_Pharmacy_Frontend {
 
     <?php
     return ob_get_clean();
-   }
+ }
 
 
-    /* ---------------------------------------------------------
+   /* ---------------------------------------------------------
        EDIT DETAILS
-    --------------------------------------------------------- */
-    public function render_edit_details() {
+--------------------------------------------------------- */
+public function render_edit_details() {
+
+    if (is_admin()) {
+        return '<div class="mc-admin-preview">Pharmacy Edit Details Preview</div>';
+    }
 
     if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
         wp_redirect(site_url('/pharmacy/login/'));
@@ -274,6 +287,11 @@ class MediCompare_Pharmacy_Frontend {
     $current_user = wp_get_current_user();
 
     ob_start();
+
+    /* ⭐ ADD HEADER + ASSET PATH HERE */
+    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+    /* ⭐ END HEADER */
     ?>
 
     <div class="mc-dashboard-header">
@@ -344,9 +362,7 @@ class MediCompare_Pharmacy_Frontend {
 
     <?php
     return ob_get_clean();
-  }
-
-
+ }
 
     /* ---------------------------------------------------------
        EDIT DETAILS HANDLER - will only allow password to be reset
@@ -431,150 +447,165 @@ class MediCompare_Pharmacy_Frontend {
 
     /* ---------------------------------------------------------
        SEARCH / COMPARISON
-    --------------------------------------------------------- */
-    public function render_search() {
+--------------------------------------------------------- */
+public function render_search() {
 
-        if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
-            wp_redirect(site_url('/pharmacy/login/'));
-            exit;
-        }
+    // ⭐ Prevent shortcode logic from running inside the editor
+    if (is_admin()) {
+        return '<div class="mc-admin-preview">Pharmacy Search Preview</div>';
+    }
 
-        $pharmacy = $this->get_current_pharmacy();
-        if (!$pharmacy) {
-            return '<p>You must be logged in as a pharmacy user to search products.</p>';
-        }
+    if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+        wp_redirect(site_url('/pharmacy/login/'));
+        exit;
+    }
 
-        // NEW: determine if a pending order exists for this pharmacy
-        global $wpdb;
-        $orders_table = $wpdb->prefix . 'medi_pending_orders';
+    $pharmacy = $this->get_current_pharmacy();
+    if (!$pharmacy) {
+        return '<p>You must be logged in as a pharmacy user to search products.</p>';
+    }
 
-        $pending_order_exists = (bool) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$orders_table} WHERE pharmacy_id = %d",
-            $pharmacy->ID
-        ));
+    // NEW: determine if a pending order exists for this pharmacy
+    global $wpdb;
+    $orders_table = $wpdb->prefix . 'medi_pending_orders';
 
-        // initial active tab on first render
-        $active_tab = 'pending';
+    $pending_order_exists = (bool) $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$orders_table} WHERE pharmacy_id = %d",
+        $pharmacy->ID
+    ));
 
-        $current_user = wp_get_current_user();
+    // initial active tab on first render
+    $active_tab = 'pending';
 
-        // Enqueue JS
-        wp_enqueue_script(
-            'mc-pharmacy-comparison',
-            plugin_dir_url(__DIR__) . '../assets/js/pharmacy-comparison.js',
-            ['jquery'],
-            '1.0',
-            true
-        );
+    $current_user = wp_get_current_user();
 
-        wp_localize_script('mc-pharmacy-comparison', 'mcComparison', [
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('mc_comparison_nonce'),
-        ]);
+    // Enqueue JS
+    wp_enqueue_script(
+        'mc-pharmacy-comparison',
+        plugin_dir_url(__DIR__) . '../assets/js/pharmacy-comparison.js',
+        ['jquery'],
+        '1.0',
+        true
+    );
 
-        ob_start();
-        ?>
+    wp_localize_script('mc-pharmacy-comparison', 'mcComparison', [
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('mc_comparison_nonce'),
+    ]);
 
-        <!-- FORCE FULL-WIDTH WRAPPER TO BREAK OUT OF BLOCK THEME CONSTRAINTS -->
-        <div class="wp-block-group alignfull" style="padding:0;margin:0;">
+    ob_start();
 
-            <!-- SHARED PAGE CONTAINER -->
-            <div class="mc-page-container">
+    /* ⭐ ADD HEADER + ASSET PATH HERE */
+    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+    /* ⭐ END HEADER */
+    ?>
 
-                <!-- TOP BAR -->
-                <div class="mc-topbar-inner">
+    <!-- FORCE FULL-WIDTH WRAPPER TO BREAK OUT OF BLOCK THEME CONSTRAINTS -->
+    <div class="wp-block-group alignfull" style="padding:0;margin:0;">
 
-                    <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
-                    class="mc-topbar-btn mc-back-btn">
-                        ← Back to Dashboard
+        <!-- SHARED PAGE CONTAINER -->
+        <div class="mc-page-container">
+
+            <!-- TOP BAR -->
+            <div class="mc-topbar-inner">
+
+                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
+                class="mc-topbar-btn mc-back-btn">
+                    ← Back to Dashboard
+                </a>
+
+                <div class="mc-topbar-right">
+                    <span class="mc-topbar-badge mc-welcome-badge">
+                        Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
+                    class="mc-topbar-btn mc-logout-btn">
+                        Logout
                     </a>
+                </div>
 
-                    <div class="mc-topbar-right">
-                        <span class="mc-topbar-badge mc-welcome-badge">
-                            Welcome, <?php echo esc_html($current_user->user_email); ?>
-                        </span>
+            </div>
 
-                        <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
-                        class="mc-topbar-btn mc-logout-btn">
-                            Logout
-                        </a>
+            <!-- SEARCH + RIGHT PANEL -->
+            <div class="mc-search-layout">
+
+                <!-- LEFT SIDE -->
+                <div class="mc-search-left">
+
+                    <h2 class="mc-section-title">Search Products & Compare Suppliers</h2>
+
+                    <div class="mc-search-bar">
+                        <label for="mc-search-input">Product name or code</label><br>
+                        <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
+                    </div>
+
+                    <div id="mc-search-results" class="mc-search-results"></div>
+
+                    <div id="mc-selected-item" class="mc-selected-item"></div>
+
+                </div>
+
+                <!-- RIGHT SIDE -->
+                <div class="mc-search-right">
+
+                    <div class="mc-order-tabs">
+                        <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">
+                            Pending Order
+                        </button>
+                        <button type="button" class="mc-order-tab" data-tab="transferred">
+                            Transferred Orders
+                        </button>
+                    </div>
+
+                    <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active"></div>
+
+                    <div id="mc-transferred-orders" class="mc-order-panel"></div>
+
+                    <div class="mc-order-actions">
+
+                        <button 
+                            type="button"
+                            id="mc-cancel-order-btn"
+                            class="mc-cancel-order-btn <?php echo ($pending_order_exists ? '' : 'mc-disabled'); ?>"
+                            <?php echo ($pending_order_exists ? '' : 'disabled'); ?>
+                        >
+                            Cancel Pending Order
+                        </button>
+
+                        <button 
+                            type="button" 
+                            id="mc-transfer-order-btn" 
+                            class="mc-transfer-btn <?php echo ($pending_order_exists ? '' : 'mc-transfer-btn-disabled mc-disabled'); ?>"
+                            <?php echo ($pending_order_exists ? '' : 'disabled'); ?>
+                        >
+                            Transfer Pending Order
+                        </button>
+
                     </div>
 
                 </div>
 
-                <!-- SEARCH + RIGHT PANEL -->
-                <div class="mc-search-layout">
+            </div><!-- end .mc-search-layout -->
 
-                    <!-- LEFT SIDE -->
-                    <div class="mc-search-left">
+        </div><!-- end .mc-page-container -->
 
-                        <h2 class="mc-section-title">Search Products & Compare Suppliers</h2>
+    </div><!-- end alignfull wrapper -->
 
-                        <div class="mc-search-bar">
-                            <label for="mc-search-input">Product name or code</label><br>
-                            <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
-                        </div>
+    <?php
+    return ob_get_clean();
+  }
 
-                        <div id="mc-search-results" class="mc-search-results"></div>
 
-                        <div id="mc-selected-item" class="mc-selected-item"></div>
-
-                    </div>
-
-                    <!-- RIGHT SIDE -->
-                    <div class="mc-search-right">
-
-                        <div class="mc-order-tabs">
-                            <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">
-                                Pending Order
-                            </button>
-                            <button type="button" class="mc-order-tab" data-tab="transferred">
-                                Transferred Orders
-                            </button>
-                        </div>
-
-                        <div id="mc-pending-order" class="mc-order-panel mc-order-panel-active"></div>
-
-                        <div id="mc-transferred-orders" class="mc-order-panel"></div>
-
-                        <div class="mc-order-actions">
-
-                            <button 
-                                type="button"
-                                id="mc-cancel-order-btn"
-                                class="mc-cancel-order-btn <?php echo ($pending_order_exists ? '' : 'mc-disabled'); ?>"
-                                <?php echo ($pending_order_exists ? '' : 'disabled'); ?>
-                            >
-                                Cancel Pending Order
-                            </button>
-
-                            <button 
-                                type="button" 
-                                id="mc-transfer-order-btn" 
-                                class="mc-transfer-btn <?php echo ($pending_order_exists ? '' : 'mc-transfer-btn-disabled mc-disabled'); ?>"
-                                <?php echo ($pending_order_exists ? '' : 'disabled'); ?>
-                            >
-                                Transfer Pending Order
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div><!-- end .mc-search-layout -->
-
-            </div><!-- end .mc-page-container -->
-
-        </div><!-- end alignfull wrapper -->
-
-        <?php
-        return ob_get_clean();
-    }
-
-     /* ---------------------------------------------------------
+    /* ---------------------------------------------------------
      ORDERS PAGE (Transferred Orders Only)
-    --------------------------------------------------------- */
-        public function render_orders_page() {
+  --------------------------------------------------------- */
+ public function render_orders_page() {
+
+    if (is_admin()) {
+        return '<div class="mc-admin-preview">Pharmacy Orders Preview</div>';
+    }
 
     // Protect page
     if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
@@ -634,6 +665,11 @@ class MediCompare_Pharmacy_Frontend {
     }
 
     ob_start();
+
+    /* ⭐ ADD HEADER + ASSET PATH HERE */
+    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+    /* ⭐ END HEADER */
     ?>
 
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
@@ -696,7 +732,6 @@ class MediCompare_Pharmacy_Frontend {
                     Clear Filters
                 </a>
             </div>
-
 
             <div class="mc-transferred-orders-wrapper">
 
@@ -890,7 +925,8 @@ class MediCompare_Pharmacy_Frontend {
 
     <?php
     return ob_get_clean();
-  }
+ }
+
 
 }
 

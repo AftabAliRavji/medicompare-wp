@@ -45,7 +45,16 @@ class MediCompare_Pharmacy_Registration {
     --------------------------------------------------------- */
     public function render_registration_form() {
 
+        if (is_admin()) {
+            return '<div class="mc-admin-preview">Pharmacy Registeration Preview</div>';
+        }
+
         ob_start();
+
+        /* ⭐ ADD HEADER + ASSET PATH HERE */
+        $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+        include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+        /* ⭐ END HEADER */
 
         if (!empty($_GET['registered'])) {
             echo '<div class="mc-success">Registration successful! Please wait for verification.</div>';
@@ -233,7 +242,6 @@ class MediCompare_Pharmacy_Registration {
         $message .= "Regards,\nMediCompare System";
 
         wp_mail($admin_email, $subject, $message);
-
 
         // Redirect
         wp_redirect(add_query_arg('registered', '1', wp_get_referer()));

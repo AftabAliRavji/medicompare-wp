@@ -19,6 +19,11 @@ class MediCompare_Pharmacy_Login {
 
     public function render_login_form() {
 
+        // Prevent shortcode logic from running inside the editor
+        if (is_admin()) {
+            return '<div class="mc-admin-preview">Pharmacy Login Preview</div>';
+        }
+
         ob_start();
 
         if (isset($_GET['login']) && $_GET['login'] === 'failed') {
@@ -45,7 +50,7 @@ class MediCompare_Pharmacy_Login {
 
             <p>
                 New pharmacy?
-                <a href="<?php echo site_url('/pharmacy/register/'); ?>">Register here</a>
+                <a href="<?php echo site_url('/pharmacy/pharmacy-registration/'); ?>">Register here</a>
             </p>
 
         </form>

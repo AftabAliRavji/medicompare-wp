@@ -138,95 +138,104 @@ class MediCompare_Pharmacy_Claim {
         wp_mail($admin_email, $subject, $message);
     }
 
-    /* ---------------------------------------------------------
-       RENDER CLAIM FORM
-    --------------------------------------------------------- */
-    public function render_claim_form() {
-        $token = isset($_GET['token']) ? sanitize_text_field($_GET['token']) : '';
+   /* ---------------------------------------------------------
+   RENDER CLAIM FORM
+--------------------------------------------------------- */
+public function render_claim_form() {
 
-        ob_start();
+    if (is_admin()) {
+        return '<div class="mc-admin-preview">Pharmacy Claim Preview</div>';
+    }
 
-        if (isset($_GET['claimed']) && $_GET['claimed'] == '1') {
-            echo '<div class="mc-success">Your account has been created. You can now log in once verified.</div>';
-            return ob_get_clean();
-        }
+    $token = isset($_GET['token']) ? sanitize_text_field($_GET['token']) : '';
 
-        if (!$token) {
-            echo '<div class="mc-error">Invalid or missing token.</div>';
-            return ob_get_clean();
-        }
+    ob_start();
 
-        $pharmacy = $this->get_pharmacy_by_token($token);
+    /* ⭐ ADD HEADER + ASSET PATH HERE */
+    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+    /* ⭐ END HEADER */
 
-        if (!$pharmacy) {
-            echo '<div class="mc-error">This registration link is invalid or has expired.</div>';
-            return ob_get_clean();
-        }
-
-        $post_id = $pharmacy->ID;
-
-        $pharmacy_name  = get_the_title($post_id);
-        $email          = get_post_meta($post_id, '_mc_email', true);
-        $phone          = get_post_meta($post_id, '_mc_phone', true);
-        $address1       = get_post_meta($post_id, '_mc_address_line_1', true);
-        $address2       = get_post_meta($post_id, '_mc_address_line_2', true);
-        $city           = get_post_meta($post_id, '_mc_city', true);
-        $postcode       = get_post_meta($post_id, '_mc_postcode', true);
-        $gphc           = get_post_meta($post_id, '_mc_gphc_number', true);
-        $contact_name   = get_post_meta($post_id, '_mc_contact_name', true);
-
-        ?>
-
-        <form method="post" class="mc-register-form">
-            <?php wp_nonce_field('mc_pharmacy_claim', 'mc_pharmacy_claim_nonce'); ?>
-
-            <h2>Complete Pharmacy Registration</h2>
-
-            <input type="hidden" name="mc_claim_token" value="<?php echo esc_attr($token); ?>">
-            <input type="hidden" name="mc_pharmacy_id" value="<?php echo esc_attr($post_id); ?>">
-
-            <label>Pharmacy Name</label>
-            <input type="text" name="mc_pharmacy_name" value="<?php echo esc_attr($pharmacy_name); ?>" required>
-
-            <label>Email</label>
-            <input type="email" name="mc_email" value="<?php echo esc_attr($email); ?>" readonly>
-
-            <label>Phone</label>
-            <input type="text" name="mc_phone" value="<?php echo esc_attr($phone); ?>">
-
-            <label>Address Line 1</label>
-            <input type="text" name="mc_address_line_1" value="<?php echo esc_attr($address1); ?>" required>
-
-            <label>Address Line 2</label>
-            <input type="text" name="mc_address_line_2" value="<?php echo esc_attr($address2); ?>">
-
-            <label>City</label>
-            <input type="text" name="mc_city" value="<?php echo esc_attr($city); ?>" required>
-
-            <label>Postcode</label>
-            <input type="text" name="mc_postcode" value="<?php echo esc_attr($postcode); ?>" required>
-
-            <label>GPhC Number</label>
-            <input type="text" name="mc_gphc_number" value="<?php echo esc_attr($gphc); ?>" required>
-
-            <label>Contact Name</label>
-            <input type="text" name="mc_contact_name" value="<?php echo esc_attr($contact_name); ?>" required>
-
-            <label>Password</label>
-            <input type="password" name="mc_password" required>
-
-            <label>Confirm Password</label>
-            <input type="password" name="mc_password_confirm" required>
-
-            <div class="g-recaptcha" data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc"></div>
-
-            <button type="submit" name="mc_claim_submit">Complete Registration</button>
-        </form>
-
-        <?php
-
+    if (isset($_GET['claimed']) && $_GET['claimed'] == '1') {
+        echo '<div class="mc-success">Your account has been created. You can now log in once verified.</div>';
         return ob_get_clean();
     }
+
+    if (!$token) {
+        echo '<div class="mc-error">Invalid or missing token.</div>';
+        return ob_get_clean();
+    }
+
+    $pharmacy = $this->get_pharmacy_by_token($token);
+
+    if (!$pharmacy) {
+        echo '<div class="mc-error">This registration link is invalid or has expired.</div>';
+        return ob_get_clean();
+    }
+
+    $post_id = $pharmacy->ID;
+
+    $pharmacy_name  = get_the_title($post_id);
+    $email          = get_post_meta($post_id, '_mc_email', true);
+    $phone          = get_post_meta($post_id, '_mc_phone', true);
+    $address1       = get_post_meta($post_id, '_mc_address_line_1', true);
+    $address2       = get_post_meta($post_id, '_mc_address_line_2', true);
+    $city           = get_post_meta($post_id, '_mc_city', true);
+    $postcode       = get_post_meta($post_id, '_mc_postcode', true);
+    $gphc           = get_post_meta($post_id, '_mc_gphc_number', true);
+    $contact_name   = get_post_meta($post_id, '_mc_contact_name', true);
+    ?>
+
+    <form method="post" class="mc-register-form">
+        <?php wp_nonce_field('mc_pharmacy_claim', 'mc_pharmacy_claim_nonce'); ?>
+
+        <h2>Complete Pharmacy Registration</h2>
+
+        <input type="hidden" name="mc_claim_token" value="<?php echo esc_attr($token); ?>">
+        <input type="hidden" name="mc_pharmacy_id" value="<?php echo esc_attr($post_id); ?>">
+
+        <label>Pharmacy Name</label>
+        <input type="text" name="mc_pharmacy_name" value="<?php echo esc_attr($pharmacy_name); ?>" required>
+
+        <label>Email</label>
+        <input type="email" name="mc_email" value="<?php echo esc_attr($email); ?>" readonly>
+
+        <label>Phone</label>
+        <input type="text" name="mc_phone" value="<?php echo esc_attr($phone); ?>">
+
+        <label>Address Line 1</label>
+        <input type="text" name="mc_address_line_1" value="<?php echo esc_attr($address1); ?>" required>
+
+        <label>Address Line 2</label>
+        <input type="text" name="mc_address_line_2" value="<?php echo esc_attr($address2); ?>">
+
+        <label>City</label>
+        <input type="text" name="mc_city" value="<?php echo esc_attr($city); ?>" required>
+
+        <label>Postcode</label>
+        <input type="text" name="mc_postcode" value="<?php echo esc_attr($postcode); ?>" required>
+
+        <label>GPhC Number</label>
+        <input type="text" name="mc_gphc_number" value="<?php echo esc_attr($gphc); ?>" required>
+
+        <label>Contact Name</label>
+        <input type="text" name="mc_contact_name" value="<?php echo esc_attr($contact_name); ?>" required>
+
+        <label>Password</label>
+        <input type="password" name="mc_password" required>
+
+        <label>Confirm Password</label>
+        <input type="password" name="mc_password_confirm" required>
+
+        <div class="g-recaptcha" data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc"></div>
+
+        <button type="submit" name="mc_claim_submit">Complete Registration</button>
+    </form>
+
+    <?php
+
+    return ob_get_clean();
+  }
 
     /* ---------------------------------------------------------
        HANDLE CLAIM SUBMISSION

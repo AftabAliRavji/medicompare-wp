@@ -38,17 +38,20 @@ add_shortcode('mc_pharmacy_portal', function () {
             <h1 class="mc-portal-title">MediCompare Pharmacy Portal</h1>
             <p class="mc-portal-subtitle">A modern platform built for independent pharmacies.</p>
 
-            <div class="mc-feature-card">
-                <img src="<?php echo $mc_assets . 'icon-search.svg'; ?>" class="mc-feature-icon">
-                <h3>Instant Price Comparison</h3>
-                <p>Search thousands of medicines and compare supplier prices in seconds.</p>
+            <div class="mc-feature-row">
+                <div class="mc-feature-card">
+                    <img src="<?php echo $mc_assets . 'icon-search.svg'; ?>" class="mc-feature-icon">
+                    <h3>Instant Price Comparison</h3>
+                    <p>Search thousands of medicines and compare supplier prices in seconds.</p>
+                </div>
+
+                <div class="mc-feature-card">
+                    <img src="<?php echo $mc_assets . 'icon-orders.svg'; ?>" class="mc-feature-icon">
+                    <h3>Unified Order Management</h3>
+                    <p>Track, manage, and fulfil orders from one clean dashboard.</p>
+                </div>
             </div>
 
-            <div class="mc-feature-card">
-                <img src="<?php echo $mc_assets . 'icon-orders.svg'; ?>" class="mc-feature-icon">
-                <h3>Unified Order Management</h3>
-                <p>Track, manage, and fulfil orders from one clean dashboard.</p>
-            </div>
 
             <!-- FAST ONBOARDING + 3-STEP ONBOARDING SIDE-BY-SIDE -->
             <div class="mc-onboarding-row">

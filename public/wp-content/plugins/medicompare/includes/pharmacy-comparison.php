@@ -280,57 +280,72 @@ class MediCompare_Pharmacy_Comparison {
     }
 
     /* ---------------------------------------------------------
-       FUZZY FALLBACK (Option A)
+       FUZZY FALLBACK (Corrected)
        Only runs when exact results = 0
-    --------------------------------------------------------- */
+--------------------------------------------------------- */
 
-    $all_products = $wpdb->get_results("
-        SELECT ID, post_title
-        FROM {$posts_table}
-        WHERE post_type = 'mc_product'
-          AND post_status = 'publish'
-        LIMIT 300
-    ", ARRAY_A);
+$all_products = $wpdb->get_results("
+    SELECT ID, post_title
+    FROM {$posts_table}
+    WHERE post_type = 'mc_product'
+      AND post_status = 'publish'
+    LIMIT 300
+", ARRAY_A);
 
-    $distances = [];
+$distances = [];
 
-    foreach ($all_products as $p) {
-        $clean_title = strtolower(
-            preg_replace('/[^a-zA-Z0-9 ]/', '',
-                preg_replace('/([0-9]+)([a-zA-Z]+)/', '$1 $2', $p['post_title'])
-            )
-        );
+foreach ($all_products as $p) {
 
-        $distances[] = [
-            'id'       => $p['ID'],
-            'title'    => $p['post_title'],
-            'distance' => levenshtein($q_clean, $clean_title)
-        ];
+    // Extract FIRST WORD ONLY (critical fix)
+    // Example: "Paracetamol 500 mg tablets" → "paracetamol"
+    $first_word = strtolower(
+        preg_replace('/[^a-zA-Z]/', '', strtok($p['post_title'], ' '))
+    );
+
+    if (!$first_word) continue;
+
+    // Compute Levenshtein distance against the first word
+    $distance = levenshtein($q_clean, $first_word);
+
+    // Prefix bonus: improves ranking for near matches
+    $prefix_bonus = 0;
+    if (strpos($first_word, substr($q_clean, 0, 2)) === 0) {
+        $prefix_bonus = -2;
     }
 
-    usort($distances, function($a, $b) {
-        return $a['distance'] - $b['distance'];
-    });
+    $distances[] = [
+        'id'       => $p['ID'],
+        'title'    => $p['post_title'],
+        'distance' => $distance + $prefix_bonus
+    ];
+}
 
-    $suggestions = array_slice($distances, 0, 3);
+// Sort by corrected distance
+usort($distances, function($a, $b) {
+    return $a['distance'] - $b['distance'];
+});
 
-    ob_start();
-    ?>
-    <p>No exact matches found.</p>
-    <p>Did you mean:</p>
-    <ul class="mc-suggestions">
-        <?php foreach ($suggestions as $s): ?>
-            <?php $label = $this->mc_get_full_product_label($s['id']); ?>
-            <li class="mc-suggestion-item"
-                data-product-id="<?php echo esc_attr($s['id']); ?>">
-                <?php echo esc_html($label); ?>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-    <?php
+// Take top 3 suggestions
+$suggestions = array_slice($distances, 0, 3);
 
-    wp_send_json_success(['html' => ob_get_clean()]);
+ob_start();
+?>
+<p>No exact matches found.</p>
+<p>Did you mean:</p>
+<ul class="mc-suggestions">
+    <?php foreach ($suggestions as $s): ?>
+        <?php $label = $this->mc_get_full_product_label($s['id']); ?>
+        <li class="mc-suggestion-item"
+            data-product-id="<?php echo esc_attr($s['id']); ?>">
+            <?php echo esc_html($label); ?>
+        </li>
+    <?php endforeach; ?>
+</ul>
+<?php
+
+ wp_send_json_success(['html' => ob_get_clean()]);
  }
+
 
     /* ---------------------------------------------------------
        AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT

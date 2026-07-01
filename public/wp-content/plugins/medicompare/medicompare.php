@@ -113,6 +113,11 @@ class MediCompare {
                 'title'   => 'Pharmacy Orders',
                 'content' => '[mc_pharmacy_orders]'
             ],
+            'subscription' => [
+                'title'   => 'Subscription History',
+                'content' => '[mc_pharmacy_subscription]'
+            ],
+
         ];
 
         foreach ($pages as $slug => $page) {

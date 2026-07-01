@@ -9,6 +9,7 @@ class MediCompare_Pharmacy_Frontend {
         add_shortcode('mc_pharmacy_edit_details', [$this, 'render_edit_details']);
         add_shortcode('mc_pharmacy_search', [$this, 'render_search']);
         add_shortcode('mc_pharmacy_orders', [$this, 'render_orders_page']);
+        add_shortcode('mc_pharmacy_subscription', [$this, 'render_subscription_page']);
 
         add_action('init', [$this, 'handle_edit_details_submit']);
         add_action('init', [$this, 'handle_support_form']);
@@ -94,7 +95,7 @@ public function render_dashboard() {
             <section class="mc-card-pro"
                      onclick="window.location='<?php echo esc_url(site_url('/pharmacy/edit-details/')); ?>';">
                 <div class="mc-card-icon">🏥</div>
-                <h2>Pharmacy Details</h2>
+                <h2 class="mc-card-title">Pharmacy Details</h2>
                 <p>View your pharmacy information and manage your account password.</p>
             </section>
 
@@ -102,15 +103,17 @@ public function render_dashboard() {
             <section class="mc-card-pro mc-card-blue"
                      onclick="window.location='<?php echo esc_url(site_url('/pharmacy/search/')); ?>';">
                 <div class="mc-card-icon">🔍</div>
-                <h2>Search Products</h2>
+                <h2 class="mc-card-title">Search Products</h2>
                 <p>Search products and compare suppliers.</p>
             </section>
 
             <!-- SUBSCRIPTION COUNTDOWN -->
-            <section class="mc-card-pro mc-card-green">
+            <section class="mc-card-pro mc-card-green"
+                     onclick="window.location='<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>';">
                 <div class="mc-card-icon">⏳</div>
-                <h2>Subscription</h2>
+                <h2 class="mc-card-title">Subscription</h2>
                 <p>
+                    <strong>Subscription due:</strong>
                     <?php
                         $today = time();
                         $days_left = max(0, floor(($trial_end - $today) / 86400));
@@ -123,7 +126,7 @@ public function render_dashboard() {
             <section class="mc-card-pro mc-card-orange"
                      onclick="window.location='<?php echo esc_url(site_url('/pharmacy/orders/')); ?>';">
                 <div class="mc-card-icon">📦</div>
-                <h2>Transferred Orders</h2>
+                <h2 class="mc-card-title">Transferred Orders</h2>
                 <p>
                     <?php
                         global $wpdb;
@@ -142,7 +145,7 @@ public function render_dashboard() {
             <!-- SUPPORT CARD -->
             <section class="mc-card-pro mc-card-purple" onclick="mcOpenSupportModal();">
                 <div class="mc-card-icon">💬</div>
-                <h2>Support</h2>
+                <h2 class="mc-card-title">Support</h2>
                 <p>Contact MediCompare support for help.</p>
             </section>
 
@@ -153,7 +156,7 @@ public function render_dashboard() {
             <div class="mc-modal-content">
                 <span class="mc-modal-close" onclick="mcCloseSupportModal();">&times;</span>
 
-                <h2>Contact Support</h2>
+                <h2 class="mc-card-title">Contact Support</h2>
 
                 <form method="post">
                     <?php wp_nonce_field('mc_support_form', 'mc_support_form_nonce'); ?>
@@ -242,7 +245,7 @@ public function render_dashboard() {
  }
 
 
-   /* ---------------------------------------------------------
+/* ---------------------------------------------------------
        EDIT DETAILS
 --------------------------------------------------------- */
 public function render_edit_details() {
@@ -288,19 +291,39 @@ public function render_edit_details() {
 
     ob_start();
 
-    /* ⭐ ADD HEADER + ASSET PATH HERE */
+    // Header + logo
     $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
-    /* ⭐ END HEADER */
     ?>
 
-    <div class="mc-dashboard-header">
-        <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
-        <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
+    <!-- FULL-WIDTH TOP BAR -->
+    <div class="wp-block-group alignfull" style="padding:0;margin:0;">
+        <div class="mc-page-container">
+
+            <div class="mc-topbar-inner">
+
+                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
+                   class="mc-topbar-btn mc-back-btn">
+                    ← Back to Dashboard
+                </a>
+
+                <div class="mc-topbar-right">
+                    <span class="mc-topbar-badge mc-welcome-badge">
+                        Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
+                       class="mc-topbar-btn mc-logout-btn">
+                        Logout
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
     </div>
 
-    <h1>Pharmacy Details</h1>
-
+    <!-- INNER CONTENT -->
     <?php if ($password_updated): ?>
         <div class="mc-success">Password updated and email sent.</div>
     <?php endif; ?>
@@ -309,56 +332,100 @@ public function render_edit_details() {
         <div class="mc-error">Old password is incorrect.</div>
     <?php endif; ?>
 
-    <div class="mc-details-grid">
 
-        <!-- LEFT COLUMN -->
-        <div class="mc-card">
-            <h2>Pharmacy Information</h2>
+ <div class="mc-details-grid mc-details-grid-wide">
 
-            <p><label>Name</label><br><input type="text" value="<?php echo esc_attr($pharmacy->post_title); ?>" disabled></p>
-            <p><label>GPhC Number</label><br><input type="text" value="<?php echo esc_attr($gphc); ?>" disabled></p>
-            <p><label>Email</label><br><input type="text" value="<?php echo esc_attr($email); ?>" disabled></p>
-            <p><label>City</label><br><input type="text" value="<?php echo esc_attr($city); ?>" disabled></p>
-            <p><label>Status</label><br><input type="text" value="<?php echo esc_attr(ucfirst($status)); ?>" disabled></p>
-            <p><label>Trial Period</label><br>
-                <input type="text" value="<?php echo esc_attr($trial_start_readable . ' → ' . $trial_end_readable); ?>" disabled>
-            </p>
+    <!-- LEFT COLUMN -->
+<div class="mc-card mc-info-card">
 
-            <h3>Address</h3>
-            <p><label>Address Line 1</label><br><input type="text" value="<?php echo esc_attr($address_1); ?>" disabled></p>
-            <p><label>Address Line 2</label><br><input type="text" value="<?php echo esc_attr($address_2); ?>" disabled></p>
-            <p><label>Postcode</label><br><input type="text" value="<?php echo esc_attr($postcode); ?>" disabled></p>
-            <p><label>Phone</label><br><input type="text" value="<?php echo esc_attr($phone); ?>" disabled></p>
-            <p><label>Contact Name</label><br><input type="text" value="<?php echo esc_attr($contact); ?>" disabled></p>
+    <h2 class="mc-reset-title">Pharmacy Details</h2>
 
-        </div>
+    <div class="mc-form-row-2col">
+        <label>Name</label>
+        <input type="text" value="<?php echo esc_attr($pharmacy->post_title); ?>" disabled>
+    </div>
 
-        <!-- RIGHT COLUMN -->
-        <div class="mc-card">
-            <h2>Reset Password</h2>
+    <div class="mc-form-row-2col">
+        <label>GPhC Number</label>
+        <input type="text" value="<?php echo esc_attr($gphc); ?>" disabled>
+    </div>
 
-            <form method="post">
-                <?php wp_nonce_field('mc_reset_password', 'mc_reset_password_nonce'); ?>
+    <div class="mc-form-row-2col">
+        <label>Email</label>
+        <input type="text" value="<?php echo esc_attr($email); ?>" disabled>
+    </div>
 
-                <p>
-                    <label>Old Password</label><br>
-                    <input type="password" name="mc_old_password" required>
-                </p>
+    <div class="mc-form-row-2col">
+        <label>City</label>
+        <input type="text" value="<?php echo esc_attr($city); ?>" disabled>
+    </div>
 
-                <p>
-                    <label>New Password</label><br>
-                    <input type="password" name="mc_new_password" required>
-                </p>
+    <div class="mc-form-row-2col">
+        <label>Status</label>
+        <input type="text" value="<?php echo esc_attr(ucfirst($status)); ?>" disabled>
+    </div>
 
-                <p>
-                    <button type="submit" name="mc_reset_password_submit">Save New Password</button>
-                </p>
+    <div class="mc-form-row-2col">
+        <label>Trial Period</label>
+        <input type="text" value="<?php echo esc_attr($trial_start_readable . ' → ' . $trial_end_readable); ?>" disabled>
+    </div>
 
-                <p><a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>">Back to dashboard</a></p>
-            </form>
-        </div>
+    <h3>Address</h3>
+
+    <div class="mc-form-row-2col">
+        <label>Address Line 1</label>
+        <input type="text" value="<?php echo esc_attr($address_1); ?>" disabled>
+    </div>
+
+    <div class="mc-form-row-2col">
+        <label>Address Line 2</label>
+        <input type="text" value="<?php echo esc_attr($address_2); ?>" disabled>
+    </div>
+
+    <div class="mc-form-row-2col">
+        <label>Postcode</label>
+        <input type="text" value="<?php echo esc_attr($postcode); ?>" disabled>
+    </div>
+
+    <div class="mc-form-row-2col">
+        <label>Phone</label>
+        <input type="text" value="<?php echo esc_attr($phone); ?>" disabled>
+    </div>
+
+    <div class="mc-form-row-2col">
+        <label>Contact Name</label>
+        <input type="text" value="<?php echo esc_attr($contact); ?>" disabled>
+    </div>
+
+  </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="mc-card mc-reset-card">
+
+        <h2 class="mc-reset-title">Reset Password</h2>
+
+        <form method="post">
+            <?php wp_nonce_field('mc_reset_password', 'mc_reset_password_nonce'); ?>
+
+            <div class="mc-form-row-2col">
+                <label>Old Password</label>
+                <input type="password" name="mc_old_password" required>
+            </div>
+
+            <div class="mc-form-row-2col">
+                <label>New Password</label>
+                <input type="password" name="mc_new_password" required>
+            </div>
+
+            <button type="submit" name="mc_reset_password_submit" class="mc-btn-primary">
+                Save New Password
+            </button>
+        </form>
 
     </div>
+
+ </div>
+
 
     <?php
     return ob_get_clean();
@@ -927,6 +994,107 @@ public function render_search() {
     return ob_get_clean();
  }
 
+ /* ---------------------------------------------------------
+       SUBSCRIPTION PAGE
+--------------------------------------------------------- */
+public function render_subscription_page() {
+
+    if (is_admin()) {
+        return '<div class="mc-admin-preview">Subscription Page Preview</div>';
+    }
+
+    // Protect page
+    if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+        wp_redirect(site_url('/pharmacy/login/'));
+        exit;
+    }
+
+    $pharmacy = $this->get_current_pharmacy();
+    if (!$pharmacy) {
+        return '<p>You must be logged in as a pharmacy user to view subscriptions.</p>';
+    }
+
+    $pharmacy_id = $pharmacy->ID;
+    $current_user = wp_get_current_user();
+
+    /* Example subscription data (replace with DB later) */
+    $subscription_history = [
+        ['month' => 'January 2026', 'amount' => '£10', 'status' => 'Paid'],
+        ['month' => 'February 2026', 'amount' => '£10', 'status' => 'Paid'],
+        ['month' => 'March 2026', 'amount' => '£10', 'status' => 'Paid'],
+    ];
+
+    /* Current month due */
+    $current_month = date('F Y');
+    $current_amount = '£10';
+
+    ob_start();
+
+    /* ⭐ HEADER + LOGO */
+    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+    ?>
+
+    <!-- FULL-WIDTH TOP BAR -->
+    <div class="wp-block-group alignfull" style="padding:0;margin:0;">
+        <div class="mc-page-container">
+
+            <div class="mc-topbar-inner">
+
+                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
+                   class="mc-topbar-btn mc-back-btn">
+                    ← Back to Dashboard
+                </a>
+
+                <div class="mc-topbar-right">
+                    <span class="mc-topbar-badge mc-welcome-badge">
+                        Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
+                       class="mc-topbar-btn mc-logout-btn">
+                        Logout
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="mc-page-container">
+
+        <h1 class="mc-page-title">Subscription History</h1>
+
+        <div class="mc-subscription-grid">
+
+            <!-- CURRENT MONTH DUE -->
+            <section class="mc-card-pro mc-card-orange"
+                     onclick="window.location='<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>';">
+                <div class="mc-card-icon">📅</div>
+                <h2 class="mc-card-title">Current Month Due</h2>
+                <p><strong><?php echo $current_month; ?></strong></p>
+                <p>Amount: <?php echo $current_amount; ?></p>
+            </section>
+
+            <!-- HISTORY -->
+            <?php foreach ($subscription_history as $row): ?>
+                <section class="mc-card-pro mc-card-green">
+                    <div class="mc-card-icon">✔️</div>
+                    <h2 class="mc-card-title"><?php echo esc_html($row['month']); ?></h2>
+                    <p>Amount: <?php echo esc_html($row['amount']); ?></p>
+                    <p>Status: <?php echo esc_html($row['status']); ?></p>
+                </section>
+            <?php endforeach; ?>
+
+        </div>
+
+    </div>
+
+    <?php
+    return ob_get_clean();
+ }
 
 }
 

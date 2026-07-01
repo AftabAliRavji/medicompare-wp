@@ -5,6 +5,15 @@ h2:not(.mc-card-title),
 .wp-block-heading.wp-block-post-title {
     display: none !important;
 }
+/* Hide WP theme header/footer on pharmacy portal pages */
+body.page-template-default.page .mc-page-container {
+    padding-top: 0 !important;
+}
+
+body.page-template-default.page header,
+body.page-template-default.page footer {
+    display: none !important;
+}
 
 
 /* ---------------------------------------------------------
@@ -256,4 +265,538 @@ h2:not(.mc-card-title),
         flex-direction: column;
         gap: 10px;
     }
+}
+.mc-feature-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.mc-feature-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 22px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/*
+    other pages under /pharmacy/ styles
+*/
+.mc-reset-card {
+    padding: 24px;
+    width: 100%;
+}
+
+.mc-form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.mc-form-row label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.mc-btn-primary {
+    background: #2563eb;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7;
+}
+/* Make the grid wider and give right card more space */
+.mc-details-grid.mc-details-grid-wide {
+    display: grid !important;
+    grid-template-columns: 1fr 1.4fr !important;
+    gap: 32px !important;
+}
+
+/* Right card styling */
+.mc-reset-card {
+    padding: 24px;
+}
+
+/* Form rows */
+.mc-form-row {
+    margin-bottom: 18px;
+}
+
+.mc-form-row label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* SaaS-style button */
+.mc-btn-primary {
+    background: #2563eb;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7;
+}
+/* Wider grid: right card gets more space */
+.mc-details-grid-wide {
+    display: grid !important;
+    grid-template-columns: 1fr 1.3fr !important;
+    gap: 40px !important;
+}
+
+/* Two-column form rows */
+.mc-form-row-2col {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.mc-form-row-2col label {
+    font-weight: 600;
+    padding-right: 10px;
+}
+
+.mc-form-row-2col input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+}
+
+/* Right card spacing */
+.mc-reset-card {
+    padding: 24px;
+}
+
+/* SaaS-style button */
+.mc-btn-primary {
+    background: #2563eb;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7;
+}
+/* FORCE the grid to behave */
+.mc-details-grid.mc-details-grid-wide {
+    display: grid !important;
+    grid-template-columns: 1.1fr 1.4fr !important;
+    gap: 40px !important;
+    width: 100% !important;
+}
+
+/* FORCE left card to expand */
+.mc-info-card {
+    width: 100% !important;
+}
+
+/* FORCE right card to expand */
+.mc-reset-card {
+    width: 100% !important;
+    padding: 24px !important;
+}
+
+/* FIX missing Reset Password heading */
+.mc-reset-card h2,
+.mc-reset-title {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    margin-bottom: 20px !important;
+    color: #111 !important;
+}
+
+/* TWO-COLUMN FORM ROWS — FORCE override theme */
+.mc-form-row-2col {
+    display: grid !important;
+    grid-template-columns: 180px 1fr !important;
+    align-items: center !important;
+    margin-bottom: 18px !important;
+}
+
+/* Label styling */
+.mc-form-row-2col label {
+    font-weight: 600 !important;
+    padding-right: 12px !important;
+    margin: 0 !important;
+}
+
+/* Input styling */
+.mc-form-row-2col input {
+    width: 100% !important;
+    padding: 10px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+}
+
+/* SaaS-style button */
+.mc-btn-primary {
+    background: #2563eb !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7 !important;
+}
+/* FORCE the grid to give both columns proper width */
+.mc-details-grid.mc-details-grid-wide {
+    display: grid !important;
+    grid-template-columns: 1.4fr 1.2fr !important; /* LEFT WIDER */
+    gap: 48px !important;
+    width: 100% !important;
+}
+
+/* Left card wider */
+.mc-info-card {
+    width: 100% !important;
+}
+
+/* Right card */
+.mc-reset-card {
+    width: 100% !important;
+    padding: 24px !important;
+}
+
+/* Reset Password heading */
+.mc-reset-card h2 {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin-bottom: 20px !important;
+    color: #111 !important;
+}
+
+/* Two-column form rows */
+.mc-form-row-2col {
+    display: grid !important;
+    grid-template-columns: 180px 1fr !important;
+    align-items: center !important;
+    margin-bottom: 18px !important;
+}
+
+/* Labels NOT bold */
+.mc-form-row-2col label {
+    font-weight: 400 !important; /* ← NOT BOLD */
+    padding-right: 12px !important;
+    margin: 0 !important;
+}
+
+/* Inputs */
+.mc-form-row-2col input {
+    width: 100% !important;
+    padding: 10px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+}
+
+/* SaaS-style button */
+.mc-btn-primary {
+    background: #2563eb !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7 !important;
+}
+/* OVERRIDE THE THEME: allow left card to expand */
+.mc-info-card {
+    width: 100% !important;
+    max-width: none !important;
+    flex: none !important;
+}
+
+/* OVERRIDE THEME: allow right card to expand */
+.mc-reset-card {
+    width: 100% !important;
+    max-width: none !important;
+    flex: none !important;
+}
+
+/* WIDEN THE GRID AGAIN */
+.mc-details-grid.mc-details-grid-wide {
+    display: grid !important;
+    grid-template-columns: 1.6fr 1.2fr !important; /* LEFT NOW MUCH WIDER */
+    gap: 48px !important;
+    width: 100% !important;
+}
+.mc-form-row-2col label {
+    font-weight: 400 !important; /* not bold */
+}
+/* Make the entire details grid wider and centered */
+.mc-details-grid.mc-details-grid-wide {
+    width: 100% !important;
+    max-width: 1200px !important;   /* ← increase overall width */
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;  /* ← both columns larger */
+    gap: 40px !important;
+}
+
+/* Allow both cards to fully expand */
+.mc-info-card,
+.mc-reset-card {
+    width: 100% !important;
+    max-width: none !important;
+    flex: none !important;
+}
+
+/* Two-column form rows: label left, input right */
+.mc-form-row-2col {
+    display: grid !important;
+    grid-template-columns: 180px 1fr !important;
+    align-items: center !important;
+    margin-bottom: 18px !important;
+}
+
+/* Labels NOT bold */
+.mc-form-row-2col label {
+    font-weight: 400 !important;
+    padding-right: 12px !important;
+    margin: 0 !important;
+}
+
+/* Inputs fill available space */
+.mc-form-row-2col input {
+    width: 100% !important;
+    padding: 10px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+}
+
+/* Reset Password heading */
+.mc-reset-card h2 {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin-bottom: 20px !important;
+    color: #111 !important;
+}
+
+/* SaaS-style button */
+.mc-btn-primary {
+    background: #2563eb !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7 !important;
+}
+/* Heading above left column */
+.mc-page-subheading {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    margin-top: 20px;
+    color: #111;
+}
+
+/* Push both columns down slightly */
+.mc-details-grid-wide {
+    margin-top: 10px !important;
+}
+
+/* Make both columns comfortably wide */
+.mc-details-grid.mc-details-grid-wide {
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 48px !important;
+}
+
+/* Allow both cards to expand fully */
+.mc-info-card,
+.mc-reset-card {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Two-column form rows */
+.mc-form-row-2col {
+    display: grid !important;
+    grid-template-columns: 180px 1fr !important;
+    align-items: center !important;
+    margin-bottom: 18px !important;
+}
+
+/* Labels NOT bold */
+.mc-form-row-2col label {
+    font-weight: 400 !important;
+    padding-right: 12px !important;
+}
+
+/* Inputs full width */
+.mc-form-row-2col input {
+    width: 100% !important;
+    padding: 10px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+}
+
+/* Reset Password heading */
+.mc-reset-title {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin-bottom: 20px !important;
+}
+
+/* SaaS-style button */
+.mc-btn-primary {
+    background: #2563eb !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
+.mc-btn-primary:hover {
+    background: #1e4fc7 !important;
+}
+/* FORCE the H1 to show (theme override) */
+.mc-section-title,
+.mc-section-title h1,
+h1.mc-section-title {
+    display: block !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    margin: 0 0 24px 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+}
+/* Align the H1 heading with the left column */
+.mc-section-title {
+    display: block !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    margin: 0 0 24px 0 !important;
+    padding-left: 180px !important; /* ← aligns with left column labels */
+    color: #111 !important;
+}
+/* Left column heading inside card */
+.mc-info-title {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin: 0 0 20px 0 !important;
+    color: #111 !important;
+}
+.mc-card-title {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin: 0 0 20px 0 !important;
+    color: #111 !important;
+}
+.mc-info-card h2,
+.mc-reset-title {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin-bottom: 20px !important;
+    color: #111 !important;
+}
+/* Shrink the right-hand card to fit its content */
+.mc-reset-card {
+    min-height: 0 !important;     /* ← removes theme’s forced height */
+    height: auto !important;      /* ← allows natural content height */
+    padding-bottom: 20px !important; /* ← keeps nice spacing */
+    align-self: flex-start !important;   /* ← prevents forced stretching */
+}
+/* Only make the Reset Password button full width on the Edit Details page */
+.mc-details-grid-wide .mc-reset-card .mc-btn-primary {
+    width: 100% !important;
+}
+
+/* Everywhere else, buttons should size naturally */
+.mc-btn-primary {
+    width: auto !important;
+}
+/* Smaller headings ONLY on dashboard cards */
+.mc-dashboard-grid .mc-card-title {
+    font-size: 16px !important;
+}
+
+.mc-subscription-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.mc-subscription-grid .mc-card-orange {
+    background: #f97316 !important;
+    color: #fff !important;
+}
+
+.mc-subscription-grid .mc-card-green {
+    background: #22c55e !important;
+    color: #fff !important;
 }

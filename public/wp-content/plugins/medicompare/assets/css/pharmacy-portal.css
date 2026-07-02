@@ -800,3 +800,28 @@ h1.mc-section-title {
     background: #22c55e !important;
     color: #fff !important;
 }
+/* Subscription badge colours */
+.mc-sub-trial {
+    background: #4caf50; /* green */
+    color: #fff;
+}
+
+.mc-sub-active {
+    background: #2196f3; /* blue */
+    color: #fff;
+}
+
+.mc-sub-past_due {
+    background: #ff9800; /* orange */
+    color: #fff;
+}
+
+.mc-sub-expired {
+    background: #f44336; /* red */
+    color: #fff;
+}
+
+.mc-sub-canceled {
+    background: #9e9e9e; /* grey */
+    color: #fff;
+}

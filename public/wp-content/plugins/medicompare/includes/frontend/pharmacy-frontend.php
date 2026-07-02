@@ -15,6 +15,63 @@ class MediCompare_Pharmacy_Frontend {
         add_action('init', [$this, 'handle_support_form']);
     }
 
+    /* ---------------------------------------------------------
+       SUBSCRIPTION STATE HELPER (NEW)
+    --------------------------------------------------------- */
+    private function mc_get_pharmacy_subscription_state($pharmacy_id) {
+
+        $status         = get_post_meta($pharmacy_id, '_mc_subscription_status', true);
+        $trial_start    = (int) get_post_meta($pharmacy_id, '_mc_trial_start', true);
+        $trial_end      = (int) get_post_meta($pharmacy_id, '_mc_trial_end', true);
+        $next_billing   = (int) get_post_meta($pharmacy_id, '_mc_next_billing_date', true);
+
+        $now = time();
+
+        /* Trial active */
+        if ($status === 'trial') {
+            if ($trial_end > $now) {
+                return [
+                    'status' => 'trial',
+                    'trial_end' => $trial_end,
+                    'is_access_allowed' => true
+                ];
+            }
+            return [
+                'status' => 'expired',
+                'is_access_allowed' => false
+            ];
+        }
+
+        /* Subscription active */
+        if ($status === 'active') {
+            if ($next_billing > $now) {
+                return [
+                    'status' => 'active',
+                    'next_billing' => $next_billing,
+                    'is_access_allowed' => true
+                ];
+            }
+            return [
+                'status' => 'past_due',
+                'is_access_allowed' => false
+            ];
+        }
+
+        /* Past due / expired / canceled */
+        if (in_array($status, ['past_due', 'expired', 'canceled'])) {
+            return [
+                'status' => $status,
+                'is_access_allowed' => false
+            ];
+        }
+
+        /* Unknown */
+        return [
+            'status' => 'unknown',
+            'is_access_allowed' => false
+        ];
+    }
+
     private function get_current_pharmacy() {
 
         if (!is_user_logged_in()) {
@@ -36,9 +93,23 @@ class MediCompare_Pharmacy_Frontend {
         return $pharmacy;
     }
 
+        private function mc_enforce_subscription_access($pharmacy_id) {
+
+        $state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
+
+            if (!isset($state['is_access_allowed']) || $state['is_access_allowed'] !== true) {
+
+                // Redirect to subscription page with a flag
+                wp_redirect(
+                    add_query_arg('subscription_blocked', '1', site_url('/pharmacy/subscription/'))
+                );
+                exit;
+            }
+        }
+
     /* ---------------------------------------------------------
        DASHBOARD
---------------------------------------------------------- */
+    --------------------------------------------------------- */
 public function render_dashboard() {
 
     if (is_admin()) {
@@ -57,6 +128,8 @@ public function render_dashboard() {
     }
 
     $pharmacy_id = $pharmacy->ID;
+
+    $this->mc_enforce_subscription_access($pharmacy_id);
 
     // Meta fields
     $gphc   = get_post_meta($pharmacy_id, '_mc_gphc_number', true);
@@ -107,19 +180,44 @@ public function render_dashboard() {
                 <p>Search products and compare suppliers.</p>
             </section>
 
-            <!-- SUBSCRIPTION COUNTDOWN -->
+            <!-- SUBSCRIPTION COUNTDOWN (UPDATED) -->
             <section class="mc-card-pro mc-card-green"
                      onclick="window.location='<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>';">
                 <div class="mc-card-icon">⏳</div>
                 <h2 class="mc-card-title">Subscription</h2>
-                <p>
-                    <strong>Subscription due:</strong>
-                    <?php
-                        $today = time();
-                        $days_left = max(0, floor(($trial_end - $today) / 86400));
-                        echo $days_left . " days remaining";
-                    ?>
-                </p>
+
+                <?php
+                    $state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
+                    $now   = time();
+                    $label = '';
+
+                    if ($state['status'] === 'trial') {
+                        $days_left = max(0, floor(($state['trial_end'] - $now) / 86400));
+                        $label = "Trial: {$days_left} days remaining";
+
+                    } elseif ($state['status'] === 'active') {
+                        if (!empty($state['next_billing'])) {
+                            $days_left = max(0, floor(($state['next_billing'] - $now) / 86400));
+                            $label = "Subscription: {$days_left} days until renewal";
+                        } else {
+                            $label = "Subscription active";
+                        }
+
+                    } elseif ($state['status'] === 'past_due') {
+                        $label = "Payment overdue – action required";
+
+                    } elseif ($state['status'] === 'expired') {
+                        $label = "Subscription expired – action required";
+
+                    } elseif ($state['status'] === 'canceled') {
+                        $label = "Subscription canceled – action required";
+
+                    } else {
+                        $label = "Subscription status unknown";
+                    }
+                ?>
+
+                <p><strong><?php echo esc_html($label); ?></strong></p>
             </section>
 
             <!-- TOTAL TRANSFERRED ORDERS -->
@@ -204,29 +302,24 @@ public function render_dashboard() {
             const toast = document.getElementById('mc-toast');
             toast.classList.add('mc-toast-show');
 
-            // 3 seconds visible + 0.8s fade-out
             setTimeout(() => {
                 toast.classList.remove('mc-toast-show');
-            }, 
-            3800
-            );
+            }, 3800);
         }
 
         /* ------------------------------
            INTERCEPT SUPPORT FORM SUBMIT
-           (close modal + show toast)
         ------------------------------ */
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('#mc-support-modal form');
 
             if (form) {
                 form.addEventListener('submit', function (e) {
-                    e.preventDefault(); // STOP page reload
+                    e.preventDefault();
 
                     mcCloseSupportModal();
                     mcShowToast();
 
-                    // Now manually submit via AJAX
                     const formData = new FormData(form);
 
                     fetch("", {
@@ -242,8 +335,7 @@ public function render_dashboard() {
 
     <?php
     return ob_get_clean();
- }
-
+  }
 
 /* ---------------------------------------------------------
        EDIT DETAILS
@@ -266,6 +358,9 @@ public function render_edit_details() {
 
     $pharmacy_id = $pharmacy->ID;
 
+    $this->mc_enforce_subscription_access($pharmacy_id);
+
+
     // Pharmacy meta
     $gphc        = get_post_meta($pharmacy_id, '_mc_gphc_number', true);
     $email       = get_post_meta($pharmacy_id, '_mc_email', true);
@@ -276,6 +371,10 @@ public function render_edit_details() {
 
     $trial_start_readable = $trial_start ? date('d M Y', $trial_start) : 'N/A';
     $trial_end_readable   = $trial_end ? date('d M Y', $trial_end) : 'N/A';
+
+    // Subscription state (NEW)
+    $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
+    $subscription_label = ucfirst($subscription_state['status']);
 
     // Address/contact
     $address_1 = get_post_meta($pharmacy_id, '_mc_address_1', true);
@@ -310,6 +409,13 @@ public function render_edit_details() {
                 <div class="mc-topbar-right">
                     <span class="mc-topbar-badge mc-welcome-badge">
                         Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                     <?php
+                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
+                    ?>
+                    <span class="<?php echo esc_attr($badge_class); ?>">
+                        <?php echo esc_html($subscription_label); ?>
                     </span>
 
                     <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
@@ -368,6 +474,12 @@ public function render_edit_details() {
     <div class="mc-form-row-2col">
         <label>Trial Period</label>
         <input type="text" value="<?php echo esc_attr($trial_start_readable . ' → ' . $trial_end_readable); ?>" disabled>
+    </div>
+
+    <!-- ⭐ NEW: Subscription Status -->
+    <div class="mc-form-row-2col">
+        <label>Subscription Status</label>
+        <input type="text" value="<?php echo esc_attr($subscription_label); ?>" disabled>
     </div>
 
     <h3>Address</h3>
@@ -431,10 +543,11 @@ public function render_edit_details() {
     return ob_get_clean();
  }
 
-    /* ---------------------------------------------------------
+
+   /* ---------------------------------------------------------
        EDIT DETAILS HANDLER - will only allow password to be reset
-    --------------------------------------------------------- */
-   public function handle_edit_details_submit() {
+--------------------------------------------------------- */
+public function handle_edit_details_submit() {
 
     if (!isset($_POST['mc_reset_password_submit'])) {
         return;
@@ -476,12 +589,13 @@ public function render_edit_details() {
 
     wp_redirect(add_query_arg('password_updated', '1', site_url('/pharmacy/edit-details/')));
     exit;
- }
+}
+
 
 /* -----------------------------------------------
   SUPPORT HANDLER TO SEND TO FORM AS AN EMAIL
 -------------------------------------------------*/
-  public function handle_support_form() {
+public function handle_support_form() {
 
     if (!isset($_POST['mc_support_submit'])) {
         return;
@@ -512,7 +626,8 @@ public function render_edit_details() {
 }
 
 
-    /* ---------------------------------------------------------
+
+ /* ---------------------------------------------------------
        SEARCH / COMPARISON
 --------------------------------------------------------- */
 public function render_search() {
@@ -528,9 +643,14 @@ public function render_search() {
     }
 
     $pharmacy = $this->get_current_pharmacy();
+
+    
+
     if (!$pharmacy) {
         return '<p>You must be logged in as a pharmacy user to search products.</p>';
     }
+
+    $this->mc_enforce_subscription_access($pharmacy->ID);
 
     // NEW: determine if a pending order exists for this pharmacy
     global $wpdb;
@@ -545,6 +665,10 @@ public function render_search() {
     $active_tab = 'pending';
 
     $current_user = wp_get_current_user();
+
+    // NEW: subscription state
+    $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy->ID);
+    $subscription_label = ucfirst($subscription_state['status']);
 
     // Enqueue JS
     wp_enqueue_script(
@@ -585,6 +709,13 @@ public function render_search() {
                 <div class="mc-topbar-right">
                     <span class="mc-topbar-badge mc-welcome-badge">
                         Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                   <?php
+                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
+                    ?>
+                    <span class="<?php echo esc_attr($badge_class); ?>">
+                        <?php echo esc_html($subscription_label); ?>
                     </span>
 
                     <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
@@ -667,8 +798,8 @@ public function render_search() {
 
     /* ---------------------------------------------------------
      ORDERS PAGE (Transferred Orders Only)
-  --------------------------------------------------------- */
- public function render_orders_page() {
+--------------------------------------------------------- */
+public function render_orders_page() {
 
     if (is_admin()) {
         return '<div class="mc-admin-preview">Pharmacy Orders Preview</div>';
@@ -681,6 +812,7 @@ public function render_search() {
     }
 
     $pharmacy = $this->get_current_pharmacy();
+
     if (!$pharmacy) {
         return '<p>You must be logged in as a pharmacy user to view orders.</p>';
     }
@@ -688,6 +820,12 @@ public function render_search() {
     global $wpdb;
     $pharmacy_id   = $pharmacy->ID;
     $current_user  = wp_get_current_user();
+
+    $this->mc_enforce_subscription_access($pharmacy_id);
+
+    // NEW: subscription state
+    $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
+    $subscription_label = ucfirst($subscription_state['status']);
 
     // Tables
     $orders_table           = $wpdb->prefix . 'medi_orders';
@@ -750,6 +888,14 @@ public function render_search() {
                 <div class="mc-topbar-right">
                     <span class="mc-topbar-badge mc-welcome-badge">
                         Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                    <!-- ⭐ NEW: Subscription Status Badge -->
+                    <?php
+                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
+                    ?>
+                    <span class="<?php echo esc_attr($badge_class); ?>">
+                        <?php echo esc_html($subscription_label); ?>
                     </span>
 
                     <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
@@ -1010,12 +1156,18 @@ public function render_subscription_page() {
     }
 
     $pharmacy = $this->get_current_pharmacy();
+
+
     if (!$pharmacy) {
         return '<p>You must be logged in as a pharmacy user to view subscriptions.</p>';
     }
 
     $pharmacy_id = $pharmacy->ID;
     $current_user = wp_get_current_user();
+
+    // ⭐ NEW: subscription state
+    $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
+    $subscription_label = ucfirst($subscription_state['status']);
 
     /* Example subscription data (replace with DB later) */
     $subscription_history = [
@@ -1049,6 +1201,14 @@ public function render_subscription_page() {
                 <div class="mc-topbar-right">
                     <span class="mc-topbar-badge mc-welcome-badge">
                         Welcome, <?php echo esc_html($current_user->user_email); ?>
+                    </span>
+
+                    <!-- ⭐ NEW: Subscription Status Badge -->
+                    <?php
+                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
+                    ?>
+                    <span class="<?php echo esc_attr($badge_class); ?>">
+                        <?php echo esc_html($subscription_label); ?>
                     </span>
 
                     <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 

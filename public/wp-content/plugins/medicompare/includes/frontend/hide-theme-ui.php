@@ -111,6 +111,15 @@ add_action('wp_enqueue_scripts', function() {
         filemtime(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/css/pharmacy-portal.css')
     );
 
+    // ⭐ 4. Subscription modal JS (NEW)
+    wp_enqueue_script(
+        'mc-subscription-modal',
+        plugin_dir_url(dirname(__FILE__, 2)) . 'assets/js/subscription-modal.js',
+        ['jquery'],
+        '1.0',
+        true
+    );
+
 });
 
 

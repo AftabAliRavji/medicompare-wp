@@ -45,6 +45,12 @@ class MediCompare {
         // Hide theme header/footer for MediCompare pages
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/hide-theme-ui.php';
 
+        // ⭐ NEW: Stripe config + checkout
+        require_once plugin_dir_path(__FILE__) . 'includes/stripe-config.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-stripe.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/stripe-webhooks.php';
+
+
         // Requirements board
         require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
     }

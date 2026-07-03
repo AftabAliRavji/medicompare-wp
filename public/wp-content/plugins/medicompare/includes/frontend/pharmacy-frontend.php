@@ -99,11 +99,8 @@ class MediCompare_Pharmacy_Frontend {
 
             if (!isset($state['is_access_allowed']) || $state['is_access_allowed'] !== true) {
 
-                // Redirect to subscription page with a flag
-                wp_redirect(
-                    add_query_arg('subscription_blocked', '1', site_url('/pharmacy/subscription/'))
-                );
-                exit;
+                $GLOBALS['mc_subscription_blocked'] = $state;
+                return;
             }
         }
 
@@ -334,6 +331,9 @@ public function render_dashboard() {
     </script>
 
     <?php
+    if (!empty($GLOBALS['mc_subscription_blocked'])) {
+        include dirname(__FILE__, 3) . '/templates/subscription-block-modal.php';
+    }
     return ob_get_clean();
   }
 
@@ -540,6 +540,10 @@ public function render_edit_details() {
 
 
     <?php
+    if (!empty($GLOBALS['mc_subscription_blocked'])) {
+        include dirname(__FILE__, 3) . '/templates/subscription-block-modal.php';
+    }
+
     return ob_get_clean();
  }
 
@@ -792,6 +796,10 @@ public function render_search() {
     </div><!-- end alignfull wrapper -->
 
     <?php
+    if (!empty($GLOBALS['mc_subscription_blocked'])) {
+        include dirname(__FILE__, 3) . '/templates/subscription-block-modal.php';
+    }
+
     return ob_get_clean();
   }
 
@@ -1137,6 +1145,9 @@ public function render_orders_page() {
     </script>
 
     <?php
+     if (!empty($GLOBALS['mc_subscription_blocked'])) {
+        include dirname(__FILE__, 3) . '/templates/subscription-block-modal.php';
+    }
     return ob_get_clean();
  }
 

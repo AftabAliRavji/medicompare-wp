@@ -18,7 +18,7 @@ class MediCompare_Pharmacy_Frontend {
     /* ---------------------------------------------------------
        SUBSCRIPTION STATE HELPER (NEW)
     --------------------------------------------------------- */
-    private function mc_get_pharmacy_subscription_state($pharmacy_id) {
+        private function mc_get_pharmacy_subscription_state($pharmacy_id) {
 
         $status         = get_post_meta($pharmacy_id, '_mc_subscription_status', true);
         $trial_start    = (int) get_post_meta($pharmacy_id, '_mc_trial_start', true);
@@ -44,6 +44,25 @@ class MediCompare_Pharmacy_Frontend {
 
         /* Subscription active */
         if ($status === 'active') {
+
+            // NEW: If trial is still active, allow access
+            if ($trial_end > $now) {
+                return [
+                    'status' => 'active',
+                    'trial_end' => $trial_end,
+                    'is_access_allowed' => true
+                ];
+            }
+
+            // If no next billing date, treat as active (trial-based)
+            if ($next_billing === 0) {
+                return [
+                    'status' => 'active',
+                    'is_access_allowed' => true
+                ];
+            }
+
+            // Normal subscription check
             if ($next_billing > $now) {
                 return [
                     'status' => 'active',
@@ -51,6 +70,7 @@ class MediCompare_Pharmacy_Frontend {
                     'is_access_allowed' => true
                 ];
             }
+
             return [
                 'status' => 'past_due',
                 'is_access_allowed' => false
@@ -71,6 +91,7 @@ class MediCompare_Pharmacy_Frontend {
             'is_access_allowed' => false
         ];
     }
+
 
     private function get_current_pharmacy() {
 

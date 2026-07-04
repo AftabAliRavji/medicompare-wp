@@ -155,6 +155,40 @@ class MediCompare_Pharmacy_Login {
 
         mc_debug("wp_signon SUCCESS → redirecting to search");
 
+        // ---------------------------------------------
+         // UPDATE SUBSCRIPTION/TRIAL STATUS AT LOGIN
+        // ---------------------------------------------
+        $pharmacy_id = get_user_meta($user->ID, '_mc_pharmacy_id', true);
+
+        if ($pharmacy_id) {
+
+            $status    = get_post_meta($pharmacy_id, '_mc_subscription_status', true);
+            $trial_end = (int) get_post_meta($pharmacy_id, '_mc_trial_end', true);
+            $sub_end   = (int) get_post_meta($pharmacy_id, '_mc_subscription_period_end', true);
+
+            $now = time();
+
+            mc_debug("StateCheck: status=$status, trial_end=$trial_end, sub_end=$sub_end, now=$now");
+
+            // Safety: If status is empty, treat as expired
+            if (empty($status)) {
+                update_post_meta($pharmacy_id, '_mc_subscription_status', 'expired');
+                mc_debug("StateCheck: status was empty → set to expired");
+            }
+
+            // Trial expired?
+            if ($status === 'trial' && $trial_end > 0 && $trial_end < $now) {
+                update_post_meta($pharmacy_id, '_mc_subscription_status', 'expired');
+                mc_debug("StateCheck: trial expired → set status=expired");
+            }
+
+            // Subscription expired?
+            if ($status === 'active' && $sub_end > 0 && $sub_end < $now) {
+                update_post_meta($pharmacy_id, '_mc_subscription_status', 'expired');
+                mc_debug("StateCheck: subscription expired → set status=expired");
+            }
+        }
+
         wp_redirect(site_url('/pharmacy/search/'));
         exit;
     }

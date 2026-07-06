@@ -150,4 +150,10 @@ add_action('template_redirect', function () {
         wp_redirect('/pharmacy/');
         exit;
     }
+
+    // Only redirect the homepage
+    if (is_front_page() || is_home()) {
+        wp_redirect(site_url('/pharmacy'));
+        exit;
+    }
 });

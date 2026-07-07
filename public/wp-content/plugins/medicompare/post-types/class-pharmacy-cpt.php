@@ -190,7 +190,7 @@ class MediCompare_Pharmacy_CPT {
     }
 
     /* ---------------------------------------------------------
-       ADMIN COLUMNS
+       ADMIN COLUMNS (UPDATED)
     --------------------------------------------------------- */
     public function add_pharmacy_columns($columns) {
 
@@ -208,6 +208,12 @@ class MediCompare_Pharmacy_CPT {
         $new['gphc']          = 'GPhC';
         $new['contact']       = 'Contact';
         $new['status']        = 'Status';
+
+        // ⭐ NEW SUBSCRIPTION COLUMNS
+        $new['sub_status']    = 'Subscription';
+        $new['trial_remaining'] = 'Trial Left';
+        $new['next_billing']  = 'Next Billing';
+
         $new['date']          = $columns['date'];
 
         return $new;
@@ -257,6 +263,30 @@ class MediCompare_Pharmacy_CPT {
                 $status = get_post_meta($post_id, '_mc_status', true);
                 echo esc_html(ucwords(str_replace('_', ' ', $status)));
                 break;
+
+            /* ---------------------------------------------------------
+               ⭐ NEW SUBSCRIPTION COLUMNS
+            --------------------------------------------------------- */
+
+            case 'sub_status':
+                $status = get_post_meta($post_id, '_mc_subscription_status', true);
+                echo esc_html(ucfirst($status ?: 'unknown'));
+                break;
+
+            case 'trial_remaining':
+                $trial_end = (int) get_post_meta($post_id, '_mc_trial_end', true);
+                if ($trial_end > time()) {
+                    $days = floor(($trial_end - time()) / 86400);
+                    echo esc_html($days . ' days');
+                } else {
+                    echo '—';
+                }
+                break;
+
+            case 'next_billing':
+                $next = (int) get_post_meta($post_id, '_mc_next_billing_date', true);
+                echo $next ? esc_html(date('d M Y', $next)) : '—';
+                break;
         }
     }
 
@@ -265,6 +295,11 @@ class MediCompare_Pharmacy_CPT {
         $columns['city']          = 'city';
         $columns['postcode']      = 'postcode';
         $columns['status']        = 'status';
+
+        // ⭐ NEW sortable subscription columns
+        $columns['sub_status']    = 'sub_status';
+        $columns['next_billing']  = 'next_billing';
+
         return $columns;
     }
 }

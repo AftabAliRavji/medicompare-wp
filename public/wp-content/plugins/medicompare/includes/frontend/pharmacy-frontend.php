@@ -198,7 +198,7 @@ public function render_dashboard() {
                 <p>Search products and compare suppliers.</p>
             </section>
 
-            <!-- SUBSCRIPTION COUNTDOWN (UPDATED) -->
+            <!-- SUBSCRIPTION CARD (UNIFIED STATE) -->
             <section class="mc-card-pro mc-card-green"
                      onclick="window.location='<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>';">
                 <div class="mc-card-icon">⏳</div>
@@ -210,13 +210,25 @@ public function render_dashboard() {
                     $label = '';
 
                     if ($state['status'] === 'trial') {
-                        $days_left = max(0, floor(($state['trial_end'] - $now) / 86400));
+
+                        // Trial active (status = trial)
+                        $days_left = isset($state['trial_end'])
+                            ? max(0, floor(($state['trial_end'] - $now) / 86400))
+                            : 0;
+
                         $label = "Trial: {$days_left} days remaining";
 
                     } elseif ($state['status'] === 'active') {
-                        if (!empty($state['next_billing'])) {
+
+                        // If trial_end is present, show trial countdown even though status=active
+                        if (!empty($state['trial_end']) && $state['trial_end'] > $now) {
+                            $days_left = max(0, floor(($state['trial_end'] - $now) / 86400));
+                            $label = "Trial: {$days_left} days remaining";
+
+                        } elseif (!empty($state['next_billing'])) {
                             $days_left = max(0, floor(($state['next_billing'] - $now) / 86400));
                             $label = "Subscription: {$days_left} days until renewal";
+
                         } else {
                             $label = "Subscription active";
                         }
@@ -1172,121 +1184,159 @@ public function render_orders_page() {
     return ob_get_clean();
  }
 
- /* ---------------------------------------------------------
-       SUBSCRIPTION PAGE
---------------------------------------------------------- */
-public function render_subscription_page() {
+     /* ---------------------------------------------------------
+       SUBSCRIPTION PAGE (DB-DRIVEN)
+    --------------------------------------------------------- */
+    public function render_subscription_page() {
 
-    if (is_admin()) {
-        return '<div class="mc-admin-preview">Subscription Page Preview</div>';
-    }
+        if (is_admin()) {
+            return '<div class="mc-admin-preview">Subscription Page Preview</div>';
+        }
 
-    // Protect page
-    if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
-        wp_redirect(site_url('/pharmacy/login/'));
-        exit;
-    }
+        // Protect page
+        if (!is_user_logged_in() || !in_array('pharmacy_user', wp_get_current_user()->roles)) {
+            wp_redirect(site_url('/pharmacy/login/'));
+            exit;
+        }
 
-    $pharmacy = $this->get_current_pharmacy();
+        $pharmacy = $this->get_current_pharmacy();
 
+        if (!$pharmacy) {
+            return '<p>You must be logged in as a pharmacy user to view subscriptions.</p>';
+        }
 
-    if (!$pharmacy) {
-        return '<p>You must be logged in as a pharmacy user to view subscriptions.</p>';
-    }
+        $pharmacy_id   = $pharmacy->ID;
+        $current_user  = wp_get_current_user();
 
-    $pharmacy_id = $pharmacy->ID;
-    $current_user = wp_get_current_user();
+        // Unified subscription state
+        $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
+        $subscription_label = ucfirst($subscription_state['status']);
 
-    // ⭐ NEW: subscription state
-    $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy_id);
-    $subscription_label = ucfirst($subscription_state['status']);
+        // Raw meta for display
+        $status                = get_post_meta($pharmacy_id, '_mc_subscription_status', true);
+        $trial_start           = (int) get_post_meta($pharmacy_id, '_mc_trial_start', true);
+        $trial_end             = (int) get_post_meta($pharmacy_id, '_mc_trial_end', true);
+        $sub_period_start      = (int) get_post_meta($pharmacy_id, '_mc_subscription_period_start', true);
+        $sub_period_end        = (int) get_post_meta($pharmacy_id, '_mc_subscription_period_end', true);
+        $next_billing          = (int) get_post_meta($pharmacy_id, '_mc_next_billing_date', true);
+        $stripe_customer_id    = get_post_meta($pharmacy_id, '_mc_stripe_customer_id', true);
+        $stripe_subscription_id= get_post_meta($pharmacy_id, '_mc_stripe_subscription_id', true);
 
-    /* Example subscription data (replace with DB later) */
-    $subscription_history = [
-        ['month' => 'January 2026', 'amount' => '£10', 'status' => 'Paid'],
-        ['month' => 'February 2026', 'amount' => '£10', 'status' => 'Paid'],
-        ['month' => 'March 2026', 'amount' => '£10', 'status' => 'Paid'],
-    ];
+        // Readable dates
+        $trial_start_readable      = $trial_start      ? date('d M Y', $trial_start)      : 'N/A';
+        $trial_end_readable        = $trial_end        ? date('d M Y', $trial_end)        : 'N/A';
+        $sub_period_start_readable = $sub_period_start ? date('d M Y', $sub_period_start) : 'N/A';
+        $sub_period_end_readable   = $sub_period_end   ? date('d M Y', $sub_period_end)   : 'N/A';
+        $next_billing_readable     = $next_billing     ? date('d M Y', $next_billing)     : 'N/A';
 
-    /* Current month due */
-    $current_month = date('F Y');
-    $current_amount = '£10';
+        ob_start();
 
-    ob_start();
+        /* HEADER + LOGO */
+        $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
+        include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
+        ?>
 
-    /* ⭐ HEADER + LOGO */
-    $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
-    include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
-    ?>
+        <!-- FULL-WIDTH TOP BAR -->
+        <div class="wp-block-group alignfull" style="padding:0;margin:0;">
+            <div class="mc-page-container">
 
-    <!-- FULL-WIDTH TOP BAR -->
-    <div class="wp-block-group alignfull" style="padding:0;margin:0;">
+                <div class="mc-topbar-inner">
+
+                    <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
+                       class="mc-topbar-btn mc-back-btn">
+                        ← Back to Dashboard
+                    </a>
+
+                    <div class="mc-topbar-right">
+                        <span class="mc-topbar-badge mc-welcome-badge">
+                            Welcome, <?php echo esc_html($current_user->user_email); ?>
+                        </span>
+
+                        <?php
+                            $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
+                        ?>
+                        <span class="<?php echo esc_attr($badge_class); ?>">
+                            <?php echo esc_html($subscription_label); ?>
+                        </span>
+
+                        <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
+                           class="mc-topbar-btn mc-logout-btn">
+                            Logout
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PAGE CONTENT -->
         <div class="mc-page-container">
 
-            <div class="mc-topbar-inner">
+            <h1 class="mc-page-title">Subscription Overview</h1>
 
-                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
-                   class="mc-topbar-btn mc-back-btn">
-                    ← Back to Dashboard
-                </a>
+            <div class="mc-subscription-grid">
 
-                <div class="mc-topbar-right">
-                    <span class="mc-topbar-badge mc-welcome-badge">
-                        Welcome, <?php echo esc_html($current_user->user_email); ?>
-                    </span>
+                <!-- CURRENT STATUS CARD -->
+                <section class="mc-card-pro mc-card-green">
+                    <div class="mc-card-icon">📊</div>
+                    <h2 class="mc-card-title">Current Status</h2>
 
-                    <!-- ⭐ NEW: Subscription Status Badge -->
+                    <p><strong>Status:</strong> <?php echo esc_html(ucfirst($status ?: 'unknown')); ?></p>
+
                     <?php
-                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
+                        $access_msg = !empty($subscription_state['is_access_allowed']) && $subscription_state['is_access_allowed']
+                            ? 'Access allowed'
+                            : 'Access blocked – please renew or contact support.';
                     ?>
-                    <span class="<?php echo esc_attr($badge_class); ?>">
-                        <?php echo esc_html($subscription_label); ?>
-                    </span>
+                    <p><strong>Access:</strong> <?php echo esc_html($access_msg); ?></p>
 
-                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
-                       class="mc-topbar-btn mc-logout-btn">
-                        Logout
-                    </a>
-                </div>
+                    <?php if (!empty($subscription_state['trial_end']) && $subscription_state['trial_end'] > time()): ?>
+                        <?php
+                            $days_left = max(0, floor(($subscription_state['trial_end'] - time()) / 86400));
+                        ?>
+                        <p><strong>Trial:</strong> <?php echo esc_html($days_left); ?> days remaining</p>
+                    <?php elseif (!empty($subscription_state['next_billing'])): ?>
+                        <?php
+                            $days_left = max(0, floor(($subscription_state['next_billing'] - time()) / 86400));
+                        ?>
+                        <p><strong>Next Billing:</strong> in <?php echo esc_html($days_left); ?> days</p>
+                    <?php endif; ?>
+                </section>
+
+                <!-- KEY DATES CARD -->
+                <section class="mc-card-pro mc-card-blue">
+                    <div class="mc-card-icon">📅</div>
+                    <h2 class="mc-card-title">Key Dates</h2>
+
+                    <p><strong>Trial Start:</strong> <?php echo esc_html($trial_start_readable); ?></p>
+                    <p><strong>Trial End:</strong> <?php echo esc_html($trial_end_readable); ?></p>
+
+                    <p><strong>Subscription Start:</strong> <?php echo esc_html($sub_period_start_readable); ?></p>
+                    <p><strong>Subscription End:</strong> <?php echo esc_html($sub_period_end_readable); ?></p>
+
+                    <p><strong>Next Billing Date:</strong> <?php echo esc_html($next_billing_readable); ?></p>
+                </section>
+
+                <!-- STRIPE DETAILS CARD -->
+                <section class="mc-card-pro mc-card-orange">
+                    <div class="mc-card-icon">💳</div>
+                    <h2 class="mc-card-title">Stripe Details</h2>
+
+                    <p><strong>Stripe Customer ID:</strong><br>
+                        <?php echo esc_html($stripe_customer_id ?: 'Not set'); ?></p>
+
+                    <p><strong>Stripe Subscription ID:</strong><br>
+                        <?php echo esc_html($stripe_subscription_id ?: 'Not set'); ?></p>
+                </section>
 
             </div>
 
         </div>
-    </div>
 
-    <!-- PAGE CONTENT -->
-    <div class="mc-page-container">
-
-        <h1 class="mc-page-title">Subscription History</h1>
-
-        <div class="mc-subscription-grid">
-
-            <!-- CURRENT MONTH DUE -->
-            <section class="mc-card-pro mc-card-orange"
-                     onclick="window.location='<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>';">
-                <div class="mc-card-icon">📅</div>
-                <h2 class="mc-card-title">Current Month Due</h2>
-                <p><strong><?php echo $current_month; ?></strong></p>
-                <p>Amount: <?php echo $current_amount; ?></p>
-            </section>
-
-            <!-- HISTORY -->
-            <?php foreach ($subscription_history as $row): ?>
-                <section class="mc-card-pro mc-card-green">
-                    <div class="mc-card-icon">✔️</div>
-                    <h2 class="mc-card-title"><?php echo esc_html($row['month']); ?></h2>
-                    <p>Amount: <?php echo esc_html($row['amount']); ?></p>
-                    <p>Status: <?php echo esc_html($row['status']); ?></p>
-                </section>
-            <?php endforeach; ?>
-
-        </div>
-
-    </div>
-
-    <?php
-    return ob_get_clean();
- }
+        <?php
+        return ob_get_clean();
+    }
 
 }
 

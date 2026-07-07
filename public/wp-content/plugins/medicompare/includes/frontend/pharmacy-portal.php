@@ -16,10 +16,25 @@ add_shortcode('mc_pharmacy_portal', function () {
         return '<div class="mc-admin-preview">Pharmacy Portal Preview</div>';
     }
 
+    error_log("GLOBAL REDIRECT FIRED");
+
+
     if (is_user_logged_in()) {
+
+        // Allow Stripe success callback
+        if (get_query_var('mc_subscription_success')) {
+            return;
+        }
+
+        // Allow Stripe cancel callback
+        if (get_query_var('mc_subscription_cancel')) {
+            return;
+        }
+
         wp_redirect('/pharmacy/search/');
         exit;
     }
+
 
     ob_start();
 

@@ -1,0 +1,85 @@
+/* Subscription Control Centre Styling */
+
+.mc-subscriptions-wrap h1 {
+    margin-bottom: 20px;
+}
+
+.mc-subscription-selector select {
+    min-width: 280px;
+    font-size: 14px;
+}
+
+.mc-subscription-details-table th {
+    width: 200px;
+}
+
+#mc-subscription-actions button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+#mc-subscription-action-result {
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+/* Toast Notification */
+.mc-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #23282d;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 99999;
+}
+
+.mc-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* ---------------------------------------------------------
+   SUBSCRIPTION TIMELINE VISUAL
+--------------------------------------------------------- */
+
+.mc-timeline {
+    position: relative;
+    width: 100%;
+    margin: 30px 0;
+    height: 8px;
+    background: #ddd;
+    border-radius: 4px;
+}
+
+.mc-timeline-segment {
+    position: absolute;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.mc-timeline-label {
+    position: absolute;
+    top: -22px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.mc-timeline-today {
+    position: absolute;
+    top: -10px;
+    width: 2px;
+    height: 28px;
+    background: #000;
+}
+
+.mc-timeline-today-label {
+    position: absolute;
+    top: 22px;
+    font-size: 12px;
+    white-space: nowrap;
+}

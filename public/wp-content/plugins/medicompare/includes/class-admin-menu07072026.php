@@ -9,20 +9,9 @@ class MediCompare_Admin_Menu {
         add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
 
-
-         //subscription actions
-         add_action('admin_post_mc_save_subscription_meta', [$this, 'save_subscription_meta']);
-         add_action('wp_ajax_mc_subscription_action', [$this, 'ajax_subscription_action']);
-         add_action('wp_ajax_mc_subscription_audit_log', [$this, 'ajax_subscription_audit_log']);
-         add_action('wp_ajax_mc_subscription_stripe_sync', [$this, 'ajax_subscription_stripe_sync']);
-         add_action('wp_ajax_mc_billing_history_sync', [$this, 'ajax_billing_history_sync']);
-         add_action('admin_enqueue_scripts', [$this, 'enqueue_subscription_js']);
-         add_action('admin_enqueue_scripts', [$this, 'enqueue_subscription_css']);
-
-
         add_action('admin_enqueue_scripts', function($hook){
-         error_log("HOOK: " . $hook);
-     });
+    error_log("HOOK: " . $hook);
+});
 
 
 
@@ -60,187 +49,176 @@ class MediCompare_Admin_Menu {
 
     public function register_menu() {
 
-    add_menu_page(
-        'MediCompare',
-        'MediCompare',
-        'manage_options',
-        'medicompare',
-        [$this, 'dashboard_page'],
-        'dashicons-clipboard',
-        2
-    );
+        add_menu_page(
+            'MediCompare',
+            'MediCompare',
+            'manage_options',
+            'medicompare',
+            [$this, 'dashboard_page'],
+            'dashicons-clipboard',
+            2
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Dashboard',
-        'Dashboard',
-        'manage_options',
-        'medicompare',
-        [$this, 'dashboard_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Dashboard',
+            'Dashboard',
+            'manage_options',
+            'medicompare',
+            [$this, 'dashboard_page']
+        );
 
-    /* ---------------------------------------------------------
-       SUPPLIERS
-    --------------------------------------------------------- */
+        /* ---------------------------------------------------------
+           SUPPLIERS
+        --------------------------------------------------------- */
 
-    add_submenu_page(
-        'medicompare',
-        'Suppliers',
-        'Suppliers ALL',
-        'manage_options',
-        'edit.php?post_type=mc_supplier'
-    );
+        add_submenu_page(
+            'medicompare',
+            'Suppliers',
+            'Suppliers ALL',
+            'manage_options',
+            'edit.php?post_type=mc_supplier'
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Add New Supplier',
-        'Suppliers Add New',
-        'manage_options',
-        'post-new.php?post_type=mc_supplier'
-    );
+        add_submenu_page(
+            'medicompare',
+            'Add New Supplier',
+            'Suppliers Add New',
+            'manage_options',
+            'post-new.php?post_type=mc_supplier'
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Upload Supplier CSV',
-        'Upload Supplier CSV',
-        'manage_options',
-        'upload-supplier-csv',
-        [$this, 'upload_supplier_csv_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Upload Supplier CSV',
+            'Upload Supplier CSV',
+            'manage_options',
+            'upload-supplier-csv',
+            [$this, 'upload_supplier_csv_page']
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Supplier Products ALL',
-        'Supplier Products ALL',
-        'manage_options',
-        'supplier-products-all',
-        [$this, 'supplier_products_all_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Supplier Products ALL',
+            'Supplier Products ALL',
+            'manage_options',
+            'supplier-products-all',
+            [$this, 'supplier_products_all_page']
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Upload Supplier Product CSV',
-        'Upload Supplier Product CSV',
-        'manage_options',
-        'medicompare-upload-supplier-product-csv',
-        [$this, 'upload_supplier_product_csv_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Upload Supplier Product CSV',
+            'Upload Supplier Product CSV',
+            'manage_options',
+            'medicompare-upload-supplier-product-csv',
+            [$this, 'upload_supplier_product_csv_page']
+        );
 
-    /* ---------------------------------------------------------
-       PRODUCTS
-    --------------------------------------------------------- */
+        /* ---------------------------------------------------------
+           PRODUCTS
+        --------------------------------------------------------- */
 
-    add_submenu_page(
-        'medicompare',
-        'Products',
-        'Products ALL',
-        'manage_options',
-        'edit.php?post_type=mc_product'
-    );
+        add_submenu_page(
+            'medicompare',
+            'Products',
+            'Products ALL',
+            'manage_options',
+            'edit.php?post_type=mc_product'
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Add New Product',
-        'Products Add New',
-        'manage_options',
-        'post-new.php?post_type=mc_product'
-    );
+        add_submenu_page(
+            'medicompare',
+            'Add New Product',
+            'Products Add New',
+            'manage_options',
+            'post-new.php?post_type=mc_product'
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Upload Product CSV',
-        'Upload Product CSV',
-        'manage_options',
-        'medicompare-upload-product-csv',
-        [$this, 'upload_product_csv_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Upload Product CSV',
+            'Upload Product CSV',
+            'manage_options',
+            'medicompare-upload-product-csv',
+            [$this, 'upload_product_csv_page']
+        );
 
-    /* ---------------------------------------------------------
-       PHARMACIES
-    --------------------------------------------------------- */
+        /* ---------------------------------------------------------
+           PHARMACIES
+        --------------------------------------------------------- */
 
-    add_submenu_page(
-        'medicompare',
-        'Pharmacies',
-        'Pharmacies ALL',
-        'manage_options',
-        'edit.php?post_type=mc_pharmacy'
-    );
+        add_submenu_page(
+            'medicompare',
+            'Pharmacies',
+            'Pharmacies ALL',
+            'manage_options',
+            'edit.php?post_type=mc_pharmacy'
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Add New Pharmacy',
-        'Pharmacies Add New',
-        'manage_options',
-        'post-new.php?post_type=mc_pharmacy'
-    );
+        add_submenu_page(
+            'medicompare',
+            'Add New Pharmacy',
+            'Pharmacies Add New',
+            'manage_options',
+            'post-new.php?post_type=mc_pharmacy'
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Upload Pharmacy CSV',
-        'Upload Pharmacy CSV',
-        'manage_options',
-        'medicompare-upload-pharmacy-csv',
-        [$this, 'upload_pharmacy_csv_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Upload Pharmacy CSV',
+            'Upload Pharmacy CSV',
+            'manage_options',
+            'medicompare-upload-pharmacy-csv',
+            [$this, 'upload_pharmacy_csv_page']
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Pending Verification',
-        'Pending Verification',
-        'manage_options',
-        'medicompare-pharmacy-verification',
-        [$this, 'pharmacy_verification_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Pending Verification',
+            'Pending Verification',
+            'manage_options',
+            'medicompare-pharmacy-verification',
+            [$this, 'pharmacy_verification_page']
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Transferred Orders',
-        'Transferred Orders',
-        'manage_options',
-        'medicompare-transferred-orders',
-        [$this, 'transferred_orders_page']
-    );
+        add_submenu_page(
+            'medicompare',
+            'Transferred Orders',
+            'Transferred Orders',
+            'manage_options',
+            'medicompare-transferred-orders',
+            [$this, 'transferred_orders_page']
+        );
 
-    /* ---------------------------------------------------------
-       ⭐ NEW — SUBSCRIPTIONS CONTROL CENTRE
-    --------------------------------------------------------- */
-    add_submenu_page(
-        'medicompare',
-        'Subscriptions',
-        'Subscriptions',
-        'manage_options',
-        'medicompare-subscriptions',
-        [$this, 'subscription_control_page']
-    );
 
-    /* ---------------------------------------------------------
-       REPORTS
-    --------------------------------------------------------- */
 
-    add_submenu_page(
-        'medicompare',
-        'Reports',
-        'Reports',
-        'manage_options',
-        'medicompare-reports',
-        [$this, 'reports_page']
-    );
+        /* ---------------------------------------------------------
+           REPORTS
+        --------------------------------------------------------- */
 
-    /* ---------------------------------------------------------
-       IMPORT LOGS
-    --------------------------------------------------------- */
+        add_submenu_page(
+            'medicompare',
+            'Reports',
+            'Reports',
+            'manage_options',
+            'medicompare-reports',
+            [$this, 'reports_page']
+        );
 
-    add_submenu_page(
-        'medicompare',
-        'Import Logs',
-        'Import Logs',
-        'manage_options',
-        'medicompare-import-logs',
-        [$this, 'import_logs_page']
-    );
-}
+        /* ---------------------------------------------------------
+           IMPORT LOGS
+        --------------------------------------------------------- */
 
+        add_submenu_page(
+            'medicompare',
+            'Import Logs',
+            'Import Logs',
+            'manage_options',
+            'medicompare-import-logs',
+            [$this, 'import_logs_page']
+        );
+    }
 
     public function dashboard_page() {
     echo '<div class="wrap">';
@@ -1478,604 +1456,6 @@ public function transferred_orders_page() {
     </div>
     <?php
   }
-
-      /* ---------------------------------------------------------
-       SUBSCRIPTIONS CONTROL CENTRE (PAGE SKELETON)
-       Hybrid Mode:
-       - Dropdown reloads page
-       - Actions use AJAX
-    --------------------------------------------------------- */
-    public function subscription_control_page() {
-
-        if (!current_user_can('manage_options')) {
-            wp_die('You do not have permission to access this page.');
-        }
-
-        // Load all pharmacies for dropdown
-        $pharmacies = get_posts([
-            'post_type'      => 'mc_pharmacy',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-            'fields'         => 'ids',
-        ]);
-
-        $selected_id = isset($_GET['pharmacy_id']) ? intval($_GET['pharmacy_id']) : 0;
-
-        ?>
-        <div class="wrap mc-subscriptions-wrap">
-            <h1>Pharmacy Subscriptions</h1>
-
-            <!-- PHARMACY SELECTOR -->
-            <form method="get" class="mc-subscription-selector">
-                <input type="hidden" name="page" value="medicompare-subscriptions">
-
-                <label>
-                    <strong>Select Pharmacy:</strong>
-                    <select name="pharmacy_id" onchange="this.form.submit()">
-                        <option value="0">-- Select Pharmacy --</option>
-                        <?php foreach ($pharmacies as $pid): ?>
-                            <option value="<?php echo esc_attr($pid); ?>"
-                                <?php selected($selected_id, $pid); ?>>
-                                <?php echo esc_html(get_the_title($pid)); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </label>
-            </form>
-
-            <?php if (!$selected_id): ?>
-                <p class="mc-muted">Please select a pharmacy to view subscription details.</p>
-                <?php return; ?>
-            <?php endif; ?>
-
-            <?php
-            /* ---------------------------------------------------------
-               LOAD SUBSCRIPTION META FOR SELECTED PHARMACY
-            --------------------------------------------------------- */
-            $status          = get_post_meta($selected_id, '_mc_subscription_status', true);
-            $trial_start     = get_post_meta($selected_id, '_mc_trial_start', true);
-            $trial_end       = get_post_meta($selected_id, '_mc_trial_end', true);
-            $sub_start       = get_post_meta($selected_id, '_mc_subscription_start', true);
-            $sub_end         = get_post_meta($selected_id, '_mc_subscription_end', true);
-            $next_billing    = get_post_meta($selected_id, '_mc_next_billing_date', true);
-            $stripe_customer = get_post_meta($selected_id, '_mc_stripe_customer_id', true);
-            $stripe_sub      = get_post_meta($selected_id, '_mc_stripe_subscription_id', true);
-            ?>
-
-            <hr>
-
-           <!-- SUBSCRIPTION DETAILS PANEL -->
-            <h2>Subscription Details</h2>
-
-            <div id="mc-subscription-details-table-wrapper">
-                <table class="form-table mc-subscription-details-table">
-                    <tr>
-                        <th>Status</th>
-                        <td><?php echo esc_html($status ?: 'unknown'); ?></td>
-                    </tr>
-                    <tr>
-                        <th>Trial Start</th>
-                        <td><?php echo $trial_start ? date('d M Y', $trial_start) : '—'; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Trial End</th>
-                        <td><?php echo $trial_end ? date('d M Y', $trial_end) : '—'; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Subscription Start</th>
-                        <td><?php echo $sub_start ? date('d M Y', $sub_start) : '—'; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Subscription End</th>
-                        <td><?php echo $sub_end ? date('d M Y', $sub_end) : '—'; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Next Billing</th>
-                        <td><?php echo $next_billing ? date('d M Y', $next_billing) : '—'; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Stripe Customer ID</th>
-                        <td><?php echo esc_html($stripe_customer ?: '—'); ?></td>
-                    </tr>
-                    <tr>
-                        <th>Stripe Subscription ID</th>
-                        <td><?php echo esc_html($stripe_sub ?: '—'); ?></td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- SUBSCRIPTION TIMELINE -->
-            <h2>Subscription Timeline</h2>
-
-            <div id="mc-subscription-timeline"
-                 data-trial-start="<?php echo esc_attr($trial_start); ?>"
-                 data-trial-end="<?php echo esc_attr($trial_end); ?>"
-                 data-sub-start="<?php echo esc_attr($sub_start); ?>"
-                 data-sub-end="<?php echo esc_attr($sub_end); ?>"
-                 data-next-billing="<?php echo esc_attr($next_billing); ?>">
-            </div>
-
-            <hr>
-
-            <!-- EDIT SUBSCRIPTION FIELDS -->
-            <h2>Edit Subscription</h2>
-
-            <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="mc-subscription-edit-form">
-                <?php wp_nonce_field('mc_save_subscription_meta', 'mc_subscription_meta_nonce'); ?>
-                <input type="hidden" name="mc_pharmacy_id" value="<?php echo esc_attr($selected_id); ?>">
-
-                <table class="form-table">
-                    <tr>
-                        <th>Trial Start</th>
-                        <td><input type="date" name="trial_start"
-                            value="<?php echo $trial_start ? date('Y-m-d', $trial_start) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th>Trial End</th>
-                        <td><input type="date" name="trial_end"
-                            value="<?php echo $trial_end ? date('Y-m-d', $trial_end) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th>Subscription Start</th>
-                        <td><input type="date" name="sub_start"
-                            value="<?php echo $sub_start ? date('Y-m-d', $sub_start) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th>Subscription End</th>
-                        <td><input type="date" name="sub_end"
-                            value="<?php echo $sub_end ? date('Y-m-d', $sub_end) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th>Next Billing</th>
-                        <td><input type="date" name="next_billing"
-                            value="<?php echo $next_billing ? date('Y-m-d', $next_billing) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th>Status</th>
-                        <td>
-                            <select name="status">
-                                <option value="trial"      <?php selected($status, 'trial'); ?>>Trial</option>
-                                <option value="active"     <?php selected($status, 'active'); ?>>Active</option>
-                                <option value="expired"    <?php selected($status, 'expired'); ?>>Expired</option>
-                                <option value="past_due"   <?php selected($status, 'past_due'); ?>>Past Due</option>
-                                <option value="canceled"   <?php selected($status, 'canceled'); ?>>Canceled</option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-
-                <p><button class="button button-primary">Save Changes</button></p>
-            </form>
-
-            <hr>
-
-            <!-- ACTION BUTTONS (AJAX) -->
-            <h2>Actions</h2>
-
-            <div id="mc-subscription-actions"
-                 data-pharmacy="<?php echo esc_attr($selected_id); ?>">
-
-                <button class="button"
-                    data-action="extend_trial_7">Extend Trial +7 Days</button>
-
-                <button class="button"
-                    data-action="extend_trial_30">Extend Trial +30 Days</button>
-
-                <button class="button"
-                    data-action="reset_trial">Reset Trial</button>
-
-                <button class="button"
-                    data-action="activate">Activate Subscription</button>
-
-                <button class="button"
-                    data-action="expire">Mark Expired</button>
-
-                <button class="button"
-                    data-action="past_due">Mark Past Due</button>
-
-                <button class="button"
-                    data-action="cancel">Cancel Subscription</button>
-
-                <button class="button"
-                    data-action="clear_billing">Clear Next Billing</button>
-
-                <button class="button"
-                    data-action="stripe_sync">Sync from Stripe</button>
-
-                <button class="button" 
-                   data-action="billing_history_sync">Sync Billing History</button>
-
-            </div>
-
-            <div id="mc-subscription-action-result"></div>
-
-            <hr>
-
-            <!-- AUDIT LOG -->
-            <h2>Audit Log</h2>
-
-            <div id="mc-subscription-audit-log">
-                <p class="mc-muted">Audit log will load here.</p>
-            </div>
-
-        </div>
-        <?php
-    }
-
-        /* ---------------------------------------------------------
-       SAVE SUBSCRIPTION META (FORM SUBMISSION)
-    --------------------------------------------------------- */
-    public function save_subscription_meta() {
-
-        if (!isset($_POST['mc_subscription_meta_nonce']) ||
-            !wp_verify_nonce($_POST['mc_subscription_meta_nonce'], 'mc_save_subscription_meta')) {
-            return;
-        }
-
-        if (!isset($_POST['mc_pharmacy_id'])) {
-            return;
-        }
-
-        $pid = intval($_POST['mc_pharmacy_id']);
-
-        // Convert dates to timestamps
-        $fields = [
-            'trial_start' => '_mc_trial_start',
-            'trial_end'   => '_mc_trial_end',
-            'sub_start'   => '_mc_subscription_start',
-            'sub_end'     => '_mc_subscription_end',
-            'next_billing'=> '_mc_next_billing_date',
-        ];
-
-        foreach ($fields as $form_key => $meta_key) {
-            if (!empty($_POST[$form_key])) {
-                $ts = strtotime($_POST[$form_key] . ' 00:00:00');
-                update_post_meta($pid, $meta_key, $ts);
-            }
-        }
-
-        // Status
-        if (isset($_POST['status'])) {
-            update_post_meta($pid, '_mc_subscription_status', sanitize_text_field($_POST['status']));
-        }
-
-        // Redirect back to page
-        wp_redirect(add_query_arg([
-            'page'        => 'medicompare-subscriptions',
-            'pharmacy_id' => $pid,
-            'updated'     => '1'
-        ], admin_url('admin.php')));
-        exit;
-    }
-
-
-    /* ---------------------------------------------------------
-       AJAX: SUBSCRIPTION ACTIONS (extend trial, activate, etc.)
-    --------------------------------------------------------- */
-    public function ajax_subscription_action() {
-
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'Permission denied']);
-        }
-
-        $pid    = intval($_POST['pharmacy_id'] ?? 0);
-        $action = sanitize_text_field($_POST['action_type'] ?? '');
-
-        if (!$pid || !$action) {
-            wp_send_json_error(['message' => 'Invalid request']);
-        }
-
-        $now = time();
-
-        switch ($action) {
-
-            case 'extend_trial_7':
-                $end = intval(get_post_meta($pid, '_mc_trial_end', true));
-                $end = $end > $now ? $end : $now;
-                update_post_meta($pid, '_mc_trial_end', $end + (7 * 86400));
-                $this->log_subscription_event($pid, "Trial extended by 7 days");
-                break;
-
-            case 'extend_trial_30':
-                $end = intval(get_post_meta($pid, '_mc_trial_end', true));
-                $end = $end > $now ? $end : $now;
-                update_post_meta($pid, '_mc_trial_end', $end + (30 * 86400));
-                $this->log_subscription_event($pid, "Trial extended by 30 days");
-                break;
-
-            case 'reset_trial':
-                update_post_meta($pid, '_mc_trial_start', $now);
-                update_post_meta($pid, '_mc_trial_end', $now + (30 * 86400));
-                update_post_meta($pid, '_mc_subscription_status', 'trial');
-                $this->log_subscription_event($pid, "Trial reset to 30 days");
-                break;
-
-            case 'activate':
-                update_post_meta($pid, '_mc_subscription_status', 'active');
-                update_post_meta($pid, '_mc_subscription_start', $now);
-                $this->log_subscription_event($pid, "Subscription activated");
-                break;
-
-            case 'expire':
-                update_post_meta($pid, '_mc_subscription_status', 'expired');
-                update_post_meta($pid, '_mc_subscription_end', $now);
-                $this->log_subscription_event($pid, "Subscription marked expired");
-                break;
-
-            case 'past_due':
-                update_post_meta($pid, '_mc_subscription_status', 'past_due');
-                $this->log_subscription_event($pid, "Subscription marked past due");
-                break;
-
-            case 'cancel':
-                update_post_meta($pid, '_mc_subscription_status', 'canceled');
-                $this->log_subscription_event($pid, "Subscription canceled");
-                break;
-
-            case 'clear_billing':
-                delete_post_meta($pid, '_mc_next_billing_date');
-                $this->log_subscription_event($pid, "Next billing date cleared");
-                break;
-
-            default:
-                wp_send_json_error(['message' => 'Unknown action']);
-        }
-
-        wp_send_json_success(['message' => 'Action completed']);
-    }
-
-        /* ---------------------------------------------------------
-       AJAX: STRIPE SYNC
-    --------------------------------------------------------- */
-    public function ajax_subscription_stripe_sync() {
-
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'Permission denied']);
-        }
-
-        $pid = intval($_POST['pharmacy_id'] ?? 0);
-        if (!$pid) {
-            wp_send_json_error(['message' => 'Invalid pharmacy']);
-        }
-
-        $stripe_customer = get_post_meta($pid, '_mc_stripe_customer_id', true);
-        $stripe_sub_id   = get_post_meta($pid, '_mc_stripe_subscription_id', true);
-
-        if (!$stripe_customer || !$stripe_sub_id) {
-            wp_send_json_error(['message' => 'Missing Stripe IDs']);
-        }
-
-        // Load Stripe
-        if (!class_exists('\Stripe\Stripe')) {
-            require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
-        }
-
-        \Stripe\Stripe::setApiKey(get_option('mc_stripe_secret_key'));
-
-        try {
-            $subscription = \Stripe\Subscription::retrieve($stripe_sub_id);
-
-            // Update WP meta
-            update_post_meta($pid, '_mc_subscription_status', $subscription->status);
-
-            update_post_meta($pid, '_mc_subscription_start', $subscription->current_period_start);
-            update_post_meta($pid, '_mc_subscription_end',   $subscription->current_period_end);
-
-            if (!empty($subscription->trial_start)) {
-                update_post_meta($pid, '_mc_trial_start', $subscription->trial_start);
-            }
-
-            if (!empty($subscription->trial_end)) {
-                update_post_meta($pid, '_mc_trial_end', $subscription->trial_end);
-            }
-
-            if (!empty($subscription->current_period_end)) {
-                update_post_meta($pid, '_mc_next_billing_date', $subscription->current_period_end);
-            }
-
-            // Log event
-            $this->log_subscription_event($pid, "Stripe sync completed (status: {$subscription->status})");
-
-            wp_send_json_success([
-                'message' => 'Stripe sync completed successfully'
-            ]);
-
-        } catch (\Exception $e) {
-            wp_send_json_error([
-                'message' => 'Stripe error: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-        /* ---------------------------------------------------------
-       SYNC BILLING HISTORY FROM STRIPE
-    --------------------------------------------------------- */
-    public function sync_billing_history_from_stripe($pharmacy_id)
-    {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'medi_billing_history';
-
-        $stripe_customer = get_post_meta($pharmacy_id, '_mc_stripe_customer_id', true);
-        $stripe_subscription = get_post_meta($pharmacy_id, '_mc_stripe_subscription_id', true);
-
-        if (!$stripe_customer || !$stripe_subscription) {
-            return [
-                'success' => false,
-                'message' => 'Missing Stripe customer or subscription ID'
-            ];
-        }
-
-        // Load Stripe
-        if (!class_exists('\Stripe\Stripe')) {
-            require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
-        }
-
-        \Stripe\Stripe::setApiKey(get_option('mc_stripe_secret_key'));
-
-        try {
-            // Fetch invoices for this subscription
-            $invoices = \Stripe\Invoice::all([
-                'subscription' => $stripe_subscription,
-                'limit' => 100
-            ]);
-
-            foreach ($invoices->data as $invoice) {
-
-                $existing = $wpdb->get_var($wpdb->prepare(
-                    "SELECT id FROM {$table} WHERE stripe_invoice_id = %s",
-                    $invoice->id
-                ));
-
-                $data = [
-                    'pharmacy_id'        => $pharmacy_id,
-                    'subscription_id'    => $stripe_subscription,
-                    'stripe_invoice_id'  => $invoice->id,
-                    'stripe_payment_intent' => $invoice->payment_intent,
-                    'stripe_charge_id'   => $invoice->charge,
-                    'amount'             => $invoice->amount_paid / 100,
-                    'currency'           => $invoice->currency,
-                    'status'             => $invoice->status,
-                    'invoice_url'        => isset($invoice->hosted_invoice_url) ? $invoice->hosted_invoice_url : '',
-                    'created_at'         => date('Y-m-d H:i:s', $invoice->created),
-                    'paid_at'            => $invoice->status === 'paid' ? date('Y-m-d H:i:s', $invoice->status_transitions->paid_at) : null,
-                    'failed_at'          => $invoice->status === 'failed' ? date('Y-m-d H:i:s', $invoice->status_transitions->failed_at) : null,
-                    'refunded_at'        => null,
-                    'retry_count'        => $invoice->attempt_count
-                ];
-
-                if ($existing) {
-                    // Update existing invoice
-                    $wpdb->update(
-                        $table,
-                        $data,
-                        ['id' => $existing]
-                    );
-                } else {
-                    // Insert new invoice
-                    $wpdb->insert($table, $data);
-                }
-            }
-
-            // Log event
-            $this->log_subscription_event($pharmacy_id, "Billing history synced from Stripe");
-
-            return [
-                'success' => true,
-                'message' => 'Billing history synced successfully'
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Stripe error: ' . $e->getMessage()
-            ];
-        }
-    }
-
-     /* ---------------------------------------------------------
-   AJAX: BILLING HISTORY SYNC
---------------------------------------------------------- */
-    public function ajax_billing_history_sync()
-    {
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'Permission denied']);
-        }
-
-        $pharmacy_id = intval($_POST['pharmacy_id'] ?? 0);
-
-        if (!$pharmacy_id) {
-            wp_send_json_error(['message' => 'Invalid pharmacy ID']);
-        }
-
-        $result = $this->sync_billing_history_from_stripe($pharmacy_id);
-
-        if ($result['success']) {
-            wp_send_json_success(['message' => $result['message']]);
-        } else {
-            wp_send_json_error(['message' => $result['message']]);
-        }
-    }
-
-
-    /* ---------------------------------------------------------
-       AUDIT LOG: FETCH LOGS
-    --------------------------------------------------------- */
-    public function ajax_subscription_audit_log() {
-
-        $pid = intval($_GET['pharmacy_id'] ?? 0);
-        if (!$pid) {
-            wp_send_json_error(['message' => 'Invalid pharmacy']);
-        }
-
-        $logs = get_post_meta($pid, '_mc_subscription_audit_log', true);
-        if (!is_array($logs)) {
-            $logs = [];
-        }
-
-        wp_send_json_success(['logs' => $logs]);
-    }
-
-
-    /* ---------------------------------------------------------
-       AUDIT LOG: WRITE ENTRY
-    --------------------------------------------------------- */
-    private function log_subscription_event($pid, $message) {
-
-        $logs = get_post_meta($pid, '_mc_subscription_audit_log', true);
-        if (!is_array($logs)) {
-            $logs = [];
-        }
-
-        $logs[] = [
-            'timestamp' => time(),
-            'message'   => $message
-        ];
-
-        update_post_meta($pid, '_mc_subscription_audit_log', $logs);
-    }
-
-   /* ---------------------------------------------------------
-   ENQUEUE JS FOR SUBSCRIPTION CONTROL PAGE
---------------------------------------------------------- */
-    public function enqueue_subscription_js($hook) {
-
-        if ($hook !== 'medicompare_page_medicompare-subscriptions') {
-            return;
-        }
-
-        wp_enqueue_script(
-            'mc-subscription-js',
-            plugin_dir_url(__FILE__) . '../assets/js/subscription-control.js',
-            ['jquery'],
-            filemtime(plugin_dir_path(__FILE__) . '../assets/js/subscription-control.js'),
-            true
-        );
-
-        wp_localize_script('mc-subscription-js', 'MC_SUBSCRIPTIONS', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('mc_subscription_actions'),
-        ]);
-    }
-
-    /* ---------------------------------------------------------
-   ENQUEUE CSS FOR SUBSCRIPTION CONTROL PAGE
---------------------------------------------------------- */
-    public function enqueue_subscription_css($hook) {
-
-        if ($hook !== 'medicompare_page_medicompare-subscriptions') {
-            return;
-        }
-
-        wp_enqueue_style(
-            'mc-subscription-css',
-            plugin_dir_url(__FILE__) . '../assets/css/subscription-control.css',
-            [],
-            filemtime(plugin_dir_path(__FILE__) . '../assets/css/subscription-control.css')
-        );
-    }
 
 }
 

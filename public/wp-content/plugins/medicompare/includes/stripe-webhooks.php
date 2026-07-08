@@ -122,13 +122,35 @@ function mc_handle_stripe_webhook() {
          * Subscription renewed (recurring payment succeeded)
          */
         case 'invoice.payment_succeeded':
+
             $invoice = $object;
 
             if (!empty($invoice->subscription)) {
 
-                $renewal_date = date('Y-m-d H:i:s', $invoice->lines->data[0]->period->end);
+                /**
+                 * Expand invoice to get full billing cycle details
+                 */
+                $expandedInvoice = \Stripe\Invoice::retrieve([
+                    'id'     => $invoice->id,
+                    'expand' => ['lines.data', 'payment_intent']
+                ]);
 
-                // Update DB
+                $line = $expandedInvoice->lines->data[0];
+
+                $period_start = $line->period->start ?? null;
+                $period_end   = $line->period->end ?? null;
+
+                $next_billing = $period_end;
+
+                $last_payment_date   = $expandedInvoice->status_transitions->paid_at ?? $expandedInvoice->created;
+                $last_payment_amount = $expandedInvoice->amount_paid ?? null;
+                $last_payment_ref    = $expandedInvoice->id ?? null;
+
+                $renewal_date = date('Y-m-d H:i:s', $period_end);
+
+                /**
+                 * Update DB
+                 */
                 $wpdb->update(
                     $table,
                     [
@@ -138,9 +160,32 @@ function mc_handle_stripe_webhook() {
                     ['stripe_subscription' => $invoice->subscription]
                 );
 
-                // Update WP user meta
+                /**
+                 * Update WP user meta
+                 */
                 if ($wp_user_id) {
                     mc_set_subscription_status($wp_user_id, 'active');
+                }
+
+                /**
+                 * Update pharmacy postmeta (overlay + subscription details page)
+                 */
+                $pharmacy_id = mc_get_pharmacy_id_by_user($wp_user_id);
+
+                if ($pharmacy_id) {
+
+                    update_post_meta($pharmacy_id, '_mc_subscription_status', 'active');
+                    update_post_meta($pharmacy_id, '_mc_status', 'active');
+
+                    update_post_meta($pharmacy_id, '_mc_subscription_period_start', $period_start);
+                    update_post_meta($pharmacy_id, '_mc_subscription_period_end', $period_end);
+                    update_post_meta($pharmacy_id, '_mc_next_billing_date', $next_billing);
+
+                    update_post_meta($pharmacy_id, '_mc_last_payment_date', $last_payment_date);
+                    update_post_meta($pharmacy_id, '_mc_last_payment_amount', $last_payment_amount);
+                    update_post_meta($pharmacy_id, '_mc_last_payment_reference', $last_payment_ref);
+
+                    update_post_meta($pharmacy_id, '_mc_sub_end', $period_end);
                 }
             }
 
@@ -166,6 +211,13 @@ function mc_handle_stripe_webhook() {
                 if ($wp_user_id) {
                     mc_set_subscription_status($wp_user_id, 'past_due');
                 }
+
+                // Update pharmacy postmeta
+                $pharmacy_id = mc_get_pharmacy_id_by_user($wp_user_id);
+                if ($pharmacy_id) {
+                    update_post_meta($pharmacy_id, '_mc_subscription_status', 'past_due');
+                    update_post_meta($pharmacy_id, '_mc_status', 'past_due');
+                }
             }
 
             break;
@@ -189,6 +241,13 @@ function mc_handle_stripe_webhook() {
                 mc_set_subscription_status($wp_user_id, 'cancelled');
             }
 
+            // Update pharmacy postmeta
+            $pharmacy_id = mc_get_pharmacy_id_by_user($wp_user_id);
+            if ($pharmacy_id) {
+                update_post_meta($pharmacy_id, '_mc_subscription_status', 'cancelled');
+                update_post_meta($pharmacy_id, '_mc_status', 'cancelled');
+            }
+
             break;
 
 
@@ -210,6 +269,13 @@ function mc_handle_stripe_webhook() {
             // Update WP user meta
             if ($wp_user_id) {
                 mc_set_subscription_status($wp_user_id, $status);
+            }
+
+            // Update pharmacy postmeta
+            $pharmacy_id = mc_get_pharmacy_id_by_user($wp_user_id);
+            if ($pharmacy_id) {
+                update_post_meta($pharmacy_id, '_mc_subscription_status', $status);
+                update_post_meta($pharmacy_id, '_mc_status', $status);
             }
 
             break;

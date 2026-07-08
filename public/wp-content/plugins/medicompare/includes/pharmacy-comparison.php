@@ -279,72 +279,82 @@ class MediCompare_Pharmacy_Comparison {
         wp_send_json_success(['html' => ob_get_clean()]);
     }
 
-    /* ---------------------------------------------------------
-       FUZZY FALLBACK (Corrected)
-       Only runs when exact results = 0
---------------------------------------------------------- */
+        /* ---------------------------------------------------------
+           FUZZY FALLBACK (Corrected)
+           Only runs when exact results = 0
+           --have commented this method out as dont want it at moment 
+           --did you mean functionality
 
-$all_products = $wpdb->get_results("
-    SELECT ID, post_title
-    FROM {$posts_table}
-    WHERE post_type = 'mc_product'
-      AND post_status = 'publish'
-    LIMIT 300
-", ARRAY_A);
+    $all_products = $wpdb->get_results("
+        SELECT ID, post_title
+        FROM {$posts_table}
+        WHERE post_type = 'mc_product'
+          AND post_status = 'publish'
+        LIMIT 300
+    ", ARRAY_A);
 
-$distances = [];
+    $distances = [];
 
-foreach ($all_products as $p) {
+    foreach ($all_products as $p) {
 
-    // Extract FIRST WORD ONLY (critical fix)
-    // Example: "Paracetamol 500 mg tablets" → "paracetamol"
-    $first_word = strtolower(
-        preg_replace('/[^a-zA-Z]/', '', strtok($p['post_title'], ' '))
-    );
+        // Extract FIRST WORD ONLY (critical fix)
+        // Example: "Paracetamol 500 mg tablets" → "paracetamol"
+        $first_word = strtolower(
+            preg_replace('/[^a-zA-Z]/', '', strtok($p['post_title'], ' '))
+        );
 
-    if (!$first_word) continue;
+        if (!$first_word) continue;
 
-    // Compute Levenshtein distance against the first word
-    $distance = levenshtein($q_clean, $first_word);
+        // Compute Levenshtein distance against the first word
+        $distance = levenshtein($q_clean, $first_word);
 
-    // Prefix bonus: improves ranking for near matches
-    $prefix_bonus = 0;
-    if (strpos($first_word, substr($q_clean, 0, 2)) === 0) {
-        $prefix_bonus = -2;
+        // Prefix bonus: improves ranking for near matches
+        $prefix_bonus = 0;
+        if (strpos($first_word, substr($q_clean, 0, 2)) === 0) {
+            $prefix_bonus = -2;
+        }
+
+        $distances[] = [
+            'id'       => $p['ID'],
+            'title'    => $p['post_title'],
+            'distance' => $distance + $prefix_bonus
+        ];
     }
 
-    $distances[] = [
-        'id'       => $p['ID'],
-        'title'    => $p['post_title'],
-        'distance' => $distance + $prefix_bonus
-    ];
-}
+    // Sort by corrected distance
+    usort($distances, function($a, $b) {
+        return $a['distance'] - $b['distance'];
+    });
 
-// Sort by corrected distance
-usort($distances, function($a, $b) {
-    return $a['distance'] - $b['distance'];
-});
+    // Take top 3 suggestions
+    $suggestions = array_slice($distances, 0, 3);
 
-// Take top 3 suggestions
-$suggestions = array_slice($distances, 0, 3);
+    ob_start();
+    ?>
+    <p>No exact matches found.</p>
+    <p>Did you mean:</p>
+    <ul class="mc-suggestions">
+        <?php foreach ($suggestions as $s): ?>
+            <?php $label = $this->mc_get_full_product_label($s['id']); ?>
+            <li class="mc-suggestion-item"
+                data-product-id="<?php echo esc_attr($s['id']); ?>">
+                <?php echo esc_html($label); ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+    <?php
 
-ob_start();
-?>
-<p>No exact matches found.</p>
-<p>Did you mean:</p>
-<ul class="mc-suggestions">
-    <?php foreach ($suggestions as $s): ?>
-        <?php $label = $this->mc_get_full_product_label($s['id']); ?>
-        <li class="mc-suggestion-item"
-            data-product-id="<?php echo esc_attr($s['id']); ?>">
-            <?php echo esc_html($label); ?>
-        </li>
-    <?php endforeach; ?>
-</ul>
-<?php
-
- wp_send_json_success(['html' => ob_get_clean()]);
- }
+     wp_send_json_success(['html' => ob_get_clean()]);
+     }
+    --------------------------------------------------------- */
+    
+    /* ---------------------------------------------------------
+   NO RESULTS FOUND → SIMPLE MESSAGE
+    --------------------------------------------------------- */
+    wp_send_json_success([
+        'html' => '<p>No matching products found.</p>'
+    ]);
+   }
 
 
     /* ---------------------------------------------------------
@@ -1030,9 +1040,10 @@ ob_start();
         wp_send_json_success(['message' => 'Order transferred successfully.']);
     }
 
-    /* ---------------------------------------------------------
-       AJAX: GET TRANSFERRED ORDERS (WITH STATUS BADGES + UI ENHANCEMENTS)
-    --------------------------------------------------------- */
+/* ---------------------------------------------------------
+   AJAX: GET TRANSFERRED ORDERS (WITH STATUS BADGES + UI ENHANCEMENTS)
+   plus grouping by date as main tab and then sub tabs for orders
+--------------------------------------------------------- */
     public function ajax_get_transferred_orders() {
         check_ajax_referer('mc_comparison_nonce', 'nonce');
 
@@ -1049,12 +1060,13 @@ ob_start();
         $order_items_table      = $wpdb->prefix . 'medi_order_items';
         $posts_table            = $wpdb->posts;
 
+        // Fetch latest transferred orders
         $orders = $wpdb->get_results($wpdb->prepare(
             "SELECT id, order_number, total_amount, created_at, status
              FROM {$orders_table}
              WHERE pharmacy_id = %d
              ORDER BY created_at DESC
-             LIMIT 20",
+             LIMIT 50",
             $pharmacy_id
         ), ARRAY_A);
 
@@ -1062,165 +1074,209 @@ ob_start();
             wp_send_json_success(['html' => '<p>No transferred orders yet.</p>']);
         }
 
+        /* ---------------------------------------------------------
+           GROUP ORDERS BY DATE
+        --------------------------------------------------------- */
+        $grouped = [];
+
+        foreach ($orders as $order) {
+            $date_key = date('Y-m-d', strtotime($order['created_at']));
+            if (!isset($grouped[$date_key])) {
+                $grouped[$date_key] = [];
+            }
+            $grouped[$date_key][] = $order;
+        }
+
         ob_start();
         ?>
         <div class="mc-transferred-orders-wrapper">
-            <?php foreach ($orders as $order): ?>
 
-                <div class="mc-transferred-order-card mc-order-collapsed">
+            <?php foreach ($grouped as $date_key => $orders_for_date): ?>
 
-                    <div class="mc-order-collapse-header" data-order-toggle>
+                <?php $pretty_date = date('d M Y', strtotime($date_key)); ?>
 
-                        <span>
-                            Order #<?php echo esc_html($order['order_number']); ?>
-                        </span>
+                <div class="mc-date-group mc-date-collapsed">
 
-                        <span class="mc-order-status-badge mc-status-<?php echo strtolower($order['status']); ?>">
-                            <?php echo esc_html(ucfirst(strtolower($order['status']))); ?>
-                        </span>
+                    <!-- DATE HEADER -->
+                    <div class="mc-date-header" data-date-toggle>
+                        <span class="mc-date-text"><?php echo esc_html($pretty_date); ?></span>
 
-                        <span class="mc-order-collapse-arrow">▼</span>
+                        <div class="mc-date-right">
+                            <span class="mc-date-status-badge">Sent</span>
+                            <span class="mc-date-arrow">▶</span>
+                        </div>
                     </div>
 
-                    <div class="mc-order-collapse-content">
+                    <div class="mc-date-content">
 
-                        <p>
-                            <strong>Date:</strong>
-                            <?php echo esc_html(date('d M Y H:i', strtotime($order['created_at']))); ?>
-                        </p>
+                        <?php foreach ($orders_for_date as $order): ?>
 
-                        <p>
-                            <strong>Total:</strong>
-                            £<?php echo number_format((float) $order['total_amount'], 2); ?>
-                        </p>
+                            <div class="mc-transferred-order-card mc-order-collapsed">
 
-                        <?php
-                        $suppliers = $wpdb->get_results($wpdb->prepare(
-                            "SELECT supplier_id, suborder_number, supplier_total_amount
-                             FROM {$supplier_summary_table}
-                             WHERE order_id = %d",
-                            $order['id']
-                        ), ARRAY_A);
-                        ?>
+                                <!-- ORDER HEADER -->
+                                <div class="mc-order-collapse-header" data-order-toggle>
 
-                        <?php if ($suppliers): ?>
-                            <div class="mc-transferred-suppliers">
+                                    <span>
+                                        Order #<?php echo esc_html($order['order_number']); ?>
+                                    </span>
 
-                                <?php foreach ($suppliers as $s): ?>
+                                    <span class="mc-order-status-badge mc-status-<?php echo strtolower($order['status']); ?>">
+                                        <?php echo esc_html(ucfirst(strtolower($order['status']))); ?>
+                                    </span>
+
+                                    <span class="mc-order-collapse-arrow">▶</span>
+                                </div>
+
+                                <div class="mc-order-collapse-content">
+
+                                    <p>
+                                        <strong>Date:</strong>
+                                        <?php echo esc_html(date('d M Y H:i', strtotime($order['created_at']))); ?>
+                                    </p>
+
+                                    <p>
+                                        <strong>Total:</strong>
+                                        £<?php echo number_format((float) $order['total_amount'], 2); ?>
+                                    </p>
 
                                     <?php
-                                    $supplier_name = $wpdb->get_var($wpdb->prepare(
-                                        "SELECT post_title FROM {$posts_table} WHERE ID = %d",
-                                        $s['supplier_id']
-                                    ));
-
-                                    $suborder = $wpdb->get_row($wpdb->prepare(
-                                        "SELECT supplier_order_status, email_sent, email_sent_at, created_at
-                                         FROM {$suborders_table}
-                                         WHERE suborder_number = %s
-                                         LIMIT 1",
-                                        $s['suborder_number']
-                                    ), ARRAY_A);
-
-                                    $suborder_status = $suborder ? strtolower($suborder['supplier_order_status']) : 'pending';
-                                    $email_sent      = $suborder ? (int) $suborder['email_sent'] : 0;
-                                    $email_sent_at   = $suborder && $suborder['email_sent_at']
-                                                        ? date('d M Y H:i', strtotime($suborder['email_sent_at']))
-                                                        : null;
-
-                                    $items = $wpdb->get_results($wpdb->prepare(
-                                        "SELECT oi.product_id, oi.quantity, oi.unit_price, oi.line_total,
-                                                p.post_title AS product_name
-                                         FROM {$order_items_table} oi
-                                         INNER JOIN {$posts_table} p ON p.ID = oi.product_id
-                                         WHERE oi.order_id = %d
-                                           AND oi.supplier_id = %d
-                                         ORDER BY p.post_title ASC",
-                                        $order['id'],
-                                        $s['supplier_id']
+                                    $suppliers = $wpdb->get_results($wpdb->prepare(
+                                        "SELECT supplier_id, suborder_number, supplier_total_amount
+                                         FROM {$supplier_summary_table}
+                                         WHERE order_id = %d",
+                                        $order['id']
                                     ), ARRAY_A);
                                     ?>
 
-                                    <div class="mc-suborder-block">
+                                    <?php if ($suppliers): ?>
+                                        <div class="mc-transferred-suppliers">
 
-                                        <div class="mc-suborder-header">
-                                            <div>
-                                                <strong><?php echo esc_html($supplier_name ?: 'Supplier #' . $s['supplier_id']); ?></strong><br>
-                                                <span class="mc-suborder-ref">
-                                                    Sub-order: <?php echo esc_html($s['suborder_number']); ?>
-                                                </span>
-                                            </div>
+                                            <?php foreach ($suppliers as $s): ?>
 
-                                            <div class="mc-suborder-status">
+                                                <?php
+                                                $supplier_name = $wpdb->get_var($wpdb->prepare(
+                                                    "SELECT post_title FROM {$posts_table} WHERE ID = %d",
+                                                    $s['supplier_id']
+                                                ));
 
-                                                <span class="mc-suborder-status-badge mc-status-<?php echo esc_attr($suborder_status); ?>">
-                                                    <?php echo esc_html(ucfirst($suborder_status)); ?>
-                                                </span>
+                                                $suborder = $wpdb->get_row($wpdb->prepare(
+                                                    "SELECT supplier_order_status, email_sent, email_sent_at, created_at
+                                                     FROM {$suborders_table}
+                                                     WHERE suborder_number = %s
+                                                     LIMIT 1",
+                                                    $s['suborder_number']
+                                                ), ARRAY_A);
 
-                                                <span class="mc-suborder-total">
-                                                    Supplier Total: £<?php echo number_format((float) $s['supplier_total_amount'], 2); ?>
-                                                </span>
+                                                $suborder_status = $suborder ? strtolower($suborder['supplier_order_status']) : 'pending';
+                                                $email_sent      = $suborder ? (int) $suborder['email_sent'] : 0;
+                                                $email_sent_at   = $suborder && $suborder['email_sent_at']
+                                                                    ? date('d M Y H:i', strtotime($suborder['email_sent_at']))
+                                                                    : null;
 
-                                                <span class="mc-email-indicator">
-                                                    Email:
-                                                    <?php if ($email_sent): ?>
-                                                        <strong>Sent</strong>
-                                                        <?php if ($email_sent_at): ?>
-                                                            (<?php echo esc_html($email_sent_at); ?>)
-                                                        <?php endif; ?>
+                                                $items = $wpdb->get_results($wpdb->prepare(
+                                                    "SELECT oi.product_id, oi.quantity, oi.unit_price, oi.line_total,
+                                                            p.post_title AS product_name
+                                                     FROM {$order_items_table} oi
+                                                     INNER JOIN {$posts_table} p ON p.ID = oi.product_id
+                                                     WHERE oi.order_id = %d
+                                                       AND oi.supplier_id = %d
+                                                     ORDER BY p.post_title ASC",
+                                                    $order['id'],
+                                                    $s['supplier_id']
+                                                ), ARRAY_A);
+                                                ?>
+
+                                                <div class="mc-suborder-block">
+
+                                                    <div class="mc-suborder-header">
+                                                        <div>
+                                                            <strong><?php echo esc_html($supplier_name ?: 'Supplier #' . $s['supplier_id']); ?></strong><br>
+                                                            <span class="mc-suborder-ref">
+                                                                Sub-order: <?php echo esc_html($s['suborder_number']); ?>
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="mc-suborder-status">
+
+                                                            <span class="mc-suborder-status-badge mc-status-<?php echo esc_attr($suborder_status); ?>">
+                                                                <?php echo esc_html(ucfirst($suborder_status)); ?>
+                                                            </span>
+
+                                                            <span class="mc-suborder-total">
+                                                                Supplier Total: £<?php echo number_format((float) $s['supplier_total_amount'], 2); ?>
+                                                            </span>
+
+                                                            <span class="mc-email-indicator">
+                                                                Email:
+                                                                <?php if ($email_sent): ?>
+                                                                    <strong>Sent</strong>
+                                                                    <?php if ($email_sent_at): ?>
+                                                                        (<?php echo esc_html($email_sent_at); ?>)
+                                                                    <?php endif; ?>
+                                                                <?php else: ?>
+                                                                    <strong>Not Sent</strong>
+                                                                <?php endif; ?>
+                                                            </span>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <?php if ($items): ?>
+                                                        <table class="mc-suborder-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Product</th>
+                                                                    <th>Qty</th>
+                                                                    <th>Unit Price</th>
+                                                                    <th>Supplier Line Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php foreach ($items as $item): ?>
+                                                                    <?php $full_label = $this->mc_get_full_product_label($item['product_id']); ?>
+                                                                    <tr>
+                                                                        <td><?php echo esc_html($full_label); ?></td>
+                                                                        <td><?php echo (int) $item['quantity']; ?></td>
+                                                                        <td>£<?php echo number_format((float) $item['unit_price'], 2); ?></td>
+                                                                        <td>£<?php echo number_format((float) $item['line_total'], 2); ?></td>
+                                                                    </tr>
+                                                                <?php endforeach; ?>
+                                                            </tbody>
+                                                        </table>
                                                     <?php else: ?>
-                                                        <strong>Not Sent</strong>
+                                                        <p>No items found for this supplier.</p>
                                                     <?php endif; ?>
-                                                </span>
 
-                                            </div>
+                                                </div>
+
+                                            <?php endforeach; ?>
+
                                         </div>
+                                    <?php else: ?>
+                                        <p>No supplier breakdown available.</p>
+                                    <?php endif; ?>
 
-                                        <?php if ($items): ?>
-                                            <table class="mc-suborder-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Product</th>
-                                                        <th>Qty</th>
-                                                        <th>Unit Price</th>
-                                                        <th>Supplier Line Total</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($items as $item): ?>
-                                                        <?php $full_label = $this->mc_get_full_product_label($item['product_id']); ?>
-                                                        <tr>
-                                                            <td><?php echo esc_html($full_label); ?></td>
-                                                            <td><?php echo (int) $item['quantity']; ?></td>
-                                                            <td>£<?php echo number_format((float) $item['unit_price'], 2); ?></td>
-                                                            <td>£<?php echo number_format((float) $item['line_total'], 2); ?></td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        <?php else: ?>
-                                            <p>No items found for this supplier.</p>
-                                        <?php endif; ?>
-
-                                    </div>
-
-                                <?php endforeach; ?>
+                                </div>
 
                             </div>
-                        <?php else: ?>
-                            <p>No supplier breakdown available.</p>
-                        <?php endif; ?>
+
+                        <?php endforeach; ?>
 
                     </div>
 
                 </div>
 
             <?php endforeach; ?>
+
         </div>
         <?php
 
         wp_send_json_success(['html' => ob_get_clean()]);
     }
+
+
+
+
 
 } // END CLASS
 

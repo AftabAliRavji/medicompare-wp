@@ -462,14 +462,6 @@
     margin-bottom: 8px;
 }
 
-.mc-order-collapse-arrow {
-    transition: transform 0.2s ease;
-}
-
-.mc-order-collapsed .mc-order-collapse-arrow {
-    transform: rotate(-90deg);
-}
-
 .mc-order-collapse-content {
     display: none;
     padding: 10px 0;
@@ -1745,6 +1737,87 @@ body.page-id-71 .mc-search-left {
 .mc-transfer-btn.mc-disabled {
     font-weight: 600;
 }
+
+.mc-date-content {
+    display: none;
+}
+.mc-date-expanded .mc-date-content {
+    display: block;
+}
+
+.mc-order-collapse-content {
+    display: none;
+}
+.mc-order-expanded .mc-order-collapse-content {
+    display: block;
+}
+/* DATE HEADER */
+.mc-date-header {
+    background: #2A6FDB;
+    color: #fff;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-weight: 600;
+}
+
+.mc-date-text {
+    font-size: 15px;
+}
+
+.mc-date-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-date-status-badge {
+    background: #1e5ac7;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mc-date-arrow {
+    font-size: 14px;
+}
+
+/* DATE COLLAPSE */
+.mc-date-content {
+    display: none;
+    padding-left: 12px;
+}
+
+.mc-date-expanded .mc-date-content {
+    display: block;
+}
+
+/* ORDER CARD COLLAPSE */
+.mc-order-collapse-content {
+    display: none;
+}
+
+.mc-order-expanded .mc-order-collapse-content {
+    display: block;
+}
+.mc-order-collapse-arrow {
+    font-size: 14px;
+}
+.mc-order-collapse-content {
+    display: none;
+}
+.mc-order-expanded .mc-order-collapse-content {
+    display: block;
+}
+
+
 
 
 

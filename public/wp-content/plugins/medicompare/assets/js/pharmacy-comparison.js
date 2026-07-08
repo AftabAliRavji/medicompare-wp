@@ -93,6 +93,8 @@ jQuery(function ($) {
             if (resp.success) {
                 $transferredPanel.html(resp.data.html);
 
+                // Collapse everything initially
+                $('.mc-date-group').addClass('mc-date-collapsed');
                 $('.mc-transferred-order-card').addClass('mc-order-collapsed');
 
                 mc_updateTransferButton(false);
@@ -105,12 +107,39 @@ jQuery(function ($) {
     }
 
     /* ---------------------------------------------------------
-       COLLAPSE / EXPAND TRANSFERRED ORDER CARDS
+       DATE TOGGLE (same behaviour as order toggle)
+    --------------------------------------------------------- */
+    $(document).on('click', '[data-date-toggle]', function () {
+        const group = $(this).closest('.mc-date-group');
+        const arrow = group.find('.mc-date-arrow');
+
+        group.toggleClass('mc-date-expanded mc-date-collapsed');
+
+        if (group.hasClass('mc-date-expanded')) {
+            arrow.text('▼');
+        } else {
+            arrow.text('▶');
+        }
+    });
+
+    /* ---------------------------------------------------------
+      COLLAPSE / EXPAND TRANSFERRED ORDER CARDS
     --------------------------------------------------------- */
     $(document).on('click', '[data-order-toggle]', function () {
         const card = $(this).closest('.mc-transferred-order-card');
+        const arrow = card.find('.mc-order-collapse-arrow');
+
+        // Toggle expanded/collapsed classes
         card.toggleClass('mc-order-expanded mc-order-collapsed');
+
+        // Update arrow text
+        if (card.hasClass('mc-order-expanded')) {
+            arrow.text('▼');   // expanded
+        } else {
+            arrow.text('▶');   // collapsed
+        }
     });
+
 
     /* ---------------------------------------------------------
        RENDER SELECTED ITEM (SUPPLIER ROW → CARD)

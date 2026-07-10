@@ -826,6 +826,40 @@ body.page-id-71 .mc-search-layout {
 }
 
 
+.wp-block-template-part {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.wp-block-group {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+
+/* this is for the back to top being available on mobile */
+#mc-back-to-top {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 9999;
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+    #mc-back-to-top {
+        display: block;
+    }
+}
+
+
 
 
 

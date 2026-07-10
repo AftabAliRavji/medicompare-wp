@@ -362,6 +362,23 @@ public function render_dashboard() {
             }
         });
     </script>
+    
+    <button id="mc-back-to-top">↑ Back to Top</button>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('mc-back-to-top');
+
+        if (btn) {
+            btn.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+    </script>
 
     <?php
     if (!empty($GLOBALS['mc_subscription_blocked'])) {
@@ -571,6 +588,22 @@ public function render_edit_details() {
 
  </div>
 
+   <button id="mc-back-to-top">↑ Back to Top</button>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('mc-back-to-top');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+        </script>
 
     <?php
     if (!empty($GLOBALS['mc_subscription_blocked'])) {
@@ -827,6 +860,23 @@ public function render_search() {
         </div><!-- end .mc-page-container -->
 
     </div><!-- end alignfull wrapper -->
+
+    <button id="mc-back-to-top">↑ Back to Top</button>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('mc-back-to-top');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+        </script>
 
     <?php
     if (!empty($GLOBALS['mc_subscription_blocked'])) {
@@ -1177,6 +1227,23 @@ public function render_orders_page() {
         });
     </script>
 
+    <button id="mc-back-to-top">↑ Back to Top</button>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('mc-back-to-top');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+        </script>
+
     <?php
      if (!empty($GLOBALS['mc_subscription_blocked'])) {
         include dirname(__FILE__, 3) . '/templates/subscription-block-modal.php';
@@ -1185,8 +1252,8 @@ public function render_orders_page() {
  }
 
      /* ---------------------------------------------------------
-       SUBSCRIPTION PAGE (DB-DRIVEN)
-    --------------------------------------------------------- */
+   SUBSCRIPTION PAGE (DB-DRIVEN)
+--------------------------------------------------------- */
     public function render_subscription_page() {
 
         if (is_admin()) {
@@ -1228,6 +1295,9 @@ public function render_orders_page() {
         $sub_period_start_readable = $sub_period_start ? date('d M Y', $sub_period_start) : 'N/A';
         $sub_period_end_readable   = $sub_period_end   ? date('d M Y', $sub_period_end)   : 'N/A';
         $next_billing_readable     = $next_billing     ? date('d M Y', $next_billing)     : 'N/A';
+
+        // Determine if currently in trial
+        $is_trial = ($trial_end && $trial_end > time());
 
         ob_start();
 
@@ -1309,16 +1379,19 @@ public function render_orders_page() {
                     <div class="mc-card-icon">📅</div>
                     <h2 class="mc-card-title">Key Dates</h2>
 
-                    <p><strong>Trial Start:</strong> <?php echo esc_html($trial_start_readable); ?></p>
-                    <p><strong>Trial End:</strong> <?php echo esc_html($trial_end_readable); ?></p>
+                    <?php if ($is_trial): ?>
+                        <p><strong>Trial Start:</strong> <?php echo esc_html($trial_start_readable); ?></p>
+                        <p><strong>Trial End:</strong> <?php echo esc_html($trial_end_readable); ?></p>
+                    <?php endif; ?>
 
-                    <p><strong>Subscription Start:</strong> <?php echo esc_html($sub_period_start_readable); ?></p>
-                    <p><strong>Subscription End:</strong> <?php echo esc_html($sub_period_end_readable); ?></p>
-
-                    <p><strong>Next Billing Date:</strong> <?php echo esc_html($next_billing_readable); ?></p>
+                    <?php if (!$is_trial): ?>
+                        <p><strong>Subscription Start:</strong> <?php echo esc_html($sub_period_start_readable); ?></p>
+                        <p><strong>Subscription End:</strong> <?php echo esc_html($sub_period_end_readable); ?></p>
+                        <p><strong>Next Billing Date:</strong> <?php echo esc_html($next_billing_readable); ?></p>
+                    <?php endif; ?>
                 </section>
 
-                <!-- STRIPE DETAILS CARD -->
+                <!-- STRIPE DETAILS CARD 
                 <section class="mc-card-pro mc-card-orange">
                     <div class="mc-card-icon">💳</div>
                     <h2 class="mc-card-title">Stripe Details</h2>
@@ -1328,11 +1401,28 @@ public function render_orders_page() {
 
                     <p><strong>Stripe Subscription ID:</strong><br>
                         <?php echo esc_html($stripe_subscription_id ?: 'Not set'); ?></p>
-                </section>
+                </section> -->
 
             </div>
 
         </div>
+
+        <button id="mc-back-to-top">↑ Back to Top</button>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('mc-back-to-top');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+        </script>
 
         <?php
         return ob_get_clean();

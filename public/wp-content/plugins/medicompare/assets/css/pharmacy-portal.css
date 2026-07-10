@@ -860,3 +860,12 @@ h1.mc-section-title {
     margin-top: 20px;
     width: 100%;
 }
+
+.wp-block-template-part {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.wp-block-group {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}

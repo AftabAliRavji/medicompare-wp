@@ -124,6 +124,23 @@ add_shortcode('mc_pharmacy_portal', function () {
             </div>
         </div>
 
+        <button id="mc-back-to-top">↑ Back to Top</button>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('mc-back-to-top');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+        </script>
+
     </div>
 
     <?php

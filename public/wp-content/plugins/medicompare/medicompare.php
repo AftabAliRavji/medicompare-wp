@@ -2,9 +2,9 @@
 /**
  * Plugin Name: MediCompare
  * Description: Core functionality for the MediCompare platform.
- * Version: 0.2.0
+ * Version: 0.2.1
  * Author: Aftab
- * Deployment test - June 28
+ * Deployment test - July 18
  */
 
 if (!session_id()) {
@@ -21,8 +21,11 @@ class MediCompare {
         register_activation_hook(__FILE__, [$this, 'activate']);
         register_activation_hook(__FILE__, [$this, 'run_migrations']);
 
-        // ⭐ NEW: Auto-create pharmacy pages (safe, non-destructive)
+        // ⭐ Auto-create pharmacy pages
         register_activation_hook(__FILE__, [$this, 'create_pharmacy_pages']);
+
+        // ⭐ NEW: Auto-create Welcome Signup page
+        register_activation_hook(__FILE__, [$this, 'create_welcome_signup_page']);
 
         // Load CPTs early
         add_action('init', [$this, 'load_cpts'], 1);
@@ -42,46 +45,56 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
         require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-comparison.php';
 
+        // ⭐ NEW: Welcome Signup page template loader
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/welcome-signup.php';
+
         // Hide theme header/footer for MediCompare pages
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/hide-theme-ui.php';
 
-        // ⭐ NEW: Stripe config + checkout
+        // Stripe config + checkout
         require_once plugin_dir_path(__FILE__) . 'includes/stripe-config.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-stripe.php';
         require_once plugin_dir_path(__FILE__) . 'includes/stripe-webhooks.php';
-
 
         // Requirements board
         require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
     }
 
     /**
+     * ⭐ Auto-create Welcome Signup Page
+     */
+    public function create_welcome_signup_page() {
+
+        $existing = get_page_by_path('welcome-signup');
+        if ($existing) return;
+
+        wp_insert_post([
+            'post_title'   => 'Welcome to MediCompare',
+            'post_name'    => 'welcome-signup',
+            'post_status'  => 'publish',
+            'post_type'    => 'page',
+            'post_content' => '[mc_welcome_signup]'
+        ]);
+    }
+
+    /**
      * ⭐ Auto-create pharmacy parent + child pages safely
-     * This will NOT override existing pages.
-    */
+     */
     public function create_pharmacy_pages() {
 
-        //
-        // 1️⃣ Ensure parent /pharmacy/ page exists
-        //
         $parent = get_page_by_path('pharmacy');
 
         if (!$parent) {
-
-            // Create the parent page
             $parent_id = wp_insert_post([
                 'post_title'   => 'Pharmacy',
                 'post_name'    => 'pharmacy',
-                'post_content' => '[mc_pharmacy_portal]',   // ⭐ main portal shortcode
+                'post_content' => '[mc_pharmacy_portal]',
                 'post_status'  => 'publish',
                 'post_type'    => 'page',
             ]);
-
         } else {
-
             $parent_id = $parent->ID;
 
-            // Ensure the parent page contains the portal shortcode
             if (strpos($parent->post_content, '[mc_pharmacy_portal]') === false) {
                 wp_update_post([
                     'ID'           => $parent_id,
@@ -90,10 +103,6 @@ class MediCompare {
             }
         }
 
-
-        //
-        // 2️⃣ Auto-create child pages under /pharmacy/
-        //
         $pages = [
             'pharmacy-registration' => [
                 'title'   => 'Pharmacy Registration',
@@ -123,19 +132,14 @@ class MediCompare {
                 'title'   => 'Subscription History',
                 'content' => '[mc_pharmacy_subscription]'
             ],
-
         ];
 
         foreach ($pages as $slug => $page) {
 
-            // Check if the page already exists under ANY parent
             $existing = get_page_by_path('pharmacy/' . $slug);
 
-            if ($existing) {
-                continue; // SAFE — do not override or duplicate
-            }
+            if ($existing) continue;
 
-            // Create the missing page under /pharmacy/
             wp_insert_post([
                 'post_title'   => $page['title'],
                 'post_name'    => $slug,
@@ -147,13 +151,10 @@ class MediCompare {
         }
     }
 
-
-
     /**
-     * Register the pharmacy_user role so WP does NOT strip it from users.
+     * Register the pharmacy_user role
      */
     public function register_roles() {
-
         add_role(
             'pharmacy_user',
             'Pharmacy User',

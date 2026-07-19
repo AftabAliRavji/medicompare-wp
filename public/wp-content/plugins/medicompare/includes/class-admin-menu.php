@@ -239,6 +239,19 @@ class MediCompare_Admin_Menu {
         'medicompare-import-logs',
         [$this, 'import_logs_page']
     );
+
+    /* ---------------------------------------------------------
+   ⭐ NEW — SIGNUP LEADS
+    --------------------------------------------------------- */
+    add_submenu_page(
+        'medicompare',
+        'Signup Leads',
+        'Signup Leads',
+        'manage_options',
+        'medicompare-signup-leads',
+        [$this, 'signup_leads_page']
+    );
+
 }
 
 
@@ -261,6 +274,15 @@ class MediCompare_Admin_Menu {
     public function import_logs_page() {
         echo '<div class="wrap"><h1>Import Logs</h1><p>Import logs will appear here.</p></div>';
     }
+
+    /* ---------------------------------------------------------
+   ⭐ NEW — SIGNUP LEADS PAGE
+    --------------------------------------------------------- */
+    public function signup_leads_page() {
+        include __DIR__ . '/admin-pages/signup-leads.php';
+    }
+
+
     /* ---------------------------------------------------------
        SUPPLIER PRODUCT CSV PARSER
     --------------------------------------------------------- */

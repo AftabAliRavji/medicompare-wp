@@ -245,4 +245,32 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
             ['Content-Type: text/html; charset=UTF-8']
         );
     }
+
+    /* ---------------------------------------------------------
+       SEND WELCOME SIGN UP NOTIFICATION EMAIL to admin
+    --------------------------------------------------------- */
+
+    public function send_welcome_signup_notification($pharmacy_name, $contact_name, $contact_number, $contact_email) {
+
+        // Load template
+        $template = $this->load_template('welcome-signup-notification.php');
+
+        // Fill placeholders
+        $body = $this->fill_template($template, [
+            'pharmacy_name'  => $pharmacy_name,
+            'contact_name'   => $contact_name,
+            'contact_number' => $contact_number,
+            'contact_email'  => $contact_email,
+            'submitted_at'   => date('d M Y H:i')
+        ]);
+
+        // Send to admin email
+        wp_mail(
+            get_option('admin_email'),
+            "New Pharmacy Signup Interest — {$pharmacy_name}",
+            $body,
+            ['Content-Type: text/html; charset=UTF-8']
+        );
+    }
+
 }

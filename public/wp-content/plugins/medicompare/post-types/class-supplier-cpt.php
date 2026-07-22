@@ -297,6 +297,37 @@ class MediCompare_Supplier_CPT {
             case 'country':
                 echo esc_html(get_post_meta($post_id, self::META_COUNTRY, true));
                 break;
+
+            // ⭐ NEW — Commission Rule Column Renderer
+            case 'commission_rule':
+
+                $rule_type   = get_post_meta($post_id, 'mc_commission_rule_type', true);
+                $custom_rate = get_post_meta($post_id, 'mc_commission_custom_rate', true);
+
+                if (!$rule_type) {
+                    echo '—';
+                    break;
+                }
+
+                switch ($rule_type) {
+                    case 'flat_5':
+                        echo 'Flat 5%';
+                        break;
+                    case 'flat_3':
+                        echo 'Flat 3%';
+                        break;
+                    case 'flat_25':
+                        echo 'Flat 2.5%';
+                        break;
+                    case 'custom_flat':
+                        echo 'Custom ' . (float)$custom_rate . '%';
+                        break;
+                    case 'default_tiers':
+                    default:
+                        echo 'Tiered 5% / 3% / 2.5%';
+                        break;
+                }
+                break;
         }
     }
 
@@ -309,6 +340,9 @@ class MediCompare_Supplier_CPT {
         $columns['city']     = 'city';
         $columns['postcode'] = 'postcode';
         $columns['status']   = 'status';
+
+        // ⭐ NEW — Make commission rule sortable
+        $columns['commission_rule'] = 'commission_rule';
 
         return $columns;
     }

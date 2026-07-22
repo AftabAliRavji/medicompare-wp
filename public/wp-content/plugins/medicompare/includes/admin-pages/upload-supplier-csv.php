@@ -3,7 +3,8 @@
 
     <p>Expected CSV columns:</p>
     <code>
-        supplier_name, email, phone, address_1, address_2, city, county, postcode, country, account_manager, supplier_code, status
+        supplier_name, email, phone, address_1, address_2, city, county, postcode, country, account_manager, supplier_code, status,
+        commission_rule_type, commission_custom_rate
     </code>
 
     <?php if (!empty($result['error'])): ?>

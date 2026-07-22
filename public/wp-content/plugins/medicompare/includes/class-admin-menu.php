@@ -1,5 +1,11 @@
 <?php
 
+// Load dompdf autoloader from plugin's lib/dompdf
+require_once plugin_dir_path(__FILE__) . '/../lib/dompdf/autoload.inc.php';
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 if (!defined('ABSPATH')) exit;
 
 class MediCompare_Admin_Menu {
@@ -19,6 +25,29 @@ class MediCompare_Admin_Menu {
          add_action('admin_enqueue_scripts', [$this, 'enqueue_subscription_js']);
          add_action('admin_enqueue_scripts', [$this, 'enqueue_subscription_css']);
 
+         // ---------------------------------------------------------
+        // SUPPLIER COMMISSION RULE UI + SAVE HANDLERS (RESTORED)
+        // ---------------------------------------------------------
+
+        // Add meta box to Supplier edit screen
+        add_action('add_meta_boxes', [$this, 'add_supplier_commission_meta_box']);
+
+        // Save commission fields when Supplier is saved
+        add_action('save_post_mc_supplier', [$this, 'save_supplier_commission_meta_box']);
+
+        // Add commission rule column in Supplier list table
+        add_filter('manage_edit-mc_supplier_columns', [$this, 'add_supplier_commission_column']);
+
+        // Render commission rule column
+        add_action('manage_mc_supplier_posts_custom_column', [$this, 'render_supplier_commission_column'], 10, 2);
+
+        // Add Quick Edit fields
+        add_action('quick_edit_custom_box', [$this, 'supplier_quick_edit_fields'], 10, 2);
+
+        // Save Quick Edit fields
+        add_action('save_post_mc_supplier', [$this, 'save_quick_edit_supplier']);
+
+
 
         add_action('admin_enqueue_scripts', function($hook){
          error_log("HOOK: " . $hook);
@@ -29,6 +58,7 @@ class MediCompare_Admin_Menu {
         // Load verification logic on all admin requests
         require_once plugin_dir_path(__FILE__) . 'admin-pages/pharmacy-verification.php';
         require_once plugin_dir_path(__FILE__) . 'admin-pages/admin-dashboard-widget.php';
+
 
     }
 
@@ -54,6 +84,138 @@ class MediCompare_Admin_Menu {
                 filemtime(plugin_dir_path(__FILE__) . '../assets/js/admin-order-transfer.js'),
                 true
             );
+        }
+    }
+
+    public function add_supplier_commission_meta_box() {
+        add_meta_box(
+            'mc_supplier_commission_rules',
+            'Commission Rules',
+            [$this, 'render_supplier_commission_meta_box'],
+            'mc_supplier',
+            'normal',
+            'default'
+        );
+    }
+
+    public function render_supplier_commission_meta_box($post) {
+
+        $rule_type   = get_post_meta($post->ID, 'mc_commission_rule_type', true);
+        $custom_rate = get_post_meta($post->ID, 'mc_commission_custom_rate', true);
+
+        if ($rule_type === '') {
+            $rule_type = 'default_tiers';
+        }
+
+        ?>
+        <table class="form-table">
+            <tr>
+                <th><label for="mc_commission_rule_type">Commission Rule</label></th>
+                <td>
+                    <select name="mc_commission_rule_type" id="mc_commission_rule_type">
+                        <option value="default_tiers" <?php selected($rule_type, 'default_tiers'); ?>>
+                            Default Tiered (5% → 3% → 2.5%)
+                        </option>
+                        <option value="flat_5" <?php selected($rule_type, 'flat_5'); ?>>
+                            Flat 5% on all orders
+                        </option>
+                        <option value="flat_3" <?php selected($rule_type, 'flat_3'); ?>>
+                            Flat 3% on all orders
+                        </option>
+                        <option value="flat_25" <?php selected($rule_type, 'flat_25'); ?>>
+                            Flat 2.5% on all orders
+                        </option>
+                        <option value="custom_flat" <?php selected($rule_type, 'custom_flat'); ?>>
+                            Custom Flat %
+                        </option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <th><label for="mc_commission_custom_rate">Custom % (if selected)</label></th>
+                <td>
+                    <input type="number"
+                        step="0.01"
+                        min="0"
+                        name="mc_commission_custom_rate"
+                        id="mc_commission_custom_rate"
+                        value="<?php echo esc_attr($custom_rate); ?>"
+                        style="width:120px;">
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+
+    public function save_supplier_commission_meta_box($post_id) {
+
+        if (get_post_type($post_id) !== 'mc_supplier') {
+            return;
+        }
+
+        if (isset($_POST['mc_commission_rule_type'])) {
+            update_post_meta(
+                $post_id,
+                'mc_commission_rule_type',
+                sanitize_text_field($_POST['mc_commission_rule_type'])
+            );
+        }
+
+        if (isset($_POST['mc_commission_custom_rate'])) {
+            update_post_meta(
+                $post_id,
+                'mc_commission_custom_rate',
+                floatval($_POST['mc_commission_custom_rate'])
+            );
+        }
+    }
+
+    public function add_supplier_commission_column($columns) {
+        $columns['mc_commission_rule'] = 'Commission Rule';
+        return $columns;
+    }
+
+    public function supplier_quick_edit_fields($column_name, $post_type) {
+        if ($post_type !== 'mc_supplier' || $column_name !== 'mc_commission_rule') {
+            return;
+        }
+
+        ?>
+        <fieldset class="inline-edit-col-right">
+            <div class="inline-edit-col">
+                <label class="inline-edit-group">
+                    <span class="title">Commission Rule</span>
+                    <select name="mc_commission_rule_type">
+                        <option value="default_tiers">Default Tiered (5% → 3% → 2.5%)</option>
+                        <option value="flat_5">Flat 5%</option>
+                        <option value="flat_3">Flat 3%</option>
+                        <option value="flat_25">Flat 2.5%</option>
+                        <option value="custom_flat">Custom Flat %</option>
+                    </select>
+                </label>
+
+                <label class="inline-edit-group">
+                    <span class="title">Custom %</span>
+                    <input type="number" step="0.01" min="0" name="mc_commission_custom_rate" value="">
+                </label>
+            </div>
+        </fieldset>
+        <?php
+    }
+
+    public function save_quick_edit_supplier($post_id) {
+
+        if (get_post_type($post_id) !== 'mc_supplier') {
+            return;
+        }
+
+        if (isset($_POST['mc_commission_rule_type'])) {
+            update_post_meta($post_id, 'mc_commission_rule_type', sanitize_text_field($_POST['mc_commission_rule_type']));
+        }
+
+        if (isset($_POST['mc_commission_custom_rate'])) {
+            update_post_meta($post_id, 'mc_commission_custom_rate', floatval($_POST['mc_commission_custom_rate']));
         }
     }
 
@@ -186,8 +348,8 @@ class MediCompare_Admin_Menu {
 
     add_submenu_page(
         'medicompare',
-        'Pending Verification',
-        'Pending Verification',
+        'Pharmacies Pending Verification',
+        'Pharmacies Pending Verification',
         'manage_options',
         'medicompare-pharmacy-verification',
         [$this, 'pharmacy_verification_page']
@@ -195,8 +357,8 @@ class MediCompare_Admin_Menu {
 
     add_submenu_page(
         'medicompare',
-        'Transferred Orders',
-        'Transferred Orders',
+        'Pharmacies Transferred Orders',
+        'Pharmacies Transferred Orders',
         'manage_options',
         'medicompare-transferred-orders',
         [$this, 'transferred_orders_page']
@@ -207,8 +369,8 @@ class MediCompare_Admin_Menu {
     --------------------------------------------------------- */
     add_submenu_page(
         'medicompare',
-        'Subscriptions',
-        'Subscriptions',
+        'Pharmacy Subscriptions',
+        'Pharmacy Subscriptions',
         'manage_options',
         'medicompare-subscriptions',
         [$this, 'subscription_control_page']
@@ -220,8 +382,8 @@ class MediCompare_Admin_Menu {
 
     add_submenu_page(
         'medicompare',
-        'Reports',
-        'Reports',
+        'Reports for Pharmacy / Supplier Info',
+        'Reports for Pharmacy / Supplier Info',
         'manage_options',
         'medicompare-reports',
         [$this, 'reports_page']
@@ -245,8 +407,8 @@ class MediCompare_Admin_Menu {
     --------------------------------------------------------- */
     add_submenu_page(
         'medicompare',
-        'Signup Leads',
-        'Signup Leads',
+        'Signup Leads of Pharmacies Interested',
+        'Signup Leads of Pharmacies Interested',
         'manage_options',
         'medicompare-signup-leads',
         [$this, 'signup_leads_page']
@@ -268,8 +430,340 @@ class MediCompare_Admin_Menu {
 
 
     public function reports_page() {
-        echo '<div class="wrap"><h1>Reports</h1><p>Reports module coming soon.</p></div>';
+
+        $report_type = $_GET['report_type'] ?? '';
+        $date_from   = $_GET['date_from'] ?? '';
+        $date_to     = $_GET['date_to'] ?? '';
+
+        ?>
+        <div class="wrap">
+            <h1>Reports</h1>
+
+            <form method="get" class="mc-report-filters">
+                <input type="hidden" name="page" value="medicompare-reports">
+
+                <table class="form-table">
+                    <tr>
+                        <th><label for="report_type">Report Type</label></th>
+                        <td>
+                            <select name="report_type" id="report_type">
+                                <option value="">-- Select Report --</option>
+                                <option value="supplier_commission" <?php selected($report_type, 'supplier_commission'); ?>>
+                                    Supplier Commission Summary
+                                </option>
+                                <option value="supplier_orders" <?php selected($report_type, 'supplier_orders'); ?>>
+                                    Supplier Order Breakdown
+                                </option>
+                                <option value="pharmacy_summary" <?php selected($report_type, 'pharmacy_summary'); ?>>
+                                    Pharmacy Order Summary
+                                </option>
+                                <option value="platform_fees" <?php selected($report_type, 'platform_fees'); ?>>
+                                    Platform Fees Report
+                                </option>
+                                <option value="supplier_performance" <?php selected($report_type, 'supplier_performance'); ?>>
+                                    Supplier Performance Report
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Date From</th>
+                        <td><input type="date" name="date_from" value="<?php echo esc_attr($date_from); ?>"></td>
+                    </tr>
+
+                    <tr>
+                        <th>Date To</th>
+                        <td><input type="date" name="date_to" value="<?php echo esc_attr($date_to); ?>"></td>
+                    </tr>
+                </table>
+
+                <p><button class="button button-primary">Generate Report</button></p>
+            </form>
+
+            <?php
+            if ($report_type) {
+                $this->render_report($report_type, $date_from, $date_to);
+            }
+            ?>
+        </div>
+        <?php
     }
+
+    public function render_report($type, $from, $to) {
+
+        switch ($type) {
+
+            case 'supplier_commission':
+                $this->report_supplier_commission($from, $to);
+                break;
+
+            case 'supplier_orders':
+                $this->report_supplier_orders($from, $to);
+                break;
+
+            case 'pharmacy_summary':
+                $this->report_pharmacy_summary($from, $to);
+                break;
+
+            case 'platform_fees':
+                $this->report_platform_fees($from, $to);
+                break;
+
+            case 'supplier_performance':
+                $this->report_supplier_performance($from, $to);
+                break;
+
+            default:
+                echo '<p class="mc-muted">Invalid report type selected.</p>';
+        }
+    }
+
+    //placeholders to fill in for other reports
+    public function report_supplier_commission($from, $to) {
+        global $wpdb;
+
+        $orders_table           = $wpdb->prefix . 'medi_orders';
+        $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
+        $postmeta_table         = $wpdb->prefix . 'postmeta';
+
+        /* ---------------------------------------------------------
+        BUILD WHERE CLAUSE
+        --------------------------------------------------------- */
+        $where = ["o.status IN ('TRANSFERRED','SENT')"];
+        $params = [];
+
+        if ($from) {
+            $where[] = "DATE(o.created_at) >= %s";
+            $params[] = $from;
+        }
+
+        if ($to) {
+            $where[] = "DATE(o.created_at) <= %s";
+            $params[] = $to;
+        }
+
+        $where_sql = implode(' AND ', $where);
+
+        /* ---------------------------------------------------------
+        SUMMARY QUERY (GROUPED BY SUPPLIER)
+        --------------------------------------------------------- */
+        $sql = "
+            SELECT 
+                oss.supplier_id,
+                COUNT(DISTINCT o.id) AS total_orders,
+                SUM(oss.supplier_total_amount) AS total_supplier_amount,
+                SUM(
+                    CASE 
+                        WHEN oss.platform_fee_amount > 0 THEN oss.platform_fee_amount
+                        WHEN oss.platform_fee_percent > 0 THEN (oss.supplier_total_amount * oss.platform_fee_percent / 100)
+                        ELSE 0
+                    END
+                ) AS total_commission,
+                AVG(
+                    CASE 
+                        WHEN oss.platform_fee_percent > 0 THEN oss.platform_fee_percent
+                        ELSE NULL
+                    END
+                ) AS avg_percent,
+                MAX(oss.platform_fee_percent) AS max_percent,
+                MIN(oss.platform_fee_percent) AS min_percent
+            FROM {$orders_table} o
+            INNER JOIN {$supplier_summary_table} oss
+                ON oss.order_id = o.id
+            WHERE {$where_sql}
+            GROUP BY oss.supplier_id
+            ORDER BY total_commission DESC
+        ";
+
+        $rows = $params ? $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A)
+                        : $wpdb->get_results($sql, ARRAY_A);
+
+        echo '<h2>Supplier Commission Summary</h2>';
+
+        if (!$rows) {
+            echo '<p>No data found for the selected date range.</p>';
+            return;
+        }
+
+        /* ---------------------------------------------------------
+        SUMMARY TABLE
+        --------------------------------------------------------- */
+        echo '<table class="widefat fixed striped">';
+        echo '<thead>
+                <tr>
+                    <th>Supplier</th>
+                    <th>Total Orders</th>
+                    <th>Total Supplier Amount (£)</th>
+                    <th>Total Commission (£)</th>
+                    <th>Avg %</th>
+                    <th>Max %</th>
+                    <th>Min %</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+        foreach ($rows as $r) {
+
+            $supplier_id   = $r['supplier_id'];
+            $supplier_name = get_the_title($supplier_id) ?: ('Supplier #' . $supplier_id);
+
+            echo '<tr>';
+            echo '<td>' . esc_html($supplier_name) . '</td>';
+            echo '<td>' . (int)$r['total_orders'] . '</td>';
+            echo '<td>£' . number_format((float)$r['total_supplier_amount'], 2) . '</td>';
+            echo '<td>£' . number_format((float)$r['total_commission'], 2) . '</td>';
+            echo '<td>' . ($r['avg_percent'] ? number_format((float)$r['avg_percent'], 2) . '%' : '—') . '</td>';
+            echo '<td>' . ($r['max_percent'] ? number_format((float)$r['max_percent'], 2) . '%' : '—') . '</td>';
+            echo '<td>' . ($r['min_percent'] ? number_format((float)$r['min_percent'], 2) . '%' : '—') . '</td>';
+            echo '</tr>';
+
+            /* ---------------------------------------------------------
+            ORDER‑LEVEL BREAKDOWN (INVOICE DETAIL)
+            --------------------------------------------------------- */
+
+            $order_sql = "
+                SELECT 
+                    o.id AS internal_order_id,
+                    o.order_number AS master_order_number,
+                    o.created_at,
+                    oss.supplier_total_amount,
+                    CASE 
+                        WHEN oss.platform_fee_amount > 0 THEN oss.platform_fee_amount
+                        WHEN oss.platform_fee_percent > 0 THEN (oss.supplier_total_amount * oss.platform_fee_percent / 100)
+                        ELSE 0
+                    END AS commission_amount,
+                    oss.platform_fee_percent
+                FROM {$orders_table} o
+                INNER JOIN {$supplier_summary_table} oss
+                    ON oss.order_id = o.id
+                WHERE oss.supplier_id = %d
+                AND {$where_sql}
+                ORDER BY o.created_at DESC
+            ";
+
+            $order_rows = $params
+                ? $wpdb->get_results($wpdb->prepare($order_sql, array_merge([$supplier_id], $params)), ARRAY_A)
+                : $wpdb->get_results($wpdb->prepare($order_sql, [$supplier_id]), ARRAY_A);
+
+            echo '<tr class="mc-supplier-orders"><td colspan="7">';
+
+            echo '<details>';
+            echo '<summary><strong>View Orders (' . count($order_rows) . ')</strong></summary>';
+
+            echo '<table class="widefat striped" style="margin-top:10px;">';
+            echo '<thead>
+                    <tr>
+                        <th>Master Order #</th>
+                        <th>Sub‑Order #</th>
+                        <th>Date</th>
+                        <th>Supplier Total (£)</th>
+                        <th>Commission (£)</th>
+                        <th>Commission %</th>
+                    </tr>
+                </thead><tbody>';
+
+            foreach ($order_rows as $o) {
+
+                $supplier_code = get_post_meta($supplier_id, 'mc_supplier_code', true);
+                if (!$supplier_code) {
+                    $supplier_code = 'SUP' . $supplier_id;
+                }
+
+                $suborder_number = $o['master_order_number'] . '-' . $supplier_code;
+
+                echo '<tr>';
+                echo '<td>' . esc_html($o['master_order_number']) . '</td>';
+                echo '<td>' . esc_html($suborder_number) . '</td>';
+                echo '<td>' . date('d M Y', strtotime($o['created_at'])) . '</td>';
+                echo '<td>£' . number_format((float)$o['supplier_total_amount'], 2) . '</td>';
+                echo '<td>£' . number_format((float)$o['commission_amount'], 2) . '</td>';
+                echo '<td>' . ($o['platform_fee_percent'] ? number_format((float)$o['platform_fee_percent'], 2) . '%' : '—') . '</td>';
+                echo '</tr>';
+            }
+
+            echo '</tbody></table>';
+            echo '</details>';
+
+            echo '</td></tr>';
+
+            /* ---------------------------------------------------------
+            PER‑SUPPLIER BUTTONS (PDF + EMAIL)
+            --------------------------------------------------------- */
+
+            echo '<tr><td colspan="7" style="text-align:right; padding-top:10px;">';
+
+            echo '<a class="button button-primary" 
+                    href="' . admin_url(
+                        'admin-post.php?action=download_report_pdf'
+                        . '&type=supplier_commission'
+                        . '&from=' . urlencode($from)
+                        . '&to='   . urlencode($to)
+                        . '&supplier_id=' . intval($supplier_id)
+                    ) . '">
+                    Download PDF Invoice
+                </a>';
+
+            echo '&nbsp;&nbsp;';
+
+            echo '<button class="button mc-email-report" 
+                    data-report="supplier_commission"
+                    data-supplier="' . intval($supplier_id) . '"
+                    data-from="' . esc_attr($from) . '"
+                    data-to="' . esc_attr($to) . '">
+                    Email Report
+                </button>';
+
+            echo '</td></tr>';
+        }
+
+        echo '</tbody></table>';
+
+        ?>
+        <script>
+        jQuery(document).on('click', '.mc-email-report', function () {
+            const btn = jQuery(this);
+            btn.prop('disabled', true).text('Sending...');
+
+            jQuery.post(ajaxurl, {
+                action: 'email_report',
+                report_type: btn.data('report'),
+                supplier_id: btn.data('supplier'),
+                date_from: btn.data('from'),
+                date_to: btn.data('to')
+            }, function (response) {
+                if (response.success) {
+                    alert('Report emailed successfully.');
+                } else {
+                    alert('Error: ' + response.data.message);
+                }
+                btn.prop('disabled', false).text('Email Report');
+            });
+        });
+        </script>
+        <?php
+    }
+
+    public function report_supplier_orders($from, $to) {
+        echo '<h2>Supplier Order Breakdown</h2>';
+        echo '<p>Report logic coming next.</p>';
+    }
+
+    public function report_pharmacy_summary($from, $to) {
+        echo '<h2>Pharmacy Order Summary</h2>';
+        echo '<p>Report logic coming next.</p>';
+    }
+
+    public function report_platform_fees($from, $to) {
+        echo '<h2>Platform Fees Report</h2>';
+        echo '<p>Report logic coming next.</p>';
+    }
+
+    public function report_supplier_performance($from, $to) {
+        echo '<h2>Supplier Performance Report</h2>';
+        echo '<p>Report logic coming next.</p>';
+    }
+
 
     public function import_logs_page() {
         echo '<div class="wrap"><h1>Import Logs</h1><p>Import logs will appear here.</p></div>';
@@ -282,6 +776,40 @@ class MediCompare_Admin_Menu {
         include __DIR__ . '/admin-pages/signup-leads.php';
     }
 
+    public function render_supplier_commission_column($column, $post_id) {
+
+        if ($column !== 'mc_commission_rule') {
+            return;
+        }
+
+        $rule_type   = get_post_meta($post_id, 'mc_commission_rule_type', true);
+        $custom_rate = get_post_meta($post_id, 'mc_commission_custom_rate', true);
+
+        if ($rule_type === '') {
+            $rule_type = 'default_tiers';
+        }
+
+        switch ($rule_type) {
+            case 'flat_5':
+                echo 'Flat 5%';
+                break;
+            case 'flat_3':
+                echo 'Flat 3%';
+                break;
+            case 'flat_25':
+                echo 'Flat 2.5%';
+                break;
+            case 'custom_flat':
+                echo 'Custom ' . (float)$custom_rate . '%';
+                break;
+            case 'default_tiers':
+            default:
+                echo 'Tiered 5% / 3% / 2.5%';
+                break;
+        }
+    }
+
+    
 
     /* ---------------------------------------------------------
        SUPPLIER PRODUCT CSV PARSER
@@ -1012,7 +1540,12 @@ class MediCompare_Admin_Menu {
             'mc_supplier_manager'    => sanitize_text_field($row['account_manager']),
             'mc_supplier_code'       => sanitize_text_field($row['supplier_code']),
             'mc_supplier_status'     => sanitize_text_field($row['status']),
+
+            // ⭐ NEW: default commission rule (can be changed per supplier later)
+            'mc_commission_rule_type'   => 'default_tiers', // applies 1,2,3 based on accumulated orders
+            'mc_commission_custom_rate' => '',              // used only for custom/flat rules
         ];
+
 
         foreach ($meta as $key => $value) {
             update_post_meta($post_id, $key, $value);
@@ -1248,7 +1781,7 @@ public function transferred_orders_page() {
     }
     ?>
     <div class="wrap">
-        <h1>Transferred Orders</h1>
+        <h1>Transferred Orders for Pharmacies to Suppliers</h1>
 
         <!-- FILTER FORM -->
         <form method="get" class="mc-admin-filters">
@@ -1375,21 +1908,27 @@ public function transferred_orders_page() {
                                     <?php
                                     $supplier_id    = (int) $row['supplier_id'];
                                     $supplier_name  = get_the_title($supplier_id);
+
                                     $supplier_total = (float) $row['supplier_total_amount'];
                                     $fee_percent    = (float) $row['platform_fee_percent'];
                                     $fee_amount     = (float) $row['platform_fee_amount'];
 
+                                    // ⭐ Recalculate fee_amount if DB stored 0 but percent exists
                                     if ($fee_amount == 0 && $fee_percent > 0) {
                                         $fee_amount = round($supplier_total * $fee_percent / 100, 2);
                                     }
 
+                                    // ⭐ Optional: supplier net amount (after commission)
+                                    // $supplier_net = $supplier_total - $fee_amount;
+
+                                    // Fetch suborder status + email info
                                     $suborder = $wpdb->get_row($wpdb->prepare(
                                         "SELECT supplier_order_status, email_sent, email_sent_at
-                                         FROM {$suborders_table}
-                                         WHERE order_id = %d
-                                           AND supplier_id = %d
-                                           AND suborder_number = %s
-                                         LIMIT 1",
+                                        FROM {$suborders_table}
+                                        WHERE order_id = %d
+                                        AND supplier_id = %d
+                                        AND suborder_number = %s
+                                        LIMIT 1",
                                         $order_id,
                                         $supplier_id,
                                         $row['suborder_number']
@@ -1401,12 +1940,13 @@ public function transferred_orders_page() {
                                         ? date('d M Y H:i', strtotime($suborder['email_sent_at']))
                                         : null;
 
+                                    // Fetch items for this supplier
                                     $items = $wpdb->get_results($wpdb->prepare(
                                         "SELECT oi.product_id, oi.quantity, oi.unit_price, oi.line_total
-                                         FROM {$order_items_table} oi
-                                         WHERE oi.order_id = %d
-                                           AND oi.supplier_id = %d
-                                         ORDER BY oi.product_id ASC",
+                                        FROM {$order_items_table} oi
+                                        WHERE oi.order_id = %d
+                                        AND oi.supplier_id = %d
+                                        ORDER BY oi.product_id ASC",
                                         $order_id,
                                         $supplier_id
                                     ), ARRAY_A);
@@ -1420,19 +1960,31 @@ public function transferred_orders_page() {
                                                     Sub-order: <?php echo esc_html($row['suborder_number']); ?>
                                                 </span>
                                             </div>
+
                                             <div class="mc-suborder-status">
                                                 <span class="mc-suborder-status-badge mc-status-<?php echo esc_attr($sub_status); ?>">
                                                     <?php echo esc_html(ucfirst($sub_status)); ?>
                                                 </span><br>
+
                                                 <span class="mc-suborder-total">
                                                     Supplier Total: £<?php echo number_format($supplier_total, 2); ?>
                                                 </span><br>
+
+                                                <!-- ⭐ Commission Display -->
                                                 <span class="mc-suborder-commission">
                                                     Commission: £<?php echo number_format($fee_amount, 2); ?>
                                                     <?php if ($fee_percent > 0): ?>
                                                         (<?php echo number_format($fee_percent, 2); ?>%)
                                                     <?php endif; ?>
                                                 </span><br>
+
+                                                <!-- ⭐ Optional: Supplier Net -->
+                                                <!--
+                                                <span class="mc-suborder-net">
+                                                    Supplier Net: £<?php echo number_format($supplier_total - $fee_amount, 2); ?>
+                                                </span><br>
+                                                -->
+
                                                 <span class="mc-email-indicator">
                                                     Email:
                                                     <?php if ($email_sent): ?>
@@ -1475,6 +2027,7 @@ public function transferred_orders_page() {
                                     </div>
 
                                 <?php endforeach; ?>
+
                             </div>
 
                         </div>
@@ -2102,3 +2655,208 @@ public function transferred_orders_page() {
 }
 
 new MediCompare_Admin_Menu();
+
+    /* ---------------------------------------------------------
+   PDF DOWNLOAD HANDLER
+--------------------------------------------------------- */
+    add_action('admin_post_download_report_pdf', function () {
+
+        $type        = sanitize_text_field($_GET['type'] ?? '');
+        $from        = sanitize_text_field($_GET['from'] ?? '');
+        $to          = sanitize_text_field($_GET['to'] ?? '');
+        $supplier_id = intval($_GET['supplier_id'] ?? 0);
+
+        if ($type !== 'supplier_commission') {
+            wp_die('Invalid report type');
+        }
+        if (!$supplier_id) {
+            wp_die('Missing supplier_id');
+        }
+
+        // Dates
+        $from_date = new DateTime($from);
+        $to_date   = new DateTime($to);
+
+        $year  = $from_date->format('Y');
+        $month = $from_date->format('m');
+        $day   = $from_date->format('d');
+
+        // Supplier info
+        $supplier_post   = get_post($supplier_id);
+        $supplier_name   = $supplier_post->post_title;
+        $supplier_code   = $supplier_post->post_name; // slug
+
+        $supplier_address = get_post_meta($supplier_id, 'mc_supplier_address', true);
+        $supplier_email   = get_post_meta($supplier_id, 'mc_supplier_email', true);
+        $supplier_phone   = get_post_meta($supplier_id, 'mc_supplier_phone', true);
+        $supplier_manager = get_post_meta($supplier_id, 'mc_supplier_manager', true);
+
+        // Invoice sequence (per supplier)
+        $sequence = intval(get_post_meta($supplier_id, 'mc_invoice_sequence', true));
+        $sequence++;
+        update_post_meta($supplier_id, 'mc_invoice_sequence', $sequence);
+
+        $sequence_str = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        $invoice_number = sprintf(
+            '%s_INV-%s-%s-%s-%s',
+            strtoupper($supplier_code),
+            $sequence_str,
+            $year,
+            $month,
+            $day
+        );
+
+        $pdf_filename = sprintf(
+            'invoice_%s_INV-%s-%s-%s-%s.pdf',
+            strtoupper($supplier_code),
+            $sequence_str,
+            $year,
+            $month,
+            $day
+        );
+
+        // Logo URL (auto environment safe)
+        $logo_url = plugins_url('assets/img/logo.png', __FILE__);
+
+        // Fetch order breakdown (YOU MUST REPLACE THIS WITH YOUR REAL QUERY)
+        $orders = mc_get_supplier_commission_orders($supplier_id, $from, $to);
+
+        $total_supplier_amount = 0;
+        $total_commission      = 0;
+
+        foreach ($orders as $row) {
+            $total_supplier_amount += floatval($row['supplier_total']);
+            $total_commission      += floatval($row['commission']);
+        }
+
+        // Build HTML
+        ob_start();
+        ?>
+        <html>
+        <head>
+            <style>
+                body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ccc; padding: 6px; }
+                th { background: #f5f5f5; }
+            </style>
+        </head>
+        <body>
+
+        <img src="<?php echo $logo_url; ?>" style="max-height:60px;"><br><br>
+
+        <h2>Invoice: <?php echo $invoice_number; ?></h2>
+        <p><strong>Period:</strong> <?php echo $from; ?> to <?php echo $to; ?></p>
+
+        <h3>Supplier Details</h3>
+        <p><strong>Supplier:</strong> <?php echo $supplier_name; ?></p>
+        <p><strong>Manager:</strong> <?php echo $supplier_manager; ?></p>
+        <p><strong>Address:</strong> <?php echo $supplier_address; ?></p>
+        <p><strong>Email:</strong> <?php echo $supplier_email; ?></p>
+        <p><strong>Phone:</strong> <?php echo $supplier_phone; ?></p>
+
+        <h3>Summary</h3>
+        <table>
+            <tr><th>Total Supplier Amount</th><td><?php echo number_format($total_supplier_amount, 2); ?></td></tr>
+            <tr><th>Total Commission</th><td><?php echo number_format($total_commission, 2); ?></td></tr>
+        </table>
+
+        <h3>Order Breakdown</h3>
+        <table>
+            <tr>
+                <th>Master Order #</th>
+                <th>Sub Order #</th>
+                <th>Date</th>
+                <th>Supplier Total</th>
+                <th>Commission</th>
+                <th>Commission %</th>
+            </tr>
+
+            <?php foreach ($orders as $row): ?>
+                <tr>
+                    <td><?php echo $row['master_order']; ?></td>
+                    <td><?php echo $row['sub_order']; ?></td>
+                    <td><?php echo $row['date']; ?></td>
+                    <td><?php echo number_format($row['supplier_total'], 2); ?></td>
+                    <td><?php echo number_format($row['commission'], 2); ?></td>
+                    <td><?php echo $row['commission_pct']; ?>%</td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+
+        <br><br>
+        <p style="text-align:center; font-size:10px;">
+            Thank you for working with MediCompare. This invoice has been generated based on inputs provided.
+        </p>
+
+        </body>
+        </html>
+        <?php
+        $html = ob_get_clean();
+
+        // DOMPDF
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . $pdf_filename . '"');
+        echo $dompdf->output();
+        exit;
+    });
+
+    function mc_get_supplier_commission_orders($supplier_id, $from, $to) {
+    global $wpdb;
+
+    $orders_table           = $wpdb->prefix . 'medi_orders';
+    $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
+
+    $where = ["o.status IN ('TRANSFERRED','SENT')"];
+    $params = [];
+
+    if ($from) {
+        $where[]  = "DATE(o.created_at) >= %s";
+        $params[] = $from;
+    }
+
+    if ($to) {
+        $where[]  = "DATE(o.created_at) <= %s";
+        $params[] = $to;
+    }
+
+    $where_sql = implode(' AND ', $where);
+
+    $sql = "
+        SELECT 
+            o.order_number AS master_order,
+            CONCAT(o.order_number, '-', pm.meta_value) AS sub_order,
+            DATE(o.created_at) AS date,
+            oss.supplier_total_amount AS supplier_total,
+            CASE 
+                WHEN oss.platform_fee_amount > 0 THEN oss.platform_fee_amount
+                WHEN oss.platform_fee_percent > 0 THEN (oss.supplier_total_amount * oss.platform_fee_percent / 100)
+                ELSE 0
+            END AS commission,
+            oss.platform_fee_percent AS commission_pct
+        FROM {$orders_table} o
+        INNER JOIN {$supplier_summary_table} oss
+            ON oss.order_id = o.id
+        LEFT JOIN {$wpdb->postmeta} pm
+            ON pm.post_id = oss.supplier_id AND pm.meta_key = 'mc_supplier_code'
+        WHERE oss.supplier_id = %d
+        AND {$where_sql}
+        ORDER BY o.created_at DESC
+    ";
+
+    $params = array_merge([$supplier_id], $params);
+
+    return $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A);
+}
+
+
+

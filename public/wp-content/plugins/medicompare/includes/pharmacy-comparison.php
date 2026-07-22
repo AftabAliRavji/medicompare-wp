@@ -63,6 +63,106 @@ class MediCompare_Pharmacy_Comparison {
         return (int) $wpdb->insert_id;
     }
 
+    /**
+     * Get CPT post ID from supplier_code
+     */
+    private function get_supplier_post_id_from_code($supplier_code) {
+        global $wpdb;
+
+        return (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta}
+            WHERE meta_key = 'mc_supplier_code'
+            AND meta_value = %s
+            LIMIT 1",
+            $supplier_code
+        ));
+    }
+
+
+            /**
+         * Get commission rule type + custom rate for a supplier.
+         */
+        private function get_supplier_commission_rule($supplier_id) {
+            $rule_type  = get_post_meta($supplier_id, 'mc_commission_rule_type', true);
+            $custom_rate = get_post_meta($supplier_id, 'mc_commission_custom_rate', true);
+
+            if ($rule_type === '') {
+                $rule_type = 'default_tiers'; // fallback
+            }
+
+            return [
+                'type'        => $rule_type,
+                'custom_rate' => (float) $custom_rate,
+            ];
+        }
+
+        /**
+         * Calculate platform fee percent for a supplier order.
+         * Uses:
+         *  - current supplier_total (this order)
+         *  - accumulated total from previous orders
+         *  - rule type stored in postmeta
+         */
+        private function calculate_platform_fee_percent($supplier_id, $supplier_total, $supplier_summary_table) {
+            global $wpdb;
+
+            $postmeta_table = $wpdb->postmeta;
+
+            // accumulated total from previous orders for this supplier
+            $accumulated = (float) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT SUM(supplier_total_amount)
+                    FROM {$supplier_summary_table}
+                    WHERE supplier_id = %d",
+                    $supplier_id
+                )
+            );
+
+            // get supplier_code from CPT meta
+            $supplier_code = $wpdb->get_var($wpdb->prepare(
+                "SELECT meta_value FROM {$postmeta_table}
+                WHERE post_id = %d AND meta_key = %s LIMIT 1",
+                $supplier_id,
+                'mc_supplier_code'
+            ));
+
+            // convert supplier_code → CPT post ID
+            $cpt_supplier_id = $this->get_supplier_post_id_from_code($supplier_code);
+
+            // get commission rule from CPT supplier
+            $rule = $this->get_supplier_commission_rule($cpt_supplier_id);
+
+            $type = $rule['type'];
+            $rate = $rule['custom_rate'];
+
+            $current_total = $accumulated + (float) $supplier_total;
+
+            switch ($type) {
+                case 'flat_5':
+                    return 5.0;
+
+                case 'flat_3':
+                    return 3.0;
+
+                case 'flat_25':
+                    return 2.5;
+
+                case 'custom_flat':
+                    return $rate > 0 ? $rate : 0.0;
+
+                case 'default_tiers':
+                case 'tiered_5_3_25':
+                default:
+                    if ($current_total <= 3000) {
+                        return 5.0;
+                    } elseif ($current_total <= 10000) {
+                        return 3.0;
+                    } else {
+                        return 2.5;
+                    }
+            }
+        }
+
     /* ---------------------------------------------------------
        BUILD FULL PRODUCT LABEL (NAME + PACK SIZE + STRENGTH)
     --------------------------------------------------------- */
@@ -389,12 +489,19 @@ class MediCompare_Pharmacy_Comparison {
                 MAX(CASE WHEN pm.meta_key = 'mc_pack_size' THEN pm.meta_value END) AS pack_size,
                 MAX(CASE WHEN pm.meta_key = 'mc_description' THEN pm.meta_value END) AS description
             FROM {$supplier_products_table} sp
-            INNER JOIN {$posts_table} p ON p.ID = sp.product_id
-            LEFT JOIN {$postmeta_table} pm ON pm.post_id = sp.product_id
-            INNER JOIN {$posts_table} s ON s.ID = sp.supplier_id
+            INNER JOIN {$posts_table} p 
+                ON p.ID = sp.product_id
+            LEFT JOIN {$postmeta_table} pm 
+                ON pm.post_id = sp.product_id
+            INNER JOIN {$posts_table} s 
+                ON s.ID = sp.supplier_id
+            INNER JOIN {$postmeta_table} sm
+                ON sm.post_id = sp.supplier_id
+            AND sm.meta_key = 'mc_supplier_status'
+            AND sm.meta_value = 'active'
             WHERE p.post_type = 'mc_product'
-              AND p.post_status = 'publish'
-              AND sp.product_id = %d
+            AND p.post_status = 'publish'
+            AND sp.product_id = %d
             GROUP BY sp.id
             ORDER BY sp.price ASC
             LIMIT 50
@@ -907,7 +1014,7 @@ class MediCompare_Pharmacy_Comparison {
 
             $supplier_code = $wpdb->get_var($wpdb->prepare(
                 "SELECT meta_value FROM {$postmeta_table}
-                 WHERE post_id = %d AND meta_key = %s LIMIT 1",
+                WHERE post_id = %d AND meta_key = %s LIMIT 1",
                 $supplier_id,
                 'mc_supplier_code'
             ));
@@ -918,13 +1025,22 @@ class MediCompare_Pharmacy_Comparison {
 
             $suborder_number = $new_order_number . '-' . $supplier_code;
 
+            // ⭐ NEW: calculate commission percent + amount
+            $fee_percent = $this->calculate_platform_fee_percent(
+                $supplier_id,
+                $supplier_total,
+                $supplier_summary_table
+            );
+
+            $fee_amount = round(($supplier_total * $fee_percent) / 100, 2);
+
             $wpdb->insert($supplier_summary_table, [
                 'order_id'              => $order_id,
                 'supplier_id'           => $supplier_id,
                 'suborder_number'       => $suborder_number,
                 'supplier_total_amount' => $supplier_total,
-                'platform_fee_percent'  => 0.00,
-                'platform_fee_amount'   => 0.00,
+                'platform_fee_percent'  => $fee_percent,
+                'platform_fee_amount'   => $fee_amount,
                 'supplier_order_status' => 'pending',
                 'created_at'            => current_time('mysql'),
             ]);
@@ -940,6 +1056,7 @@ class MediCompare_Pharmacy_Comparison {
                 'updated_at'            => null,
             ]);
         }
+
 
         // 3) deduct supplier stock
         foreach ($items as $item) {
@@ -1013,6 +1130,31 @@ class MediCompare_Pharmacy_Comparison {
             $suppliers,
             $items_by_supplier
         );
+
+        // ⭐ Update supplier summary + suborder status to SENT
+        foreach ($suppliers as $sup) {
+            $wpdb->update(
+                $supplier_summary_table,
+                ['supplier_order_status' => 'sent'],
+                [
+                    'order_id'    => $order_id,
+                    'supplier_id' => $sup['supplier_id']
+                ]
+            );
+
+            $wpdb->update(
+                $suborders_table,
+                [
+                    'supplier_order_status' => 'sent',
+                    'email_sent'            => 1,
+                    'email_sent_at'         => current_time('mysql')
+                ],
+                [
+                    'order_id'    => $order_id,
+                    'supplier_id' => $sup['supplier_id']
+                ]
+            );
+        }
 
         //IF want to send pharmacy email in future the uncomment
         // $email_engine->send_pharmacy_confirmation(

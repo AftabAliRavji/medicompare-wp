@@ -2686,7 +2686,42 @@ new MediCompare_Admin_Menu();
         $supplier_name   = $supplier_post->post_title;
         $supplier_code   = $supplier_post->post_name; // slug
 
-        $supplier_address = get_post_meta($supplier_id, 'mc_supplier_address', true);
+        // bank details of mediCompare
+        $bank_acc_name   = get_option('mc_bank_account_name', 'mediCompare');
+        $bank_name       = get_option('mc_bank_name', 'HSBC');
+        $bank_acc_number = get_option('mc_bank_account_number', 'xxxxxxx');
+        $bank_sort_code  = get_option('mc_bank_sort_code', 'xx-xx-xx');
+
+
+        /* ---------------------------------------------------------
+        ADDRESS FIX (old + new formats)
+        --------------------------------------------------------- */
+        $address_single = trim(get_post_meta($supplier_id, 'mc_supplier_address', true));
+
+        $addr1     = trim(get_post_meta($supplier_id, 'mc_supplier_address_1', true));
+        $addr2     = trim(get_post_meta($supplier_id, 'mc_supplier_address_2', true));
+        $city      = trim(get_post_meta($supplier_id, 'mc_supplier_city', true));
+        $county    = trim(get_post_meta($supplier_id, 'mc_supplier_county', true));
+        $postcode  = trim(get_post_meta($supplier_id, 'mc_supplier_postcode', true));
+        $country   = trim(get_post_meta($supplier_id, 'mc_supplier_country', true));
+
+        $address_parts = array_filter([
+            $addr1,
+            $addr2,
+            $city,
+            $county,
+            $postcode,
+            $country
+        ]);
+
+        if (!empty($address_single)) {
+            $supplier_address = $address_single;
+        } elseif (!empty($address_parts)) {
+            $supplier_address = implode(', ', $address_parts);
+        } else {
+            $supplier_address = 'Address not available';
+        }
+
         $supplier_email   = get_post_meta($supplier_id, 'mc_supplier_email', true);
         $supplier_phone   = get_post_meta($supplier_id, 'mc_supplier_phone', true);
         $supplier_manager = get_post_meta($supplier_id, 'mc_supplier_manager', true);
@@ -2716,11 +2751,32 @@ new MediCompare_Admin_Menu();
             $day
         );
 
-        // Logo URL (auto environment safe)
-        $logo_url = plugins_url('assets/img/logo.png', __FILE__);
+        /* ---------------------------------------------------------
+        LOGO FIX — correct plugin root
+        dirname(__FILE__, 1) = /medicompare/
+        --------------------------------------------------------- */
+        $plugin_root = dirname(__FILE__, 1);
+        $logo_url = plugins_url('assets/img/logo.png', $plugin_root);
 
-        // Fetch order breakdown (YOU MUST REPLACE THIS WITH YOUR REAL QUERY)
+        /* ---------------------------------------------------------
+        Fetch order breakdown
+        --------------------------------------------------------- */
         $orders = mc_get_supplier_commission_orders($supplier_id, $from, $to);
+
+        /* ---------------------------------------------------------
+            AUTO-DETERMINE DATE RANGE IF NONE SELECTED
+        --------------------------------------------------------- */
+        if (empty($from) || empty($to)) {
+
+            $dates = array_column($orders, 'date'); // date is already YYYY-MM-DD
+
+            if (!empty($dates)) {
+                sort($dates); // earliest → latest
+
+                $from = $dates[0];
+                $to   = $dates[count($dates) - 1];
+            }
+        }
 
         $total_supplier_amount = 0;
         $total_commission      = 0;
@@ -2730,7 +2786,9 @@ new MediCompare_Admin_Menu();
             $total_commission      += floatval($row['commission']);
         }
 
-        // Build HTML
+        /* ---------------------------------------------------------
+        Build HTML
+        --------------------------------------------------------- */
         ob_start();
         ?>
         <html>
@@ -2758,8 +2816,16 @@ new MediCompare_Admin_Menu();
 
         <h3>Summary</h3>
         <table>
-            <tr><th>Total Supplier Amount</th><td><?php echo number_format($total_supplier_amount, 2); ?></td></tr>
-            <tr><th>Total Commission</th><td><?php echo number_format($total_commission, 2); ?></td></tr>
+            <tr><th>Total Supplier Amount</th><td>£<?php echo number_format($total_supplier_amount, 2); ?></td></tr>
+            <tr><th>Total Commission to be paid to MediCompare</th><td>£<?php echo number_format($total_commission, 2); ?></td></tr>
+        </table>
+
+        <h3>Payable To</h3>
+        <table>
+            <tr><th>Account Name</th><td><?php echo esc_html($bank_acc_name); ?></td></tr>
+            <tr><th>Bank</th><td><?php echo esc_html($bank_name); ?></td></tr>
+            <tr><th>Account Number</th><td><?php echo esc_html($bank_acc_number); ?></td></tr>
+            <tr><th>Sort Code</th><td><?php echo esc_html($bank_sort_code); ?></td></tr>
         </table>
 
         <h3>Order Breakdown</h3>
@@ -2778,8 +2844,8 @@ new MediCompare_Admin_Menu();
                     <td><?php echo $row['master_order']; ?></td>
                     <td><?php echo $row['sub_order']; ?></td>
                     <td><?php echo $row['date']; ?></td>
-                    <td><?php echo number_format($row['supplier_total'], 2); ?></td>
-                    <td><?php echo number_format($row['commission'], 2); ?></td>
+                    <td>£<?php echo number_format($row['supplier_total'], 2); ?></td>
+                    <td>£<?php echo number_format($row['commission'], 2); ?></td>
                     <td><?php echo $row['commission_pct']; ?>%</td>
                 </tr>
             <?php endforeach; ?>
@@ -2857,6 +2923,226 @@ new MediCompare_Admin_Menu();
 
     return $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A);
 }
+
+    /**
+     * Email report
+     */
+    add_action('wp_ajax_email_report', 'mc_email_supplier_report');
+    add_action('wp_ajax_nopriv_email_report', 'mc_email_supplier_report');
+
+    function mc_email_supplier_report() {
+
+        $report_type = sanitize_text_field($_POST['report_type'] ?? '');
+        $supplier_id = intval($_POST['supplier_id'] ?? 0);
+        $from        = sanitize_text_field($_POST['date_from'] ?? '');
+        $to          = sanitize_text_field($_POST['date_to'] ?? '');
+
+        if ($report_type !== 'supplier_commission') {
+            wp_send_json_error(['message' => 'Invalid report type']);
+        }
+        if (!$supplier_id) {
+            wp_send_json_error(['message' => 'Missing supplier_id']);
+        }
+
+        /* ---------------------------------------------------------
+        Supplier info
+        --------------------------------------------------------- */
+        $supplier_post   = get_post($supplier_id);
+        $supplier_name   = $supplier_post->post_title;
+        $supplier_email  = get_post_meta($supplier_id, 'mc_supplier_email', true);
+
+        if (!$supplier_email) {
+            wp_send_json_error(['message' => 'Supplier has no email address']);
+        }
+
+        /* ---------------------------------------------------------
+        Address (same logic as PDF)
+        --------------------------------------------------------- */
+        $address_single = trim(get_post_meta($supplier_id, 'mc_supplier_address', true));
+
+        $addr1     = trim(get_post_meta($supplier_id, 'mc_supplier_address_1', true));
+        $addr2     = trim(get_post_meta($supplier_id, 'mc_supplier_address_2', true));
+        $city      = trim(get_post_meta($supplier_id, 'mc_supplier_city', true));
+        $county    = trim(get_post_meta($supplier_id, 'mc_supplier_county', true));
+        $postcode  = trim(get_post_meta($supplier_id, 'mc_supplier_postcode', true));
+        $country   = trim(get_post_meta($supplier_id, 'mc_supplier_country', true));
+
+        $address_parts = array_filter([$addr1, $addr2, $city, $county, $postcode, $country]);
+
+        if (!empty($address_single)) {
+            $supplier_address = $address_single;
+        } elseif (!empty($address_parts)) {
+            $supplier_address = implode(', ', $address_parts);
+        } else {
+            $supplier_address = 'Address not available';
+        }
+
+        /* ---------------------------------------------------------
+        Bank details from wp_options
+        --------------------------------------------------------- */
+        $bank_acc_name   = get_option('mc_bank_account_name', 'mediCompare');
+        $bank_name       = get_option('mc_bank_name', 'HSBC');
+        $bank_acc_number = get_option('mc_bank_account_number', 'xxxxxxx');
+        $bank_sort_code  = get_option('mc_bank_sort_code', 'xx-xx-xx');
+
+        /* ---------------------------------------------------------
+        Fetch orders
+        --------------------------------------------------------- */
+        $orders = mc_get_supplier_commission_orders($supplier_id, $from, $to);
+
+        if (empty($orders)) {
+            wp_send_json_error(['message' => 'No orders found for this supplier']);
+        }
+
+        /* ---------------------------------------------------------
+        Auto date range if missing
+        --------------------------------------------------------- */
+        if (empty($from) || empty($to)) {
+            $dates = array_column($orders, 'date');
+            sort($dates);
+            $from = $dates[0];
+            $to   = $dates[count($dates) - 1];
+        }
+
+        /* ---------------------------------------------------------
+        Totals
+        --------------------------------------------------------- */
+        $total_supplier_amount = 0;
+        $total_commission      = 0;
+
+        foreach ($orders as $row) {
+            $total_supplier_amount += floatval($row['supplier_total']);
+            $total_commission      += floatval($row['commission']);
+        }
+
+        /* ---------------------------------------------------------
+        Logo URL (same as PDF)
+        --------------------------------------------------------- */
+        $plugin_root = dirname(__FILE__, 1);
+        $logo_url = plugins_url('assets/img/logo.png', $plugin_root);
+
+        /* ---------------------------------------------------------
+        Build HTML email (PDF-style)
+        --------------------------------------------------------- */
+        ob_start();
+        ?>
+        <div style="font-family: Arial, sans-serif; font-size: 14px; color:#333;">
+
+            <img src="<?php echo $logo_url; ?>" style="max-height:60px; margin-bottom:20px;">
+
+            <h2 style="margin-bottom:10px;">Supplier Commission Report</h2>
+            <p><strong>Period:</strong> <?php echo $from; ?> to <?php echo $to; ?></p>
+
+            <h3 style="margin-top:25px;">Supplier Details</h3>
+            <p><strong>Name:</strong> <?php echo esc_html($supplier_name); ?></p>
+            <p><strong>Address:</strong> <?php echo esc_html($supplier_address); ?></p>
+
+            <h3 style="margin-top:25px;">Summary</h3>
+            <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
+                <tr>
+                    <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Total Supplier Amount</th>
+                    <td style="border:1px solid #ccc;">£<?php echo number_format($total_supplier_amount, 2); ?></td>
+                </tr>
+                <tr>
+                    <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Total Commission Payable to MediCompare</th>
+                    <td style="border:1px solid #ccc;">£<?php echo number_format($total_commission, 2); ?></td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top:25px;">Payable To</h3>
+            <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
+                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Name</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_name); ?></td></tr>
+                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Bank</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_name); ?></td></tr>
+                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Number</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_number); ?></td></tr>
+                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Sort Code</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_sort_code); ?></td></tr>
+            </table>
+
+            <h3 style="margin-top:25px;">Order Breakdown</h3>
+            <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
+                <tr>
+                    <th style="background:#f5f5f5; border:1px solid #ccc;">Master Order #</th>
+                    <th style="background:#f5f5f5; border:1px solid #ccc;">Sub Order #</th>
+                    <th style="background:#f5f5f5; border:1px solid #ccc;">Date</th>
+                    <th style="background:#f5f5f5; border:1px solid #ccc;">Supplier Total</th>
+                    <th style="background:#f5f5f5; border:1px solid #ccc;">Commission</th>
+                    <th style="background:#f5f5f5; border:1px solid #ccc;">Commission %</th>
+                </tr>
+
+                <?php foreach ($orders as $row): ?>
+                    <tr>
+                        <td style="border:1px solid #ccc;"><?php echo $row['master_order']; ?></td>
+                        <td style="border:1px solid #ccc;"><?php echo $row['sub_order']; ?></td>
+                        <td style="border:1px solid #ccc;"><?php echo $row['date']; ?></td>
+                        <td style="border:1px solid #ccc;">£<?php echo number_format($row['supplier_total'], 2); ?></td>
+                        <td style="border:1px solid #ccc;">£<?php echo number_format($row['commission'], 2); ?></td>
+                        <td style="border:1px solid #ccc;"><?php echo $row['commission_pct']; ?>%</td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+
+            <p style="font-size:12px; margin-top:20px;">
+                Thank you for working with MediCompare.
+            </p>
+
+        </div>
+        <?php
+        $email_html = ob_get_clean();
+
+        /* ---------------------------------------------------------
+        Send email
+        --------------------------------------------------------- */
+        wp_mail(
+            $supplier_email,
+            'Supplier Commission Report',
+            $email_html,
+            ['Content-Type: text/html; charset=UTF-8']
+        );
+
+        wp_send_json_success(['message' => 'Email sent successfully']);
+    }
+
+    /**
+     * Being able to edit and update Suypplier Product ALL screen
+     * the [price]
+     * the [stock]
+     */
+    add_action('wp_ajax_mc_update_supplier_product', 'mc_update_supplier_product');
+    function mc_update_supplier_product() {
+        global $wpdb;
+
+        $product_id  = intval($_POST['product_id'] ?? 0);
+        $supplier_id = intval($_POST['supplier_id'] ?? 0);
+        $field       = sanitize_text_field($_POST['field'] ?? '');
+        $value       = sanitize_text_field($_POST['value'] ?? '');
+
+        if (!$product_id || !$supplier_id) {
+            wp_send_json_error(['message' => 'Missing product or supplier ID']);
+        }
+
+        if (!in_array($field, ['price', 'stock'], true)) {
+            wp_send_json_error(['message' => 'Invalid field']);
+        }
+
+        $table = $wpdb->prefix . 'medi_supplier_products';
+
+        $updated = $wpdb->update(
+            $table,
+            [$field => $value, 'last_updated' => current_time('mysql')],
+            ['product_id' => $product_id, 'supplier_id' => $supplier_id],
+            ['%f', '%s'],
+            ['%d', '%d']
+        );
+
+        if ($updated === false) {
+            wp_send_json_error(['message' => 'Database update failed']);
+        }
+
+        wp_send_json_success(['message' => 'Updated']);
+    }
+
+
+
+
 
 
 

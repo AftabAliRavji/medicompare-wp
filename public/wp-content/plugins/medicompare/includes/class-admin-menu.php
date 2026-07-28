@@ -2681,6 +2681,9 @@ new MediCompare_Admin_Menu();
         $month = $from_date->format('m');
         $day   = $from_date->format('d');
 
+        //pay date
+        $pay_date = date("Y-m-t", strtotime($from));
+
         // Supplier info
         $supplier_post   = get_post($supplier_id);
         $supplier_name   = $supplier_post->post_title;
@@ -2822,6 +2825,7 @@ new MediCompare_Admin_Menu();
 
         <h3>Payable To</h3>
         <table>
+            <tr><th>Pay Date</th><td><?php echo esc_html($pay_date); ?></td></tr>
             <tr><th>Account Name</th><td><?php echo esc_html($bank_acc_name); ?></td></tr>
             <tr><th>Bank</th><td><?php echo esc_html($bank_name); ?></td></tr>
             <tr><th>Account Number</th><td><?php echo esc_html($bank_acc_number); ?></td></tr>
@@ -2944,6 +2948,9 @@ new MediCompare_Admin_Menu();
             wp_send_json_error(['message' => 'Missing supplier_id']);
         }
 
+        //pay date
+        $pay_date = date("Y-m-t", strtotime($from));
+
         /* ---------------------------------------------------------
         Supplier info
         --------------------------------------------------------- */
@@ -3051,6 +3058,8 @@ new MediCompare_Admin_Menu();
 
             <h3 style="margin-top:25px;">Payable To</h3>
             <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
+                <tr>
+                <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Pay Date</th><td style="border:1px solid #ccc;"><?php echo esc_html($pay_date); ?></td></tr>
                 <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Name</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_name); ?></td></tr>
                 <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Bank</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_name); ?></td></tr>
                 <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Number</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_number); ?></td></tr>
@@ -3089,15 +3098,52 @@ new MediCompare_Admin_Menu();
         $email_html = ob_get_clean();
 
         /* ---------------------------------------------------------
-        Send email
+        Send email to supplier
         --------------------------------------------------------- */
         wp_mail(
             $supplier_email,
-            'Supplier Commission Report',
+            'Supplier Commission Report for ' . $supplier_name . ' — ' . $from . ' to ' . $to,
             $email_html,
-            ['Content-Type: text/html; charset=UTF-8']
+            ['Content-Type: text/html; charset=UTF-8',
+            'From: MediCompare <no-reply@medicompare.local>']
         );
 
+        /* ---------------------------------------------------------
+        Send copy to admin
+        --------------------------------------------------------- */
+        $admin_email = get_option('admin_email');
+
+        wp_mail(
+            $admin_email,
+            'Supplier Commission Report for ' . $supplier_name . ' — ' . $from . ' to ' . $to . ' (Copy)',
+            $email_html,
+            ['Content-Type: text/html; charset=UTF-8',
+            'From: MediCompare <no-reply@medicompare.local>']
+        );
+
+        /* ---------------------------------------------------------
+        Insert into commission email log table
+        --------------------------------------------------------- */
+        global $wpdb;
+
+        $wpdb->insert(
+            $wpdb->prefix . 'medi_supplier_commission_emails',
+            [
+                'supplier_id'   => $supplier_id,
+                'period_from'   => $from,
+                'period_to'     => $to,
+                'sent_at'       => current_time('mysql'),
+                'sent_by_admin' => 1,
+                'auto_sent'     => 0
+            ],
+            [
+                '%d', '%s', '%s', '%s', '%d', '%d'
+            ]
+        );
+
+        /* ---------------------------------------------------------
+        Return JSON success
+        --------------------------------------------------------- */
         wp_send_json_success(['message' => 'Email sent successfully']);
     }
 

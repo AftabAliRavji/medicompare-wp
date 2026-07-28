@@ -2825,7 +2825,7 @@ new MediCompare_Admin_Menu();
 
         <h3>Payable To</h3>
         <table>
-            <tr><th>Pay Date</th><td><?php echo esc_html($pay_date); ?></td></tr>
+            <tr><th>Payment Due Date</th><td><?php echo esc_html($pay_date); ?></td></tr>
             <tr><th>Account Name</th><td><?php echo esc_html($bank_acc_name); ?></td></tr>
             <tr><th>Bank</th><td><?php echo esc_html($bank_name); ?></td></tr>
             <tr><th>Account Number</th><td><?php echo esc_html($bank_acc_number); ?></td></tr>
@@ -3059,7 +3059,7 @@ new MediCompare_Admin_Menu();
             <h3 style="margin-top:25px;">Payable To</h3>
             <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
                 <tr>
-                <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Pay Date</th><td style="border:1px solid #ccc;"><?php echo esc_html($pay_date); ?></td></tr>
+                <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Payment Due Date</th><td style="border:1px solid #ccc;"><?php echo esc_html($pay_date); ?></td></tr>
                 <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Name</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_name); ?></td></tr>
                 <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Bank</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_name); ?></td></tr>
                 <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Number</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_number); ?></td></tr>

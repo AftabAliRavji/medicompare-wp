@@ -33,10 +33,9 @@ class MediCompare_Admin_Dashboard_Widget {
         ");
 
         /* ---------------------------------------------------------
-           3. Subscription Overview (NEW)
+           3. Subscription Overview
         --------------------------------------------------------- */
 
-        // Get all published pharmacies
         $pharmacies = $wpdb->get_results("
             SELECT ID 
             FROM {$wpdb->posts}
@@ -89,11 +88,86 @@ class MediCompare_Admin_Dashboard_Widget {
         }
 
         // Admin URLs
-        $pending_url        = admin_url('admin.php?page=medicompare-pharmacy-verification');
-        $orders_url         = admin_url('admin.php?page=medicompare-transferred-orders');
-        $pharmacy_list_url  = admin_url('edit.php?post_type=mc_pharmacy');
+        $pending_url           = admin_url('admin.php?page=medicompare-pharmacy-verification');
+        $orders_url            = admin_url('admin.php?page=medicompare-transferred-orders');
+        $pharmacy_list_url     = admin_url('edit.php?post_type=mc_pharmacy');
+        $commission_report_url = admin_url('admin.php?page=medicompare-reports&report_type=supplier_commission');
+
+        /* ---------------------------------------------------------
+           4. Supplier Commission + Order Value Overview
+        --------------------------------------------------------- */
+
+        $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
+
+        // Get all suppliers
+        $suppliers = $wpdb->get_results("
+            SELECT ID, post_title
+            FROM {$wpdb->posts}
+            WHERE post_type = 'mc_supplier'
+              AND post_status = 'publish'
+        ");
+
+        $labels = [];
+        $commission_totals = [];
+        $order_totals = [];
+
+        foreach ($suppliers as $supplier) {
+
+            $supplier_id = (int) $supplier->ID;
+
+            // Commission total (only SENT)
+            $commission_total = (float) $wpdb->get_var($wpdb->prepare("
+                SELECT SUM(platform_fee_amount)
+                FROM {$supplier_summary_table}
+                WHERE supplier_id = %d
+                  AND supplier_order_status = 'sent'
+            ", $supplier_id));
+
+            // Order value total (only SENT)
+            $order_total = (float) $wpdb->get_var($wpdb->prepare("
+                SELECT SUM(supplier_total_amount)
+                FROM {$supplier_summary_table}
+                WHERE supplier_id = %d
+                  AND supplier_order_status = 'sent'
+            ", $supplier_id));
+
+            $labels[] = $supplier->post_title;
+            $commission_totals[] = $commission_total ?: 0;
+            $order_totals[] = $order_total ?: 0;
+        }
+
+        /* ---------------------------------------------------------
+           5. Commission Email Overview
+        --------------------------------------------------------- */
+
+        $email_table = $wpdb->prefix . 'medi_supplier_commission_emails';
+
+        $email_rows = [];
+
+        foreach ($suppliers as $supplier) {
+
+            $supplier_id = $supplier->ID;
+
+            $count_sent = (int) $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*) FROM {$email_table}
+                WHERE supplier_id = %d
+            ", $supplier_id));
+
+            $last_sent = $wpdb->get_var($wpdb->prepare("
+                SELECT MAX(sent_at) FROM {$email_table}
+                WHERE supplier_id = %d
+            ", $supplier_id));
+
+            $email_rows[] = [
+                'name' => $supplier->post_title,
+                'count' => $count_sent,
+                'last' => $last_sent ? $last_sent : '—'
+            ];
+        }
+
         ?>
 
+        <!-- FIRST ROW: 3 CARDS -->
         <div class="mc-admin-dashboard-cards">
 
             <!-- Pending Verifications -->
@@ -121,57 +195,159 @@ class MediCompare_Admin_Dashboard_Widget {
 
         </div>
 
-        <!-- Chart.js Graph -->
+        <!-- SECOND ROW: 2 CARDS -->
+        <div class="mc-admin-dashboard-cards">
+
+            <!-- Supplier Commission Overview -->
+            <a href="<?php echo esc_url($commission_report_url); ?>" class="mc-admin-card mc-admin-card-primary">
+                <div class="mc-admin-card-label">Supplier Commission Overview</div>
+
+                <div style="overflow-x:auto; padding-bottom:10px;">
+                    <canvas id="mc-supplier-commission-chart"
+                        height="160"
+                        style="min-width:220px; width:<?php echo max(220, count($suppliers) * 120); ?>px;">
+                    </canvas>
+                </div>
+
+                <div class="mc-admin-card-footer">View supplier commission report →</div>
+            </a>
+
+            <!-- Commission Email Overview -->
+            <div class="mc-admin-card mc-admin-card-green">
+
+                <div class="mc-admin-card-label">Commission Email Overview</div>
+
+                <div style="max-height:180px; overflow-y:auto; padding-right:10px;">
+
+                    <?php foreach ($email_rows as $row): ?>
+                        <div class="mc-admin-card-subtext">
+                            <?php echo esc_html($row['name']); ?>:
+                            <?php echo esc_html($row['count']); ?> sent —
+                            Last: <?php echo esc_html($row['last']); ?>
+                        </div>
+                    <?php endforeach; ?>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Chart.js Graphs -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
 
-                const canvas = document.getElementById('mc-subscription-chart');
-                if (!canvas) return;
+                /* -------------------------
+                   Subscription Chart
+                ------------------------- */
+                const canvasSub = document.getElementById('mc-subscription-chart');
+                if (canvasSub) {
+                    const ctxSub = canvasSub.getContext('2d');
 
-                const ctx = canvas.getContext('2d');
-
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Trial', 'Active', 'Expired', 'Past Due', 'Canceled'],
-                        datasets: [{
-                            label: 'Pharmacies',
-                            data: [
-                                <?php echo (int) $trial; ?>,
-                                <?php echo (int) $active; ?>,
-                                <?php echo (int) $expired; ?>,
-                                <?php echo (int) $past_due; ?>,
-                                <?php echo (int) $canceled; ?>
-                            ],
-                            backgroundColor: [
-                                '#4CAF50',
-                                '#2196F3',
-                                '#F44336',
-                                '#FF9800',
-                                '#9C27B0'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: false,
-                        plugins: {
-                            legend: { display: false }
+                    new Chart(ctxSub, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Trial', 'Active', 'Expired', 'Past Due', 'Canceled'],
+                            datasets: [{
+                                label: 'Pharmacies',
+                                data: [
+                                    <?php echo (int) $trial; ?>,
+                                    <?php echo (int) $active; ?>,
+                                    <?php echo (int) $expired; ?>,
+                                    <?php echo (int) $past_due; ?>,
+                                    <?php echo (int) $canceled; ?>
+                                ],
+                                backgroundColor: [
+                                    '#4CAF50',
+                                    '#2196F3',
+                                    '#F44336',
+                                    '#FF9800',
+                                    '#9C27B0'
+                                ]
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    precision: 0
+                        options: {
+                            responsive: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
+
+                /* -------------------------
+                   Supplier Commission Chart
+                ------------------------- */
+                const canvasComm = document.getElementById('mc-supplier-commission-chart');
+                if (canvasComm) {
+                    const ctxComm = canvasComm.getContext('2d');
+
+                    const commissionData = <?php echo json_encode($commission_totals); ?>;
+                    const orderData      = <?php echo json_encode($order_totals); ?>;
+
+                    new Chart(ctxComm, {
+                        type: 'bar',
+                        data: {
+                            labels: <?php echo json_encode($labels); ?>,
+                            datasets: [
+                                {
+                                    label: 'Commission (£)',
+                                    data: commissionData,
+                                    backgroundColor: '#4CAF50',
+                                    yAxisID: 'commissionAxis'
+                                },
+                                {
+                                    label: 'Total Sales (£)',
+                                    data: orderData,
+                                    backgroundColor: '#2196F3',
+                                    yAxisID: 'orderAxis'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: false,
+                            plugins: {
+                                legend: { display: true }
+                            },
+                            scales: {
+                                commissionAxis: {
+                                    type: 'linear',
+                                    position: 'left',
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Commission (£)'
+                                    },
+                                    max: Math.ceil(Math.max(...commissionData) * 1.3)
+                                },
+                                orderAxis: {
+                                    type: 'linear',
+                                    position: 'right',
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Total Sales (£)'
+                                    },
+                                    max: Math.ceil(Math.max(...orderData) * 1.3),
+                                    grid: {
+                                        drawOnChartArea: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
 
             });
         </script>
 
-        <?php
+<?php
     }
 }

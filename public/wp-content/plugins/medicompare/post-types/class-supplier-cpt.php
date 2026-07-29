@@ -19,6 +19,8 @@ class MediCompare_Supplier_CPT {
     const META_POSTCODE  = 'mc_supplier_postcode';
     const META_COUNTRY   = 'mc_supplier_country';
 
+    const META_AUTO_SEND = 'mc_auto_send_commission_email'; // ⭐ NEW
+
     public function __construct() {
 
         add_action('init', [$this, 'register_cpt'], 20);
@@ -91,11 +93,12 @@ class MediCompare_Supplier_CPT {
 
         wp_nonce_field('mc_supplier_save_meta', 'mc_supplier_meta_nonce');
 
-        $email   = get_post_meta($post->ID, self::META_EMAIL, true);
-        $phone   = get_post_meta($post->ID, self::META_PHONE, true);
-        $code    = get_post_meta($post->ID, self::META_CODE, true);
-        $status  = get_post_meta($post->ID, self::META_STATUS, true) ?: 'active';
-        $manager = get_post_meta($post->ID, self::META_MANAGER, true);
+        $email     = get_post_meta($post->ID, self::META_EMAIL, true);
+        $phone     = get_post_meta($post->ID, self::META_PHONE, true);
+        $code      = get_post_meta($post->ID, self::META_CODE, true);
+        $status    = get_post_meta($post->ID, self::META_STATUS, true) ?: 'active';
+        $manager   = get_post_meta($post->ID, self::META_MANAGER, true);
+        $auto_send = get_post_meta($post->ID, self::META_AUTO_SEND, true); // ⭐ NEW
 
         ?>
         <table class="form-table">
@@ -132,6 +135,20 @@ class MediCompare_Supplier_CPT {
                         <option value="suspended" <?php selected($status, 'suspended'); ?>>Suspended</option>
                         <option value="test"      <?php selected($status, 'test'); ?>>Test</option>
                     </select>
+                </td>
+            </tr>
+
+            <!-- ⭐ NEW: Auto-send toggle -->
+            <tr>
+                <th>Auto-send Commission Email</th>
+                <td>
+                    <label>
+                        <input type="checkbox"
+                               name="mc_auto_send_commission_email"
+                               value="yes"
+                               <?php checked($auto_send, 'yes'); ?>>
+                        Automatically send commission report every 7 days
+                    </label>
                 </td>
             </tr>
 
@@ -222,6 +239,13 @@ class MediCompare_Supplier_CPT {
         foreach ($fields as $key => $value) {
             update_post_meta($post_id, $key, $value);
         }
+
+        // ⭐ NEW: Save auto-send toggle
+        if (isset($_POST['mc_auto_send_commission_email'])) {
+            update_post_meta($post_id, self::META_AUTO_SEND, 'yes');
+        } else {
+            update_post_meta($post_id, self::META_AUTO_SEND, 'no');
+        }
     }
 
     /* ---------------------------------------------------------
@@ -246,6 +270,8 @@ class MediCompare_Supplier_CPT {
         $new['county']    = 'County';
         $new['postcode']  = 'Postcode';
         $new['country']   = 'Country';
+
+        $new['auto_send'] = 'Auto‑Send'; // ⭐ NEW COLUMN
 
         return $new;
     }
@@ -298,7 +324,13 @@ class MediCompare_Supplier_CPT {
                 echo esc_html(get_post_meta($post_id, self::META_COUNTRY, true));
                 break;
 
-            // ⭐ NEW — Commission Rule Column Renderer
+            // ⭐ NEW — Auto-send column renderer
+            case 'auto_send':
+                $auto = get_post_meta($post_id, self::META_AUTO_SEND, true);
+                echo $auto === 'yes' ? 'Yes' : 'No';
+                break;
+
+            // ⭐ Existing commission rule renderer
             case 'commission_rule':
 
                 $rule_type   = get_post_meta($post_id, 'mc_commission_rule_type', true);
@@ -341,8 +373,10 @@ class MediCompare_Supplier_CPT {
         $columns['postcode'] = 'postcode';
         $columns['status']   = 'status';
 
-        // ⭐ NEW — Make commission rule sortable
         $columns['commission_rule'] = 'commission_rule';
+
+        // ⭐ NEW — Make auto-send sortable
+        $columns['auto_send'] = 'auto_send';
 
         return $columns;
     }

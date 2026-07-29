@@ -3,6 +3,13 @@
 // Load dompdf autoloader from plugin's lib/dompdf
 require_once plugin_dir_path(__FILE__) . '/../lib/dompdf/autoload.inc.php';
 
+//Load helper file so can use the methods from it
+require_once plugin_dir_path(__FILE__) . 'helpers.php';
+
+//Load the commission scheduler
+require_once plugin_dir_path(__FILE__) . 'commission-scheduler.php';
+
+
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -2656,9 +2663,9 @@ public function transferred_orders_page() {
 
 new MediCompare_Admin_Menu();
 
-    /* ---------------------------------------------------------
-   PDF DOWNLOAD HANDLER
---------------------------------------------------------- */
+        /* ---------------------------------------------------------
+    PDF DOWNLOAD HANDLER (UPDATED TO USE HELPERS)
+    --------------------------------------------------------- */
     add_action('admin_post_download_report_pdf', function () {
 
         $type        = sanitize_text_field($_GET['type'] ?? '');
@@ -2673,263 +2680,37 @@ new MediCompare_Admin_Menu();
             wp_die('Missing supplier_id');
         }
 
-        // Dates
-        $from_date = new DateTime($from);
-        $to_date   = new DateTime($to);
-
-        $year  = $from_date->format('Y');
-        $month = $from_date->format('m');
-        $day   = $from_date->format('d');
-
-        //pay date
-        $pay_date = date("Y-m-t", strtotime($from));
-
-        // Supplier info
-        $supplier_post   = get_post($supplier_id);
-        $supplier_name   = $supplier_post->post_title;
-        $supplier_code   = $supplier_post->post_name; // slug
-
-        // bank details of mediCompare
-        $bank_acc_name   = get_option('mc_bank_account_name', 'mediCompare');
-        $bank_name       = get_option('mc_bank_name', 'HSBC');
-        $bank_acc_number = get_option('mc_bank_account_number', 'xxxxxxx');
-        $bank_sort_code  = get_option('mc_bank_sort_code', 'xx-xx-xx');
-
-
         /* ---------------------------------------------------------
-        ADDRESS FIX (old + new formats)
+        Build summary using helpers.php
         --------------------------------------------------------- */
-        $address_single = trim(get_post_meta($supplier_id, 'mc_supplier_address', true));
+        $summary = mc_generate_commission_summary($supplier_id, $from, $to);
 
-        $addr1     = trim(get_post_meta($supplier_id, 'mc_supplier_address_1', true));
-        $addr2     = trim(get_post_meta($supplier_id, 'mc_supplier_address_2', true));
-        $city      = trim(get_post_meta($supplier_id, 'mc_supplier_city', true));
-        $county    = trim(get_post_meta($supplier_id, 'mc_supplier_county', true));
-        $postcode  = trim(get_post_meta($supplier_id, 'mc_supplier_postcode', true));
-        $country   = trim(get_post_meta($supplier_id, 'mc_supplier_country', true));
-
-        $address_parts = array_filter([
-            $addr1,
-            $addr2,
-            $city,
-            $county,
-            $postcode,
-            $country
-        ]);
-
-        if (!empty($address_single)) {
-            $supplier_address = $address_single;
-        } elseif (!empty($address_parts)) {
-            $supplier_address = implode(', ', $address_parts);
-        } else {
-            $supplier_address = 'Address not available';
-        }
-
-        $supplier_email   = get_post_meta($supplier_id, 'mc_supplier_email', true);
-        $supplier_phone   = get_post_meta($supplier_id, 'mc_supplier_phone', true);
-        $supplier_manager = get_post_meta($supplier_id, 'mc_supplier_manager', true);
-
-        // Invoice sequence (per supplier)
-        $sequence = intval(get_post_meta($supplier_id, 'mc_invoice_sequence', true));
-        $sequence++;
-        update_post_meta($supplier_id, 'mc_invoice_sequence', $sequence);
-
-        $sequence_str = str_pad($sequence, 4, '0', STR_PAD_LEFT);
-
-        $invoice_number = sprintf(
-            '%s_INV-%s-%s-%s-%s',
-            strtoupper($supplier_code),
-            $sequence_str,
-            $year,
-            $month,
-            $day
-        );
-
-        $pdf_filename = sprintf(
-            'invoice_%s_INV-%s-%s-%s-%s.pdf',
-            strtoupper($supplier_code),
-            $sequence_str,
-            $year,
-            $month,
-            $day
-        );
-
-        /* ---------------------------------------------------------
-        LOGO FIX — correct plugin root
-        dirname(__FILE__, 1) = /medicompare/
-        --------------------------------------------------------- */
-        $plugin_root = dirname(__FILE__, 1);
-        $logo_url = plugins_url('assets/img/logo.png', $plugin_root);
-
-        /* ---------------------------------------------------------
-        Fetch order breakdown
-        --------------------------------------------------------- */
-        $orders = mc_get_supplier_commission_orders($supplier_id, $from, $to);
-
-        /* ---------------------------------------------------------
-            AUTO-DETERMINE DATE RANGE IF NONE SELECTED
-        --------------------------------------------------------- */
-        if (empty($from) || empty($to)) {
-
-            $dates = array_column($orders, 'date'); // date is already YYYY-MM-DD
-
-            if (!empty($dates)) {
-                sort($dates); // earliest → latest
-
-                $from = $dates[0];
-                $to   = $dates[count($dates) - 1];
-            }
-        }
-
-        $total_supplier_amount = 0;
-        $total_commission      = 0;
-
-        foreach ($orders as $row) {
-            $total_supplier_amount += floatval($row['supplier_total']);
-            $total_commission      += floatval($row['commission']);
+        if (!$summary) {
+            wp_die('No orders found for this supplier');
         }
 
         /* ---------------------------------------------------------
-        Build HTML
+        Generate PDF using helpers.php
+        (This preserves your full original HTML layout)
         --------------------------------------------------------- */
-        ob_start();
-        ?>
-        <html>
-        <head>
-            <style>
-                body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
-                table { width: 100%; border-collapse: collapse; }
-                th, td { border: 1px solid #ccc; padding: 6px; }
-                th { background: #f5f5f5; }
-            </style>
-        </head>
-        <body>
+        $pdf_path = mc_generate_commission_pdf($summary);
 
-        <img src="<?php echo $logo_url; ?>" style="max-height:60px;"><br><br>
+        if (!file_exists($pdf_path)) {
+            wp_die('PDF generation failed');
+        }
 
-        <h2>Invoice: <?php echo $invoice_number; ?></h2>
-        <p><strong>Period:</strong> <?php echo $from; ?> to <?php echo $to; ?></p>
-
-        <h3>Supplier Details</h3>
-        <p><strong>Supplier:</strong> <?php echo $supplier_name; ?></p>
-        <p><strong>Manager:</strong> <?php echo $supplier_manager; ?></p>
-        <p><strong>Address:</strong> <?php echo $supplier_address; ?></p>
-        <p><strong>Email:</strong> <?php echo $supplier_email; ?></p>
-        <p><strong>Phone:</strong> <?php echo $supplier_phone; ?></p>
-
-        <h3>Summary</h3>
-        <table>
-            <tr><th>Total Supplier Amount</th><td>£<?php echo number_format($total_supplier_amount, 2); ?></td></tr>
-            <tr><th>Total Commission to be paid to MediCompare</th><td>£<?php echo number_format($total_commission, 2); ?></td></tr>
-        </table>
-
-        <h3>Payable To</h3>
-        <table>
-            <tr><th>Payment Due Date</th><td><?php echo esc_html($pay_date); ?></td></tr>
-            <tr><th>Account Name</th><td><?php echo esc_html($bank_acc_name); ?></td></tr>
-            <tr><th>Bank</th><td><?php echo esc_html($bank_name); ?></td></tr>
-            <tr><th>Account Number</th><td><?php echo esc_html($bank_acc_number); ?></td></tr>
-            <tr><th>Sort Code</th><td><?php echo esc_html($bank_sort_code); ?></td></tr>
-        </table>
-
-        <h3>Order Breakdown</h3>
-        <table>
-            <tr>
-                <th>Master Order #</th>
-                <th>Sub Order #</th>
-                <th>Date</th>
-                <th>Supplier Total</th>
-                <th>Commission</th>
-                <th>Commission %</th>
-            </tr>
-
-            <?php foreach ($orders as $row): ?>
-                <tr>
-                    <td><?php echo $row['master_order']; ?></td>
-                    <td><?php echo $row['sub_order']; ?></td>
-                    <td><?php echo $row['date']; ?></td>
-                    <td>£<?php echo number_format($row['supplier_total'], 2); ?></td>
-                    <td>£<?php echo number_format($row['commission'], 2); ?></td>
-                    <td><?php echo $row['commission_pct']; ?>%</td>
-                </tr>
-            <?php endforeach; ?>
-        </table>
-
-        <br><br>
-        <p style="text-align:center; font-size:10px;">
-            Thank you for working with MediCompare. This invoice has been generated based on inputs provided.
-        </p>
-
-        </body>
-        </html>
-        <?php
-        $html = ob_get_clean();
-
-        // DOMPDF
-        $options = new Options();
-        $options->set('isRemoteEnabled', true);
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
+        /* ---------------------------------------------------------
+        Stream PDF to browser (same behaviour as before)
+        --------------------------------------------------------- */
         header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="' . $pdf_filename . '"');
-        echo $dompdf->output();
+        header('Content-Disposition: attachment; filename="' . basename($pdf_path) . '"');
+        echo file_get_contents($pdf_path);
         exit;
     });
 
-    function mc_get_supplier_commission_orders($supplier_id, $from, $to) {
-    global $wpdb;
-
-    $orders_table           = $wpdb->prefix . 'medi_orders';
-    $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
-
-    $where = ["o.status IN ('TRANSFERRED','SENT')"];
-    $params = [];
-
-    if ($from) {
-        $where[]  = "DATE(o.created_at) >= %s";
-        $params[] = $from;
-    }
-
-    if ($to) {
-        $where[]  = "DATE(o.created_at) <= %s";
-        $params[] = $to;
-    }
-
-    $where_sql = implode(' AND ', $where);
-
-    $sql = "
-        SELECT 
-            o.order_number AS master_order,
-            CONCAT(o.order_number, '-', pm.meta_value) AS sub_order,
-            DATE(o.created_at) AS date,
-            oss.supplier_total_amount AS supplier_total,
-            CASE 
-                WHEN oss.platform_fee_amount > 0 THEN oss.platform_fee_amount
-                WHEN oss.platform_fee_percent > 0 THEN (oss.supplier_total_amount * oss.platform_fee_percent / 100)
-                ELSE 0
-            END AS commission,
-            oss.platform_fee_percent AS commission_pct
-        FROM {$orders_table} o
-        INNER JOIN {$supplier_summary_table} oss
-            ON oss.order_id = o.id
-        LEFT JOIN {$wpdb->postmeta} pm
-            ON pm.post_id = oss.supplier_id AND pm.meta_key = 'mc_supplier_code'
-        WHERE oss.supplier_id = %d
-        AND {$where_sql}
-        ORDER BY o.created_at DESC
-    ";
-
-    $params = array_merge([$supplier_id], $params);
-
-    return $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A);
-}
-
+    
     /**
-     * Email report
+     * Email report (manual send)
      */
     add_action('wp_ajax_email_report', 'mc_email_supplier_report');
     add_action('wp_ajax_nopriv_email_report', 'mc_email_supplier_report');
@@ -2948,202 +2729,19 @@ new MediCompare_Admin_Menu();
             wp_send_json_error(['message' => 'Missing supplier_id']);
         }
 
-        //pay date
-        $pay_date = date("Y-m-t", strtotime($from));
+        // Build summary using helpers.php
+        $summary = mc_generate_commission_summary($supplier_id, $from, $to);
 
-        /* ---------------------------------------------------------
-        Supplier info
-        --------------------------------------------------------- */
-        $supplier_post   = get_post($supplier_id);
-        $supplier_name   = $supplier_post->post_title;
-        $supplier_email  = get_post_meta($supplier_id, 'mc_supplier_email', true);
-
-        if (!$supplier_email) {
-            wp_send_json_error(['message' => 'Supplier has no email address']);
-        }
-
-        /* ---------------------------------------------------------
-        Address (same logic as PDF)
-        --------------------------------------------------------- */
-        $address_single = trim(get_post_meta($supplier_id, 'mc_supplier_address', true));
-
-        $addr1     = trim(get_post_meta($supplier_id, 'mc_supplier_address_1', true));
-        $addr2     = trim(get_post_meta($supplier_id, 'mc_supplier_address_2', true));
-        $city      = trim(get_post_meta($supplier_id, 'mc_supplier_city', true));
-        $county    = trim(get_post_meta($supplier_id, 'mc_supplier_county', true));
-        $postcode  = trim(get_post_meta($supplier_id, 'mc_supplier_postcode', true));
-        $country   = trim(get_post_meta($supplier_id, 'mc_supplier_country', true));
-
-        $address_parts = array_filter([$addr1, $addr2, $city, $county, $postcode, $country]);
-
-        if (!empty($address_single)) {
-            $supplier_address = $address_single;
-        } elseif (!empty($address_parts)) {
-            $supplier_address = implode(', ', $address_parts);
-        } else {
-            $supplier_address = 'Address not available';
-        }
-
-        /* ---------------------------------------------------------
-        Bank details from wp_options
-        --------------------------------------------------------- */
-        $bank_acc_name   = get_option('mc_bank_account_name', 'mediCompare');
-        $bank_name       = get_option('mc_bank_name', 'HSBC');
-        $bank_acc_number = get_option('mc_bank_account_number', 'xxxxxxx');
-        $bank_sort_code  = get_option('mc_bank_sort_code', 'xx-xx-xx');
-
-        /* ---------------------------------------------------------
-        Fetch orders
-        --------------------------------------------------------- */
-        $orders = mc_get_supplier_commission_orders($supplier_id, $from, $to);
-
-        if (empty($orders)) {
+        if (!$summary) {
             wp_send_json_error(['message' => 'No orders found for this supplier']);
         }
 
-        /* ---------------------------------------------------------
-        Auto date range if missing
-        --------------------------------------------------------- */
-        if (empty($from) || empty($to)) {
-            $dates = array_column($orders, 'date');
-            sort($dates);
-            $from = $dates[0];
-            $to   = $dates[count($dates) - 1];
-        }
+        // Build email HTML using helpers.php
+        $email_html = mc_generate_commission_email_html($summary);
 
-        /* ---------------------------------------------------------
-        Totals
-        --------------------------------------------------------- */
-        $total_supplier_amount = 0;
-        $total_commission      = 0;
+        // Send email + log using helpers.php
+        mc_send_commission_email($supplier_id, $summary, $email_html);
 
-        foreach ($orders as $row) {
-            $total_supplier_amount += floatval($row['supplier_total']);
-            $total_commission      += floatval($row['commission']);
-        }
-
-        /* ---------------------------------------------------------
-        Logo URL (same as PDF)
-        --------------------------------------------------------- */
-        $plugin_root = dirname(__FILE__, 1);
-        $logo_url = plugins_url('assets/img/logo.png', $plugin_root);
-
-        /* ---------------------------------------------------------
-        Build HTML email (PDF-style)
-        --------------------------------------------------------- */
-        ob_start();
-        ?>
-        <div style="font-family: Arial, sans-serif; font-size: 14px; color:#333;">
-
-            <img src="<?php echo $logo_url; ?>" style="max-height:60px; margin-bottom:20px;">
-
-            <h2 style="margin-bottom:10px;">Supplier Commission Report</h2>
-            <p><strong>Period:</strong> <?php echo $from; ?> to <?php echo $to; ?></p>
-
-            <h3 style="margin-top:25px;">Supplier Details</h3>
-            <p><strong>Name:</strong> <?php echo esc_html($supplier_name); ?></p>
-            <p><strong>Address:</strong> <?php echo esc_html($supplier_address); ?></p>
-
-            <h3 style="margin-top:25px;">Summary</h3>
-            <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
-                <tr>
-                    <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Total Supplier Amount</th>
-                    <td style="border:1px solid #ccc;">£<?php echo number_format($total_supplier_amount, 2); ?></td>
-                </tr>
-                <tr>
-                    <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Total Commission Payable to MediCompare</th>
-                    <td style="border:1px solid #ccc;">£<?php echo number_format($total_commission, 2); ?></td>
-                </tr>
-            </table>
-
-            <h3 style="margin-top:25px;">Payable To</h3>
-            <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
-                <tr>
-                <th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Payment Due Date</th><td style="border:1px solid #ccc;"><?php echo esc_html($pay_date); ?></td></tr>
-                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Name</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_name); ?></td></tr>
-                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Bank</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_name); ?></td></tr>
-                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Account Number</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_acc_number); ?></td></tr>
-                <tr><th style="background:#f5f5f5; border:1px solid #ccc; text-align:left;">Sort Code</th><td style="border:1px solid #ccc;"><?php echo esc_html($bank_sort_code); ?></td></tr>
-            </table>
-
-            <h3 style="margin-top:25px;">Order Breakdown</h3>
-            <table cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
-                <tr>
-                    <th style="background:#f5f5f5; border:1px solid #ccc;">Master Order #</th>
-                    <th style="background:#f5f5f5; border:1px solid #ccc;">Sub Order #</th>
-                    <th style="background:#f5f5f5; border:1px solid #ccc;">Date</th>
-                    <th style="background:#f5f5f5; border:1px solid #ccc;">Supplier Total</th>
-                    <th style="background:#f5f5f5; border:1px solid #ccc;">Commission</th>
-                    <th style="background:#f5f5f5; border:1px solid #ccc;">Commission %</th>
-                </tr>
-
-                <?php foreach ($orders as $row): ?>
-                    <tr>
-                        <td style="border:1px solid #ccc;"><?php echo $row['master_order']; ?></td>
-                        <td style="border:1px solid #ccc;"><?php echo $row['sub_order']; ?></td>
-                        <td style="border:1px solid #ccc;"><?php echo $row['date']; ?></td>
-                        <td style="border:1px solid #ccc;">£<?php echo number_format($row['supplier_total'], 2); ?></td>
-                        <td style="border:1px solid #ccc;">£<?php echo number_format($row['commission'], 2); ?></td>
-                        <td style="border:1px solid #ccc;"><?php echo $row['commission_pct']; ?>%</td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
-
-            <p style="font-size:12px; margin-top:20px;">
-                Thank you for working with MediCompare.
-            </p>
-
-        </div>
-        <?php
-        $email_html = ob_get_clean();
-
-        /* ---------------------------------------------------------
-        Send email to supplier
-        --------------------------------------------------------- */
-        wp_mail(
-            $supplier_email,
-            'Supplier Commission Report for ' . $supplier_name . ' — ' . $from . ' to ' . $to,
-            $email_html,
-            ['Content-Type: text/html; charset=UTF-8',
-            'From: MediCompare <no-reply@medicompare.local>']
-        );
-
-        /* ---------------------------------------------------------
-        Send copy to admin
-        --------------------------------------------------------- */
-        $admin_email = get_option('admin_email');
-
-        wp_mail(
-            $admin_email,
-            'Supplier Commission Report for ' . $supplier_name . ' — ' . $from . ' to ' . $to . ' (Copy)',
-            $email_html,
-            ['Content-Type: text/html; charset=UTF-8',
-            'From: MediCompare <no-reply@medicompare.local>']
-        );
-
-        /* ---------------------------------------------------------
-        Insert into commission email log table
-        --------------------------------------------------------- */
-        global $wpdb;
-
-        $wpdb->insert(
-            $wpdb->prefix . 'medi_supplier_commission_emails',
-            [
-                'supplier_id'   => $supplier_id,
-                'period_from'   => $from,
-                'period_to'     => $to,
-                'sent_at'       => current_time('mysql'),
-                'sent_by_admin' => 1,
-                'auto_sent'     => 0
-            ],
-            [
-                '%d', '%s', '%s', '%s', '%d', '%d'
-            ]
-        );
-
-        /* ---------------------------------------------------------
-        Return JSON success
-        --------------------------------------------------------- */
         wp_send_json_success(['message' => 'Email sent successfully']);
     }
 

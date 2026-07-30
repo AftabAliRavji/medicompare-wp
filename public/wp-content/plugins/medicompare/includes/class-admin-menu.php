@@ -54,7 +54,8 @@ class MediCompare_Admin_Menu {
         // Save Quick Edit fields
         add_action('save_post_mc_supplier', [$this, 'save_quick_edit_supplier']);
 
-
+        //for supplier payment action
+        add_action('admin_post_mc_add_supplier_payment_action', 'mc_add_supplier_payment_action');
 
         add_action('admin_enqueue_scripts', function($hook){
          error_log("HOOK: " . $hook);
@@ -225,7 +226,6 @@ class MediCompare_Admin_Menu {
             update_post_meta($post_id, 'mc_commission_custom_rate', floatval($_POST['mc_commission_custom_rate']));
         }
     }
-
 
     public function register_menu() {
 
@@ -458,6 +458,9 @@ class MediCompare_Admin_Menu {
                                 <option value="supplier_commission" <?php selected($report_type, 'supplier_commission'); ?>>
                                     Supplier Commission Summary
                                 </option>
+                                <option value="commission_paid" <?php selected($report_type, 'commission_paid'); ?>>
+                                    Commission PAID Report
+                                </option>
                                 <option value="supplier_orders" <?php selected($report_type, 'supplier_orders'); ?>>
                                     Supplier Order Breakdown
                                 </option>
@@ -521,14 +524,35 @@ class MediCompare_Admin_Menu {
                 $this->report_supplier_performance($from, $to);
                 break;
 
+            /** ⭐ NEW REPORT — Commission PAID Report */
+            case 'commission_paid':
+                mc_report_commission_paid();   // global function we created
+                break;
+
             default:
                 echo '<p class="mc-muted">Invalid report type selected.</p>';
         }
     }
 
-    //placeholders to fill in for other reports
+   /**
+    * The generation of supplier commission report
+    */
     public function report_supplier_commission($from, $to) {
         global $wpdb;
+
+        /* ---------------------------------------------------------
+        GROUP 3 — PERIOD ALIGNMENT (UI uses same period as scheduler)
+        --------------------------------------------------------- */
+
+        // If user did not filter dates, use scheduler period
+        if (empty($from) || empty($to)) {
+            $from = date('Y-m-d', strtotime('-7 days'));
+            $to   = date('Y-m-d');
+        }
+
+        // Force format to Y-m-d (scheduler format)
+        $from = date('Y-m-d', strtotime($from));
+        $to   = date('Y-m-d', strtotime($to));
 
         $orders_table           = $wpdb->prefix . 'medi_orders';
         $supplier_summary_table = $wpdb->prefix . 'medi_order_supplier_summary';
@@ -540,15 +564,11 @@ class MediCompare_Admin_Menu {
         $where = ["o.status IN ('TRANSFERRED','SENT')"];
         $params = [];
 
-        if ($from) {
-            $where[] = "DATE(o.created_at) >= %s";
-            $params[] = $from;
-        }
+        $where[] = "DATE(o.created_at) >= %s";
+        $params[] = $from;
 
-        if ($to) {
-            $where[] = "DATE(o.created_at) <= %s";
-            $params[] = $to;
-        }
+        $where[] = "DATE(o.created_at) <= %s";
+        $params[] = $to;
 
         $where_sql = implode(' AND ', $where);
 
@@ -583,8 +603,7 @@ class MediCompare_Admin_Menu {
             ORDER BY total_commission DESC
         ";
 
-        $rows = $params ? $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A)
-                        : $wpdb->get_results($sql, ARRAY_A);
+        $rows = $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A);
 
         echo '<h2>Supplier Commission Summary</h2>';
 
@@ -626,7 +645,7 @@ class MediCompare_Admin_Menu {
             echo '</tr>';
 
             /* ---------------------------------------------------------
-            ORDER‑LEVEL BREAKDOWN (INVOICE DETAIL)
+            ORDER‑LEVEL BREAKDOWN
             --------------------------------------------------------- */
 
             $order_sql = "
@@ -645,13 +664,15 @@ class MediCompare_Admin_Menu {
                 INNER JOIN {$supplier_summary_table} oss
                     ON oss.order_id = o.id
                 WHERE oss.supplier_id = %d
-                AND {$where_sql}
+                AND DATE(o.created_at) >= %s
+                AND DATE(o.created_at) <= %s
                 ORDER BY o.created_at DESC
             ";
 
-            $order_rows = $params
-                ? $wpdb->get_results($wpdb->prepare($order_sql, array_merge([$supplier_id], $params)), ARRAY_A)
-                : $wpdb->get_results($wpdb->prepare($order_sql, [$supplier_id]), ARRAY_A);
+            $order_rows = $wpdb->get_results(
+                $wpdb->prepare($order_sql, [$supplier_id, $from, $to]),
+                ARRAY_A
+            );
 
             echo '<tr class="mc-supplier-orders"><td colspan="7">';
 
@@ -713,19 +734,29 @@ class MediCompare_Admin_Menu {
 
             echo '&nbsp;&nbsp;';
 
+            /* ---------------------------------------------------------
+            GROUP 2 — RESEND BUTTON LOGIC
+            --------------------------------------------------------- */
+
+            $period_from = date('Y-m-d', strtotime('-7 days'));
+            $period_to   = date('Y-m-d');
+
+            $already_sent = mc_has_sent_for_period($supplier_id, $period_from, $period_to);
+
+            $button_text = $already_sent ? "Resend Email Report" : "Email Report";
+
             echo '<button class="button mc-email-report" 
                     data-report="supplier_commission"
                     data-supplier="' . intval($supplier_id) . '"
                     data-from="' . esc_attr($from) . '"
                     data-to="' . esc_attr($to) . '">
-                    Email Report
+                    ' . esc_html($button_text) . '
                 </button>';
 
             echo '</td></tr>';
         }
 
         echo '</tbody></table>';
-
         ?>
         <script>
         jQuery(document).on('click', '.mc-email-report', function () {
@@ -739,11 +770,19 @@ class MediCompare_Admin_Menu {
                 date_from: btn.data('from'),
                 date_to: btn.data('to')
             }, function (response) {
+
                 if (response.success) {
-                    alert('Report emailed successfully.');
+
+                    alert(response.data.message);
+
+                    if (response.data.warning) {
+                        alert(response.data.warning);
+                    }
+
                 } else {
                     alert('Error: ' + response.data.message);
                 }
+
                 btn.prop('disabled', false).text('Email Report');
             });
         });
@@ -751,6 +790,7 @@ class MediCompare_Admin_Menu {
         <?php
     }
 
+    //placeholders to fill in for other reports
     public function report_supplier_orders($from, $to) {
         echo '<h2>Supplier Order Breakdown</h2>';
         echo '<p>Report logic coming next.</p>';
@@ -2708,7 +2748,7 @@ new MediCompare_Admin_Menu();
         exit;
     });
 
-    
+      
     /**
      * Email report (manual send)
      */
@@ -2729,20 +2769,95 @@ new MediCompare_Admin_Menu();
             wp_send_json_error(['message' => 'Missing supplier_id']);
         }
 
-        // Build summary using helpers.php
+        // Build summary
         $summary = mc_generate_commission_summary($supplier_id, $from, $to);
 
         if (!$summary) {
             wp_send_json_error(['message' => 'No orders found for this supplier']);
         }
 
-        // Build email HTML using helpers.php
+        // Check if already sent
+        $already_sent = mc_has_sent_for_period(
+            $supplier_id,
+            $summary['date_from'],
+            $summary['date_to']
+        );
+
+        $warning = $already_sent
+            ? 'Warning: This report was already sent automatically for this period.'
+            : '';
+
+        /**
+         * ⭐ DUPLICATE INVOICE PREVENTION
+         */
+        $existing = mc_get_existing_invoice(
+            $supplier_id,
+            $summary['date_from'],
+            $summary['date_to']
+        );
+
+        if ($existing) {
+
+            // Reuse existing invoice reference
+            $summary['invoice_reference'] = $existing['invoice_reference'];
+
+        } else {
+
+            // Generate new invoice number
+            $sequence = intval(get_post_meta($supplier_id, 'mc_invoice_sequence', true));
+            $sequence++;
+            update_post_meta($supplier_id, 'mc_invoice_sequence', $sequence);
+
+            $sequence_str = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+            $from_date = new DateTime($summary['date_from']);
+            $year  = $from_date->format('Y');
+            $month = $from_date->format('m');
+            $day   = $from_date->format('d');
+
+            $supplier_post = get_post($supplier_id);
+            $supplier_code = $supplier_post->post_name;
+
+            $invoice_number = sprintf(
+                '%s_INV-%s-%s-%s-%s',
+                strtoupper($supplier_code),
+                $sequence_str,
+                $year,
+                $month,
+                $day
+            );
+
+            // Add invoice reference to summary
+            $summary['invoice_reference'] = $invoice_number;
+
+            // Store invoice in DB
+            global $wpdb;
+            $wpdb->insert(
+                $wpdb->prefix . 'medi_supplier_invoices',
+                [
+                    'supplier_id'           => $supplier_id,
+                    'period_from'           => $summary['date_from'],
+                    'period_to'             => $summary['date_to'],
+                    'invoice_reference'     => $invoice_number,
+                    'total_commission'      => $summary['total_commission'],
+                    'total_supplier_amount' => $summary['total_supplier_amount'],
+                    'orders_json'           => json_encode($summary['orders']),
+                    'pdf_filename'          => null,
+                    'generated_at'          => current_time('mysql'),
+                ]
+            );
+        }
+
+        // Build email HTML
         $email_html = mc_generate_commission_email_html($summary);
 
-        // Send email + log using helpers.php
+        // Send email
         mc_send_commission_email($supplier_id, $summary, $email_html);
 
-        wp_send_json_success(['message' => 'Email sent successfully']);
+        wp_send_json_success([
+            'message' => 'Email sent successfully',
+            'warning' => $warning
+        ]);
     }
 
     /**

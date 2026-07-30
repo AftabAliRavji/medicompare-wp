@@ -8,6 +8,72 @@ class MediCompare_Admin_Dashboard_Widget {
         global $wpdb;
 
         /* ---------------------------------------------------------
+           Commission Email Overview – Helper Functions (Group 1)
+        --------------------------------------------------------- */
+
+        function mc_get_last_auto_send() {
+            global $wpdb;
+            $table = $wpdb->prefix . 'medi_supplier_commission_emails';
+
+            $last = $wpdb->get_row("
+                SELECT sent_at 
+                FROM {$table}
+                WHERE auto_sent = 1
+                ORDER BY sent_at DESC
+                LIMIT 1
+            ");
+
+            if (!$last) {
+                return [
+                    'timestamp' => null,
+                    'suppliers' => []
+                ];
+            }
+
+            $suppliers = $wpdb->get_results($wpdb->prepare("
+                SELECT supplier_id
+                FROM {$table}
+                WHERE auto_sent = 1
+                  AND sent_at = %s
+            ", $last->sent_at));
+
+            return [
+                'timestamp' => $last->sent_at,
+                'suppliers' => wp_list_pluck($suppliers, 'supplier_id')
+            ];
+        }
+
+        function mc_get_last_manual_send() {
+            global $wpdb;
+            $table = $wpdb->prefix . 'medi_supplier_commission_emails';
+
+            $row = $wpdb->get_row("
+                SELECT supplier_id, sent_at
+                FROM {$table}
+                WHERE sent_by_admin = 1
+                ORDER BY sent_at DESC
+                LIMIT 1
+            ");
+
+            if (!$row) {
+                return [
+                    'timestamp' => null,
+                    'supplier'  => null
+                ];
+            }
+
+            return [
+                'timestamp' => $row->sent_at,
+                'supplier'  => $row->supplier_id
+            ];
+        }
+
+        function mc_get_next_scheduled_send() {
+            $ts = wp_next_scheduled('medi_compare_commission_scheduler_event');
+            return $ts ? date('Y-m-d H:i', $ts) : null;
+        }
+
+        /* ---------------------------------------------------------
            1. Pending pharmacy verifications
         --------------------------------------------------------- */
         $pending_count = (int) (new WP_Query([
@@ -217,6 +283,44 @@ class MediCompare_Admin_Dashboard_Widget {
 
                 <div class="mc-admin-card-label">Commission Email Overview</div>
 
+                <?php
+                $auto   = mc_get_last_auto_send();
+                $manual = mc_get_last_manual_send();
+                $next   = mc_get_next_scheduled_send();
+                ?>
+
+                <div class="mc-admin-card-subtext" style="margin-bottom:10px;">
+                    <strong>Last Auto Send:</strong>
+                    <?php echo $auto['timestamp'] ? esc_html($auto['timestamp']) : 'Never'; ?><br>
+
+                    <strong>Suppliers Sent:</strong>
+                    <?php
+                    if (!empty($auto['suppliers'])) {
+                        $names = array_map(function($id) {
+                            return get_the_title($id);
+                        }, $auto['suppliers']);
+                        echo esc_html(implode(', ', $names));
+                    } else {
+                        echo 'None';
+                    }
+                    ?>
+                </div>
+
+                <div class="mc-admin-card-subtext" style="margin-bottom:10px;">
+                    <strong>Last Manual Send:</strong>
+                    <?php echo $manual['timestamp'] ? esc_html($manual['timestamp']) : 'Never'; ?><br>
+
+                    <strong>Supplier:</strong>
+                    <?php echo $manual['supplier'] ? esc_html(get_the_title($manual['supplier'])) : 'None'; ?>
+                </div>
+
+                <div class="mc-admin-card-subtext" style="margin-bottom:10px;">
+                    <strong>Next Auto Scheduled Send:</strong>
+                    <?php echo $next ? esc_html($next) : 'Not scheduled'; ?>
+                </div>
+
+                <hr>
+
                 <div style="max-height:180px; overflow-y:auto; padding-right:10px;">
 
                     <?php foreach ($email_rows as $row): ?>
@@ -351,3 +455,4 @@ class MediCompare_Admin_Dashboard_Widget {
 <?php
     }
 }
+

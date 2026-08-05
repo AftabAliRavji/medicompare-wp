@@ -28,7 +28,7 @@ class MediCompare {
         register_activation_hook(__FILE__, [$this, 'create_welcome_signup_page']);
 
         //make sure timezone is set properly
-        register_activation_hook(__FILE__, 'mc_fix_timezone_on_activation');
+        register_activation_hook(__FILE__, [$this,'mc_fix_timezone_on_activation']);
 
         // Load CPTs early
         add_action('init', [$this, 'load_cpts'], 1);

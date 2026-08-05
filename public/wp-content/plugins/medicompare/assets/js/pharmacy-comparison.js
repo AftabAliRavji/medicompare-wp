@@ -148,10 +148,10 @@ jQuery(function ($) {
         $('#mc-search-results').removeClass('active').hide();
 
         var productName = row.find('td').eq(0).text();
-        var description = row.find('td').eq(1).text();
-        var supplier    = row.find('td').eq(2).text();
         var unitPrice   = parseFloat(row.data('unit-price'));
-        var stock       = row.find('td').eq(4).text();
+        var stock       = row.find('td').eq(2).text();
+        var supplier    = row.find('td').eq(3).text();
+
         var productId   = row.data('product-id');
         var supplierId  = row.data('supplier-id');
 
@@ -162,10 +162,9 @@ jQuery(function ($) {
                     <thead>
                         <tr>
                             <th>Product</th>
-                            <th>Description</th>
-                            <th>Supplier</th>
                             <th>Unit Price</th>
                             <th>Stock</th>
+                            <th>Supplier</th>
                             <th>Qty</th>
                             <th>Actions</th>
                         </tr>
@@ -173,10 +172,9 @@ jQuery(function ($) {
                     <tbody>
                         <tr>
                             <td class="mc-selected-value">${productName}</td>
-                            <td class="mc-selected-value">${description}</td>
-                            <td class="mc-selected-value">${supplier}</td>
                             <td class="mc-selected-value">£${unitPrice.toFixed(2)}</td>
                             <td class="mc-selected-value">${stock}</td>
+                            <td class="mc-selected-value">${supplier}</td>
                             <td>
                                 <input type="number" id="mc-selected-qty" value="1" min="1" max="${stock}" step="1" class="mc-qty-input">
                             </td>
@@ -345,11 +343,25 @@ jQuery(function ($) {
             unit_price: unitPrice,
             quantity: qty
         }).done(function (resp) {
+
             $btn.prop('disabled', false).text('Add to pending order ✓');
 
             if (resp.success) {
+
+                // Show temporary message
                 $selectedItem.html('<p>Item added to pending order.</p>');
+
+                // Reload pending order immediately
                 loadPendingOrder();
+
+                // Clear search box
+                $('#mc-search-input').val('');
+
+                // Remove message + selected card after 1.5 seconds
+                setTimeout(function () {
+                    $selectedItem.empty().hide();
+                }, 1500);
+
             } else {
                 alert(resp.data?.message || 'Error adding item.');
             }
@@ -438,6 +450,37 @@ jQuery(function ($) {
             }
         });
     });
+
+    /* ---------------------------------------------------------
+        UPDATE QTY ON ENTER KEY
+    --------------------------------------------------------- */
+        $pendingOrderPanel.on('keydown', '.mc-edit-qty', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+
+                var row = $(this).closest('tr');
+                var itemId = parseInt(row.find('.mc-update-row').data('item-id'), 10);
+                var qty = parseInt($(this).val(), 10);
+
+                if (!itemId || !qty || qty < 1) {
+                    alert('Please enter a valid quantity.');
+                    return;
+                }
+
+                $.post(mcComparison.ajaxUrl, {
+                    action: 'mc_update_pending_qty',
+                    nonce: mcComparison.nonce,
+                    item_id: itemId,
+                    qty: qty
+                }).done(function (resp) {
+                    if (resp.success) {
+                        loadPendingOrder();
+                    } else {
+                        alert(resp.data?.message || 'Error updating quantity.');
+                    }
+                });
+            }
+        });
 
     /* ---------------------------------------------------------
        TRANSFER ORDER

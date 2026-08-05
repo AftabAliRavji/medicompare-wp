@@ -163,36 +163,6 @@ class MediCompare_Pharmacy_Comparison {
             }
         }
 
-    /* ---------------------------------------------------------
-       BUILD FULL PRODUCT LABEL (NAME + PACK SIZE + STRENGTH)
-    --------------------------------------------------------- */
-    private function mc_get_full_product_label($product_id) {
-        $name      = get_the_title($product_id);
-        $pack_size = get_post_meta($product_id, 'mc_pack_size', true);
-        $strength  = get_post_meta($product_id, 'mc_strength', true);
-
-        $label = $name;
-
-        if ($pack_size || $strength) {
-            $label .= ' (';
-
-            if ($pack_size) {
-                $label .= $pack_size;
-            }
-
-            if ($pack_size && $strength) {
-                $label .= ', ';
-            }
-
-            if ($strength) {
-                $label .= $strength;
-            }
-
-            $label .= ')';
-        }
-
-        return $label;
-    }
 
     /* ---------------------------------------------------------
        AJAX: SEARCH PRODUCTS (PRODUCT LIST ONLY)
@@ -236,7 +206,7 @@ class MediCompare_Pharmacy_Comparison {
                 </tr>
             </thead>
             <tbody>
-                <?php $full_label = $this->mc_get_full_product_label($product['ID']); ?>
+                <?php $full_label = mc_get_full_product_label($product['ID']); ?>
                 <tr class="mc-product-row"
                     data-product-id="<?php echo esc_attr($product['ID']); ?>">
                     <td><?php echo esc_html($full_label); ?></td>
@@ -367,7 +337,7 @@ class MediCompare_Pharmacy_Comparison {
             </thead>
             <tbody>
             <?php foreach ($products as $row): ?>
-                <?php $full_label = $this->mc_get_full_product_label($row['product_id']); ?>
+                <?php $full_label = mc_get_full_product_label($row['product_id']); ?>
                 <tr class="mc-product-row"
                     data-product-id="<?php echo esc_attr($row['product_id']); ?>">
                     <td><?php echo esc_html($full_label); ?></td>
@@ -435,7 +405,7 @@ class MediCompare_Pharmacy_Comparison {
     <p>Did you mean:</p>
     <ul class="mc-suggestions">
         <?php foreach ($suggestions as $s): ?>
-            <?php $label = $this->mc_get_full_product_label($s['id']); ?>
+            <?php $label = mc_get_full_product_label($s['id']); ?>
             <li class="mc-suggestion-item"
                 data-product-id="<?php echo esc_attr($s['id']); ?>">
                 <?php echo esc_html($label); ?>
@@ -458,8 +428,8 @@ class MediCompare_Pharmacy_Comparison {
 
 
     /* ---------------------------------------------------------
-       AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT
-       - returns comparison table (cheapest first)
+   AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT
+   - returns comparison table (cheapest first)
     --------------------------------------------------------- */
     public function ajax_get_product_suppliers() {
         check_ajax_referer('mc_comparison_nonce', 'nonce');
@@ -497,8 +467,8 @@ class MediCompare_Pharmacy_Comparison {
                 ON s.ID = sp.supplier_id
             INNER JOIN {$postmeta_table} sm
                 ON sm.post_id = sp.supplier_id
-            AND sm.meta_key = 'mc_supplier_status'
-            AND sm.meta_value = 'active'
+                AND sm.meta_key = 'mc_supplier_status'
+                AND sm.meta_value = 'active'
             WHERE p.post_type = 'mc_product'
             AND p.post_status = 'publish'
             AND sp.product_id = %d
@@ -522,31 +492,17 @@ class MediCompare_Pharmacy_Comparison {
             <thead>
                 <tr>
                     <th>Product</th>
-                    <th>Description</th>
-                    <th>Supplier</th>
                     <th>Unit Price</th>
                     <th>Stock</th>
+                    <th>Supplier</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($rows as $row): ?>
 
                 <?php
-                $name_parts = [];
-
-                if (!empty($row['pack_size'])) {
-                    $name_parts[] = $row['pack_size'];
-                }
-                if (!empty($row['strength'])) {
-                    $name_parts[] = $row['strength'];
-                }
-
-                $suffix = '';
-                if (!empty($name_parts)) {
-                    $suffix = ' (' . implode(', ', $name_parts) . ')';
-                }
-
-                $full_name = $row['product_name'] . $suffix;
+                // ⭐ NEW — unified product label
+                $full_name = mc_get_full_product_label($row['product_id']);
                 ?>
 
                 <tr class="mc-supplier-row"
@@ -556,10 +512,9 @@ class MediCompare_Pharmacy_Comparison {
                     data-unit-price="<?php echo esc_attr($row['price']); ?>">
 
                     <td><?php echo esc_html($full_name); ?></td>
-                    <td><?php echo esc_html($row['description']); ?></td>
-                    <td><?php echo esc_html($row['supplier_name']); ?></td>
                     <td>£<?php echo number_format((float) $row['price'], 2); ?></td>
                     <td><?php echo (int) $row['stock']; ?></td>
+                    <td><?php echo esc_html($row['supplier_name']); ?></td>
                 </tr>
 
             <?php endforeach; ?>
@@ -569,6 +524,7 @@ class MediCompare_Pharmacy_Comparison {
 
         wp_send_json_success(['html' => ob_get_clean()]);
     }
+
 
     /* ---------------------------------------------------------
        AJAX: ADD ITEM TO PENDING ORDER
@@ -607,7 +563,7 @@ class MediCompare_Pharmacy_Comparison {
     }
 
     /* ---------------------------------------------------------
-       RENDER PENDING ORDER HTML (WITH EDITABLE QTY + ✔️ UPDATE)
+        RENDER PENDING ORDER HTML (WITH EDITABLE QTY + ✔️ UPDATE)
     --------------------------------------------------------- */
     private function render_pending_order_html($pharmacy_id) {
         global $wpdb;
@@ -679,9 +635,9 @@ class MediCompare_Pharmacy_Comparison {
                 <thead>
                     <tr>
                         <th>Product</th>
-                        <th>Supplier</th>
                         <th>Qty</th>
                         <th>Unit Price</th>
+                        <th>Supplier</th>
                         <th>Supplier Line Total</th>
                         <th></th>
                     </tr>
@@ -692,11 +648,10 @@ class MediCompare_Pharmacy_Comparison {
 
                     <?php foreach ($data['items'] as $item): ?>
                         <?php
-                            $full_label = $this->mc_get_full_product_label($item['product_id']);
+                            $full_label = mc_get_full_product_label($item['product_id']);
                         ?>
                         <tr>
                             <td><?php echo esc_html($full_label); ?></td>
-                            <td><?php echo esc_html($data['supplier_name']); ?></td>
 
                             <td>
                                 <input 
@@ -710,27 +665,28 @@ class MediCompare_Pharmacy_Comparison {
                             </td>
 
                             <td>£<?php echo number_format($item['unit_price'], 2); ?></td>
+                            <td><?php echo esc_html($data['supplier_name']); ?></td>
                             <td>£<?php echo number_format($item['line_total'], 2); ?></td>
 
                             <td class="mc-actions">
-                            <button 
-                                type="button"
-                                class="mc-update-row"
-                                data-item-id="<?php echo esc_attr($item['id']); ?>"
-                                title="Update quantity"
-                            >
-                                ✔️
-                            </button>
+                                <button 
+                                    type="button"
+                                    class="mc-update-row"
+                                    data-item-id="<?php echo esc_attr($item['id']); ?>"
+                                    title="Update quantity"
+                                >
+                                    ✔️
+                                </button>
 
-                            <button 
-                                type="button"
-                                class="mc-remove-pending-item"
-                                data-item-id="<?php echo esc_attr($item['id']); ?>"
-                                title="Remove item"
-                            >
-                                ❌
-                            </button>
-                        </td>
+                                <button 
+                                    type="button"
+                                    class="mc-remove-pending-item"
+                                    data-item-id="<?php echo esc_attr($item['id']); ?>"
+                                    title="Remove item"
+                                >
+                                    ❌
+                                </button>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
 
@@ -758,6 +714,7 @@ class MediCompare_Pharmacy_Comparison {
 
         return ob_get_clean();
     }
+
 
     /* ---------------------------------------------------------
        AJAX: GET PENDING ORDER
@@ -1375,7 +1332,7 @@ class MediCompare_Pharmacy_Comparison {
                                                             </thead>
                                                             <tbody>
                                                                 <?php foreach ($items as $item): ?>
-                                                                    <?php $full_label = $this->mc_get_full_product_label($item['product_id']); ?>
+                                                                    <?php $full_label = mc_get_full_product_label($item['product_id']); ?>
                                                                     <tr>
                                                                         <td><?php echo esc_html($full_label); ?></td>
                                                                         <td><?php echo (int) $item['quantity']; ?></td>

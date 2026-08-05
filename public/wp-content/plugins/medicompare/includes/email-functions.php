@@ -13,36 +13,6 @@ class MediCompare_Email_Engine {
         $this->template_path = plugin_dir_path(__FILE__) . '../templates/emails/';
     }
 
-    /* ---------------------------------------------------------
-       FULL PRODUCT LABEL (NAME + PACK SIZE + STRENGTH)
-    --------------------------------------------------------- */
-    private function mc_get_full_product_label($product_id) {
-        $name      = get_the_title($product_id);
-        $pack_size = get_post_meta($product_id, 'mc_pack_size', true);
-        $strength  = get_post_meta($product_id, 'mc_strength', true);
-
-        $label = $name;
-
-        if ($pack_size || $strength) {
-            $label .= ' (';
-
-            if ($pack_size) {
-                $label .= $pack_size;
-            }
-
-            if ($pack_size && $strength) {
-                $label .= ', ';
-            }
-
-            if ($strength) {
-                $label .= $strength;
-            }
-
-            $label .= ')';
-        }
-
-        return $label;
-    }
 
     /* ---------------------------------------------------------
        LOAD TEMPLATE FILE (SAFE — OUTPUT BUFFERING)
@@ -93,7 +63,7 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
         $rows = '';
         foreach ($items_by_supplier[$supplier_id] as $item) {
 
-            $full_label = $this->mc_get_full_product_label($item['product_id']);
+            $full_label = mc_get_full_product_label($item['product_id']);
 
             $rows .= '<tr>
                 <td>' . esc_html($full_label) . '</td>
@@ -109,7 +79,7 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
         $body = $this->fill_template($template, [
             'suborder_number' => $suborder_number,
             'order_number'    => $order_number,
-            'order_date'      => date('d M Y H:i'),
+            'order_date'      => wp_date('d M Y H:i'),
             'pharmacy_name'   => $pharmacy['name'],
             'pharmacy_address'=> $pharmacy['address'],
             'pharmacy_email'  => $pharmacy['email'],
@@ -171,7 +141,7 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
         $item_rows = '';
         foreach ($all_items as $item) {
 
-            $full_label   = $this->mc_get_full_product_label($item['product_id']);
+            $full_label   = mc_get_full_product_label($item['product_id']);
             $supplier_name = get_the_title($item['supplier_id']);
 
             $item_rows .= '<tr>
@@ -190,7 +160,7 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
         // Fill template
         $body = $this->fill_template($template, [
             'order_number'            => $order_number,
-            'order_date'              => date('d M Y H:i'),
+            'order_date'              => wp_date('d M Y H:i'),
             'pharmacy_name'           => $pharmacy['name'],
             'supplier_breakdown_table'=> $supplier_rows,
             'full_items_table'        => $item_rows,
@@ -231,7 +201,7 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
             'pharmacy_email'       => $pharmacy['email'],
             'pharmacy_phone'       => $pharmacy['phone'],
             'order_number'         => $order_number,
-            'order_date'           => date('d M Y H:i'),
+            'order_date'           => wp_date('d M Y H:i'),
             'supplier_breakdown_table' => $rows,
             'grand_total'          => $grand_total,
             'admin_order_link'     => admin_url("admin.php?page=medi_order&id={$order_number}"),
@@ -261,7 +231,7 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
             'contact_name'   => $contact_name,
             'contact_number' => $contact_number,
             'contact_email'  => $contact_email,
-            'submitted_at'   => date('d M Y H:i')
+            'submitted_at'   => wp_date('d M Y H:i')
         ]);
 
         // Send to admin email

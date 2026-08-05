@@ -1105,9 +1105,10 @@ public function render_orders_page() {
 
                                             $suborder_status = $suborder ? strtolower($suborder['supplier_order_status']) : 'pending';
                                             $email_sent      = $suborder ? (int)$suborder['email_sent'] : 0;
-                                            $email_sent_at   = $suborder && $suborder['email_sent_at']
-                                                ? date('d M Y H:i', strtotime($suborder['email_sent_at']))
-                                                : null;
+                                            $email_sent_at = null;
+                                            if ($suborder && $suborder['email_sent_at']) {
+                                                $email_sent_at = date('d M Y H:i', strtotime($suborder['email_sent_at']));
+                                            }
 
                                             $items = $wpdb->get_results($wpdb->prepare(
                                                 "SELECT oi.product_id, oi.quantity, oi.unit_price, oi.line_total,

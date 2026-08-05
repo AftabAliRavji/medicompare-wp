@@ -109,8 +109,7 @@ body.page-id-71 .mc-search-layout {
 
 #mc-search-input {
     width: 100%;
-    max-width: 400px;
-    padding: 8px;
+    padding: 6px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -135,7 +134,7 @@ body.page-id-71 .mc-search-layout {
 .mc-search-results-table td {
     padding: 6px 8px;
     border-bottom: 1px solid #eee;
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .mc-search-row {

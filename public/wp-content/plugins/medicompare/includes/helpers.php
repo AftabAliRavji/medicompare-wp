@@ -737,4 +737,85 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
         );
     }
 
+    /**
+     * Build full product label in correct order:
+     *   Name + Strength + Form + (Pack Size)
+     *
+     * Example:
+     *   Omeprazole 20mg Capsules (28)
+     */
+    function mc_get_full_product_label($product_id) {
+
+        $name       = get_the_title($product_id);
+        $strength   = get_post_meta($product_id, 'mc_strength', true);
+        $pack_size  = get_post_meta($product_id, 'mc_pack_size', true);
+        $category   = get_post_meta($product_id, 'mc_category', true);
+
+        /* ---------------------------------------------------------
+        STEP 1 — Detect form (Capsules, Tablets, Inhaler, etc.)
+        --------------------------------------------------------- */
+        $form = '';
+
+        // Detect form from category
+        if ($category) {
+            if (preg_match('/tablet/i', $category)) {
+                $form = 'Tablets';
+            } elseif (preg_match('/capsule/i', $category)) {
+                $form = 'Capsules';
+            } elseif (preg_match('/inhaler/i', $category)) {
+                $form = 'Inhaler';
+            } elseif (preg_match('/gel/i', $category)) {
+                $form = 'Gel';
+            } elseif (preg_match('/cream/i', $category)) {
+                $form = 'Cream';
+            }
+        }
+
+        // If still empty, detect form from product title
+        if (!$form) {
+            if (preg_match('/tablet/i', $name)) {
+                $form = 'Tablets';
+            } elseif (preg_match('/capsule/i', $name)) {
+                $form = 'Capsules';
+            } elseif (preg_match('/inhaler/i', $name)) {
+                $form = 'Inhaler';
+            } elseif (preg_match('/gel/i', $name)) {
+                $form = 'Gel';
+            } elseif (preg_match('/cream/i', $name)) {
+                $form = 'Cream';
+            }
+        }
+
+        /* ---------------------------------------------------------
+        STEP 2 — Strip form from product title
+        e.g. "Omeprazole Capsules" → "Omeprazole"
+        --------------------------------------------------------- */
+        if ($form) {
+            // Remove singular or plural form words
+            $name = preg_replace('/\b' . preg_quote($form, '/') . '\b/i', '', $name);
+            $name = preg_replace('/\b' . preg_quote(rtrim($form, 's'), '/') . 's?\b/i', '', $name);
+            $name = trim($name);
+        }
+
+        /* ---------------------------------------------------------
+        STEP 3 — Build final label
+        --------------------------------------------------------- */
+        $label = $name;
+
+        if ($strength) {
+            $label .= ' ' . $strength;
+        }
+
+        if ($form) {
+            $label .= ' ' . $form;
+        }
+
+        if ($pack_size) {
+            $label .= ' (' . $pack_size . ')';
+        }
+
+        return trim($label);
+    }
+
+
 

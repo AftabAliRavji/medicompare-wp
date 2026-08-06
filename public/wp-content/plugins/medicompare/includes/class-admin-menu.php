@@ -3,6 +3,9 @@
 // Load dompdf autoloader from plugin's lib/dompdf
 require_once plugin_dir_path(__FILE__) . '/../lib/dompdf/autoload.inc.php';
 
+// Load pdfparser autoloader for plugin's lib/pdfparser
+require_once plugin_dir_path(__FILE__) . '/../lib/pdfparser/autoload.php';
+
 //Load helper file so can use the methods from it
 require_once plugin_dir_path(__FILE__) . 'helpers.php';
 
@@ -421,6 +424,18 @@ class MediCompare_Admin_Menu {
         [$this, 'signup_leads_page']
     );
 
+    /* ---------------------------------------------------------
+   ⭐ NEW — REFERENCE PRICE IMPORT
+    --------------------------------------------------------- */
+        add_submenu_page(
+            'medicompare',
+            'Reference NHS Price Import',
+            'Reference NHS Price Import',
+            'manage_options',
+            'medicompare-reference-price-import',
+            [$this, 'reference_price_import_page']
+        );
+
 }
 
 
@@ -823,6 +838,194 @@ class MediCompare_Admin_Menu {
         include __DIR__ . '/admin-pages/signup-leads.php';
     }
 
+    /**
+     * To import price for nhs price import for drug tarrif, clawback, concession
+     */
+    public function reference_price_import_page() {
+
+        $result = null;
+        $mode = null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
+
+            $mode = 'import';
+
+            if (!empty($_FILES['mc_import_pdf']['tmp_name'])) {
+
+                $pdf_path = $_FILES['mc_import_pdf']['tmp_name'];
+                $import_type = sanitize_text_field($_POST['mc_import_type']);
+
+                $result = $this->process_reference_price_import($import_type, $pdf_path);
+
+            } else {
+                $result = ['error' => 'No PDF file uploaded.'];
+            }
+        }
+
+        include __DIR__ . '/admin-pages/reference-price-import.php';
+    }
+
+    /**
+     * the parser of getting the correct VIIIA section for drug tarrif
+     */
+    public function process_reference_price_import($type, $pdf_path)
+    {
+        try {
+
+            global $wpdb;
+
+            // Parse PDF
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf    = $parser->parseFile($pdf_path);
+            $text   = $pdf->getText();
+
+            // ---------------------------------------------------------
+            // 1. Extract from column header to EOF
+            // ---------------------------------------------------------
+
+            $columnHeader = "Drug Quantity Basic Price Category";
+            $columnHeaderPos = stripos($text, $columnHeader);
+
+            if ($columnHeaderPos === false) {
+                return ['error' => 'Column header not found'];
+            }
+
+            // Start at the column header
+            $startPos = $columnHeaderPos;
+            $block    = substr($text, $startPos);
+
+            // Remove garbage header lines that appear after the header
+            $block = preg_replace('/P\s*art\s*VIII\s*A.*?\n/i', '', $block);
+            $block = preg_replace('/Part\s+VIIIA\s*-\s*Basic\s+Prices\s+of\s+Drugs\s+Product\s+List.*?\n/i', '', $block);
+            $block = preg_replace('/Part\s+VIIIA\s+products\s+[A-Z].*?\n/i', '', $block);
+
+            // Clean whitespace
+            $block = preg_replace('/[ \t]+/', ' ', $block);
+            $block = preg_replace('/\n{2,}/', "\n", $block);
+            $block = trim($block);
+
+            // ---------------------------------------------------------
+            // 2. Parse block into structured rows
+            // ---------------------------------------------------------
+
+            $lines       = explode("\n", $block);
+            $rows        = [];
+            $currentDrug = "";
+
+            // Skip the header line
+            array_shift($lines);
+
+            foreach ($lines as $line) {
+
+                $line = trim($line);
+                if ($line === "") continue;
+
+                // Case 1: drug + data on same line
+                // e.g. "Acarbose 100mg tablets 90 3473 A"
+                if (preg_match('/^(.*\D)\s+(\d+)\s+(\d+)\s+([ACM])\s*(.*)$/i', $line, $m)) {
+
+                    $rows[] = [
+                        'drug_name'   => trim($m[1]),
+                        'quantity'    => intval($m[2]),
+                        'basic_price' => intval($m[3]),   // in pence
+                        'category'    => strtoupper($m[4]),
+                        'brand'       => trim($m[5]),
+                    ];
+
+                    $currentDrug = "";
+                    continue;
+                }
+
+                // Case 2: data-only line (multi-line drug name above)
+                // e.g. "168 2206 M"
+                if (preg_match('/^(\d+)\s+(\d+)\s+([ACM])\s*(.*)$/i', $line, $m)) {
+
+                    $rows[] = [
+                        'drug_name'   => trim($currentDrug),
+                        'quantity'    => intval($m[1]),
+                        'basic_price' => intval($m[2]),   // in pence
+                        'category'    => strtoupper($m[3]),
+                        'brand'       => trim($m[4]),
+                    ];
+
+                    $currentDrug = "";
+                    continue;
+                }
+
+                // Otherwise: part of a multi-line drug name
+                $currentDrug .= ($currentDrug === "" ? "" : " ") . $line;
+            }
+
+            // ---------------------------------------------------------
+            // 3. Match each drug to wp_posts (product_id)
+            // ---------------------------------------------------------
+
+            foreach ($rows as &$r) {
+
+                $searchName = strtolower($r['drug_name']);
+                $post_id    = 0;
+
+                // Exact match
+                $post_id = $wpdb->get_var($wpdb->prepare(
+                    "SELECT ID FROM {$wpdb->posts}
+                    WHERE post_title = %s AND post_type = 'product' LIMIT 1",
+                    $r['drug_name']
+                ));
+
+                // Case-insensitive match
+                if (!$post_id) {
+                    $post_id = $wpdb->get_var($wpdb->prepare(
+                        "SELECT ID FROM {$wpdb->posts}
+                        WHERE LOWER(post_title) = %s AND post_type = 'product' LIMIT 1",
+                        $searchName
+                    ));
+                }
+
+                // Normalised match (remove spaces)
+                if (!$post_id) {
+                    $post_id = $wpdb->get_var($wpdb->prepare(
+                        "SELECT ID FROM {$wpdb->posts}
+                        WHERE REPLACE(LOWER(post_title), ' ', '') = %s
+                        AND post_type = 'product' LIMIT 1",
+                        str_replace(' ', '', $searchName)
+                    ));
+                }
+
+                $r['product_id'] = $post_id ?: 0;
+            }
+            unset($r);
+
+            // ---------------------------------------------------------
+            // 4. Insert into wp_medi_reference_prices
+            // ---------------------------------------------------------
+
+            foreach ($rows as $r) {
+
+                // Convert basic_price (pence) to decimal pounds
+                $priceDecimal = $r['basic_price'] / 100;
+
+                $wpdb->insert(
+                    $wpdb->prefix . 'medi_reference_prices',
+                    [
+                        'product_id'   => $r['product_id'],
+                        'type'         => 'drug_tariff',
+                        'price'        => $priceDecimal,
+                        'display'      => 'yes',
+                        'last_updated' => current_time('mysql'),
+                    ],
+                    [
+                        '%d','%s','%f','%s','%s'
+                    ]
+                );
+            }
+
+            return ['success' => true, 'imported' => count($rows)];
+
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
     public function render_supplier_commission_column($column, $post_id) {
 
         if ($column !== 'mc_commission_rule') {
@@ -855,8 +1058,6 @@ class MediCompare_Admin_Menu {
                 break;
         }
     }
-
-    
 
     /* ---------------------------------------------------------
        SUPPLIER PRODUCT CSV PARSER
@@ -2658,6 +2859,7 @@ public function transferred_orders_page() {
 
         update_post_meta($pid, '_mc_subscription_audit_log', $logs);
     }
+
 
    /* ---------------------------------------------------------
    ENQUEUE JS FOR SUBSCRIPTION CONTROL PAGE

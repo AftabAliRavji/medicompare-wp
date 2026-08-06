@@ -354,6 +354,13 @@ jQuery(function ($) {
                 // Reload pending order immediately
                 loadPendingOrder();
 
+                // ⭐ FORCE TAB SWITCH BACK TO PENDING
+                $('.mc-order-tab').removeClass('mc-order-tab-active');
+                $('.mc-order-panel').removeClass('mc-order-panel-active');
+
+                $('.mc-order-tab[data-tab="pending"]').addClass('mc-order-tab-active');
+                $('#mc-pending-order').addClass('mc-order-panel-active');
+
                 // Clear search box
                 $('#mc-search-input').val('');
 

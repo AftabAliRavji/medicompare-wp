@@ -806,7 +806,7 @@ public function render_search() {
 
                     <div class="mc-search-bar">
                         <label for="mc-search-input">Product name or code</label><br>
-                        <input type="text" id="mc-search-input" placeholder="Start typing product name or code...">
+                        <input type="text" id="mc-search-input" placeholder="Start typing product name or code to start search and comparison...">
                     </div>
 
                     <div id="mc-search-results" class="mc-search-results"></div>

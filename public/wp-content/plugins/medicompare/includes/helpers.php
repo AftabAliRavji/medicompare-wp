@@ -817,5 +817,632 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
         return trim($label);
     }
 
+    /* ---------------------------------------------------------
+   NORMALISE ANY NAME (tariff or product)
+--------------------------------------------------------- */
+function mc_normalise_name($name) {
+
+    $name = strtolower($name);
+
+    // Remove punctuation
+    $name = str_replace(['-', '/', '(', ')', ',', '.'], ' ', $name);
+
+    // Remove noise words
+    $noise = [
+        'solution for injection', 'prefilled', 'pre filled', 'disposable devices',
+        'gastro resistant', 'gastro-resistant', 'sugar free', 'ear spray',
+        'oral powder', 'sachets', 'injection', 'inhaler'
+    ];
+    foreach ($noise as $n) {
+        $name = str_replace($n, '', $name);
+    }
+
+    // Remove units spacing
+    $name = str_replace([' mg ', ' ml ', ' g ', ' mcg '], ' ', $name);
+
+    // Remove multiple spaces
+    $name = preg_replace('/\s+/', ' ', $name);
+
+    return trim($name);
+}
+
+
+/* ---------------------------------------------------------
+   BUILD FULL PRODUCT LABEL FOR MATCHING
+--------------------------------------------------------- */
+function mc_build_label_for_matching($product_id) {
+
+    $name       = get_the_title($product_id);
+    $strength   = get_post_meta($product_id, 'mc_strength', true);
+    $pack_size  = get_post_meta($product_id, 'mc_pack_size', true);
+    $category   = get_post_meta($product_id, 'mc_category', true);
+
+    // Detect form
+    $form = '';
+    if ($category) {
+        if (preg_match('/tablet/i', $category)) $form = 'tablets';
+        elseif (preg_match('/capsule/i', $category)) $form = 'capsules';
+        elseif (preg_match('/inhaler/i', $category)) $form = 'inhaler';
+        elseif (preg_match('/gel/i', $category)) $form = 'gel';
+        elseif (preg_match('/cream/i', $category)) $form = 'cream';
+    }
+
+    if (!$form) {
+        if (preg_match('/tablet/i', $name)) $form = 'tablets';
+        elseif (preg_match('/capsule/i', $name)) $form = 'capsules';
+        elseif (preg_match('/inhaler/i', $name)) $form = 'inhaler';
+        elseif (preg_match('/gel/i', $name)) $form = 'gel';
+        elseif (preg_match('/cream/i', $name)) $form = 'cream';
+    }
+
+    // Strip form from name
+    if ($form) {
+        $name = preg_replace('/\b' . preg_quote($form, '/') . '\b/i', '', $name);
+        $name = trim($name);
+    }
+
+    // Build label
+    $label = $name;
+
+    if ($strength) $label .= ' ' . $strength;
+    if ($form)     $label .= ' ' . $form;
+
+    return strtolower(trim($label));
+}
+
+    /**
+     * MATCH PRODUCT ID USING FUZZY LOGIC + PACK SIZE + FORM
+     */
+    function mc_match_product_id($drug_name, $pack_size = null, $form = null)
+    {
+        global $wpdb;
+
+        $tariffNorm = mc_normalise_name($drug_name);
+
+        $products = $wpdb->get_results("
+            SELECT ID
+            FROM {$wpdb->posts}
+            WHERE post_type = 'mc_product'
+            AND post_status = 'publish'
+        ");
+
+        $best_id = 0;
+        $best_score = PHP_INT_MAX;
+
+        foreach ($products as $p) {
+
+            $label = mc_build_label_for_matching($p->ID);
+            $labelNorm = mc_normalise_name($label);
+
+            // Base score: Levenshtein distance
+            $score = levenshtein($tariffNorm, $labelNorm);
+
+            // Token overlap bonus
+            $tariffTokens = explode(' ', $tariffNorm);
+            $labelTokens  = explode(' ', $labelNorm);
+            $overlap = count(array_intersect($tariffTokens, $labelTokens));
+            $score -= ($overlap * 3);
+
+            // PACK SIZE MATCH BONUS
+            $product_pack = get_post_meta($p->ID, 'mc_pack_size', true);
+            if ($product_pack && $pack_size && intval($product_pack) === intval($pack_size)) {
+                $score -= 8; // strong bonus
+            }
+
+            // FORM MATCH BONUS
+            $product_category = strtolower(get_post_meta($p->ID, 'mc_category', true));
+            $formNorm = strtolower($form);
+
+            if ($formNorm && $product_category && strpos($product_category, $formNorm) !== false) {
+                $score -= 5;
+            }
+
+            if ($score < $best_score) {
+                $best_score = $score;
+                $best_id = $p->ID;
+            }
+        }
+
+        return $best_id ?: 0;
+    }
+
+
+    /**
+     * Fetch Drug Tariff Part VIIIA rows from HTML
+     * Auto-discovers A–Z product pages and extracts table rows.
+     */
+    function mc_fetch_drug_tariff_rows_from_html($root_url)
+    {
+        $rows = [];
+
+        // 1. Fetch root page
+        $response = wp_remote_get($root_url);
+        if (is_wp_error($response)) {
+            throw new Exception('Failed to fetch Drug Tariff root page.');
+        }
+
+        $html = wp_remote_retrieve_body($response);
+
+        // Parse HTML
+        $dom = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html);
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+
+        /**
+         * 2. Find all Part VIIIA products A–Z links
+         * These appear as clickable items in the left navigation.
+         */
+        $links = $xpath->query("//a[contains(., 'Part VIIIA products')]");
+
+        $product_urls = [];
+        foreach ($links as $a) {
+            $href = $a->getAttribute('href');
+            if (!$href) continue;
+
+            // Convert relative → absolute
+            if (strpos($href, 'http') !== 0) {
+                $href = 'https://www.drugtariff.nhsbsa.nhs.uk' . $href;
+            }
+
+            $product_urls[] = $href;
+        }
+
+        /**
+         * 3. Loop through each A–Z page
+         */
+        foreach ($product_urls as $url) {
+
+            $resp = wp_remote_get($url);
+            if (is_wp_error($resp)) continue;
+
+            $page_html = wp_remote_retrieve_body($resp);
+
+            $page_dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $page_dom->loadHTML($page_html);
+            libxml_clear_errors();
+
+            $page_xpath = new DOMXPath($page_dom);
+
+            /**
+             * 4. Extract table rows
+             * The NHS Drug Tariff uses a simple <table> structure.
+             * We target all <tr> inside any <table>.
+             */
+            $trs = $page_xpath->query("//table//tr");
+
+            foreach ($trs as $tr) {
+
+                $tds = $tr->getElementsByTagName('td');
+
+                // Skip header or malformed rows
+                if ($tds->length < 4) continue;
+
+                $drug_name   = trim($tds->item(0)->textContent);
+                $quantity    = trim($tds->item(1)->textContent);
+                $basic_price = trim($tds->item(2)->textContent);
+                $category    = trim($tds->item(3)->textContent);
+
+                // Manufacturer / brand (optional)
+                $brand = ($tds->length > 4)
+                    ? trim($tds->item(4)->textContent)
+                    : '';
+
+                // Skip empty rows
+                if ($drug_name === '') continue;
+
+                // Convert price to integer (pence)
+                $basic_price = intval($basic_price);
+
+                $rows[] = [
+                    'drug_name'   => $drug_name,
+                    'quantity'    => $quantity,
+                    'basic_price' => $basic_price,
+                    'category'    => strtoupper($category),
+                    'brand'       => $brand,
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+    * Fetch Drug Tariff Part VIIIA rows using DITA map + topic crawler (A → Z)
+    */
+    function mc_fetch_drug_tariff_rows_from_dita()
+    {
+        $rows = [];
+
+        // Hard-coded A–Z topic IDs from the DITA2MAP output
+        $topic_ids = [
+            'DC00912579', // A
+            'DC00912493', // B
+            'DC00912609', // C
+            'DC00912780', // D
+            'DC00912127', // E
+            'DC00912213', // F
+            'DC00912866', // G
+            'DC00912652', // H
+            'DC00912508', // I
+            'DC00912435', // J
+            'DC00912214', // K
+            'DC00912747', // L
+            'DC00912330', // M
+            'DC00912556', // N
+            'DC00912854', // O
+            'DC00912710', // P
+            'DC00912375', // Q
+            'DC00912094', // R
+            'DC00912823', // S
+            'DC00912372', // T
+            'DC00912711', // U
+            'DC00912837', // V
+            'DC00912570', // W
+            'DC00912331', // X
+            'DC00912867', // Y
+            'DC00912257', // Z
+        ];
+
+        // DEBUG: log topic IDs being used
+        file_put_contents(WP_CONTENT_DIR . '/debug_dita_topic_ids.txt', print_r($topic_ids, true));
+
+        foreach ($topic_ids as $topic_id) {
+
+            $topic_url =
+                "https://www.drugtariff.nhsbsa.nhs.uk/NotusCloudApi/resources/dita/topic/00912915-DC/" .
+                $topic_id .
+                "?format=html&metadata=external&resolveMaps=true&resolveTopics=false";
+
+            // DEBUG: log each topic URL
+            file_put_contents(WP_CONTENT_DIR . '/debug_dita_last_topic_url.txt', $topic_url);
+
+            $topic_response = wp_remote_get($topic_url);
+
+            if (is_wp_error($topic_response)) {
+                file_put_contents(
+                    WP_CONTENT_DIR . '/debug_dita_errors.txt',
+                    "ERROR FETCHING $topic_url\n" . print_r($topic_response, true) . "\n\n",
+                    FILE_APPEND
+                );
+                continue;
+            }
+
+            $topic_html = wp_remote_retrieve_body($topic_response);
+
+            // DEBUG: dump raw HTML for each topic
+            file_put_contents(
+                WP_CONTENT_DIR . "/debug_dita_topic_$topic_id.html",
+                $topic_html
+            );
+
+            $topic_dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $topic_dom->loadHTML($topic_html);
+            libxml_clear_errors();
+
+            $topic_xpath = new DOMXPath($topic_dom);
+
+            // Extract rows
+            $trs = $topic_xpath->query("//table[contains(@class,'table')]//tr");
+
+            // DEBUG: log number of rows found
+            file_put_contents(
+                WP_CONTENT_DIR . '/debug_dita_row_counts.txt',
+                "Topic $topic_id → " . $trs->length . " rows\n",
+                FILE_APPEND
+            );
+
+            foreach ($trs as $tr) {
+
+                $tds = $tr->getElementsByTagName("td");
+                if ($tds->length < 8) continue;
+
+                $drug_name   = trim($tds->item(1)->textContent);
+                $quantity    = trim($tds->item(3)->textContent);
+                $basic_price = trim($tds->item(5)->textContent);
+                $category    = trim($tds->item(7)->textContent);
+
+                $brand = ($tds->length > 8)
+                    ? trim($tds->item(8)->textContent)
+                    : "";
+
+                if ($drug_name === "") continue;
+
+                $rows[] = [
+                    'drug_name'   => $drug_name,
+                    'quantity'    => $quantity,
+                    'basic_price' => intval($basic_price),
+                    'category'    => strtoupper($category),
+                    'brand'       => $brand,
+                ];
+            }
+        }
+
+        // DEBUG: final rows count
+        file_put_contents(
+            WP_CONTENT_DIR . '/debug_dita_final_rows.txt',
+            "TOTAL ROWS: " . count($rows)
+        );
+
+        return $rows;
+    }
+
+        /**
+     * Parse Drug Tariff Part VIIIA CSV file
+     * CSV Columns:
+     * Medicine, Pack size, Form, VMP, VMPP, Category, Basic Price
+     */
+    function mc_fetch_drug_tariff_rows_from_csv($csv_path)
+    {
+        $rows = [];
+
+        if (!file_exists($csv_path)) {
+            return [];
+        }
+
+        $handle = fopen($csv_path, 'r');
+        if (!$handle) {
+            return [];
+        }
+
+        $lineNumber = 0;
+
+        while (($data = fgetcsv($handle)) !== false) {
+
+            $lineNumber++;
+
+            // Skip first 2 lines (title + blank)
+            if ($lineNumber <= 2) continue;
+
+            // Skip header row
+            if ($lineNumber === 3) continue;
+
+            // Ensure minimum columns
+            // Medicine, Pack size, Form, VMP, VMPP, Category, Basic Price
+            if (count($data) < 7) continue;
+
+            $medicine    = trim($data[0]);
+            $pack_size   = trim($data[1]);
+            $form        = trim($data[2]);
+            $vmp_code    = trim($data[3]);   // <-- NEW
+            $vmpp_code   = trim($data[4]);   // <-- NEW
+            $category    = trim($data[5]);
+            $basic_price = intval(trim($data[6])); // pence
+
+            if ($medicine === '') continue;
+
+            // Extract category letter (A/C/M)
+            $category_letter = '';
+            if (preg_match('/Category\s+([ACM])/i', $category, $m)) {
+                $category_letter = strtoupper($m[1]);
+            }
+
+            $rows[] = [
+                'drug_name'   => $medicine,
+                'pack_size'   => $pack_size,
+                'form'        => $form,
+                'vmp_code'    => $vmp_code,    // <-- NEW
+                'vmpp_code'   => $vmpp_code,   // <-- NEW
+                'category'    => $category_letter,
+                'basic_price' => $basic_price,
+            ];
+        }
+
+        fclose($handle);
+
+        return $rows;
+    }
+
+
+        /**
+     * Perform detailed matching and return full product info + score.
+     */
+    function mc_match_product_detailed($drug_name, $pack_size, $form, $csv_vmp = '', $csv_vmpp = '')
+    {
+        // Strict match now includes DM+D matching
+        $product_id = mc_match_product_strict($drug_name, $pack_size, $form, $csv_vmp, $csv_vmpp);
+
+        if ($product_id > 0) {
+            return [
+                'product_id' => $product_id,
+                'name'       => get_the_title($product_id),
+                'strength'   => get_post_meta($product_id, 'mc_strength', true),
+                'form'       => get_post_meta($product_id, 'mc_category', true),
+                'pack_size'  => get_post_meta($product_id, 'mc_pack_size', true),
+                'code'       => get_post_meta($product_id, 'mc_product_code', true),
+                'score'      => 0
+            ];
+        }
+
+        return [
+            'product_id' => 0,
+            'name'       => '',
+            'strength'   => '',
+            'form'       => '',
+            'pack_size'  => '',
+            'code'       => '',
+            'score'      => 999
+        ];
+    }
+
+    function mc_match_product_strict($csv_name, $csv_pack, $csv_form, $csv_vmp = '', $csv_vmpp = '')
+    {
+        global $wpdb;
+
+        /**
+         * 1. DM+D MATCHING FIRST
+         */
+
+        // Try VMPP (strongest)
+        if (!empty($csv_vmpp)) {
+            $product_id = mc_find_product_by_vmpp($csv_vmpp);
+            if ($product_id > 0) {
+                return $product_id;
+            }
+        }
+
+        // Try VMP (fallback)
+        if (!empty($csv_vmp)) {
+            $product_id = mc_find_product_by_vmp($csv_vmp);
+            if ($product_id > 0) {
+                return $product_id;
+            }
+        }
+
+        /**
+         * 2. FALLBACK TO EXISTING STRICT MATCHING
+         */
+
+        // Normalise CSV
+        $csv_norm = strtolower($csv_name);
+
+        // Extract ingredient
+        $csv_ai = strtolower(strtok($csv_norm, ' '));
+
+        // Extract strength
+        preg_match('/(\d+mg|\d+g|\d+ml)/', $csv_norm, $strength_match);
+        $csv_strength = strtolower($strength_match[1] ?? '');
+
+        // Extract pack size
+        $csv_pack = intval($csv_pack);
+
+        // Extract base form
+        $csv_form_norm = strtolower($csv_form);
+
+        // Strict formulation modifiers
+        $modifiers = [
+            'dispersible',
+            'gastro-resistant',
+            'enteric-coated',
+            'effervescent',
+            'chewable',
+            'orodispersible',
+            'modified-release',
+            'slow-release',
+            'prolonged-release',
+            'delayed-release'
+        ];
+
+        // CSV modifier
+        $csv_modifier = '';
+        foreach ($modifiers as $m) {
+            if (strpos($csv_norm, $m) !== false) {
+                $csv_modifier = $m;
+                break;
+            }
+        }
+
+        // Fetch all MC products
+        $products = $wpdb->get_results("
+            SELECT ID, post_title
+            FROM {$wpdb->posts}
+            WHERE post_type = 'mc_product'
+            AND post_status = 'publish'
+        ");
+
+        foreach ($products as $p) {
+
+            $name       = strtolower($p->post_title);
+            $strength   = strtolower(get_post_meta($p->ID, 'mc_strength', true));
+            $pack       = intval(get_post_meta($p->ID, 'mc_pack_size', true));
+            $desc       = strtolower(get_post_meta($p->ID, 'mc_description', true));
+
+            // Ingredient must match
+            if (strpos($name, $csv_ai) === false) continue;
+
+            // Strength must match
+            if ($csv_strength !== $strength) continue;
+
+            // Pack size must match
+            if ($csv_pack !== $pack) continue;
+
+            // Base form must match
+            if (strpos($name, $csv_form_norm) === false) continue;
+
+            // MC modifier detection
+            $mc_modifier = '';
+            foreach ($modifiers as $m) {
+                if (strpos($name, $m) !== false || strpos($desc, $m) !== false) {
+                    $mc_modifier = $m;
+                    break;
+                }
+            }
+
+            // STRICT modifier rules
+            if ($csv_modifier && !$mc_modifier) continue;
+            if ($mc_modifier && !$csv_modifier) continue;
+            if ($csv_modifier && $mc_modifier && $csv_modifier !== $mc_modifier) continue;
+
+            // FULL STRICT MATCH
+            return $p->ID;
+        }
+
+        return 0;
+    }
+
+
+
+ /**
+ * Find product by DM+D VMPP code.
+ */
+function mc_find_product_by_vmpp($vmpp_code)
+{
+    global $wpdb;
+
+    if (empty($vmpp_code)) return 0;
+
+    $product_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id 
+         FROM {$wpdb->postmeta}
+         WHERE meta_key = 'mc_dmd_vmpp'
+         AND meta_value = %s
+         LIMIT 1",
+        $vmpp_code
+    ));
+
+    return intval($product_id);
+}
+
+/**
+ * Find product by DM+D VMP code.
+ */
+function mc_find_product_by_vmp($vmp_code)
+{
+    global $wpdb;
+
+    if (empty($vmp_code)) return 0;
+
+    $product_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id 
+         FROM {$wpdb->postmeta}
+         WHERE meta_key = 'mc_dmd_vmp'
+         AND meta_value = %s
+         LIMIT 1",
+        $vmp_code
+    ));
+
+    return intval($product_id);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

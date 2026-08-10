@@ -1817,6 +1817,29 @@ body.page-id-71 .mc-search-left {
     display: block;
 }
 
+/* ---------------------------------------------------------
+   Drug Tariff Row Styling
+   --------------------------------------------------------- */
+
+.mc-tariff-row {
+    background: #f4f4f4 !important;   /* light grey background */
+    font-style: italic;               /* visually distinct */
+    color: #555 !important;           /* muted text */
+}
+
+.mc-tariff-row td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.mc-tariff-label {
+    font-size: 11px;
+    color: #777;
+    margin-left: 4px;
+    font-style: normal;
+}
+
+
 
 
 

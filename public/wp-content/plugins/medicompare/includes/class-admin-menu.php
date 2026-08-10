@@ -838,27 +838,208 @@ class MediCompare_Admin_Menu {
         include __DIR__ . '/admin-pages/signup-leads.php';
     }
 
-    /**
-     * To import price for nhs price import for drug tarrif, clawback, concession
+        /**
+     * Reference NHS Price Import Page
      */
     public function reference_price_import_page() {
 
-        $result = null;
-        $mode = null;
+        $result            = null;
+        $csv_preview       = null;
+        $matching_preview  = null;
+
+        // Load current import mode (default: drug_tariff)
+        $import_mode = get_option('mc_reference_import_mode', 'drug_tariff');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
 
-            $mode = 'import';
+            check_admin_referer('mc_reference_import_nonce');
 
-            if (!empty($_FILES['mc_import_pdf']['tmp_name'])) {
+            $action = sanitize_text_field($_POST['mc_reference_import_submit']);
 
-                $pdf_path = $_FILES['mc_import_pdf']['tmp_name'];
-                $import_type = sanitize_text_field($_POST['mc_import_type']);
+            /* ---------------------------------------------------------
+            MODE SELECTION
+            --------------------------------------------------------- */
+            if ($action === 'set_mode') {
 
-                $result = $this->process_reference_price_import($import_type, $pdf_path);
+                $new_mode = sanitize_text_field($_POST['mc_import_mode']);
+                $valid_modes = ['drug_tariff', 'concession', 'clawback', 'dmd'];
 
-            } else {
-                $result = ['error' => 'No PDF file uploaded.'];
+                if (in_array($new_mode, $valid_modes, true)) {
+                    update_option('mc_reference_import_mode', $new_mode);
+                    $import_mode = $new_mode;
+                    $result = ['success' => true, 'message' => 'Import mode updated.'];
+                } else {
+                    $result = ['error' => 'Invalid import mode selected.'];
+                }
+            }
+
+            /* ---------------------------------------------------------
+            STEP 1 — UPLOAD CSV → RAW PREVIEW
+            --------------------------------------------------------- */
+            elseif ($action === 'upload_csv') {
+
+                if (!empty($_FILES['mc_import_csv']['tmp_name'])) {
+
+                    $csv_path = $_FILES['mc_import_csv']['tmp_name'];
+
+                    // Parse CSV
+                    $csv_preview = mc_fetch_drug_tariff_rows_from_csv($csv_path);
+
+                    // Store preview rows
+                    set_transient('mc_csv_preview_rows', $csv_preview, 60 * 10);
+
+                } else {
+                    $result = ['error' => 'No CSV file uploaded.'];
+                }
+            }
+
+            /* ---------------------------------------------------------
+            STEP 2 — PARSE & MATCH → MATCHING PREVIEW
+            --------------------------------------------------------- */
+            elseif ($action === 'parse_match') {
+
+                $rows = get_transient('mc_csv_preview_rows');
+
+                if (!$rows || !is_array($rows)) {
+                    $result = ['error' => 'CSV preview expired or missing. Please upload again.'];
+                } else {
+
+                    $matching_preview = [];
+
+                    foreach ($rows as $r) {
+
+                        // Perform matching WITH DM+D
+                        $match = mc_match_product_detailed(
+                            $r['drug_name'],
+                            $r['pack_size'],
+                            $r['form'],
+                            $r['vmp_code'],
+                            $r['vmpp_code']
+                        );
+
+                        // Determine match source
+                        $match_source = 'Unmatched';
+
+                        if ($match['product_id'] > 0) {
+
+                            if (!empty($r['vmpp_code'])) {
+                                $vmpp_hit = mc_find_product_by_vmpp($r['vmpp_code']);
+                                if ($vmpp_hit == $match['product_id']) {
+                                    $match_source = 'DM+D (VMPP)';
+                                }
+                            }
+
+                            if ($match_source === 'Unmatched' && !empty($r['vmp_code'])) {
+                                $vmp_hit = mc_find_product_by_vmp($r['vmp_code']);
+                                if ($vmp_hit == $match['product_id']) {
+                                    $match_source = 'DM+D (VMP)';
+                                }
+                            }
+
+                            if ($match_source === 'Unmatched') {
+                                $match_source = 'Strict Normalisation';
+                            }
+                        }
+
+                        $matching_preview[] = [
+                            'csv'         => $r,
+                            'product_id'  => $match['product_id'],
+                            'product'     => [
+                                'name'      => $match['name'],
+                                'strength'  => $match['strength'],
+                                'form'      => $match['form'],
+                                'pack_size' => $match['pack_size'],
+                                'code'      => $match['code'],
+                            ],
+                            'match_source' => $match_source,
+                            'vmp_code'     => $r['vmp_code'],
+                            'vmpp_code'    => $r['vmpp_code'],
+                            'score'        => $match['score']
+                        ];
+                    }
+
+                    // Store matched rows
+                    set_transient('mc_csv_matched_rows', $matching_preview, 60 * 10);
+                }
+            }
+
+            /* ---------------------------------------------------------
+            STEP 2B — FILTER MATCHING PREVIEW
+            --------------------------------------------------------- */
+            elseif ($action === 'filter_preview') {
+
+                // Save filter choice
+                $filter = sanitize_text_field($_POST['mc_preview_filter']);
+                set_transient('mc_csv_preview_filter', $filter, 60 * 10);
+
+                // Reload matched rows so filter has data
+                $matching_preview = get_transient('mc_csv_matched_rows');
+
+                if (!$matching_preview || !is_array($matching_preview)) {
+                    $result = ['error' => 'Matching preview expired or missing. Please parse again.'];
+                }
+            }
+
+            /* ---------------------------------------------------------
+            STEP 3 — CONFIRM & IMPORT → DB INSERT
+            --------------------------------------------------------- */
+            elseif ($action === 'confirm_import') {
+
+                $matched_rows = get_transient('mc_csv_matched_rows');
+
+                if (!$matched_rows || !is_array($matched_rows)) {
+                    $import_result = ['error' => 'Matching preview expired or missing. Please parse again.'];
+                } else {
+
+                    global $wpdb;
+
+                    $imported = 0;
+                    $matched  = 0;
+
+                    foreach ($matched_rows as $row) {
+
+                        $product_id = intval($row['product_id']);
+
+                        // Only insert matched rows
+                        if ($product_id > 0) {
+
+                            $priceDecimal = $row['csv']['basic_price'] / 100;
+
+                            $wpdb->insert(
+                                $wpdb->prefix . 'medi_reference_prices',
+                                [
+                                    'product_id'   => $product_id,
+                                    'type'         => $import_mode,
+                                    'price'        => $priceDecimal,
+                                    'last_updated' => current_time('mysql'),
+                                ],
+                                ['%d','%s','%f','%s']
+                            );
+
+                            $matched++;
+                        }
+
+                        $imported++;
+                    }
+
+                    // Clear transients
+                    delete_transient('mc_csv_preview_rows');
+                    delete_transient('mc_csv_matched_rows');
+                    delete_transient('mc_csv_preview_filter');
+
+                    $import_result = [
+                        'success'  => true,
+                        'message'  => sprintf(
+                            'Import completed successfully. %d rows processed. %d matched. %d unmatched.',
+                            $imported,
+                            $matched,
+                            $imported - $matched
+                        ),
+                        'imported' => $imported,
+                        'matched'  => $matched,
+                        'unmatched'=> $imported - $matched
+                    ];
+                }
             }
         }
 
@@ -866,7 +1047,67 @@ class MediCompare_Admin_Menu {
     }
 
     /**
-     * the parser of getting the correct VIIIA section for drug tarrif
+     * NEW — DITA MAP + TOPIC CRAWLER FOR DRUG TARIFF
+     */
+    public function process_reference_price_import_dita($type)
+    {
+        try {
+
+            global $wpdb;
+
+            // Fetch rows from DITA crawler
+            $rows = mc_fetch_drug_tariff_rows_from_dita();
+
+            // Match product_id
+            foreach ($rows as &$r) {
+                $r['product_id'] = mc_match_product_id($r['drug_name']);
+            }
+            unset($r);
+
+            // Insert into DB (same as before)
+            $imported = 0;
+            $matched  = 0;
+
+            foreach ($rows as $r) {
+
+                $priceDecimal = $r['basic_price'] / 100;
+
+                $wpdb->insert(
+                    $wpdb->prefix . 'medi_reference_prices',
+                    [
+                        'product_id'   => $r['product_id'],
+                        'type'         => $type,
+                        'price'        => $priceDecimal,
+                        'last_updated' => current_time('mysql'),
+                    ],
+                    ['%d','%s','%f','%s']
+                );
+
+                $imported++;
+                if ($r['product_id'] > 0) $matched++;
+            }
+
+            return [
+                'success'  => true,
+                'message'  => sprintf(
+                    'Import completed successfully. %d rows processed. %d matched to products. %d unmatched.',
+                    $imported,
+                    $matched,
+                    $imported - $matched
+                ),
+                'imported' => $imported,
+                'matched'  => $matched,
+                'unmatched'=> $imported - $matched
+            ];
+
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+
+    /**
+     * EXISTING PDF PARSER (UNCHANGED)
      */
     public function process_reference_price_import($type, $pdf_path)
     {
@@ -879,10 +1120,15 @@ class MediCompare_Admin_Menu {
             $pdf    = $parser->parseFile($pdf_path);
             $text   = $pdf->getText();
 
-            // ---------------------------------------------------------
-            // 1. Extract from column header to EOF
-            // ---------------------------------------------------------
+            // DEBUG
+            file_put_contents(
+                WP_CONTENT_DIR . '/debug_tariff_raw.txt',
+                $text
+            );
 
+            /* ---------------------------------------------------------
+            1. Extract from column header
+            --------------------------------------------------------- */
             $columnHeader = "Drug Quantity Basic Price Category";
             $columnHeaderPos = stripos($text, $columnHeader);
 
@@ -890,30 +1136,21 @@ class MediCompare_Admin_Menu {
                 return ['error' => 'Column header not found'];
             }
 
-            // Start at the column header
-            $startPos = $columnHeaderPos;
-            $block    = substr($text, $startPos);
+            $block = substr($text, $columnHeaderPos);
 
-            // Remove garbage header lines that appear after the header
-            $block = preg_replace('/P\s*art\s*VIII\s*A.*?\n/i', '', $block);
-            $block = preg_replace('/Part\s+VIIIA\s*-\s*Basic\s+Prices\s+of\s+Drugs\s+Product\s+List.*?\n/i', '', $block);
-            $block = preg_replace('/Part\s+VIIIA\s+products\s+[A-Z].*?\n/i', '', $block);
-
-            // Clean whitespace
+            // Clean
             $block = preg_replace('/[ \t]+/', ' ', $block);
             $block = preg_replace('/\n{2,}/', "\n", $block);
             $block = trim($block);
 
-            // ---------------------------------------------------------
-            // 2. Parse block into structured rows
-            // ---------------------------------------------------------
-
+            /* ---------------------------------------------------------
+            2. Parse rows
+            --------------------------------------------------------- */
             $lines       = explode("\n", $block);
             $rows        = [];
             $currentDrug = "";
 
-            // Skip the header line
-            array_shift($lines);
+            array_shift($lines); // skip header
 
             foreach ($lines as $line) {
 
@@ -921,15 +1158,14 @@ class MediCompare_Admin_Menu {
                 if ($line === "") continue;
 
                 // Case 1: drug + data on same line
-                // e.g. "Acarbose 100mg tablets 90 3473 A"
-                if (preg_match('/^(.*\D)\s+(\d+)\s+(\d+)\s+([ACM])\s*(.*)$/i', $line, $m)) {
+                if (preg_match('/^(.*?)\s+(\d+\s*(?:ml|g|mg|mcg|dose|caps|tabs)?)\s+(\d+)\s+([ACM])\s*$/i', $line, $m)) {
 
                     $rows[] = [
                         'drug_name'   => trim($m[1]),
-                        'quantity'    => intval($m[2]),
-                        'basic_price' => intval($m[3]),   // in pence
+                        'quantity'    => trim($m[2]),
+                        'basic_price' => intval($m[3]),
                         'category'    => strtoupper($m[4]),
-                        'brand'       => trim($m[5]),
+                        'brand'       => '',
                     ];
 
                     $currentDrug = "";
@@ -937,89 +1173,69 @@ class MediCompare_Admin_Menu {
                 }
 
                 // Case 2: data-only line (multi-line drug name above)
-                // e.g. "168 2206 M"
-                if (preg_match('/^(\d+)\s+(\d+)\s+([ACM])\s*(.*)$/i', $line, $m)) {
+                if (preg_match('/^(\d+\s*(?:ml|g|mg|mcg|dose|caps|tabs)?)\s+(\d+)\s+([ACM])\s*$/i', $line, $m)) {
 
                     $rows[] = [
                         'drug_name'   => trim($currentDrug),
-                        'quantity'    => intval($m[1]),
-                        'basic_price' => intval($m[2]),   // in pence
+                        'quantity'    => trim($m[1]),
+                        'basic_price' => intval($m[2]),
                         'category'    => strtoupper($m[3]),
-                        'brand'       => trim($m[4]),
+                        'brand'       => '',
                     ];
 
                     $currentDrug = "";
                     continue;
                 }
 
-                // Otherwise: part of a multi-line drug name
+                // Multi-line drug name
                 $currentDrug .= ($currentDrug === "" ? "" : " ") . $line;
             }
 
-            // ---------------------------------------------------------
-            // 3. Match each drug to wp_posts (product_id)
-            // ---------------------------------------------------------
-
+            /* ---------------------------------------------------------
+            3. Match product_id using helper
+            --------------------------------------------------------- */
             foreach ($rows as &$r) {
-
-                $searchName = strtolower($r['drug_name']);
-                $post_id    = 0;
-
-                // Exact match
-                $post_id = $wpdb->get_var($wpdb->prepare(
-                    "SELECT ID FROM {$wpdb->posts}
-                    WHERE post_title = %s AND post_type = 'product' LIMIT 1",
-                    $r['drug_name']
-                ));
-
-                // Case-insensitive match
-                if (!$post_id) {
-                    $post_id = $wpdb->get_var($wpdb->prepare(
-                        "SELECT ID FROM {$wpdb->posts}
-                        WHERE LOWER(post_title) = %s AND post_type = 'product' LIMIT 1",
-                        $searchName
-                    ));
-                }
-
-                // Normalised match (remove spaces)
-                if (!$post_id) {
-                    $post_id = $wpdb->get_var($wpdb->prepare(
-                        "SELECT ID FROM {$wpdb->posts}
-                        WHERE REPLACE(LOWER(post_title), ' ', '') = %s
-                        AND post_type = 'product' LIMIT 1",
-                        str_replace(' ', '', $searchName)
-                    ));
-                }
-
-                $r['product_id'] = $post_id ?: 0;
+                $r['product_id'] = mc_match_product_id($r['drug_name']);
             }
             unset($r);
 
-            // ---------------------------------------------------------
-            // 4. Insert into wp_medi_reference_prices
-            // ---------------------------------------------------------
+            /* ---------------------------------------------------------
+            4. Insert into DB
+            --------------------------------------------------------- */
+            $imported = 0;
+            $matched  = 0;
 
             foreach ($rows as $r) {
 
-                // Convert basic_price (pence) to decimal pounds
                 $priceDecimal = $r['basic_price'] / 100;
 
                 $wpdb->insert(
                     $wpdb->prefix . 'medi_reference_prices',
                     [
                         'product_id'   => $r['product_id'],
-                        'type'         => 'drug_tariff',
+                        'type'         => $type,
                         'price'        => $priceDecimal,
-                        'display'      => 'yes',
                         'last_updated' => current_time('mysql'),
                     ],
-                    [
-                        '%d','%s','%f','%s','%s'
-                    ]
+                    ['%d','%s','%f','%s']
                 );
+
+                $imported++;
+                if ($r['product_id'] > 0) $matched++;
             }
 
-            return ['success' => true, 'imported' => count($rows)];
+            return [
+                'success'  => true,
+                'message'  => sprintf(
+                    'Import completed successfully. %d rows processed. %d matched to products. %d unmatched.',
+                    $imported,
+                    $matched,
+                    $imported - $matched
+                ),
+                'imported' => $imported,
+                'matched'  => $matched,
+                'unmatched'=> $imported - $matched
+            ];
 
         } catch (\Exception $e) {
             return ['error' => $e->getMessage()];
@@ -1120,7 +1336,7 @@ class MediCompare_Admin_Menu {
     }
 
     /* ---------------------------------------------------------
-       PRODUCT CSV PARSER
+     PRODUCT CSV PARSER — UPDATED FOR DM+D
     --------------------------------------------------------- */
     public function process_product_csv_upload() {
 
@@ -1149,7 +1365,17 @@ class MediCompare_Admin_Menu {
         $header = array_map('trim', array_shift($rows));
         $header = array_map('strtolower', $header);
 
-        $required = ['product_code', 'product_name', 'category', 'strength', 'pack_size', 'description'];
+        // ⭐ UPDATED REQUIRED COLUMNS
+        $required = [
+            'product_code',
+            'product_name',
+            'category',
+            'strength',
+            'pack_size',
+            'description',
+            'dmd_vmp',     // NEW
+            'dmd_vmpp'     // NEW
+        ];
 
         foreach ($required as $col) {
             if (!in_array($col, $header)) {
@@ -1172,6 +1398,10 @@ class MediCompare_Admin_Menu {
                 'strength'     => $data['strength'],
                 'pack_size'    => $data['pack_size'],
                 'description'  => $data['description'],
+
+                // ⭐ NEW DM+D fields
+                'dmd_vmp'      => $data['dmd_vmp'],
+                'dmd_vmpp'     => $data['dmd_vmpp'],
             ];
         }
 
@@ -1180,6 +1410,7 @@ class MediCompare_Admin_Menu {
             'data'    => $mapped
         ];
     }
+
 
     /* ---------------------------------------------------------
        PHARMACY CSV PARSER
@@ -1322,75 +1553,67 @@ class MediCompare_Admin_Menu {
 }
 
     /* ---------------------------------------------------------
-       INSERT / UPDATE PRODUCT
-    --------------------------------------------------------- */
+   INSERT OR UPDATE PRODUCT — UPDATED FOR DM+D
+--------------------------------------------------------- */
     public function insert_or_update_product_from_row($row) {
 
-    $product_code = trim($row['product_code']);
-    $product_name = trim($row['product_name']);
-    $category     = trim($row['category']);
-    $strength     = trim($row['strength']);
-    $pack_size    = trim($row['pack_size']);
-    $description  = trim($row['description']);
+        $product_code = sanitize_text_field($row['product_code']);
 
-    if ($product_code === '' || $product_name === '') {
-        return 'skipped';
-    }
+        if ($product_code === '') {
+            return 'skipped';
+        }
 
-    // IMPORTANT: use correct meta key (no underscore)
-    $existing = get_posts([
-        'post_type'      => 'mc_product',
-        'post_status'    => 'any',
-        'meta_key'       => 'mc_product_code',
-        'meta_value'     => $product_code,
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-    ]);
-
-    // UPDATE
-    if (!empty($existing)) {
-
-        $product_id = $existing[0];
-
-        wp_update_post([
-            'ID'          => $product_id,
-            'post_title'  => $product_name,
-            'post_name'   => sanitize_title($product_code),
-            'post_status' => 'publish',   // ensure published
-            'post_author' => 1,
+        // Check if product exists
+        $existing = get_posts([
+            'post_type'      => 'mc_product',
+            'post_status'    => 'any',
+            'meta_key'       => 'mc_product_code',
+            'meta_value'     => $product_code,
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
         ]);
 
-        update_post_meta($product_id, 'mc_product_code', $product_code);
-        update_post_meta($product_id, 'mc_category', $category);
-        update_post_meta($product_id, 'mc_strength', $strength);
-        update_post_meta($product_id, 'mc_pack_size', $pack_size);
-        update_post_meta($product_id, 'mc_description', $description);
+        $post_id = !empty($existing) ? $existing[0] : 0;
 
-        return 'updated';
+        /* ---------------------------------------------------------
+        CREATE NEW PRODUCT
+        --------------------------------------------------------- */
+        if (!$post_id) {
+
+            $post_id = wp_insert_post([
+                'post_type'   => 'mc_product',
+                'post_title'  => sanitize_text_field($row['product_name']),
+                'post_status' => 'publish',
+                'post_author' => get_current_user_id(),
+                'post_name'   => sanitize_title($product_code),
+            ]);
+
+            $status = 'inserted';
+
+        } else {
+            $status = 'updated';
+        }
+
+        /* ---------------------------------------------------------
+        UPDATE META FIELDS
+        --------------------------------------------------------- */
+        update_post_meta($post_id, 'mc_product_code', $product_code);
+        update_post_meta($post_id, 'mc_category', sanitize_text_field($row['category']));
+        update_post_meta($post_id, 'mc_strength', sanitize_text_field($row['strength']));
+        update_post_meta($post_id, 'mc_pack_size', sanitize_text_field($row['pack_size']));
+        update_post_meta($post_id, 'mc_description', sanitize_textarea_field($row['description']));
+
+        // ⭐ NEW DM+D fields
+        if (!empty($row['dmd_vmp'])) {
+            update_post_meta($post_id, 'mc_dmd_vmp', sanitize_text_field($row['dmd_vmp']));
+        }
+
+        if (!empty($row['dmd_vmpp'])) {
+            update_post_meta($post_id, 'mc_dmd_vmpp', sanitize_text_field($row['dmd_vmpp']));
+        }
+
+        return $status;
     }
-
-    // INSERT
-    $product_id = wp_insert_post([
-        'post_title'  => $product_name,
-        'post_name'   => sanitize_title($product_code),
-        'post_type'   => 'mc_product',
-        'post_status' => 'publish',
-        'post_author' => 1,
-    ]);
-
-    if (is_wp_error($product_id) || !$product_id) {
-        return 'skipped';
-    }
-
-    update_post_meta($product_id, 'mc_product_code', $product_code);
-    update_post_meta($product_id, 'mc_category', $category);
-    update_post_meta($product_id, 'mc_strength', $strength);
-    update_post_meta($product_id, 'mc_pack_size', $pack_size);
-    update_post_meta($product_id, 'mc_description', $description);
-
-    return 'inserted';
-}
-
 
     /* ---------------------------------------------------------
        INSERT / UPDATE PHARMACY

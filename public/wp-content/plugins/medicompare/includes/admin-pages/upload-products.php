@@ -7,7 +7,7 @@
 
     <p>Expected CSV columns:</p>
     <code>
-        product_code, product_name, category, strength, pack_size, description
+        product_code, product_name, category, strength, pack_size, description, dmd_vmp, dmd_vmpp
     </code>
 
     <?php if (!empty($result['error'])): ?>
@@ -26,12 +26,20 @@
     <?php endif; ?>
 
     <?php if ($mode === 'preview' && !empty($result['success'])): ?>
-        <h2>Preview</h2>
+     <h2>Preview</h2>
         <table class="widefat striped">
             <thead>
                 <tr>
-                    <th>Code</th><th>Name</th><th>Category</th><th>Strength</th>
-                    <th>Pack Size</th><th>Description</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Strength</th>
+                    <th>Pack Size</th>
+                    <th>Description</th>
+
+                    <!-- ⭐ NEW DM+D columns -->
+                    <th>DM+D VMP</th>
+                    <th>DM+D VMPP</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,6 +51,10 @@
                         <td><?php echo esc_html($row['strength']); ?></td>
                         <td><?php echo esc_html($row['pack_size']); ?></td>
                         <td><?php echo esc_html($row['description']); ?></td>
+
+                        <!-- ⭐ NEW DM+D columns -->
+                        <td><?php echo esc_html($row['dmd_vmp']); ?></td>
+                        <td><?php echo esc_html($row['dmd_vmpp']); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

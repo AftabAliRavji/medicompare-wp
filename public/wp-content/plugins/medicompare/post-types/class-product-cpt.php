@@ -71,85 +71,113 @@ class MediCompare_Product_CPT {
     --------------------------------------------------------- */
     public function render_product_details_meta_box($post) {
 
-        // Load correct meta keys (NO underscores)
-        $product_code = get_post_meta($post->ID, 'mc_product_code', true);
-        $category     = get_post_meta($post->ID, 'mc_category', true);
-        $strength     = get_post_meta($post->ID, 'mc_strength', true);
-        $pack_size    = get_post_meta($post->ID, 'mc_pack_size', true);
-        $description  = get_post_meta($post->ID, 'mc_description', true);
+    // Load existing meta
+    $product_code = get_post_meta($post->ID, 'mc_product_code', true);
+    $category     = get_post_meta($post->ID, 'mc_category', true);
+    $strength     = get_post_meta($post->ID, 'mc_strength', true);
+    $pack_size    = get_post_meta($post->ID, 'mc_pack_size', true);
+    $description  = get_post_meta($post->ID, 'mc_description', true);
 
-        wp_nonce_field('mc_save_product_details', 'mc_product_details_nonce');
-        ?>
+    // NEW DM+D fields
+    $dmd_vmp      = get_post_meta($post->ID, 'mc_dmd_vmp', true);
+    $dmd_vmpp     = get_post_meta($post->ID, 'mc_dmd_vmpp', true);
 
-        <table class="form-table">
+    wp_nonce_field('mc_save_product_details', 'mc_product_details_nonce');
+    ?>
 
-            <tr>
-                <th><label>Product Code</label></th>
-                <td>
-                    <input type="text"
-                           name="mc_product_code"
-                           value="<?php echo esc_attr($product_code); ?>"
-                           class="regular-text"
-                           required>
+    <table class="form-table">
 
-                    <?php if ($product_code): ?>
-                        <p class="description" style="color:#d63638;">
-                            Changing the product code may affect supplier product links.
-                        </p>
-                    <?php else: ?>
-                        <p class="description">Enter a unique product code.</p>
-                    <?php endif; ?>
-                </td>
-            </tr>
+        <tr>
+            <th><label>Product Code</label></th>
+            <td>
+                <input type="text"
+                       name="mc_product_code"
+                       value="<?php echo esc_attr($product_code); ?>"
+                       class="regular-text"
+                       required>
 
-            <tr>
-                <th><label>Category</label></th>
-                <td>
-                    <input type="text"
-                           name="mc_category"
-                           value="<?php echo esc_attr($category); ?>"
-                           class="regular-text">
-                </td>
-            </tr>
+                <?php if ($product_code): ?>
+                    <p class="description" style="color:#d63638;">
+                        Changing the product code may affect supplier product links.
+                    </p>
+                <?php else: ?>
+                    <p class="description">Enter a unique product code.</p>
+                <?php endif; ?>
+            </td>
+        </tr>
 
-            <tr>
-                <th><label>Strength</label></th>
-                <td>
-                    <input type="text"
-                           name="mc_strength"
-                           value="<?php echo esc_attr($strength); ?>"
-                           class="regular-text">
-                </td>
-            </tr>
+        <tr>
+            <th><label>Category</label></th>
+            <td>
+                <input type="text"
+                       name="mc_category"
+                       value="<?php echo esc_attr($category); ?>"
+                       class="regular-text">
+            </td>
+        </tr>
 
-            <tr>
-                <th><label>Pack Size</label></th>
-                <td>
-                    <input type="text"
-                           name="mc_pack_size"
-                           value="<?php echo esc_attr($pack_size); ?>"
-                           class="regular-text">
-                </td>
-            </tr>
+        <tr>
+            <th><label>Strength</label></th>
+            <td>
+                <input type="text"
+                       name="mc_strength"
+                       value="<?php echo esc_attr($strength); ?>"
+                       class="regular-text">
+            </td>
+        </tr>
 
-            <tr>
-                <th><label>Description</label></th>
-                <td>
-                    <textarea name="mc_description"
-                              rows="4"
-                              class="large-text"><?php echo esc_textarea($description); ?></textarea>
-                </td>
-            </tr>
+        <tr>
+            <th><label>Pack Size</label></th>
+            <td>
+                <input type="text"
+                       name="mc_pack_size"
+                       value="<?php echo esc_attr($pack_size); ?>"
+                       class="regular-text">
+            </td>
+        </tr>
 
-        </table>
+        <tr>
+            <th><label>Description</label></th>
+            <td>
+                <textarea name="mc_description"
+                          rows="4"
+                          class="large-text"><?php echo esc_textarea($description); ?></textarea>
+            </td>
+        </tr>
 
-        <?php
-    }
+        <!-- ⭐ NEW DM+D FIELDS -->
+        <tr>
+            <th><label>DM+D VMP Code</label></th>
+            <td>
+                <input type="text"
+                       name="mc_dmd_vmp"
+                       value="<?php echo esc_attr($dmd_vmp); ?>"
+                       class="regular-text">
+                <p class="description">Optional. Virtual Medicinal Product (VMP) SNOMED code.</p>
+            </td>
+        </tr>
+
+        <tr>
+            <th><label>DM+D VMPP Code</label></th>
+            <td>
+                <input type="text"
+                       name="mc_dmd_vmpp"
+                       value="<?php echo esc_attr($dmd_vmpp); ?>"
+                       class="regular-text">
+                <p class="description">Optional. Virtual Medicinal Product Pack (VMPP) SNOMED code.</p>
+            </td>
+        </tr>
+
+    </table>
+
+    <?php
+}
+
 
     /* ---------------------------------------------------------
        SAVE HANDLER
     --------------------------------------------------------- */
-    public function save_product_details($post_id) {
+   public function save_product_details($post_id) {
 
     // Prevent recursion
     if (defined('MC_SAVING_PRODUCT') && MC_SAVING_PRODUCT) {
@@ -174,6 +202,10 @@ class MediCompare_Product_CPT {
     $strength     = isset($_POST['mc_strength']) ? sanitize_text_field($_POST['mc_strength']) : '';
     $pack_size    = isset($_POST['mc_pack_size']) ? sanitize_text_field($_POST['mc_pack_size']) : '';
     $description  = isset($_POST['mc_description']) ? sanitize_textarea_field($_POST['mc_description']) : '';
+
+    // NEW DM+D fields
+    $dmd_vmp      = isset($_POST['mc_dmd_vmp']) ? sanitize_text_field($_POST['mc_dmd_vmp']) : '';
+    $dmd_vmpp     = isset($_POST['mc_dmd_vmpp']) ? sanitize_text_field($_POST['mc_dmd_vmpp']) : '';
 
     if ($product_code === '') {
         return; // product code required
@@ -201,15 +233,19 @@ class MediCompare_Product_CPT {
         'ID'          => $post_id,
         'post_status' => 'publish',
         'post_author' => get_current_user_id(),
-        'post_name'   => sanitize_title($product_code), // slug = product_code
+        'post_name'   => sanitize_title($product_code),
     ]);
 
-    // Save meta using correct keys
+    // Save meta
     update_post_meta($post_id, 'mc_product_code', $product_code);
     update_post_meta($post_id, 'mc_category', $category);
     update_post_meta($post_id, 'mc_strength', $strength);
     update_post_meta($post_id, 'mc_pack_size', $pack_size);
     update_post_meta($post_id, 'mc_description', $description);
+
+    // ⭐ NEW DM+D meta fields
+    update_post_meta($post_id, 'mc_dmd_vmp', $dmd_vmp);
+    update_post_meta($post_id, 'mc_dmd_vmpp', $dmd_vmpp);
 
     // End recursion guard
     define('MC_SAVING_PRODUCT', false);
@@ -230,10 +266,16 @@ class MediCompare_Product_CPT {
         $new['strength']     = 'Strength';
         $new['pack_size']    = 'Pack Size';
         $new['description']  = 'Description';
+
+        // ⭐ NEW DM+D columns
+        $new['dmd_vmp']      = 'DM+D VMP';
+        $new['dmd_vmpp']     = 'DM+D VMPP';
+
         $new['date']         = $columns['date'];
 
         return $new;
     }
+
 
     public function render_product_columns($column, $post_id) {
 
@@ -258,13 +300,30 @@ class MediCompare_Product_CPT {
             case 'description':
                 echo esc_html(get_post_meta($post_id, 'mc_description', true));
                 break;
+
+            // ⭐ NEW DM+D columns
+            case 'dmd_vmp':
+                echo esc_html(get_post_meta($post_id, 'mc_dmd_vmp', true));
+                break;
+
+            case 'dmd_vmpp':
+                echo esc_html(get_post_meta($post_id, 'mc_dmd_vmpp', true));
+                break;
         }
     }
 
+
     public function make_columns_sortable($columns) {
+
         $columns['product_code'] = 'product_code';
+
+        // ⭐ NEW sortable DM+D columns
+        $columns['dmd_vmp']  = 'dmd_vmp';
+        $columns['dmd_vmpp'] = 'dmd_vmpp';
+
         return $columns;
     }
+
 }
 
 new MediCompare_Product_CPT();

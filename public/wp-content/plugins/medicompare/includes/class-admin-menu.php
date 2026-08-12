@@ -436,6 +436,18 @@ class MediCompare_Admin_Menu {
             [$this, 'reference_price_import_page']
         );
 
+    /*---------------------------------------------------------
+    ⭐ NEW — REFERENCE PRICE NHS DRUG TARRIF/CLAWBACK/CONCESSIONS TABLE 
+    --------------------------------------------------------- */        
+        add_submenu_page(
+        'medicompare',
+        'Reference Prices Table',
+        'Reference Prices Table',
+        'manage_options',
+        'medicompare-reference-prices',
+        [$this, 'reference_prices_table_page']
+    );
+
 }
 
 
@@ -547,6 +559,292 @@ class MediCompare_Admin_Menu {
             default:
                 echo '<p class="mc-muted">Invalid report type selected.</p>';
         }
+    }
+
+    /*---------------------------------------------------------
+      NEW PAGE FOR SHOWING REFERENCE NHS PRICES LIKE DRUG TARRIF/CLAWBACK AND CONCESSIONS TABLE
+    ----------------------------------------------------------*/
+        public function reference_prices_table_page() {
+        global $wpdb;
+
+        $table          = $wpdb->prefix . 'medi_reference_prices';
+        $products_table = $wpdb->posts;
+        $postmeta_table = $wpdb->postmeta;
+
+        /* ---------------------------------------------------------
+        HANDLE UPDATE ROW
+        --------------------------------------------------------- */
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_update_row'])) {
+
+            $id          = intval($_POST['id']);
+            $product_id  = intval($_POST['product_id']);
+            $type        = sanitize_text_field($_POST['type']);
+            $price       = floatval($_POST['price']);
+
+            $wpdb->update(
+                $table,
+                [
+                    'product_id'   => $product_id,
+                    'type'         => $type,
+                    'price'        => $price,
+                    'last_updated' => current_time('mysql')
+                ],
+                ['id' => $id],
+                ['%d','%s','%f','%s'],
+                ['%d']
+            );
+
+            echo '<div class="updated"><p>Row updated successfully.</p></div>';
+        }
+
+        /* ---------------------------------------------------------
+        HANDLE ADD NEW ROW
+        --------------------------------------------------------- */
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_add_row'])) {
+
+            $product_id  = intval($_POST['product_id']);
+            $type        = sanitize_text_field($_POST['type']);
+            $price       = floatval($_POST['price']);
+
+            $wpdb->insert(
+                $table,
+                [
+                    'product_id'   => $product_id,
+                    'type'         => $type,
+                    'price'        => $price,
+                    'last_updated' => current_time('mysql')
+                ],
+                ['%d','%s','%f','%s']
+            );
+
+            echo '<div class="updated"><p>New row added successfully.</p></div>';
+        }
+
+        /* ---------------------------------------------------------
+        READ FILTERS + SEARCH
+        --------------------------------------------------------- */
+        $type_filter = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
+        $search      = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+
+        /* ---------------------------------------------------------
+        PAGINATION
+        --------------------------------------------------------- */
+        $per_page = 50;
+        $page     = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+        $offset   = ($page - 1) * $per_page;
+
+        /* ---------------------------------------------------------
+        WHERE CLAUSE
+        --------------------------------------------------------- */
+        $where = "WHERE 1=1";
+
+        if ($type_filter !== '') {
+            $where .= $wpdb->prepare(" AND rp.type = %s", $type_filter);
+        }
+
+        if ($search !== '') {
+            $like = '%' . $wpdb->esc_like($search) . '%';
+
+            $where .= $wpdb->prepare("
+                AND (
+                    rp.product_id LIKE %s
+                    OR p.post_title LIKE %s
+                    OR pm_vmp.meta_value LIKE %s
+                    OR pm_vmpp.meta_value LIKE %s
+                )
+            ", $like, $like, $like, $like);
+        }
+
+        /* ---------------------------------------------------------
+        MAIN QUERY
+        --------------------------------------------------------- */
+        $sql = "
+            SELECT 
+                rp.id,
+                rp.product_id,
+                rp.type,
+                rp.price,
+                rp.last_updated,
+                p.post_title AS product_name,
+                pm_vmp.meta_value AS vmp_code,
+                pm_vmpp.meta_value AS vmpp_code
+            FROM {$table} rp
+            LEFT JOIN {$products_table} p 
+                ON p.ID = rp.product_id
+            LEFT JOIN {$postmeta_table} pm_vmp
+                ON pm_vmp.post_id = rp.product_id AND pm_vmp.meta_key = 'mc_vmp_code'
+            LEFT JOIN {$postmeta_table} pm_vmpp
+                ON pm_vmpp.post_id = rp.product_id AND pm_vmpp.meta_key = 'mc_vmpp_code'
+            $where
+            ORDER BY rp.last_updated DESC
+            LIMIT %d OFFSET %d
+        ";
+
+        $rows = $wpdb->get_results($wpdb->prepare($sql, $per_page, $offset), ARRAY_A);
+
+        /* ---------------------------------------------------------
+        COUNT TOTAL FOR PAGINATION
+        --------------------------------------------------------- */
+        $count_sql = "
+            SELECT COUNT(*)
+            FROM {$table} rp
+            LEFT JOIN {$products_table} p 
+                ON p.ID = rp.product_id
+            LEFT JOIN {$postmeta_table} pm_vmp
+                ON pm_vmp.post_id = rp.product_id AND pm_vmp.meta_key = 'mc_vmp_code'
+            LEFT JOIN {$postmeta_table} pm_vmpp
+                ON pm_vmpp.post_id = rp.product_id AND pm_vmpp.meta_key = 'mc_vmpp_code'
+            $where
+        ";
+
+        $total_rows  = (int) $wpdb->get_var($count_sql);
+        $total_pages = ceil($total_rows / $per_page);
+
+        ?>
+        <div class="wrap">
+            <h1>Reference Prices Table</h1>
+
+            <!-- ADD NEW ROW -->
+            <h2>Add New Reference Price</h2>
+
+            <form method="post" style="margin-bottom:30px; padding:15px; background:#fff; border:1px solid #ccc;">
+                <input type="hidden" name="mc_add_row" value="1">
+
+                <table class="form-table">
+                    <tr>
+                        <th>Product ID</th>
+                        <td><input type="number" name="product_id" required></td>
+                    </tr>
+
+                    <tr>
+                        <th>Type</th>
+                        <td>
+                            <select name="type" required>
+                                <option value="drug_tariff">Drug Tariff</option>
+                                <option value="clawback">Clawback</option>
+                                <option value="concession">Concession</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Price (£)</th>
+                        <td><input type="text" name="price" required></td>
+                    </tr>
+                </table>
+
+                <button class="button button-primary">Add Row</button>
+            </form>
+
+            <!-- EDIT ROW -->
+            <?php if (isset($_GET['edit'])): 
+                $edit_id = intval($_GET['edit']);
+                $edit_row = $wpdb->get_row("SELECT * FROM {$table} WHERE id = {$edit_id}", ARRAY_A);
+            ?>
+
+            <h2>Edit Reference Price</h2>
+
+            <form method="post" style="margin-bottom:30px; padding:15px; background:#fff; border:1px solid #ccc;">
+                <input type="hidden" name="mc_update_row" value="1">
+                <input type="hidden" name="id" value="<?php echo intval($edit_row['id']); ?>">
+
+                <table class="form-table">
+                    <tr>
+                        <th>Product ID</th>
+                        <td><input type="number" name="product_id" value="<?php echo intval($edit_row['product_id']); ?>" required></td>
+                    </tr>
+
+                    <tr>
+                        <th>Type</th>
+                        <td>
+                            <select name="type" required>
+                                <option value="drug_tariff" <?php selected($edit_row['type'], 'drug_tariff'); ?>>Drug Tariff</option>
+                                <option value="clawback" <?php selected($edit_row['type'], 'clawback'); ?>>Clawback</option>
+                                <option value="concession" <?php selected($edit_row['type'], 'concession'); ?>>Concession</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Price (£)</th>
+                        <td><input type="text" name="price" value="<?php echo esc_attr($edit_row['price']); ?>" required></td>
+                    </tr>
+                </table>
+
+                <button class="button button-primary">Update Row</button>
+            </form>
+
+            <?php endif; ?>
+
+            <!-- FILTERS -->
+            <form method="get" style="margin-bottom:20px;">
+                <input type="hidden" name="page" value="medicompare-reference-prices">
+
+                <input type="text" name="s" placeholder="Search product name, ID, VMP, VMPP"
+                    value="<?php echo esc_attr($search); ?>"
+                    style="width:300px;">
+
+                <select name="type">
+                    <option value="">All Types</option>
+                    <option value="drug_tariff" <?php selected($type_filter, 'drug_tariff'); ?>>Drug Tariff</option>
+                    <option value="clawback" <?php selected($type_filter, 'clawback'); ?>>Clawback</option>
+                    <option value="concession" <?php selected($type_filter, 'concession'); ?>>Concession</option>
+                </select>
+
+                <button class="button button-primary">Filter</button>
+            </form>
+
+            <!-- TABLE -->
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Type</th>
+                        <th>Price (£)</th>
+                        <th>Last Updated</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php if (empty($rows)): ?>
+                        <tr><td colspan="6">No reference prices found.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($rows as $r): ?>
+                            <tr>
+                                <td><?php echo intval($r['id']); ?></td>
+                                <td><?php echo esc_html($r['product_name']); ?> (<?php echo intval($r['product_id']); ?>)</td>
+                                <td><?php echo esc_html(ucwords(str_replace('_',' ', $r['type']))); ?></td>
+                                <td>£<?php echo number_format((float)$r['price'], 2); ?></td>
+                                <td><?php echo esc_html($r['last_updated']); ?></td>
+                                <td>
+                                    <a href="<?php echo admin_url('admin.php?page=medicompare-reference-prices&edit=' . intval($r['id'])); ?>" 
+                                    class="button button-small">Edit</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+
+
+            <!-- PAGINATION -->
+            <div style="margin-top:20px;">
+                <?php
+                echo paginate_links([
+                    'base'      => add_query_arg('paged', '%#%'),
+                    'format'    => '',
+                    'prev_text' => '« Prev',
+                    'next_text' => 'Next »',
+                    'total'     => $total_pages,
+                    'current'   => $page
+                ]);
+                ?>
+            </div>
+
+        </div>
+        <?php
     }
 
    /**
@@ -839,212 +1137,418 @@ class MediCompare_Admin_Menu {
     }
 
         /**
-     * Reference NHS Price Import Page
+     * Reference NHS Price Import Page (Router + Mode Controller)
      */
     public function reference_price_import_page() {
 
-        $result            = null;
-        $csv_preview       = null;
-        $matching_preview  = null;
+        $import_result      = null;
+        $csv_preview        = null;
+        $matching_preview   = null;
+        $filter             = get_transient('mc_csv_preview_filter');
 
-        // Load current import mode (default: drug_tariff)
-        $import_mode = get_option('mc_reference_import_mode', 'drug_tariff');
+        // Default mode
+        $import_mode = 'drug_tariff';
+
+        // Handle mode selector (Set Mode button)
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_set_mode'])) {
+            check_admin_referer('mc_reference_import_nonce');
+
+            $new_mode = sanitize_text_field($_POST['mc_import_mode']);
+            $valid_modes = ['drug_tariff', 'concession', 'clawback', 'dmd'];
+
+            if (in_array($new_mode, $valid_modes, true)) {
+                $import_mode = $new_mode;
+            }
+        }
+
+        // Preserve mode during importer actions (Generate / Confirm)
+        if (isset($_POST['mc_import_mode'])) {
+            $new_mode = sanitize_text_field($_POST['mc_import_mode']);
+            $valid_modes = ['drug_tariff', 'concession', 'clawback', 'dmd'];
+
+            if (in_array($new_mode, $valid_modes, true)) {
+                $import_mode = $new_mode;
+            }
+        }
+
+        // Handle importer actions (Drug Tariff, Concession, Clawback, etc.)
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
+
+            $action = sanitize_text_field($_POST['mc_reference_import_submit']);
+
+           if ($import_mode === 'drug_tariff') {
+
+                $result = $this->handle_drug_tariff_import();
+
+                $import_result    = $result['import_result'];
+                $csv_preview      = $result['csv_preview'];
+                $matching_preview = $result['matching_preview'];
+                $filter           = get_transient('mc_csv_preview_filter');   // ← FIX
+            }
+
+
+            if ($import_mode === 'clawback') {
+
+                $result = $this->handle_clawback_import();
+
+                $clawback_preview = $result['clawback_preview'];
+                $clawback_result  = $result['clawback_result'];
+            }
+
+
+            // Add other modes here later
+        }
+
+        // MODE SELECTOR UI
+        echo '<div class="wrap">';
+        echo '<h1>NHS Reference Price Import</h1>';
+
+        echo '<form method="post" style="margin-bottom:20px;">';
+        wp_nonce_field('mc_reference_import_nonce');
+
+        echo '<label><strong>Import Type:</strong></label><br>';
+        echo '<select name="mc_import_mode" style="width:300px;">';
+
+        $modes = [
+            'drug_tariff' => 'Drug Tariff (Part VIIIA)',
+            'concession'  => 'Concession Prices (NCS)',
+            'clawback'    => 'Clawback / Discount Deduction',
+            'dmd'         => 'DM+D Product Import'
+        ];
+
+        foreach ($modes as $key => $label) {
+            $selected = ($import_mode === $key) ? 'selected' : '';
+            echo "<option value='{$key}' {$selected}>{$label}</option>";
+        }
+
+        echo '</select>';
+
+        echo '<br><br>';
+        echo '<button type="submit" name="mc_set_mode" value="set_mode" class="button button-primary">Set Import Mode</button>';
+        echo '</form>';
+        echo '</div>';
+
+        // LOAD TEMPLATE AFTER LOGIC
+        $base = plugin_dir_path(__FILE__) . 'admin-pages/';
+
+        if ($import_mode === 'drug_tariff') {
+            include $base . 'drug-tariff-import.php';
+        }
+        elseif ($import_mode === 'clawback') {
+            include $base . 'clawback-import.php';
+        }
+    }
+
+    /**
+     * Drug Tariff Import Logic
+     */
+private function handle_drug_tariff_import() {
+
+    global $wpdb;
+
+    // Always reload current state
+    $csv_preview       = get_transient('mc_csv_preview_rows');
+    $matching_preview  = get_transient('mc_csv_matched_rows');
+    $import_result     = null;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
+
+        check_admin_referer('mc_reference_import_nonce');
+        $action = sanitize_text_field($_POST['mc_reference_import_submit']);
+
+        /**
+         * STEP 1 — UPLOAD CSV
+         */
+        if ($action === 'upload_csv') {
+
+            if (!empty($_FILES['mc_import_csv']['tmp_name'])) {
+
+                $csv_path = $_FILES['mc_import_csv']['tmp_name'];
+
+                $csv_preview = mc_fetch_drug_tariff_rows_from_csv($csv_path);
+
+                set_transient('mc_csv_preview_rows', $csv_preview, 60 * 10);
+
+                // Reset matching preview
+                delete_transient('mc_csv_matched_rows');
+                $matching_preview = null;
+
+            } else {
+                $import_result = ['error' => 'No CSV file uploaded.'];
+            }
+        }
+
+        /**
+         * STEP 2 — PARSE & MATCH
+         */
+        elseif ($action === 'parse_match') {
+
+            $rows = get_transient('mc_csv_preview_rows');
+
+            if (!$rows || !is_array($rows)) {
+                $import_result = ['error' => 'CSV preview expired or missing. Please upload again.'];
+            } else {
+
+                $matching_preview = [];
+
+                foreach ($rows as $r) {
+
+                    $match = mc_match_product_detailed(
+                        $r['drug_name'],
+                        $r['pack_size'],
+                        $r['form'],
+                        $r['vmp_code'],
+                        $r['vmpp_code']
+                    );
+
+                    $match_source = 'Unmatched';
+
+                    if ($match['product_id'] > 0) {
+
+                        if (!empty($r['vmpp_code'])) {
+                            $vmpp_hit = mc_find_product_by_vmpp($r['vmpp_code']);
+                            if ($vmpp_hit == $match['product_id']) {
+                                $match_source = 'DM+D (VMPP)';
+                            }
+                        }
+
+                        if ($match_source === 'Unmatched' && !empty($r['vmp_code'])) {
+                            $vmp_hit = mc_find_product_by_vmp($r['vmp_code']);
+                            if ($vmp_hit == $match['product_id']) {
+                                $match_source = 'DM+D (VMP)';
+                            }
+                        }
+
+                        if ($match_source === 'Unmatched') {
+                            $match_source = 'Strict Normalisation';
+                        }
+                    }
+
+                    $matching_preview[] = [
+                        'csv'         => $r,
+                        'product_id'  => $match['product_id'],
+                        'product'     => [
+                            'name'      => $match['name'],
+                            'strength'  => $match['strength'],
+                            'form'      => $match['form'],
+                            'pack_size' => $match['pack_size'],
+                            'code'      => $match['code'],
+                        ],
+                        'match_source' => $match_source,
+                        'vmp_code'     => $r['vmp_code'],
+                        'vmpp_code'    => $r['vmpp_code'],
+                        'score'        => $match['score']
+                    ];
+                }
+
+                set_transient('mc_csv_matched_rows', $matching_preview, 60 * 10);
+                $filter = 'all';
+
+                // Hide CSV preview now
+                $csv_preview = null;
+            }
+        }
+
+        /**
+         * STEP 3 — FILTER PREVIEW
+         */
+        elseif ($action === 'filter_preview') {
+
+            $filter = sanitize_text_field($_POST['mc_preview_filter']);
+            set_transient('mc_csv_preview_filter', $filter, 60 * 10);
+
+            // Reload matching preview
+            $matching_preview = get_transient('mc_csv_matched_rows');
+
+            // Hide CSV preview
+            $csv_preview = null;
+
+            if (!$matching_preview || !is_array($matching_preview)) {
+                $import_result = ['error' => 'Matching preview expired or missing. Please parse again.'];
+            }
+        }
+
+        /**
+         * STEP 4 — CONFIRM IMPORT
+         */
+        elseif ($action === 'confirm_import') {
+
+            $matched_rows = get_transient('mc_csv_matched_rows');
+
+            if (!$matched_rows || !is_array($matched_rows)) {
+                $import_result = ['error' => 'Matching preview expired or missing. Please parse again.'];
+            } else {
+
+                $imported = 0;
+                $matched  = 0;
+
+                foreach ($matched_rows as $row) {
+
+                    $product_id = intval($row['product_id']);
+
+                    if ($product_id > 0) {
+
+                        $priceDecimal = $row['csv']['basic_price'] / 100;
+
+                        $wpdb->insert(
+                            $wpdb->prefix . 'medi_reference_prices',
+                            [
+                                'product_id'   => $product_id,
+                                'type'         => 'drug_tariff',
+                                'price'        => $priceDecimal,
+                                'last_updated' => current_time('mysql'),
+                            ],
+                            ['%d','%s','%f','%s']
+                        );
+
+                        $matched++;
+                    }
+
+                    $imported++;
+                }
+
+                delete_transient('mc_csv_preview_rows');
+                delete_transient('mc_csv_matched_rows');
+                delete_transient('mc_csv_preview_filter');
+
+                $import_result = [
+                    'success'  => true,
+                    'message'  => sprintf(
+                        'Import completed successfully. %d rows processed. %d matched. %d unmatched.',
+                        $imported,
+                        $matched,
+                        $imported - $matched
+                    ),
+                    'imported' => $imported,
+                    'matched'  => $matched,
+                    'unmatched'=> $imported - $matched
+                ];
+                /**
+                 * ⭐ PERMANENT STORAGE FOR DASHBOARD
+                 */
+                update_option('mc_last_tariff_import', [
+                    'timestamp' => current_time('mysql'),
+                    'total'     => $imported,
+                    'matched'   => $matched,
+                    'unmatched' => $imported - $matched
+                ]);
+            }
+
+            // Hide previews
+            $csv_preview = null;
+            $matching_preview = null;
+        }
+    }
+
+    return [
+        'csv_preview'      => $csv_preview,
+        'matching_preview' => $matching_preview,
+        'import_result'    => $import_result
+    ];
+}
+
+
+
+
+/**
+ * Clawback Import Logic
+ */               
+    private function handle_clawback_import() {
+
+        global $wpdb;
+
+        $clawback_preview = get_transient('mc_clawback_preview');
+        $clawback_result  = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
 
             check_admin_referer('mc_reference_import_nonce');
-
             $action = sanitize_text_field($_POST['mc_reference_import_submit']);
 
-            /* ---------------------------------------------------------
-            MODE SELECTION
-            --------------------------------------------------------- */
-            if ($action === 'set_mode') {
+            /* STEP 1 — Generate Preview */
+            if ($action === 'generate_clawback') {
 
-                $new_mode = sanitize_text_field($_POST['mc_import_mode']);
-                $valid_modes = ['drug_tariff', 'concession', 'clawback', 'dmd'];
+                $rows = $wpdb->get_results("
+                    SELECT product_id, price
+                    FROM {$wpdb->prefix}medi_reference_prices
+                    WHERE type = 'drug_tariff'
+                    ORDER BY last_updated DESC
+                ");
 
-                if (in_array($new_mode, $valid_modes, true)) {
-                    update_option('mc_reference_import_mode', $new_mode);
-                    $import_mode = $new_mode;
-                    $result = ['success' => true, 'message' => 'Import mode updated.'];
-                } else {
-                    $result = ['error' => 'Invalid import mode selected.'];
+                $preview = [];
+
+                foreach ($rows as $r) {
+
+                    $dt = floatval($r->price);
+                    $cb = round($dt - ($dt * 0.20), 2);
+
+                    $preview[] = [
+                        'product_id'     => $r->product_id,
+                        'drug_tariff'    => $dt,
+                        'clawback_price' => $cb
+                    ];
                 }
+
+                set_transient('mc_clawback_preview', $preview, 60 * 10);
+                $clawback_preview = $preview;
             }
 
-            /* ---------------------------------------------------------
-            STEP 1 — UPLOAD CSV → RAW PREVIEW
-            --------------------------------------------------------- */
-            elseif ($action === 'upload_csv') {
+            /* STEP 2 — Confirm & Import */
+            elseif ($action === 'confirm_clawback') {
 
-                if (!empty($_FILES['mc_import_csv']['tmp_name'])) {
+                $preview = get_transient('mc_clawback_preview');
 
-                    $csv_path = $_FILES['mc_import_csv']['tmp_name'];
-
-                    // Parse CSV
-                    $csv_preview = mc_fetch_drug_tariff_rows_from_csv($csv_path);
-
-                    // Store preview rows
-                    set_transient('mc_csv_preview_rows', $csv_preview, 60 * 10);
-
-                } else {
-                    $result = ['error' => 'No CSV file uploaded.'];
-                }
-            }
-
-            /* ---------------------------------------------------------
-            STEP 2 — PARSE & MATCH → MATCHING PREVIEW
-            --------------------------------------------------------- */
-            elseif ($action === 'parse_match') {
-
-                $rows = get_transient('mc_csv_preview_rows');
-
-                if (!$rows || !is_array($rows)) {
-                    $result = ['error' => 'CSV preview expired or missing. Please upload again.'];
+                if (!$preview || !is_array($preview)) {
+                    $clawback_result = ['error' => 'Clawback preview expired. Please generate again.'];
                 } else {
 
-                    $matching_preview = [];
+                    $inserted = 0;
 
-                    foreach ($rows as $r) {
+                    foreach ($preview as $row) {
 
-                        // Perform matching WITH DM+D
-                        $match = mc_match_product_detailed(
-                            $r['drug_name'],
-                            $r['pack_size'],
-                            $r['form'],
-                            $r['vmp_code'],
-                            $r['vmpp_code']
+                        $wpdb->insert(
+                            $wpdb->prefix . 'medi_reference_prices',
+                            [
+                                'product_id'   => $row['product_id'],
+                                'type'         => 'clawback',
+                                'price'        => $row['clawback_price'],
+                                'last_updated' => current_time('mysql'),
+                            ],
+                            ['%d','%s','%f','%s']
                         );
 
-                        // Determine match source
-                        $match_source = 'Unmatched';
-
-                        if ($match['product_id'] > 0) {
-
-                            if (!empty($r['vmpp_code'])) {
-                                $vmpp_hit = mc_find_product_by_vmpp($r['vmpp_code']);
-                                if ($vmpp_hit == $match['product_id']) {
-                                    $match_source = 'DM+D (VMPP)';
-                                }
-                            }
-
-                            if ($match_source === 'Unmatched' && !empty($r['vmp_code'])) {
-                                $vmp_hit = mc_find_product_by_vmp($r['vmp_code']);
-                                if ($vmp_hit == $match['product_id']) {
-                                    $match_source = 'DM+D (VMP)';
-                                }
-                            }
-
-                            if ($match_source === 'Unmatched') {
-                                $match_source = 'Strict Normalisation';
-                            }
-                        }
-
-                        $matching_preview[] = [
-                            'csv'         => $r,
-                            'product_id'  => $match['product_id'],
-                            'product'     => [
-                                'name'      => $match['name'],
-                                'strength'  => $match['strength'],
-                                'form'      => $match['form'],
-                                'pack_size' => $match['pack_size'],
-                                'code'      => $match['code'],
-                            ],
-                            'match_source' => $match_source,
-                            'vmp_code'     => $r['vmp_code'],
-                            'vmpp_code'    => $r['vmpp_code'],
-                            'score'        => $match['score']
-                        ];
+                        $inserted++;
                     }
 
-                    // Store matched rows
-                    set_transient('mc_csv_matched_rows', $matching_preview, 60 * 10);
-                }
-            }
+                    delete_transient('mc_clawback_preview');
 
-            /* ---------------------------------------------------------
-            STEP 2B — FILTER MATCHING PREVIEW
-            --------------------------------------------------------- */
-            elseif ($action === 'filter_preview') {
-
-                // Save filter choice
-                $filter = sanitize_text_field($_POST['mc_preview_filter']);
-                set_transient('mc_csv_preview_filter', $filter, 60 * 10);
-
-                // Reload matched rows so filter has data
-                $matching_preview = get_transient('mc_csv_matched_rows');
-
-                if (!$matching_preview || !is_array($matching_preview)) {
-                    $result = ['error' => 'Matching preview expired or missing. Please parse again.'];
-                }
-            }
-
-            /* ---------------------------------------------------------
-            STEP 3 — CONFIRM & IMPORT → DB INSERT
-            --------------------------------------------------------- */
-            elseif ($action === 'confirm_import') {
-
-                $matched_rows = get_transient('mc_csv_matched_rows');
-
-                if (!$matched_rows || !is_array($matched_rows)) {
-                    $import_result = ['error' => 'Matching preview expired or missing. Please parse again.'];
-                } else {
-
-                    global $wpdb;
-
-                    $imported = 0;
-                    $matched  = 0;
-
-                    foreach ($matched_rows as $row) {
-
-                        $product_id = intval($row['product_id']);
-
-                        // Only insert matched rows
-                        if ($product_id > 0) {
-
-                            $priceDecimal = $row['csv']['basic_price'] / 100;
-
-                            $wpdb->insert(
-                                $wpdb->prefix . 'medi_reference_prices',
-                                [
-                                    'product_id'   => $product_id,
-                                    'type'         => $import_mode,
-                                    'price'        => $priceDecimal,
-                                    'last_updated' => current_time('mysql'),
-                                ],
-                                ['%d','%s','%f','%s']
-                            );
-
-                            $matched++;
-                        }
-
-                        $imported++;
-                    }
-
-                    // Clear transients
-                    delete_transient('mc_csv_preview_rows');
-                    delete_transient('mc_csv_matched_rows');
-                    delete_transient('mc_csv_preview_filter');
-
-                    $import_result = [
+                    $clawback_result = [
                         'success'  => true,
-                        'message'  => sprintf(
-                            'Import completed successfully. %d rows processed. %d matched. %d unmatched.',
-                            $imported,
-                            $matched,
-                            $imported - $matched
-                        ),
-                        'imported' => $imported,
-                        'matched'  => $matched,
-                        'unmatched'=> $imported - $matched
+                        'message'  => "Clawback import completed. {$inserted} rows inserted.",
+                        'inserted' => $inserted
                     ];
+
+                    /**
+                     * ⭐ PERMANENT STORAGE FOR DASHBOARD
+                     */
+                    update_option('mc_last_clawback_import', [
+                        'timestamp' => current_time('mysql'),
+                        'inserted' => $inserted
+                    ]);
+
+                    // Hide preview after import
+                    $clawback_preview = null;
                 }
             }
         }
 
-        include __DIR__ . '/admin-pages/reference-price-import.php';
+        return [
+            'clawback_preview' => $clawback_preview,
+            'clawback_result'  => $clawback_result
+        ];
     }
+
+
 
     /**
      * NEW — DITA MAP + TOPIC CRAWLER FOR DRUG TARIFF

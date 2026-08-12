@@ -452,6 +452,90 @@ class MediCompare_Admin_Dashboard_Widget {
             });
         </script>
 
+        <!-- THIRD ROW: DRUG TARIFF + CLAWBACK -->
+        <div class="mc-admin-dashboard-cards">
+
+            <!-- Drug Tariff Import Summary -->
+            <div class="mc-admin-card mc-admin-card-primary">
+                <div class="mc-admin-card-label">NHS Drug Tariff Import</div>
+
+                <?php 
+                 $tariff_summary = get_option('mc_last_tariff_import'); 
+                 $reference_prices_url = admin_url('admin.php?page=medicompare-reference-prices');
+                ?>
+
+                <?php if ($tariff_summary): ?>
+                    <div class="mc-admin-card-subtext" style="margin-bottom:10px;">
+                        <strong>Last Import:</strong>
+                        <?php echo esc_html($tariff_summary['timestamp']); ?>
+                    </div>
+
+                    <div class="mc-admin-card-subtext">
+                        <strong>Total Rows:</strong>
+                        <?php echo intval($tariff_summary['total']); ?>
+                    </div>
+
+                    <div class="mc-admin-card-subtext">
+                        <strong>Matched Rows:</strong>
+                        <?php echo intval($tariff_summary['matched']); ?>
+                    </div>
+
+                    <div class="mc-admin-card-subtext">
+                        <strong>Unmatched Rows:</strong>
+                        <?php echo intval($tariff_summary['unmatched']); ?>
+                    </div>
+
+                    <div class="mc-admin-card-subtext" style="margin-top:10px;">
+                        <a href="<?php echo esc_url($reference_prices_url); ?>" class="button button-secondary">
+                            View Reference Prices Table
+                        </a>
+                    </div>
+
+                <?php else: ?>
+                    <div class="mc-admin-card-subtext">
+                        No Drug Tariff import has been recorded yet.
+                    </div>
+                <?php endif; ?>
+
+            </div>
+
+
+            <!-- Clawback Import Summary -->
+            <div class="mc-admin-card mc-admin-card-green">
+                <div class="mc-admin-card-label">Clawback Import</div>
+
+                <?php 
+                $clawback_summary = get_option('mc_last_clawback_import');
+                $reference_prices_url = admin_url('admin.php?page=medicompare-reference-prices');
+                ?>
+
+                <?php if ($clawback_summary): ?>
+                    <div class="mc-admin-card-subtext" style="margin-bottom:10px;">
+                        <strong>Last Import:</strong>
+                        <?php echo esc_html($clawback_summary['timestamp']); ?>
+                    </div>
+
+                    <div class="mc-admin-card-subtext">
+                        <strong>Rows Inserted:</strong>
+                        <?php echo intval($clawback_summary['inserted']); ?>
+                    </div>
+
+                    <div class="mc-admin-card-subtext" style="margin-top:10px;">
+                        <a href="<?php echo esc_url($reference_prices_url); ?>" class="button button-secondary">
+                            View Reference Prices Table
+                        </a>
+                    </div>
+
+                <?php else: ?>
+                    <div class="mc-admin-card-subtext">
+                        No Clawback import has been recorded yet.
+                    </div>
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+
 <?php
     }
 }

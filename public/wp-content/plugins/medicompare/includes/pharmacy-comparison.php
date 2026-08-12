@@ -427,10 +427,10 @@ class MediCompare_Pharmacy_Comparison {
    }
 
 
-        /* ---------------------------------------------------------
+       /* ---------------------------------------------------------
         AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT
         - returns comparison table (cheapest first)
-    --------------------------------------------------------- */
+        --------------------------------------------------------- */
     public function ajax_get_product_suppliers() {
         check_ajax_referer('mc_comparison_nonce', 'nonce');
 
@@ -443,15 +443,24 @@ class MediCompare_Pharmacy_Comparison {
         global $wpdb;
 
         /* ---------------------------------------------------------
-        1️⃣ FETCH DRUG TARIFF PRICE FOR THIS PRODUCT
+        1️⃣ FETCH DRUG TARIFF PRICE
         --------------------------------------------------------- */
         $tariff_row = $wpdb->get_row($wpdb->prepare("
-            SELECT 
-                rp.price AS tariff_price,
-                rp.product_id
-            FROM {$wpdb->prefix}medi_reference_prices rp
-            WHERE rp.product_id = %d
-            AND rp.type = 'drug_tariff'
+            SELECT price AS tariff_price
+            FROM {$wpdb->prefix}medi_reference_prices
+            WHERE product_id = %d
+            AND type = 'drug_tariff'
+            LIMIT 1
+        ", $product_id), ARRAY_A);
+
+        /* ---------------------------------------------------------
+        1️⃣b FETCH CLAWBACK PRICE
+        --------------------------------------------------------- */
+        $clawback_row = $wpdb->get_row($wpdb->prepare("
+            SELECT price AS clawback_price
+            FROM {$wpdb->prefix}medi_reference_prices
+            WHERE product_id = %d
+            AND type = 'clawback'
             LIMIT 1
         ", $product_id), ARRAY_A);
 
@@ -498,14 +507,14 @@ class MediCompare_Pharmacy_Comparison {
         );
 
         /* ---------------------------------------------------------
-        3️⃣ IF NO SUPPLIERS AND NO TARIFF → RETURN EMPTY
+        3️⃣ IF NO SUPPLIERS → DO NOT SHOW TARIFF OR CLAWBACK
         --------------------------------------------------------- */
-        if (!$rows && !$tariff_row) {
-            wp_send_json_success(['html' => '<p>No supplier or tariff data found for this product.</p>']);
+        if (!$rows) {
+            wp_send_json_success(['html' => '<p>No suppliers found for this product.</p>']);
         }
 
         /* ---------------------------------------------------------
-        4️⃣ IF TARIFF FOUND → ADD AS A SUPPLIER-LIKE ROW
+        4️⃣ ADD DRUG TARIFF AS A PSEUDO-SUPPLIER (ONLY IF SUPPLIERS EXIST)
         --------------------------------------------------------- */
         if ($tariff_row) {
             $rows[] = [
@@ -519,12 +528,33 @@ class MediCompare_Pharmacy_Comparison {
                 'strength'            => null,
                 'pack_size'           => null,
                 'description'         => null,
-                'is_tariff'           => true
+                'is_tariff'           => true,
+                'is_clawback'         => false
             ];
         }
 
         /* ---------------------------------------------------------
-        5️⃣ SORT ALL ROWS BY PRICE (CHEAPEST FIRST)
+        4️⃣b ADD CLAWBACK AS A PSEUDO-SUPPLIER (ONLY IF SUPPLIERS EXIST)
+        --------------------------------------------------------- */
+        if ($clawback_row) {
+            $rows[] = [
+                'supplier_product_id' => 0,
+                'supplier_id'         => 0,
+                'product_id'          => $product_id,
+                'price'               => (float) $clawback_row['clawback_price'],
+                'stock'               => null,
+                'product_name'        => mc_get_full_product_label($product_id),
+                'supplier_name'       => 'Clawback',
+                'strength'            => null,
+                'pack_size'           => null,
+                'description'         => null,
+                'is_tariff'           => false,
+                'is_clawback'         => true
+            ];
+        }
+
+        /* ---------------------------------------------------------
+        5️⃣ SORT CHEAPEST FIRST
         --------------------------------------------------------- */
         usort($rows, function($a, $b) {
             return $a['price'] <=> $b['price'];
@@ -548,9 +578,10 @@ class MediCompare_Pharmacy_Comparison {
             <?php foreach ($rows as $row): ?>
 
                 <?php
-                $is_tariff = !empty($row['is_tariff']);
-                $row_class = $is_tariff ? 'mc-tariff-row' : 'mc-supplier-row';
-                $full_name = mc_get_full_product_label($row['product_id']);
+                $is_tariff   = !empty($row['is_tariff']);
+                $is_clawback = !empty($row['is_clawback']);
+                $row_class   = $is_tariff ? 'mc-tariff-row' : ($is_clawback ? 'mc-clawback-row' : 'mc-supplier-row');
+                $full_name   = mc_get_full_product_label($row['product_id']);
                 ?>
 
                 <tr class="<?php echo $row_class; ?>"
@@ -565,15 +596,17 @@ class MediCompare_Pharmacy_Comparison {
                         £<?php echo number_format((float) $row['price'], 2); ?>
                         <?php if ($is_tariff): ?>
                             <span class="mc-tariff-label">(Tariff)</span>
+                        <?php elseif ($is_clawback): ?>
+                            <span class="mc-clawback-label">(Clawback)</span>
                         <?php endif; ?>
                     </td>
 
                     <td>
-                        <?php echo $is_tariff ? '—' : (int) $row['stock']; ?>
+                        <?php echo ($is_tariff || $is_clawback) ? '—' : (int) $row['stock']; ?>
                     </td>
 
                     <td>
-                        <?php echo $is_tariff ? 'Drug Tariff' : esc_html($row['supplier_name']); ?>
+                        <?php echo esc_html($row['supplier_name']); ?>
                     </td>
 
                 </tr>
@@ -585,6 +618,7 @@ class MediCompare_Pharmacy_Comparison {
 
         wp_send_json_success(['html' => ob_get_clean()]);
     }
+
 
 
     /* ---------------------------------------------------------

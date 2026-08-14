@@ -1458,55 +1458,405 @@ function mc_build_label_for_matching($product_id) {
         }
     }
 
-        /**
-     * Parse HTML table from Concession email
-     * Expected columns:
-     *  - Medicine
-     *  - Pack Size
-     *  - Price concession (£x.xx)
-     */
-    function mc_parse_concession_email_html($html) {
+ /**
+ * Parse concession email body (HTML table OR plain text list)
+ *
+ * Expected return format:
+ * [
+ *   [
+ *     'drug_name' => 'Mirtazapine',
+ *     'pack_size' => '30',
+ *     'form'      => 'orodispersible tablets',
+ *     'price'     => 2.34,
+ *   ],
+ *   ...
+ * ]
+ */
+function mc_parse_concession_email_html($body) {
 
-        $rows = [];
+    $rows = [];
 
-        libxml_use_internal_errors(true);
-        $dom = new DOMDocument();
-        $dom->loadHTML($html);
-        libxml_clear_errors();
+    // Normalise encoding artefacts (Â£ etc.)
+    $body = str_replace(['Â£', 'Â '], ['£', ' '], $body);
 
-        $xpath = new DOMXPath($dom);
+    libxml_use_internal_errors(true);
 
-        // Find the first table
-        $table = $xpath->query('//table')->item(0);
-        if (!$table) return [];
+    $dom = new DOMDocument();
+    $loaded = $dom->loadHTML($body);
 
-        foreach ($table->getElementsByTagName('tr') as $tr) {
+    libxml_clear_errors();
 
-            $cells = $tr->getElementsByTagName('td');
-            if ($cells->length < 3) continue;
+    if (!$loaded) {
+        return [];
+    }
 
-            $drug_name = trim($cells->item(0)->textContent);
-            $pack_size = trim($cells->item(1)->textContent);
-            $price_raw = trim($cells->item(2)->textContent);
+    $xpath = new DOMXPath($dom);
 
-            if ($drug_name === '') continue;
+    // 1️⃣ Find the specific table that has the header: Drug | Pack size | Price concession
+    $tables = $xpath->query('//table');
+    $targetTable = null;
 
-            // Remove £ symbol
-            $price_clean = str_replace(['£', ' '], '', $price_raw);
+    foreach ($tables as $table) {
+        $headerCells = $xpath->query('.//tr[1]/td | .//tr[1]/th', $table);
 
-            // Convert to decimal (float)
-            $price_decimal = floatval($price_clean);
-
-            $rows[] = [
-                'drug_name' => $drug_name,
-                'pack_size' => intval($pack_size),
-                'form'      => '',
-                'price'     => $price_decimal   // already in pounds
-            ];
+        if ($headerCells->length < 3) {
+            continue;
         }
 
-        return $rows;
+        $h1 = trim($headerCells->item(0)->textContent);
+        $h2 = trim($headerCells->item(1)->textContent);
+        $h3 = trim($headerCells->item(2)->textContent);
+
+        if (
+            stripos($h1, 'Drug') !== false &&
+            stripos($h2, 'Pack size') !== false &&
+            stripos($h3, 'Price concession') !== false
+        ) {
+            $targetTable = $table;
+            break;
+        }
     }
+
+    if (!$targetTable) {
+        return [];
+    }
+
+    // 2️⃣ Parse all data rows from that table
+    $trNodes = $xpath->query('.//tr[position() > 1]', $targetTable);
+
+    foreach ($trNodes as $tr) {
+
+        $tds = $xpath->query('./td', $tr);
+        if ($tds->length < 3) {
+            continue;
+        }
+
+        $drug  = trim($tds->item(0)->textContent);
+        $pack  = trim($tds->item(1)->textContent);
+        $price = trim($tds->item(2)->textContent);
+
+        if ($drug === '' || $pack === '' || $price === '') {
+            continue;
+        }
+
+        // Extract numeric pack size
+        if (preg_match('/(\d+)/', $pack, $mPack)) {
+            $pack_size = $mPack[1];
+        } else {
+            $pack_size = $pack;
+        }
+
+        // Extract numeric price
+        if (preg_match('/([\d\.]+)/', $price, $mPrice)) {
+            $priceDecimal = (float)$mPrice[1];
+        } else {
+            $priceDecimal = 0.0;
+        }
+
+        // ✅ Keep full drug string as drug_name (no splitting)
+        $drug_name = $drug;
+
+        // Optional: if you still want a separate form, you can derive it later in matching
+        $form = '';
+
+        $rows[] = [
+            'drug_name' => $drug_name,   // e.g. "Mirtazapine 15mg orodispersible tablets"
+            'pack_size' => $pack_size,   // e.g. "30"
+            'form'      => $form,        // left blank for now
+            'price'     => $priceDecimal // e.g. 2.34
+        ];
+    }
+
+    return $rows;
+}
+
+
+
+
+/**
+ * Fallback parser for flattened text list:
+ * "Drug Pack size Price concession" followed by lines like:
+ * "Mirtazapine 15mg orodispersible tablets 30 £2.34"
+ */
+function mc_parse_concession_text_block($body) {
+
+    $lines = preg_split('/\R/u', $body);
+    $rows  = [];
+
+    $in_block = false;
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        // Start when we hit the header line
+        if (!$in_block && stripos($line, 'Drug') !== false && stripos($line, 'Pack size') !== false && stripos($line, 'Price concession') !== false) {
+            $in_block = true;
+            continue;
+        }
+
+        // Stop when we reach the next section
+        if ($in_block && (
+            stripos($line, 'The DHSC previously announced') === 0 ||
+            stripos($line, 'To date, this takes the total number') === 0
+        )) {
+            break;
+        }
+
+        if (!$in_block) {
+            continue;
+        }
+
+        // Expect pattern: <drug+form> <pack> £<price> [optional "(previously £x.xx)"]
+        // Example: "Mirtazapine 15mg orodispersible tablets 30 £2.34"
+        if (!preg_match('/^(.*?)\s+(\d+)\s+£\s*([\d\.]+)/u', $line, $m)) {
+            // Some lines may have no space between £ and number
+            if (!preg_match('/^(.*?)\s+(\d+)\s+£?([\d\.]+)/u', $line, $m)) {
+                continue;
+            }
+        }
+
+        $fullDrug = trim($m[1]);
+        $pack     = trim($m[2]);
+        $price    = trim($m[3]);
+
+        // Try to split form from drug name (best‑effort)
+        $knownForms = [
+            'tablets','capsules','cream','ointment','solution','suspension','drops',
+            'pessary','pessaries','patches','gum','granules'
+        ];
+
+        $form = '';
+        $drugName = $fullDrug;
+
+        foreach ($knownForms as $f) {
+            if (stripos($fullDrug, ' ' . $f) !== false) {
+                $pos = stripos($fullDrug, ' ' . $f);
+                $drugName = trim(substr($fullDrug, 0, $pos));
+                $form     = trim(substr($fullDrug, $pos + 1)); // include strength+form
+                break;
+            }
+        }
+
+        $rows[] = [
+            'drug_name' => $drugName,
+            'pack_size' => $pack,
+            'form'      => $form,
+            'price'     => mc_normalise_concession_price($price),
+        ];
+    }
+
+    return $rows;
+}
+
+/**
+ * Normalise price string like "£2.34" or "2.34" to decimal float
+ */
+function mc_normalise_concession_price($priceRaw) {
+
+    // Remove currency symbol and any text like "(previously £4.37)"
+    $priceRaw = preg_replace('/£/u', '', $priceRaw);
+    $priceRaw = preg_replace('/[^0-9\.]/', '', $priceRaw);
+
+    return (float) $priceRaw;
+}
+
+
+
+        /**
+     * Get Gmail access token from stored refresh token
+     */
+    function get_gmail_access_token() {
+
+        $client_id     = get_option('medicompare_gmail_client_id');
+        $client_secret = get_option('medicompare_gmail_client_secret');
+        $refresh_token = get_option('medicompare_gmail_refresh_token');
+
+        if (!$client_id || !$client_secret || !$refresh_token) {
+            return null;
+        }
+
+        $response = wp_remote_post('https://oauth2.googleapis.com/token', [
+            'body' => [
+                'client_id'     => $client_id,
+                'client_secret' => $client_secret,
+                'refresh_token' => $refresh_token,
+                'grant_type'    => 'refresh_token',
+            ],
+        ]);
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+
+        return !empty($body['access_token']) ? $body['access_token'] : null;
+    }
+
+
+    /**
+     * Perform a GET request to Gmail API
+     */
+    function gmail_api_get($endpoint, $params = []) {
+
+        $access_token = get_gmail_access_token();
+        if (!$access_token) {
+            return null;
+        }
+
+        $url = add_query_arg($params, 'https://gmail.googleapis.com/gmail/v1/users/me/' . ltrim($endpoint, '/'));
+
+        $response = wp_remote_get($url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $access_token,
+            ],
+        ]);
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        return json_decode(wp_remote_retrieve_body($response), true);
+    }
+
+
+        /**
+     * List Gmail messages with multi‑sender + subject fallback logic
+     */
+    function gmail_list_messages($query = '') {
+
+        // 1️⃣ Primary search (actual NHS sender)
+        $primary_queries = [
+            'from:ncs@nhsbsa.nhs.uk',
+            'from:noreply@cpe.org.uk'
+        ];
+
+        foreach ($primary_queries as $q) {
+            $result = gmail_api_get('messages', ['q' => $q]);
+            if (!empty($result['messages'])) {
+                return $result['messages'];
+            }
+        }
+
+        // 2️⃣ If developer passed a custom query, try that too
+        if (!empty($query)) {
+            $result = gmail_api_get('messages', ['q' => $query]);
+            if (!empty($result['messages'])) {
+                return $result['messages'];
+            }
+        }
+
+        // 3️⃣ Fallback: subject contains "Price Concessions"
+        $result = gmail_api_get('messages', ['q' => 'subject:"Price Concessions"']);
+        if (!empty($result['messages'])) {
+            return $result['messages'];
+        }
+
+        // 4️⃣ Fallback: subject contains "Concession"
+        $result = gmail_api_get('messages', ['q' => 'subject:Concession']);
+        if (!empty($result['messages'])) {
+            return $result['messages'];
+        }
+
+        // 5️⃣ Fallback: search all inbox messages
+        $result = gmail_api_get('messages', ['q' => 'label:INBOX']);
+        if (!empty($result['messages'])) {
+            return $result['messages'];
+        }
+
+        // 6️⃣ Nothing found
+        return [];
+    }
+
+
+
+    /**
+     * Fetch full Gmail message (needed for attachments)
+     */
+    function gmail_get_message($message_id) {
+
+        $result = gmail_api_get('messages/' . $message_id, ['format' => 'full']);
+
+        return $result ?: null;
+    }
+
+
+    /**
+     * Extract attachment from Gmail message
+     */
+    function gmail_get_attachment($message_id, $attachment_id) {
+
+        $result = gmail_api_get('messages/' . $message_id . '/attachments/' . $attachment_id);
+
+        if (empty($result['data'])) {
+            return null;
+        }
+
+        return base64_decode(strtr($result['data'], '-_', '+/'));
+    }
+
+     /**
+ * Recursively extract HTML body from Gmail message parts
+ * Supports base64, quoted-printable, nested multiparts
+ */
+function gmail_extract_html_recursive($parts) {
+
+    $best = '';
+    $best_len = 0;
+
+    foreach ($parts as $p) {
+
+        // Nested multiparts
+        if (!empty($p['parts'])) {
+            $html = gmail_extract_html_recursive($p['parts']);
+            if (strlen($html) > $best_len) {
+                $best = $html;
+                $best_len = strlen($html);
+            }
+        }
+
+        // HTML part
+        if (isset($p['mimeType']) && stripos($p['mimeType'], 'text/html') !== false) {
+
+            // Base64 encoded HTML
+            if (!empty($p['body']['data'])) {
+                $decoded = base64_decode(strtr($p['body']['data'], '-_', '+/'));
+            }
+
+            // Quoted-printable HTML
+            elseif (!empty($p['body']['attachmentId'])) {
+                $message_id = $_POST['mc_email_msgno'];
+                $raw = gmail_get_attachment($message_id, $p['body']['attachmentId']);
+                $decoded = quoted_printable_decode($raw);
+            }
+
+            else {
+                continue;
+            }
+
+            if (strlen($decoded) > $best_len) {
+                $best = $decoded;
+                $best_len = strlen($decoded);
+            }
+        }
+    }
+
+    return $best;
+}
+
+
+
+    //for debug only
+    function debug_log($label, $data) {
+        error_log("DEBUG [$label]: " . print_r($data, true));
+    }
+
+
+
+
 
 
 

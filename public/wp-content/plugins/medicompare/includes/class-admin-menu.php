@@ -579,10 +579,10 @@ class MediCompare_Admin_Menu {
         }
     }
 
-    /*---------------------------------------------------------
-      NEW PAGE FOR SHOWING REFERENCE NHS PRICES LIKE DRUG TARRIF/CLAWBACK AND CONCESSIONS TABLE
+        /*---------------------------------------------------------
+        NEW PAGE FOR SHOWING REFERENCE NHS PRICES LIKE DRUG TARRIF/CLAWBACK AND CONCESSIONS TABLE
     ----------------------------------------------------------*/
-        public function reference_prices_table_page() {
+    public function reference_prices_table_page() {
         global $wpdb;
 
         $table          = $wpdb->prefix . 'medi_reference_prices';
@@ -818,6 +818,7 @@ class MediCompare_Admin_Menu {
                     <tr>
                         <th>ID</th>
                         <th>Product</th>
+                        <th>Product ID</th>
                         <th>Type</th>
                         <th>Price (£)</th>
                         <th>Last Updated</th>
@@ -827,12 +828,18 @@ class MediCompare_Admin_Menu {
 
                 <tbody>
                     <?php if (empty($rows)): ?>
-                        <tr><td colspan="6">No reference prices found.</td></tr>
+                        <tr><td colspan="7">No reference prices found.</td></tr>
                     <?php else: ?>
                         <?php foreach ($rows as $r): ?>
                             <tr>
                                 <td><?php echo intval($r['id']); ?></td>
-                                <td><?php echo esc_html($r['product_name']); ?> (<?php echo intval($r['product_id']); ?>)</td>
+
+                                <!-- ⭐ FULL PRODUCT LABEL -->
+                                <td><?php echo esc_html(mc_get_full_product_label($r['product_id'])); ?></td>
+
+                                <!-- ⭐ PRODUCT ID AS SEPARATE COLUMN -->
+                                <td><?php echo intval($r['product_id']); ?></td>
+
                                 <td><?php echo esc_html(ucwords(str_replace('_',' ', $r['type']))); ?></td>
                                 <td>£<?php echo number_format((float)$r['price'], 2); ?></td>
                                 <td><?php echo esc_html($r['last_updated']); ?></td>
@@ -845,7 +852,6 @@ class MediCompare_Admin_Menu {
                     <?php endif; ?>
                 </tbody>
             </table>
-
 
             <!-- PAGINATION -->
             <div style="margin-top:20px;">
@@ -864,6 +870,7 @@ class MediCompare_Admin_Menu {
         </div>
         <?php
     }
+
 
    /**
     * The generation of supplier commission report
@@ -1220,57 +1227,6 @@ class MediCompare_Admin_Menu {
 
         wp_redirect(admin_url('admin.php?page=medicompare-gmail-oauth'));
         exit;
-    }
-
-        /**
-     * Fetch Gmail messages for Concession Import
-     */
-    public function gmail_list_messages($query = '') {
-
-        // Use helper to get access token
-        $access_token = get_gmail_access_token();
-        if (!$access_token) {
-            return ['error' => 'Gmail is not connected'];
-        }
-
-        // Build Gmail API endpoint
-        $endpoint = 'messages';
-
-        // Call helper to perform GET request
-        $result = gmail_api_get($endpoint, ['q' => $query]);
-
-        if (!$result || isset($result['error'])) {
-            return ['error' => 'Failed to fetch Gmail messages'];
-        }
-
-        return !empty($result['messages']) ? $result['messages'] : [];
-    }
-
-        /**
-     * Fetch full Gmail message (needed for attachments)
-     */
-    public function gmail_get_message($message_id) {
-
-        $access_token = get_gmail_access_token();
-        if (!$access_token) {
-            return null;
-        }
-
-        $endpoint = 'messages/' . $message_id;
-
-        $result = gmail_api_get($endpoint, ['format' => 'full']);
-
-        return $result ?: null;
-    }
-
-        /**
-     * Extract attachment from Gmail message
-     */
-    public function gmail_get_attachment($message_id, $attachment_id) {
-
-        $data = gmail_api_get_attachment($message_id, $attachment_id);
-
-        return $data ?: null;
     }
 
 
@@ -1694,202 +1650,245 @@ private function handle_drug_tariff_import() {
         ];
     }
 
+
+/**
+ * Concession Price Import Logic (Email → Parse → Match → Import)
+ */
+private function handle_concession_import() {
+
+    global $wpdb;
+
+    // Always reload current state
+    $concession_preview = get_transient('mc_concession_preview_rows');
+    $matching_preview   = get_transient('mc_concession_matched_rows');
+    $import_result      = null;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
+
+        check_admin_referer('mc_reference_import_nonce');
+        $action = sanitize_text_field($_POST['mc_reference_import_submit']);
+
         /**
-     * Concession Price Import Logic (Email → Parse → Match → Import)
-     */
-    private function handle_concession_import() {
+         * STEP 1 — FETCH EMAIL BODY (GMAIL API VERSION)
+         */
+        if ($action === 'fetch_email') {
 
-        global $wpdb;
+            $message_id = sanitize_text_field($_POST['mc_email_msgno']);
 
-        // Always reload current state
-        $concession_preview = get_transient('mc_concession_preview_rows');
-        $matching_preview   = get_transient('mc_concession_matched_rows');
-        $import_result      = null;
+            // Fetch full Gmail message
+            $full = gmail_get_message($message_id);
+            debug_log("FULL_GMAIL_MESSAGE", $full);
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mc_reference_import_submit'])) {
+            if (!$full) {
+                $import_result = ['error' => 'Unable to fetch Gmail message.'];
+            } else {
 
-            check_admin_referer('mc_reference_import_nonce');
-            $action = sanitize_text_field($_POST['mc_reference_import_submit']);
+                /**
+                 * ⭐ ALWAYS TRY RECURSIVE HTML FIRST
+                 * (This contains the real table — proven by your debug)
+                 */
+                $recursive_html = '';
+                if (!empty($full['payload']['parts'])) {
+                    $recursive_html = gmail_extract_html_recursive($full['payload']['parts']);
+                    debug_log("RECURSIVE_BODY_RESULT", substr($recursive_html, 0, 2000));
+                }
 
-            /**
-             * STEP 1 — FETCH EMAIL BODY (GMAIL API VERSION)
-             */
-            if ($action === 'fetch_email') {
+                /**
+                 * ⭐ Decode main body (usually just a summary)
+                 */
+                $body = '';
+                $body_data = $full['payload']['body']['data'] ?? null;
 
-                $message_id = sanitize_text_field($_POST['mc_email_msgno']);
+                debug_log("MAIN_BODY_DATA", $body_data);
 
-                // Fetch full Gmail message
-                $full = $this->gmail_get_message($message_id);
+                if ($body_data) {
+                    $body = base64_decode(strtr($body_data, '-_', '+/'));
+                    debug_log("MAIN_BODY_DECODED", substr($body, 0, 500));
+                }
 
-                if (!$full) {
-                    $import_result = ['error' => 'Unable to fetch Gmail message.'];
-                } else {
+                /**
+                 * ⭐ Choose the correct body:
+                 * If recursive HTML contains a <table>, ALWAYS use it.
+                 */
+                if (stripos($recursive_html, '<table') !== false) {
+                    $body = $recursive_html;
+                }
 
-                    // Find attachment part
+                /**
+                 * ⭐ ATTACHMENT THIRD — fallback
+                 */
+                if (!$body) {
+
                     $parts = $full['payload']['parts'] ?? [];
+                    debug_log("ATTACHMENT_SEARCH_PARTS", $parts);
+
                     $attachment_data = null;
 
                     foreach ($parts as $p) {
+                        debug_log("CHECKING_PART", $p);
 
                         if (!empty($p['filename']) && !empty($p['body']['attachmentId'])) {
-
-                            $attachment_id = $p['body']['attachmentId'];
-
-                            // Fetch attachment binary
-                            $attachment_data = $this->gmail_get_attachment($message_id, $attachment_id);
+                            debug_log("FOUND_ATTACHMENT_ID", $p['body']['attachmentId']);
+                            $attachment_id   = $p['body']['attachmentId'];
+                            $attachment_data = gmail_get_attachment($message_id, $attachment_id);
+                            debug_log("ATTACHMENT_DATA", substr($attachment_data, 0, 500));
                             break;
                         }
                     }
 
-                    if (!$attachment_data) {
-                        $import_result = ['error' => 'No attachment found in Gmail message.'];
-                    } else {
-
-                        // Convert attachment (CSV or HTML) to string
+                    if ($attachment_data) {
                         $body = $attachment_data;
+                    }
+                }
 
-                        // Parse HTML table from email
-                        $concession_preview = mc_parse_concession_email_html($body);
+                /**
+                 * ⭐ If still no body → fail
+                 */
+                if (!$body) {
+                    $import_result = ['error' => 'No readable email body or attachment found. Check debug logs.' ];
+                } else {
 
+                    debug_log("FINAL_BODY_BEFORE_PARSE", substr($body, 0, 2000));
+
+                    // Parse HTML table from email
+                    $concession_preview = mc_parse_concession_email_html($body);
+
+                    debug_log("PARSED_TABLE_ROWS", $concession_preview);
+
+                    if (empty($concession_preview)) {
+                        $import_result = ['error' => 'No concession table found in email body or attachment. Check debug logs.' ];
+                    } else {
                         set_transient('mc_concession_preview_rows', $concession_preview, 60 * 10);
-
-                        // Reset matching preview
                         delete_transient('mc_concession_matched_rows');
                         $matching_preview = null;
                     }
                 }
             }
+        }
 
-            /**
-             * STEP 2 — PARSE & MATCH
-             */
-            elseif ($action === 'parse_match') {
+        /**
+         * STEP 2 — PARSE & MATCH
+         */
+        elseif ($action === 'parse_match') {
 
-                $rows = get_transient('mc_concession_preview_rows');
+            $rows = get_transient('mc_concession_preview_rows');
 
-                if (!$rows || !is_array($rows)) {
-                    $import_result = ['error' => 'Email preview expired or missing. Please fetch again.'];
-                } else {
+            if (!$rows || !is_array($rows)) {
+                $import_result = ['error' => 'Email preview expired or missing. Please fetch again.'];
+            } else {
 
-                    $matching_preview = [];
+                $matching_preview = [];
 
-                    foreach ($rows as $r) {
+                foreach ($rows as $r) {
 
-                        // Concessions do not include VMP/VMPP codes
-                        $match = mc_match_product_detailed(
-                            $r['drug_name'],
-                            $r['pack_size'],
-                            $r['form'],
-                            '',
-                            ''
-                        );
+                    $match = mc_match_product_detailed(
+                        $r['drug_name'],
+                        $r['pack_size'],
+                        $r['form'],
+                        '',
+                        ''
+                    );
 
-                        $match_source = ($match['product_id'] > 0)
-                            ? 'Strict Normalisation'
-                            : 'Unmatched';
+                    $match_source = ($match['product_id'] > 0)
+                        ? 'Strict Normalisation'
+                        : 'Unmatched';
 
-                        $matching_preview[] = [
-                            'csv'         => $r,
-                            'product_id'  => $match['product_id'],
-                            'product'     => [
-                                'name'      => $match['name'],
-                                'strength'  => $match['strength'],
-                                'form'      => $match['form'],
-                                'pack_size' => $match['pack_size'],
-                                'code'      => $match['code'],
-                            ],
-                            'match_source' => $match_source,
-                            'score'        => $match['score']
-                        ];
-                    }
-
-                    set_transient('mc_concession_matched_rows', $matching_preview, 60 * 10);
-
-                    // Hide preview now
-                    $concession_preview = null;
-                }
-            }
-
-            /**
-             * STEP 3 — CONFIRM IMPORT
-             */
-            elseif ($action === 'confirm_import') {
-
-                $matched_rows = get_transient('mc_concession_matched_rows');
-
-                if (!$matched_rows || !is_array($matched_rows)) {
-                    $import_result = ['error' => 'Matching preview expired or missing. Please parse again.'];
-                } else {
-
-                    $imported = 0;
-                    $matched  = 0;
-
-                    foreach ($matched_rows as $row) {
-
-                        $product_id = intval($row['product_id']);
-
-                        if ($product_id > 0) {
-
-                            $priceDecimal = $row['csv']['price'];   // already in pounds
-
-                            $wpdb->insert(
-                                $wpdb->prefix . 'medi_reference_prices',
-                                [
-                                    'product_id'   => $product_id,
-                                    'type'         => 'concession',
-                                    'price'        => $priceDecimal,
-                                    'last_updated' => current_time('mysql'),
-                                ],
-                                ['%d','%s','%f','%s']
-                            );
-
-                            $matched++;
-                        }
-
-                        $imported++;
-                    }
-
-                    // Clear transients
-                    delete_transient('mc_concession_preview_rows');
-                    delete_transient('mc_concession_matched_rows');
-
-                    // Final result
-                    $import_result = [
-                        'success'  => true,
-                        'message'  => sprintf(
-                            'Concession import completed. %d rows processed. %d matched. %d unmatched.',
-                            $imported,
-                            $matched,
-                            $imported - $matched
-                        ),
-                        'imported' => $imported,
-                        'matched'  => $matched,
-                        'unmatched'=> $imported - $matched
+                    $matching_preview[] = [
+                        'csv'         => $r,
+                        'product_id'  => $match['product_id'],
+                        'product'     => [
+                            'name'      => $match['name'],
+                            'strength'  => $match['strength'],
+                            'form'      => $match['form'],
+                            'pack_size' => $match['pack_size'],
+                            'code'      => $match['code'],
+                        ],
+                        'match_source' => $match_source,
+                        'score'        => $match['score']
                     ];
-
-                    /**
-                     * ⭐ PERMANENT STORAGE FOR DASHBOARD
-                     */
-                    update_option('mc_last_concession_import', [
-                        'timestamp' => current_time('mysql'),
-                        'total'     => $imported,
-                        'matched'   => $matched,
-                        'unmatched' => $imported - $matched
-                    ]);
                 }
 
-                // Hide previews
+                set_transient('mc_concession_matched_rows', $matching_preview, 60 * 10);
+
                 $concession_preview = null;
-                $matching_preview   = null;
             }
         }
 
-        return [
-            'concession_preview' => $concession_preview,
-            'matching_preview'   => $matching_preview,
-            'import_result'      => $import_result
-        ];
+        /**
+         * STEP 3 — CONFIRM IMPORT
+         */
+        elseif ($action === 'confirm_import') {
+
+            $matched_rows = get_transient('mc_concession_matched_rows');
+
+            if (!$matched_rows || !is_array($matched_rows)) {
+                $import_result = ['error' => 'Matching preview expired or missing. Please parse again.'];
+            } else {
+
+                $imported = 0;
+                $matched  = 0;
+
+                foreach ($matched_rows as $row) {
+
+                    $product_id = intval($row['product_id']);
+
+                    if ($product_id > 0) {
+
+                        $priceDecimal = $row['csv']['price'];
+
+                        $wpdb->insert(
+                            $wpdb->prefix . 'medi_reference_prices',
+                            [
+                                'product_id'   => $product_id,
+                                'type'         => 'concession',
+                                'price'        => $priceDecimal,
+                                'last_updated' => current_time('mysql'),
+                            ],
+                            ['%d','%s','%f','%s']
+                        );
+
+                        $matched++;
+                    }
+
+                    $imported++;
+                }
+
+                delete_transient('mc_concession_preview_rows');
+                delete_transient('mc_concession_matched_rows');
+
+                $import_result = [
+                    'success'  => true,
+                    'message'  => sprintf(
+                        'Concession import completed. %d rows processed. %d matched. %d unmatched.',
+                        $imported,
+                        $matched,
+                        $imported - $matched
+                    ),
+                    'imported' => $imported,
+                    'matched'  => $matched,
+                    'unmatched'=> $imported - $matched
+                ];
+
+                update_option('mc_last_concession_import', [
+                    'timestamp' => current_time('mysql'),
+                    'total'     => $imported,
+                    'matched'   => $matched,
+                    'unmatched' => $imported - $matched
+                ]);
+            }
+
+            $concession_preview = null;
+            $matching_preview   = null;
+        }
     }
+
+    return [
+        'concession_preview' => $concession_preview,
+        'matching_preview'   => $matching_preview,
+        'import_result'      => $import_result
+    ];
+}
+
 
 
     /**

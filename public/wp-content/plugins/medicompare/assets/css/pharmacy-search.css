@@ -1861,6 +1861,28 @@ body.page-id-71 .mc-search-left {
     font-style: normal;
 }
 
+/* ---------------------------------------------------------
+   Concession Row Styling
+   --------------------------------------------------------- */
+
+.mc-concession-row {
+    background: #e8e8e8 !important;   /* slightly darker grey than tariff */
+    font-style: italic;               /* visually distinct */
+    color: #444 !important;           /* slightly darker muted text */
+}
+
+.mc-concession-row td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.mc-concession-label {
+    font-size: 11px;
+    color: #666;
+    margin-left: 4px;
+    font-style: normal;
+}
+
 
 
 

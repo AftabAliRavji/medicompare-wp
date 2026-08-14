@@ -426,96 +426,124 @@ class MediCompare_Pharmacy_Comparison {
     ]);
    }
 
+/* ---------------------------------------------------------
+    AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT
+    - returns comparison table (cheapest first)
+--------------------------------------------------------- */
+public function ajax_get_product_suppliers() {
+    check_ajax_referer('mc_comparison_nonce', 'nonce');
 
-       /* ---------------------------------------------------------
-        AJAX: GET SUPPLIERS FOR A SELECTED PRODUCT
-        - returns comparison table (cheapest first)
-        --------------------------------------------------------- */
-    public function ajax_get_product_suppliers() {
-        check_ajax_referer('mc_comparison_nonce', 'nonce');
+    $pharmacy_id = $this->get_current_pharmacy_id();
+    if (!$pharmacy_id) wp_send_json_error(['message' => 'Not authorised.']);
 
-        $pharmacy_id = $this->get_current_pharmacy_id();
-        if (!$pharmacy_id) wp_send_json_error(['message' => 'Not authorised.']);
+    $product_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
+    if ($product_id <= 0) wp_send_json_error(['message' => 'Invalid product.']);
 
-        $product_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
-        if ($product_id <= 0) wp_send_json_error(['message' => 'Invalid product.']);
+    global $wpdb;
 
-        global $wpdb;
+    /* ---------------------------------------------------------
+    1️⃣ FETCH REFERENCE PRICES
+    --------------------------------------------------------- */
+    $concession_row = $wpdb->get_row($wpdb->prepare("
+        SELECT price AS concession_price
+        FROM {$wpdb->prefix}medi_reference_prices
+        WHERE product_id = %d
+        AND type = 'concession'
+        ORDER BY last_updated DESC
+        LIMIT 1
+    ", $product_id), ARRAY_A);
 
-        /* ---------------------------------------------------------
-        1️⃣ FETCH DRUG TARIFF PRICE
-        --------------------------------------------------------- */
-        $tariff_row = $wpdb->get_row($wpdb->prepare("
-            SELECT price AS tariff_price
-            FROM {$wpdb->prefix}medi_reference_prices
-            WHERE product_id = %d
-            AND type = 'drug_tariff'
-            LIMIT 1
-        ", $product_id), ARRAY_A);
+    $tariff_row = $wpdb->get_row($wpdb->prepare("
+        SELECT price AS tariff_price
+        FROM {$wpdb->prefix}medi_reference_prices
+        WHERE product_id = %d
+        AND type = 'drug_tariff'
+        LIMIT 1
+    ", $product_id), ARRAY_A);
 
-        /* ---------------------------------------------------------
-        1️⃣b FETCH CLAWBACK PRICE
-        --------------------------------------------------------- */
-        $clawback_row = $wpdb->get_row($wpdb->prepare("
-            SELECT price AS clawback_price
-            FROM {$wpdb->prefix}medi_reference_prices
-            WHERE product_id = %d
-            AND type = 'clawback'
-            LIMIT 1
-        ", $product_id), ARRAY_A);
+    $clawback_row = $wpdb->get_row($wpdb->prepare("
+        SELECT price AS clawback_price
+        FROM {$wpdb->prefix}medi_reference_prices
+        WHERE product_id = %d
+        AND type = 'clawback'
+        LIMIT 1
+    ", $product_id), ARRAY_A);
 
-        /* ---------------------------------------------------------
-        2️⃣ FETCH SUPPLIER ROWS
-        --------------------------------------------------------- */
-        $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
-        $posts_table             = $wpdb->posts;
-        $postmeta_table          = $wpdb->postmeta;
+    /* ---------------------------------------------------------
+    2️⃣ FETCH SUPPLIER ROWS
+    --------------------------------------------------------- */
+    $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
+    $posts_table             = $wpdb->posts;
+    $postmeta_table          = $wpdb->postmeta;
 
-        $sql = "
-            SELECT
-                sp.id AS supplier_product_id,
-                sp.supplier_id,
-                sp.product_id,
-                sp.price,
-                sp.stock,
-                p.post_title AS product_name,
-                s.post_title AS supplier_name,
-                MAX(CASE WHEN pm.meta_key = 'mc_strength' THEN pm.meta_value END) AS strength,
-                MAX(CASE WHEN pm.meta_key = 'mc_pack_size' THEN pm.meta_value END) AS pack_size,
-                MAX(CASE WHEN pm.meta_key = 'mc_description' THEN pm.meta_value END) AS description
-            FROM {$supplier_products_table} sp
-            INNER JOIN {$posts_table} p 
-                ON p.ID = sp.product_id
-            LEFT JOIN {$postmeta_table} pm 
-                ON pm.post_id = sp.product_id
-            INNER JOIN {$posts_table} s 
-                ON s.ID = sp.supplier_id
-            INNER JOIN {$postmeta_table} sm
-                ON sm.post_id = sp.supplier_id
-                AND sm.meta_key = 'mc_supplier_status'
-                AND sm.meta_value = 'active'
-            WHERE p.post_type = 'mc_product'
-            AND p.post_status = 'publish'
-            AND sp.product_id = %d
-            GROUP BY sp.id
-            LIMIT 50
-        ";
+    $sql = "
+        SELECT
+            sp.id AS supplier_product_id,
+            sp.supplier_id,
+            sp.product_id,
+            sp.price,
+            sp.stock,
+            p.post_title AS product_name,
+            s.post_title AS supplier_name,
+            MAX(CASE WHEN pm.meta_key = 'mc_strength' THEN pm.meta_value END) AS strength,
+            MAX(CASE WHEN pm.meta_key = 'mc_pack_size' THEN pm.meta_value END) AS pack_size,
+            MAX(CASE WHEN pm.meta_key = 'mc_description' THEN pm.meta_value END) AS description
+        FROM {$supplier_products_table} sp
+        INNER JOIN {$posts_table} p 
+            ON p.ID = sp.product_id
+        LEFT JOIN {$postmeta_table} pm 
+            ON pm.post_id = sp.product_id
+        INNER JOIN {$posts_table} s 
+            ON s.ID = sp.supplier_id
+        INNER JOIN {$postmeta_table} sm
+            ON sm.post_id = sp.supplier_id
+            AND sm.meta_key = 'mc_supplier_status'
+            AND sm.meta_value = 'active'
+        WHERE p.post_type = 'mc_product'
+        AND p.post_status = 'publish'
+        AND sp.product_id = %d
+        GROUP BY sp.id
+        LIMIT 50
+    ";
 
-        $rows = $wpdb->get_results(
-            $wpdb->prepare($sql, $product_id),
-            ARRAY_A
-        );
+    $rows = $wpdb->get_results(
+        $wpdb->prepare($sql, $product_id),
+        ARRAY_A
+    );
 
-        /* ---------------------------------------------------------
-        3️⃣ IF NO SUPPLIERS → DO NOT SHOW TARIFF OR CLAWBACK
-        --------------------------------------------------------- */
-        if (!$rows) {
-            wp_send_json_success(['html' => '<p>No suppliers found for this product.</p>']);
-        }
+    /* ---------------------------------------------------------
+    3️⃣ IF NO SUPPLIERS → DO NOT SHOW TARIFF / CLAWBACK / CONCESSION
+    --------------------------------------------------------- */
+    if (!$rows) {
+        wp_send_json_success(['html' => '<p>No suppliers found for this product.</p>']);
+    }
 
-        /* ---------------------------------------------------------
-        4️⃣ ADD DRUG TARIFF AS A PSEUDO-SUPPLIER (ONLY IF SUPPLIERS EXIST)
-        --------------------------------------------------------- */
+    /* ---------------------------------------------------------
+    4️⃣ ADD CONCESSION / TARIFF / CLAWBACK AS PSEUDO-SUPPLIERS
+        - If concession exists → show ONLY concession
+        - Else → show tariff + clawback (as before)
+    --------------------------------------------------------- */
+
+    // 4a. Concession (highest priority, replaces tariff + clawback)
+    if ($concession_row) {
+        $rows[] = [
+            'supplier_product_id' => 0,
+            'supplier_id'         => 0,
+            'product_id'          => $product_id,
+            'price'               => (float) $concession_row['concession_price'],
+            'stock'               => null,
+            'product_name'        => mc_get_full_product_label($product_id),
+            'supplier_name'       => 'Concession',
+            'strength'            => null,
+            'pack_size'           => null,
+            'description'         => null,
+            'is_concession'       => true,
+            'is_tariff'           => false,
+            'is_clawback'         => false
+        ];
+    } else {
+
+        // 4b. Drug Tariff (only when NO concession)
         if ($tariff_row) {
             $rows[] = [
                 'supplier_product_id' => 0,
@@ -528,14 +556,13 @@ class MediCompare_Pharmacy_Comparison {
                 'strength'            => null,
                 'pack_size'           => null,
                 'description'         => null,
+                'is_concession'       => false,
                 'is_tariff'           => true,
                 'is_clawback'         => false
             ];
         }
 
-        /* ---------------------------------------------------------
-        4️⃣b ADD CLAWBACK AS A PSEUDO-SUPPLIER (ONLY IF SUPPLIERS EXIST)
-        --------------------------------------------------------- */
+        // 4c. Clawback (only when NO concession)
         if ($clawback_row) {
             $rows[] = [
                 'supplier_product_id' => 0,
@@ -548,79 +575,88 @@ class MediCompare_Pharmacy_Comparison {
                 'strength'            => null,
                 'pack_size'           => null,
                 'description'         => null,
+                'is_concession'       => false,
                 'is_tariff'           => false,
                 'is_clawback'         => true
             ];
         }
-
-        /* ---------------------------------------------------------
-        5️⃣ SORT CHEAPEST FIRST
-        --------------------------------------------------------- */
-        usort($rows, function($a, $b) {
-            return $a['price'] <=> $b['price'];
-        });
-
-        /* ---------------------------------------------------------
-        6️⃣ RENDER TABLE
-        --------------------------------------------------------- */
-        ob_start();
-        ?>
-        <table class="mc-search-results-table mc-supplier-comparison-table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Unit Price</th>
-                    <th>Stock</th>
-                    <th>Supplier</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($rows as $row): ?>
-
-                <?php
-                $is_tariff   = !empty($row['is_tariff']);
-                $is_clawback = !empty($row['is_clawback']);
-                $row_class   = $is_tariff ? 'mc-tariff-row' : ($is_clawback ? 'mc-clawback-row' : 'mc-supplier-row');
-                $full_name   = mc_get_full_product_label($row['product_id']);
-                ?>
-
-                <tr class="<?php echo $row_class; ?>"
-                    data-supplier-product-id="<?php echo esc_attr($row['supplier_product_id']); ?>"
-                    data-product-id="<?php echo esc_attr($row['product_id']); ?>"
-                    data-supplier-id="<?php echo esc_attr($row['supplier_id']); ?>"
-                    data-unit-price="<?php echo esc_attr($row['price']); ?>">
-
-                    <td><?php echo esc_html($full_name); ?></td>
-
-                    <td>
-                        £<?php echo number_format((float) $row['price'], 2); ?>
-                        <?php if ($is_tariff): ?>
-                            <span class="mc-tariff-label">(Tariff)</span>
-                        <?php elseif ($is_clawback): ?>
-                            <span class="mc-clawback-label">(Clawback)</span>
-                        <?php endif; ?>
-                    </td>
-
-                    <td>
-                        <?php echo ($is_tariff || $is_clawback) ? '—' : (int) $row['stock']; ?>
-                    </td>
-
-                    <td>
-                        <?php echo esc_html($row['supplier_name']); ?>
-                    </td>
-
-                </tr>
-
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-        <?php
-
-        wp_send_json_success(['html' => ob_get_clean()]);
     }
 
+    /* ---------------------------------------------------------
+    5️⃣ SORT CHEAPEST FIRST
+    --------------------------------------------------------- */
+    usort($rows, function($a, $b) {
+        return $a['price'] <=> $b['price'];
+    });
 
+    /* ---------------------------------------------------------
+    6️⃣ RENDER TABLE
+    --------------------------------------------------------- */
+    ob_start();
+    ?>
+    <table class="mc-search-results-table mc-supplier-comparison-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Unit Price</th>
+                <th>Stock</th>
+                <th>Supplier</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($rows as $row): ?>
 
+            <?php
+            $is_concession = !empty($row['is_concession']);
+            $is_tariff     = !empty($row['is_tariff']);
+            $is_clawback   = !empty($row['is_clawback']);
+
+            $row_class = $is_concession ? 'mc-concession-row'
+                        : ($is_tariff ? 'mc-tariff-row'
+                        : ($is_clawback ? 'mc-clawback-row'
+                        : 'mc-supplier-row'));
+
+            $full_name = mc_get_full_product_label($row['product_id']);
+            ?>
+
+            <tr class="<?php echo $row_class; ?>"
+                data-supplier-product-id="<?php echo esc_attr($row['supplier_product_id']); ?>"
+                data-product-id="<?php echo esc_attr($row['product_id']); ?>"
+                data-supplier-id="<?php echo esc_attr($row['supplier_id']); ?>"
+                data-unit-price="<?php echo esc_attr($row['price']); ?>">
+
+                <td><?php echo esc_html($full_name); ?></td>
+
+                <td>
+                    £<?php echo number_format((float) $row['price'], 2); ?>
+                    <?php if ($is_concession): ?>
+                        <span class="mc-concession-label">(Concession)</span>
+                    <?php elseif ($is_tariff): ?>
+                        <span class="mc-tariff-label">(Tariff)</span>
+                    <?php elseif ($is_clawback): ?>
+                        <span class="mc-clawback-label">(Clawback)</span>
+                    <?php endif; ?>
+                </td>
+
+                <td>
+                    <?php echo ($is_concession || $is_tariff || $is_clawback) ? '—' : (int) $row['stock']; ?>
+                </td>
+
+                <td>
+                    <?php echo esc_html($row['supplier_name']); ?>
+                </td>
+
+            </tr>
+
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php
+
+    wp_send_json_success(['html' => ob_get_clean()]);
+}
+
+      
     /* ---------------------------------------------------------
        AJAX: ADD ITEM TO PENDING ORDER
     --------------------------------------------------------- */

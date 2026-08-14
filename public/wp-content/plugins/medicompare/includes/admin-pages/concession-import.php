@@ -18,8 +18,7 @@
 <h2>Concession Email Inbox</h2>
 
 <?php
-// Fetch Gmail messages using your class method
-$messages = $this->gmail_list_messages('from:ncs@nhsbsa.nhs.uk'); // adjust query if needed
+$messages = gmail_list_messages('from:ncs@nhsbsa.nhs.uk');
 ?>
 
 <?php if (isset($messages['error'])): ?>
@@ -48,13 +47,11 @@ $messages = $this->gmail_list_messages('from:ncs@nhsbsa.nhs.uk'); // adjust quer
             <?php foreach ($messages as $msg): ?>
 
                 <?php
-                // Fetch full message to extract headers
-                $full = $this->gmail_get_message($msg['id']);
+                $full = gmail_get_message($msg['id']);
                 if (!$full) continue;
 
                 $headers = $full['payload']['headers'];
 
-                // Extract header fields
                 $date    = '';
                 $subject = '';
                 $from    = '';
@@ -140,6 +137,24 @@ $messages = $this->gmail_list_messages('from:ncs@nhsbsa.nhs.uk'); // adjust quer
     <h2>Matching Preview</h2>
     <p>Review how each concession row matches to MediCompare products.</p>
 
+    <?php
+    // ⭐ Load filter selection (default = all)
+    $filter = isset($_POST['mc_match_filter']) ? sanitize_text_field($_POST['mc_match_filter']) : 'all';
+    ?>
+
+    <form method="post" style="margin-bottom: 15px;">
+        <?php wp_nonce_field('mc_reference_import_nonce'); ?>
+        <input type="hidden" name="mc_import_mode" value="concession">
+        <input type="hidden" name="mc_reference_import_submit" value="parse_match">
+
+        <label for="mc_match_filter"><strong>Show:</strong></label>
+        <select name="mc_match_filter" id="mc_match_filter" onchange="this.form.submit()">
+            <option value="all"      <?php selected($filter, 'all'); ?>>All Rows</option>
+            <option value="matched"  <?php selected($filter, 'matched'); ?>>Matched Only</option>
+            <option value="unmatched"<?php selected($filter, 'unmatched'); ?>>Unmatched Only</option>
+        </select>
+    </form>
+
     <table class="widefat striped">
         <thead>
             <tr>
@@ -160,6 +175,15 @@ $messages = $this->gmail_list_messages('from:ncs@nhsbsa.nhs.uk'); // adjust quer
 
         <tbody>
             <?php foreach ($matching_preview as $row): ?>
+
+                <?php
+                // ⭐ Apply filter
+                $isMatched = ($row['product_id'] > 0);
+
+                if ($filter === 'matched' && !$isMatched) continue;
+                if ($filter === 'unmatched' && $isMatched) continue;
+                ?>
+
                 <tr>
                     <td><?php echo esc_html($row['csv']['drug_name']); ?></td>
                     <td><?php echo esc_html($row['csv']['pack_size']); ?></td>
@@ -174,13 +198,14 @@ $messages = $this->gmail_list_messages('from:ncs@nhsbsa.nhs.uk'); // adjust quer
                     <td><?php echo esc_html($row['match_source']); ?></td>
 
                     <td>
-                        <?php if ($row['product_id'] > 0): ?>
+                        <?php if ($isMatched): ?>
                             <span style="color:green;font-weight:bold;">Matched</span>
                         <?php else: ?>
                             <span style="color:red;font-weight:bold;">Unmatched</span>
                         <?php endif; ?>
                     </td>
                 </tr>
+
             <?php endforeach; ?>
         </tbody>
     </table>

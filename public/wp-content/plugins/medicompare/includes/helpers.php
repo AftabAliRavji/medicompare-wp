@@ -1386,47 +1386,130 @@ function mc_build_label_for_matching($product_id) {
 
 
 
- /**
- * Find product by DM+D VMPP code.
- */
-function mc_find_product_by_vmpp($vmpp_code)
-{
-    global $wpdb;
+    /**
+     * Find product by DM+D VMPP code.
+     */
+    function mc_find_product_by_vmpp($vmpp_code)
+    {
+        global $wpdb;
 
-    if (empty($vmpp_code)) return 0;
+        if (empty($vmpp_code)) return 0;
 
-    $product_id = $wpdb->get_var($wpdb->prepare(
-        "SELECT post_id 
-         FROM {$wpdb->postmeta}
-         WHERE meta_key = 'mc_dmd_vmpp'
-         AND meta_value = %s
-         LIMIT 1",
-        $vmpp_code
-    ));
+        $product_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id 
+            FROM {$wpdb->postmeta}
+            WHERE meta_key = 'mc_dmd_vmpp'
+            AND meta_value = %s
+            LIMIT 1",
+            $vmpp_code
+        ));
 
-    return intval($product_id);
-}
+        return intval($product_id);
+    }
 
-/**
- * Find product by DM+D VMP code.
- */
-function mc_find_product_by_vmp($vmp_code)
-{
-    global $wpdb;
+    /**
+     * Find product by DM+D VMP code.
+     */
+    function mc_find_product_by_vmp($vmp_code)
+    {
+        global $wpdb;
 
-    if (empty($vmp_code)) return 0;
+        if (empty($vmp_code)) return 0;
 
-    $product_id = $wpdb->get_var($wpdb->prepare(
-        "SELECT post_id 
-         FROM {$wpdb->postmeta}
-         WHERE meta_key = 'mc_dmd_vmp'
-         AND meta_value = %s
-         LIMIT 1",
-        $vmp_code
-    ));
+        $product_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id 
+            FROM {$wpdb->postmeta}
+            WHERE meta_key = 'mc_dmd_vmp'
+            AND meta_value = %s
+            LIMIT 1",
+            $vmp_code
+        ));
 
-    return intval($product_id);
-}
+        return intval($product_id);
+    }
+
+    /*------------------------------------------------
+    GET IMAP CONFIGURATION BASED ON ENVIRONMENT
+    -------------------------------------------------*/
+    function mc_get_imap_config() {
+        switch (MC_ENV) {
+            case 'development':
+                return [
+                    'host' => MC_IMAP_HOST_LOCAL,
+                    'port' => MC_IMAP_PORT_LOCAL,
+                    'user' => MC_IMAP_USER_LOCAL,
+                    'pass' => MC_IMAP_PASS_LOCAL,
+                ];
+            case 'test':
+                return [
+                    'host' => MC_IMAP_HOST_TEST,
+                    'port' => MC_IMAP_PORT_TEST,
+                    'user' => MC_IMAP_USER_TEST,
+                    'pass' => MC_IMAP_PASS_TEST,
+                ];
+            case 'production':
+            default:
+                return [
+                    'host' => MC_IMAP_HOST_PROD,
+                    'port' => MC_IMAP_PORT_PROD,
+                    'user' => MC_IMAP_USER_PROD,
+                    'pass' => MC_IMAP_PASS_PROD,
+                ];
+        }
+    }
+
+        /**
+     * Parse HTML table from Concession email
+     * Expected columns:
+     *  - Medicine
+     *  - Pack Size
+     *  - Price concession (£x.xx)
+     */
+    function mc_parse_concession_email_html($html) {
+
+        $rows = [];
+
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML($html);
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+
+        // Find the first table
+        $table = $xpath->query('//table')->item(0);
+        if (!$table) return [];
+
+        foreach ($table->getElementsByTagName('tr') as $tr) {
+
+            $cells = $tr->getElementsByTagName('td');
+            if ($cells->length < 3) continue;
+
+            $drug_name = trim($cells->item(0)->textContent);
+            $pack_size = trim($cells->item(1)->textContent);
+            $price_raw = trim($cells->item(2)->textContent);
+
+            if ($drug_name === '') continue;
+
+            // Remove £ symbol
+            $price_clean = str_replace(['£', ' '], '', $price_raw);
+
+            // Convert to decimal (float)
+            $price_decimal = floatval($price_clean);
+
+            $rows[] = [
+                'drug_name' => $drug_name,
+                'pack_size' => intval($pack_size),
+                'form'      => '',
+                'price'     => $price_decimal   // already in pounds
+            ];
+        }
+
+        return $rows;
+    }
+
+
+
 
 
 

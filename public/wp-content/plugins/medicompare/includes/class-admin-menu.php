@@ -3423,7 +3423,7 @@ public function transferred_orders_page() {
 
             <?php
             /* ---------------------------------------------------------
-               LOAD SUBSCRIPTION META FOR SELECTED PHARMACY
+            LOAD SUBSCRIPTION META FOR SELECTED PHARMACY
             --------------------------------------------------------- */
             $status          = get_post_meta($selected_id, '_mc_subscription_status', true);
             $trial_start     = get_post_meta($selected_id, '_mc_trial_start', true);
@@ -3437,7 +3437,7 @@ public function transferred_orders_page() {
 
             <hr>
 
-           <!-- SUBSCRIPTION DETAILS PANEL -->
+            <!-- SUBSCRIPTION DETAILS PANEL -->
             <h2>Subscription Details</h2>
 
             <div id="mc-subscription-details-table-wrapper">
@@ -3481,11 +3481,11 @@ public function transferred_orders_page() {
             <h2>Subscription Timeline</h2>
 
             <div id="mc-subscription-timeline"
-                 data-trial-start="<?php echo esc_attr($trial_start); ?>"
-                 data-trial-end="<?php echo esc_attr($trial_end); ?>"
-                 data-sub-start="<?php echo esc_attr($sub_start); ?>"
-                 data-sub-end="<?php echo esc_attr($sub_end); ?>"
-                 data-next-billing="<?php echo esc_attr($next_billing); ?>">
+                data-trial-start="<?php echo esc_attr($trial_start); ?>"
+                data-trial-end="<?php echo esc_attr($trial_end); ?>"
+                data-sub-start="<?php echo esc_attr($sub_start); ?>"
+                data-sub-end="<?php echo esc_attr($sub_end); ?>"
+                data-next-billing="<?php echo esc_attr($next_billing); ?>">
             </div>
 
             <hr>
@@ -3495,6 +3495,9 @@ public function transferred_orders_page() {
 
             <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="mc-subscription-edit-form">
                 <?php wp_nonce_field('mc_save_subscription_meta', 'mc_subscription_meta_nonce'); ?>
+
+                <!-- ⭐ REQUIRED FIX -->
+                <input type="hidden" name="action" value="mc_save_subscription_meta">
                 <input type="hidden" name="mc_pharmacy_id" value="<?php echo esc_attr($selected_id); ?>">
 
                 <table class="form-table">
@@ -3546,37 +3549,18 @@ public function transferred_orders_page() {
             <h2>Actions</h2>
 
             <div id="mc-subscription-actions"
-                 data-pharmacy="<?php echo esc_attr($selected_id); ?>">
+                data-pharmacy="<?php echo esc_attr($selected_id); ?>">
 
-                <button class="button"
-                    data-action="extend_trial_7">Extend Trial +7 Days</button>
-
-                <button class="button"
-                    data-action="extend_trial_30">Extend Trial +30 Days</button>
-
-                <button class="button"
-                    data-action="reset_trial">Reset Trial</button>
-
-                <button class="button"
-                    data-action="activate">Activate Subscription</button>
-
-                <button class="button"
-                    data-action="expire">Mark Expired</button>
-
-                <button class="button"
-                    data-action="past_due">Mark Past Due</button>
-
-                <button class="button"
-                    data-action="cancel">Cancel Subscription</button>
-
-                <button class="button"
-                    data-action="clear_billing">Clear Next Billing</button>
-
-                <button class="button"
-                    data-action="stripe_sync">Sync from Stripe</button>
-
-                <button class="button" 
-                   data-action="billing_history_sync">Sync Billing History</button>
+                <button class="button" data-action="extend_trial_7">Extend Trial +7 Days</button>
+                <button class="button" data-action="extend_trial_30">Extend Trial +30 Days</button>
+                <button class="button" data-action="reset_trial">Reset Trial</button>
+                <button class="button" data-action="activate">Activate Subscription</button>
+                <button class="button" data-action="expire">Mark Expired</button>
+                <button class="button" data-action="past_due">Mark Past Due</button>
+                <button class="button" data-action="cancel">Cancel Subscription</button>
+                <button class="button" data-action="clear_billing">Clear Next Billing</button>
+                <button class="button" data-action="stripe_sync">Sync from Stripe</button>
+                <button class="button" data-action="billing_history_sync">Sync Billing History</button>
 
             </div>
 
@@ -3598,20 +3582,27 @@ public function transferred_orders_page() {
         /* ---------------------------------------------------------
        SAVE SUBSCRIPTION META (FORM SUBMISSION)
     --------------------------------------------------------- */
-    public function save_subscription_meta() {
+        public function save_subscription_meta() {
 
+        // Must match the form nonce
         if (!isset($_POST['mc_subscription_meta_nonce']) ||
             !wp_verify_nonce($_POST['mc_subscription_meta_nonce'], 'mc_save_subscription_meta')) {
-            return;
+            wp_die('Invalid request (nonce failed).');
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die('Permission denied.');
         }
 
         if (!isset($_POST['mc_pharmacy_id'])) {
-            return;
+            wp_die('Missing pharmacy ID.');
         }
 
         $pid = intval($_POST['mc_pharmacy_id']);
 
-        // Convert dates to timestamps
+        /* ---------------------------------------------------------
+        SAVE DATE FIELDS (convert to timestamps)
+        --------------------------------------------------------- */
         $fields = [
             'trial_start' => '_mc_trial_start',
             'trial_end'   => '_mc_trial_end',
@@ -3621,23 +3612,29 @@ public function transferred_orders_page() {
         ];
 
         foreach ($fields as $form_key => $meta_key) {
+
             if (!empty($_POST[$form_key])) {
                 $ts = strtotime($_POST[$form_key] . ' 00:00:00');
                 update_post_meta($pid, $meta_key, $ts);
+            } else {
+                // If field cleared, remove it
+                delete_post_meta($pid, $meta_key);
             }
         }
 
-        // Status
+        /* ---------------------------------------------------------
+        SAVE STATUS
+        --------------------------------------------------------- */
         if (isset($_POST['status'])) {
             update_post_meta($pid, '_mc_subscription_status', sanitize_text_field($_POST['status']));
         }
 
-        // Redirect back to page
-        wp_redirect(add_query_arg([
-            'page'        => 'medicompare-subscriptions',
-            'pharmacy_id' => $pid,
-            'updated'     => '1'
-        ], admin_url('admin.php')));
+        /* ---------------------------------------------------------
+        REDIRECT BACK TO PAGE
+        --------------------------------------------------------- */
+        wp_redirect(
+            admin_url('admin.php?page=medicompare-subscriptions&pharmacy_id=' . $pid . '&updated=1')
+        );
         exit;
     }
 

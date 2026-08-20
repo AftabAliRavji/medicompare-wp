@@ -1883,6 +1883,120 @@ body.page-id-71 .mc-search-left {
     font-style: normal;
 }
 
+/* ---------------------------------------------
+    Rendered table to add product to pending order
+------------------------------------------------*/
+/* Selected item card wrapper */
+.mc-selected-card {
+    font-family: inherit;          /* match site font */
+    color: #333;                   /* match comparison table text */
+    margin-top: 15px;
+}
+
+/* Title */
+.mc-selected-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+/* Table styling to match comparison table */
+.mc-selected-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: inherit;
+    font-size: 14px;               /* match comparison table font size */
+    color: #333;
+}
+
+/* Table headers */
+.mc-selected-table th {
+    background: #f7f7f7;
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Table cells */
+.mc-selected-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    font-family: inherit;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Highlight values slightly */
+.mc-selected-value {
+    font-weight: 500;
+}
+
+/* Qty input */
+.mc-qty-input {
+    width: 60px;
+    padding: 4px 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+/* Buttons */
+.mc-selected-actions button {
+    font-size: 14px;
+    font-family: inherit;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+/*------------------------------------------------
+    Changing the hover icon to a hand
+-------------------------------------------------*/
+.mc-suggestion-item,
+.mc-product-row,
+.mc-supplier-row,
+.mc-concession-row,
+.mc-tariff-row,
+.mc-clawback-row {
+    cursor: pointer;
+    cursor: grab;        /* modern click-style cursor */
+}
+
+/*---------------------------
+ Search instructions
+ --------------------------*/
+.mc-search-instructions {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #444;
+}
+
+.mc-instructions-heading {
+    margin: 20px 0 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.mc-instruction-card {
+    background: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+
+
+
+
 
 
 

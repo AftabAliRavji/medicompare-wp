@@ -5,11 +5,15 @@ if (!defined('ABSPATH')) exit;
 class MediCompare_Pharmacy_Frontend {
 
     public function __construct() {
+
         add_shortcode('mc_pharmacy_dashboard', [$this, 'render_dashboard']);
         add_shortcode('mc_pharmacy_edit_details', [$this, 'render_edit_details']);
         add_shortcode('mc_pharmacy_search', [$this, 'render_search']);
         add_shortcode('mc_pharmacy_orders', [$this, 'render_orders_page']);
         add_shortcode('mc_pharmacy_subscription', [$this, 'render_subscription_page']);
+
+        // ⭐ NEW SHORTCODE
+        add_shortcode('mc_search_instructions', [$this, 'shortcode_search_instructions']);
 
         add_action('init', [$this, 'handle_edit_details_submit']);
         add_action('init', [$this, 'handle_support_form']);
@@ -124,6 +128,17 @@ class MediCompare_Pharmacy_Frontend {
                 return;
             }
         }
+
+        /* ---------------------------------------------------------
+        SHORTCODE: Search Instructions
+    --------------------------------------------------------- */
+    public function shortcode_search_instructions() {
+        $text = get_option('mc_search_instructions_text', '');
+        if (!$text) return '';
+
+        return '<div class="mc-search-instructions">' . wpautop($text) . '</div>';
+    }
+
 
     /* ---------------------------------------------------------
        DASHBOARD
@@ -812,6 +827,8 @@ public function render_search() {
                     <div id="mc-search-results" class="mc-search-results"></div>
 
                     <div id="mc-selected-item" class="mc-selected-item"></div>
+                    
+                    <?php echo do_shortcode('[mc_search_instructions]'); ?>
 
                 </div>
 

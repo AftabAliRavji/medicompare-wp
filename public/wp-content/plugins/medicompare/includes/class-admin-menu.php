@@ -22,6 +22,8 @@ class MediCompare_Admin_Menu {
 
     public function __construct() {
         add_action('admin_menu', [$this, 'register_menu']);
+        add_action('admin_init', [$this, 'register_settings']);
+
         add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
 
@@ -243,6 +245,27 @@ class MediCompare_Admin_Menu {
         [$this, 'dashboard_page'],
         'dashicons-clipboard',
         2
+    );
+
+        /* ---------------------------------------------------------
+    SETTINGS
+    --------------------------------------------------------- */
+    add_submenu_page(
+        'medicompare',
+        'Settings',
+        'Settings',
+        'manage_options',
+        'medicompare-settings',
+        [$this, 'settings_page']
+    );
+
+    add_submenu_page(
+        null, // hidden submenu
+        'Search Instructions',
+        'Search Instructions',
+        'manage_options',
+        'medicompare-search-instructions',
+        [$this, 'search_instructions_page']
     );
 
     add_submenu_page(
@@ -467,6 +490,259 @@ class MediCompare_Admin_Menu {
     );
 
 }
+
+   /*--------------------------------------------------------------
+    Settings for search instructions area
+    ---------------------------------------------------------------*/
+    public function register_settings() {
+
+        register_setting('mc_settings_group', 'mc_search_instructions_text');
+
+        add_settings_section(
+            'mc_search_instructions_section',
+            'Search Instructions',
+            function() {
+                echo '<p>Text shown under the product search box.</p>';
+            },
+            'medicompare-search-instructions'
+        );
+
+        add_settings_field(
+            'mc_search_instructions_field',
+            'Instructions Text',
+            function() {
+
+                $value = get_option('mc_search_instructions_text', '');
+
+                /* ---------------------------------------------------------
+                ADMIN NOTE (static)
+                --------------------------------------------------------- */
+                echo '
+                <div style="padding:12px; background:#fff8e1; border:1px solid #f0d98a; border-radius:6px; margin-bottom:20px;">
+                    <strong>Admin Note:</strong><br>
+                    You can upload images using the “Upload Image to MediCompare” button below.<br>
+                    Images will be stored in:<br>
+                    <code>/wp-content/plugins/medicompare/assets/img</code><br><br>
+                    To insert an image into a step, use:<br>
+                    <code>&lt;img src="/wp-content/plugins/medicompare/assets/img/your-image.png" style="max-width:100%; border-radius:6px;"&gt;</code>
+                </div>
+                ';
+
+                /* ---------------------------------------------------------
+                EXAMPLE TEMPLATE (HTML BLOCK SHOWN AS CODE)
+                --------------------------------------------------------- */
+                echo '
+                <div style="padding:12px; background:#eef7ff; border:1px solid #bcd9f5; border-radius:6px; margin-bottom:20px;">
+                    <strong>Example Template (copy into Editor):</strong><br><br>
+
+                    <pre style="
+                        background:#f7f7f7;
+                        border:1px solid #ddd;
+                        border-radius:6px;
+                        padding:10px;
+                        font-size:13px;
+                        overflow:auto;
+                    ">&lt;h3 class="mc-instructions-heading"&gt;How to Use Product Search&lt;/h3&gt;
+
+    &lt;div class="mc-instruction-card"&gt;
+        &lt;strong&gt;Step 1:&lt;/strong&gt; Type the concession line or product name into the search box.
+        &lt;br&gt;&lt;br&gt;
+        &lt;img src="/wp-content/plugins/medicompare/assets/img/search-box-example.png"
+            alt="Search box example"
+            style="max-width:100%; border-radius:6px;"&gt;
+    &lt;/div&gt;
+
+    &lt;div class="mc-instruction-card"&gt;
+        &lt;strong&gt;Step 2:&lt;/strong&gt; Click the correct concession or product from the results.
+        &lt;br&gt;&lt;br&gt;
+        &lt;img src="/wp-content/plugins/medicompare/assets/img/search-results-example.png"
+            alt="Search results example"
+            style="max-width:100%; border-radius:6px;"&gt;
+    &lt;/div&gt;
+
+    &lt;div class="mc-instruction-card"&gt;
+        &lt;strong&gt;Step 3:&lt;/strong&gt; Choose the supplier option you want.
+        &lt;br&gt;&lt;br&gt;
+        &lt;img src="/wp-content/plugins/medicompare/assets/img/supplier-options-example.png"
+            alt="Supplier options example"
+            style="max-width:100%; border-radius:6px;"&gt;
+    &lt;/div&gt;
+                    </pre>
+                </div>
+                ';
+
+                /* ---------------------------------------------------------
+                RICH TEXT EDITOR (blank if no saved content)
+                --------------------------------------------------------- */
+                echo '<h3>Editor</h3>';
+
+                wp_editor(
+                    $value,
+                    'mc_search_instructions_text',
+                    [
+                        'textarea_name' => 'mc_search_instructions_text',
+                        'media_buttons' => false,
+                        'teeny'         => false,
+                        'quicktags'     => true,
+                        'editor_height' => 250
+                    ]
+                );
+
+                /* ---------------------------------------------------------
+                IMAGE UPLOAD BUTTON
+                --------------------------------------------------------- */
+                ?>
+                <h3 style="margin-top:25px;">Upload Image to Instructions</h3>
+
+                <button type="button" class="button" id="mc-upload-instruction-image">
+                    Upload Image to MediCompare
+                </button>
+
+                <p class="description">
+                    Images will be stored in: <code>/wp-content/plugins/medicompare/assets/img</code>
+                </p>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+
+                    const uploadBtn = document.getElementById('mc-upload-instruction-image');
+
+                    uploadBtn.addEventListener('click', function () {
+
+                        const fileInput = document.createElement('input');
+                        fileInput.type = 'file';
+                        fileInput.accept = 'image/*';
+
+                        fileInput.onchange = async function () {
+                            const file = fileInput.files[0];
+                            if (!file) return;
+
+                            const formData = new FormData();
+                            formData.append('action', 'mc_upload_instruction_image');
+                            formData.append('mc_image', file);
+
+                            const response = await fetch(ajaxurl, {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                const url = result.url;
+
+                                if (typeof tinymce !== 'undefined') {
+                                    const editor = tinymce.get('mc_search_instructions_text');
+                                    if (editor) {
+                                        editor.insertContent('<img src="' + url + '" style="max-width:100%; border-radius:6px;">');
+                                    }
+                                }
+
+                                alert('Image uploaded and inserted!');
+                            } else {
+                                alert('Upload failed: ' + result.message);
+                            }
+                        };
+
+                        fileInput.click();
+                    });
+                });
+                </script>
+                <?php
+
+                /* ---------------------------------------------------------
+                LIVE PREVIEW
+                --------------------------------------------------------- */
+
+                echo '<h3 style="margin-top:30px;">Preview</h3>';
+                echo '<div id="mc-instructions-preview" style="
+                        border:1px solid #ddd;
+                        padding:15px;
+                        background:#fafafa;
+                        border-radius:6px;
+                        max-width:800px;
+                    ">';
+
+                echo wpautop($value);
+
+                echo '</div>';
+
+                ?>
+                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+
+                    const preview = document.getElementById('mc-instructions-preview');
+
+                    function getEditorContent() {
+                        if (typeof tinymce !== 'undefined') {
+                            const editor = tinymce.get('mc_search_instructions_text');
+                            if (editor && !editor.isHidden()) {
+                                return editor.getContent();
+                            }
+                        }
+                        const textarea = document.getElementById('mc_search_instructions_text');
+                        return textarea ? textarea.value : '';
+                    }
+
+                    function updatePreview() {
+                        preview.innerHTML = getEditorContent();
+                    }
+
+                    if (typeof tinymce !== 'undefined') {
+                        const editor = tinymce.get('mc_search_instructions_text');
+                        if (editor) {
+                            editor.on('keyup', updatePreview);
+                            editor.on('change', updatePreview);
+                            editor.on('paste', updatePreview);
+                        }
+                    }
+
+                    const textarea = document.getElementById('mc_search_instructions_text');
+                    if (textarea) {
+                        textarea.addEventListener('keyup', updatePreview);
+                        textarea.addEventListener('change', updatePreview);
+                        textarea.addEventListener('paste', updatePreview);
+                    }
+                });
+                </script>
+                <?php
+            },
+            'medicompare-search-instructions',
+            'mc_search_instructions_section'
+        );
+    }
+
+
+   public function settings_page() {
+    ?>
+    <div class="wrap">
+        <h1>MediCompare Settings</h1>
+
+        <h2 class="title">Search Instructions</h2>
+        <p>Click below to edit the instructions shown under the product search box.</p>
+
+        <a href="<?php echo admin_url('admin.php?page=medicompare-search-instructions'); ?>" class="button button-primary">
+            Edit Search Instructions
+        </a>
+    </div>
+    <?php
+   }
+
+   public function search_instructions_page() {
+        ?>
+        <div class="wrap">
+            <h1>Search Instructions</h1>
+
+            <form method="post" action="options.php">
+                <?php
+                    settings_fields('mc_settings_group');
+                    do_settings_sections('medicompare-search-instructions');
+                    submit_button('Save Instructions');
+                ?>
+            </form>
+        </div>
+        <?php
+   }
 
 
     public function dashboard_page() {
@@ -4165,6 +4441,58 @@ new MediCompare_Admin_Menu();
 
         wp_send_json_success(['message' => 'Updated']);
     }
+
+    /* ---------------------------------------------------------
+   AJAX: Upload Instruction Image to Plugin Folder
+--------------------------------------------------------- */
+    add_action('wp_ajax_mc_upload_instruction_image', function () {
+
+        // Only admins should upload images
+        if (!current_user_can('manage_options')) {
+            wp_send_json([
+                'success' => false,
+                'message' => 'Permission denied'
+            ]);
+        }
+
+        // Ensure file exists
+        if (!isset($_FILES['mc_image'])) {
+            wp_send_json([
+                'success' => false,
+                'message' => 'No file uploaded'
+            ]);
+        }
+
+        $file = $_FILES['mc_image'];
+
+        // Plugin image directory
+        $upload_dir = plugin_dir_path(__FILE__) . '../assets/img/';
+        $upload_url = plugin_dir_url(__FILE__) . '../assets/img/';
+
+        // Ensure directory exists
+        if (!file_exists($upload_dir)) {
+            wp_mkdir_p($upload_dir);
+        }
+
+        // Sanitize filename
+        $filename = sanitize_file_name($file['name']);
+        $target = $upload_dir . $filename;
+
+        // Move file
+        if (!move_uploaded_file($file['tmp_name'], $target)) {
+            wp_send_json([
+                'success' => false,
+                'message' => 'Failed to save file'
+            ]);
+        }
+
+        // Return URL for TinyMCE insertion
+        wp_send_json([
+            'success' => true,
+            'url' => $upload_url . $filename
+        ]);
+    });
+
 
 
 

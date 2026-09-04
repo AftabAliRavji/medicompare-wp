@@ -65,6 +65,8 @@ class MediCompare_Admin_Menu {
         //to handle gmail oauth call back
         add_action('admin_init', [$this, 'handle_gmail_oauth_callback']);
 
+        add_action('admin_init', [$this, 'register_redirect_settings']);
+
         add_action('admin_enqueue_scripts', function($hook){
          error_log("HOOK: " . $hook);
      });
@@ -491,6 +493,13 @@ class MediCompare_Admin_Menu {
 
 }
 
+    public function register_redirect_settings() {
+        register_setting('mc_redirect_settings_group', 'mc_enable_home_redirect');
+        register_setting('mc_redirect_settings_group', 'mc_enable_login_redirect');
+        register_setting('mc_redirect_settings_group', 'mc_enable_home_to_pharmacy_redirect');
+    }
+
+
    /*--------------------------------------------------------------
     Settings for search instructions area
     ---------------------------------------------------------------*/
@@ -713,20 +722,68 @@ class MediCompare_Admin_Menu {
     }
 
 
-   public function settings_page() {
-    ?>
-    <div class="wrap">
-        <h1>MediCompare Settings</h1>
+    public function settings_page() {
+        ?>
+        <div class="wrap">
+            <h1>MediCompare Settings</h1>
 
-        <h2 class="title">Search Instructions</h2>
-        <p>Click below to edit the instructions shown under the product search box.</p>
+            <h2 class="title">Search Instructions</h2>
+            <p>Click below to edit the instructions shown under the product search box.</p>
 
-        <a href="<?php echo admin_url('admin.php?page=medicompare-search-instructions'); ?>" class="button button-primary">
-            Edit Search Instructions
-        </a>
-    </div>
-    <?php
-   }
+            <a href="<?php echo admin_url('admin.php?page=medicompare-search-instructions'); ?>" class="button button-primary">
+                Edit Search Instructions
+            </a>
+
+            <hr><br>
+
+            <h2 class="title">Redirect Settings</h2>
+
+            <form method="post" action="options.php">
+                <?php settings_fields('mc_redirect_settings_group'); ?>
+
+                <table class="form-table">
+
+                    <tr>
+                        <th scope="row">Homepage → Welcome Signup</th>
+                        <td>
+                            <input type="checkbox"
+                                name="mc_enable_home_redirect"
+                                value="1"
+                                <?php checked(1, get_option('mc_enable_home_redirect')); ?> />
+                            <p class="description">Redirect homepage → /welcome-signup/</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">/pharmacy/login Redirect</th>
+                        <td>
+                            <input type="checkbox"
+                                name="mc_enable_login_redirect"
+                                value="1"
+                                <?php checked(1, get_option('mc_enable_login_redirect')); ?> />
+                            <p class="description">Redirect /pharmacy/login → /pharmacy/</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">Homepage → /pharmacy (legacy)</th>
+                        <td>
+                            <input type="checkbox"
+                                name="mc_enable_home_to_pharmacy_redirect"
+                                value="1"
+                                <?php checked(1, get_option('mc_enable_home_to_pharmacy_redirect')); ?> />
+                            <p class="description">Redirect homepage → /pharmacy (old behaviour)</p>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <?php submit_button('Save Redirect Settings'); ?>
+            </form>
+        </div>
+        <?php
+    }
+
 
    public function search_instructions_page() {
         ?>

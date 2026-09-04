@@ -146,14 +146,20 @@ add_action('template_redirect', function () {
 
     if (is_admin()) return;
 
-    if (is_page('pharmacy/login')) {
-        wp_redirect('/pharmacy/');
-        exit;
+    // ⭐ Toggle: Redirect /pharmacy/login → /pharmacy
+    if (get_option('mc_enable_login_redirect')) {
+        if (is_page('pharmacy/login')) {
+            wp_redirect('/pharmacy/');
+            exit;
+        }
     }
 
-    // Only redirect the homepage
-    if (is_front_page() || is_home()) {
-        wp_redirect(site_url('/pharmacy'));
-        exit;
+    // ⭐ Toggle: Redirect homepage → /pharmacy (legacy behaviour)
+    if (get_option('mc_enable_home_to_pharmacy_redirect')) {
+        if (is_front_page() || is_home()) {
+            wp_redirect(site_url('/pharmacy'));
+            exit;
+        }
     }
+
 });

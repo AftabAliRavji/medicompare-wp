@@ -27,7 +27,7 @@ class MediCompare {
         // ⭐ NEW: Auto-create Welcome Signup page
         register_activation_hook(__FILE__, [$this, 'create_welcome_signup_page']);
 
-        //make sure timezone is set properly
+        // Make sure timezone is set properly
         register_activation_hook(__FILE__, [$this,'mc_fix_timezone_on_activation']);
 
         // Load CPTs early
@@ -61,6 +61,25 @@ class MediCompare {
 
         // Requirements board
         require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
+
+        /**
+         * ⭐ TEMPORARY HOMEPAGE REDIRECT (toggle controlled)
+         * Works on LocalWP (nginx), InfinityFree (Apache), AWS/GCP (nginx)
+         */
+        add_action('template_redirect', function () {
+
+            // Only run if toggle is enabled
+            if (!get_option('mc_enable_home_redirect')) {
+                return;
+            }
+
+            // Only redirect homepage
+            if (is_front_page()) {
+                wp_redirect(home_url('/welcome-signup/'));
+                exit;
+            }
+
+        });
     }
 
     /**
@@ -84,10 +103,7 @@ class MediCompare {
      * Making sure timezone is set to europe/london 
      */
     function mc_fix_timezone_on_activation() {
-        // Force correct timezone
         update_option('timezone_string', 'Europe/London');
-
-        // Remove any conflicting GMT/UTC offset
         delete_option('gmt_offset');
     }
 

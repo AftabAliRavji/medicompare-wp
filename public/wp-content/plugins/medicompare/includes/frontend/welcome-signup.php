@@ -67,8 +67,8 @@ function mc_welcome_signup_shortcode() {
 
     ob_start();
     $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
-    $mc_video  = plugin_dir_url(__FILE__) . '../../assets/video/Demo_signUp.mp4';
-    $mc_poster = plugin_dir_url(__FILE__) . '../../assets/video/demo-poster.png';
+    // $mc_video  = plugin_dir_url(__FILE__) . '../../assets/video/Demo_signUp.mp4';
+    // $mc_poster = plugin_dir_url(__FILE__) . '../../assets/video/demo-poster.png';
     ?>
     <div class="mc-welcome-container">
 
@@ -89,35 +89,73 @@ function mc_welcome_signup_shortcode() {
             </p>
         </section>
 
-        <!-- ⭐ VIDEO + FORM SIDE-BY-SIDE -->
+        <!-- ⭐ FEATURES (LEFT) + FORM (RIGHT) -->
         <section class="mc-video-section">
 
             <div class="mc-video-grid">
 
-                <!-- LEFT: VIDEO -->
+                <!-- LEFT: FEATURES (moved up, same markup as before) -->
                 <div class="mc-video-container">
-                    <div class="mc-video-placeholder">
+                    <section class="mc-features">
+                        <h2 class="mc-card-title">What MediCompare Offers</h2>
 
-                        <video class="mc-video-iframe" controls poster="<?php echo $mc_poster; ?>" id="mcDemoVideo">
-                            <source src="<?php echo $mc_video; ?>" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
+                        <div class="mc-feature-grid">
 
-                        <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const vid = document.getElementById('mcDemoVideo');
-                            if (vid) {
-                                vid.addEventListener('ended', function() {
-                                    vid.currentTime = 0;   // ⭐ resets to start
-                                });
-                            }
-                        });
-                        </script>
+                            <div class="mc-feature-card">
+                                <h3>Instant Supplier Comparison</h3>
+                                <p>Search products and instantly compare prices, stock levels, and suppliers.</p>
+                                <div class="mc-feature-preview">
+                                    <div class="mc-feature-preview-box">
+                                        <span class="mc-preview-title">Search & Compare</span>
+                                        <div class="mc-preview-bar"></div>
+                                        <div class="mc-preview-lines">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    </div>
+                            <div class="mc-feature-card">
+                                <h3>Smart Ordering</h3>
+                                <p>Add items to your pending order and transfer them when ready.</p>
+                                <div class="mc-feature-preview">
+                                    <div class="mc-feature-preview-box">
+                                        <span class="mc-preview-title">Pending Order List</span>
+                                        <div class="mc-preview-lines">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mc-feature-card">
+                                <h3>Full Audit Trail</h3>
+                                <p>Track transferred orders by date, supplier, and product.</p>
+                                <div class="mc-feature-preview">
+                                    <div class="mc-feature-preview-box">
+                                        <span class="mc-preview-title">Transferred Orders</span>
+                                        <div class="mc-preview-table">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mc-feature-card mc-feature-card-autoheight">
+                                <h3>Mobile Friendly</h3>
+                                <p>Use MediCompare on any device — desktop, tablet, or mobile.</p>
+                                <div class="mc-feature-preview">
+                                    <div class="mc-feature-preview-box mc-preview-mobile">
+                                        <div class="mc-mobile-screen"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
                 </div>
 
-                <!-- RIGHT: FORM -->
+                <!-- RIGHT: FORM (unchanged) -->
                 <div class="mc-video-form">
 
                     <h2 class="mc-form-heading mc-card-title">Sign Up Interest</h2>
@@ -163,64 +201,7 @@ function mc_welcome_signup_shortcode() {
 
         </section>
 
-        <!-- FEATURES (unchanged) -->
-        <section class="mc-features">
-            <h2 class="mc-card-title">What MediCompare Offers</h2>
-
-            <div class="mc-feature-grid">
-
-                <div class="mc-feature-card">
-                    <h3>Instant Supplier Comparison</h3>
-                    <p>Search products and instantly compare prices, stock levels, and suppliers.</p>
-                    <div class="mc-feature-preview">
-                        <div class="mc-feature-preview-box">
-                            <span class="mc-preview-title">Search & Compare</span>
-                            <div class="mc-preview-bar"></div>
-                            <div class="mc-preview-lines">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mc-feature-card">
-                    <h3>Smart Ordering</h3>
-                    <p>Add items to your pending order and transfer them when ready.</p>
-                    <div class="mc-feature-preview">
-                        <div class="mc-feature-preview-box">
-                            <span class="mc-preview-title">Pending Order List</span>
-                            <div class="mc-preview-lines">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mc-feature-card">
-                    <h3>Full Audit Trail</h3>
-                    <p>Track transferred orders by date, supplier, and product.</p>
-                    <div class="mc-feature-preview">
-                        <div class="mc-feature-preview-box">
-                            <span class="mc-preview-title">Transferred Orders</span>
-                            <div class="mc-preview-table">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mc-feature-card mc-feature-card-autoheight">
-                    <h3>Mobile Friendly</h3>
-                    <p>Use MediCompare on any device — desktop, tablet, or mobile.</p>
-                    <div class="mc-feature-preview">
-                        <div class="mc-feature-preview-box mc-preview-mobile">
-                            <div class="mc-mobile-screen"></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
+        <!-- ORIGINAL BOTTOM FEATURES SECTION REMOVED (now shown above) -->
 
     </div>
     <?php

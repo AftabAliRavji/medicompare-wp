@@ -36,6 +36,41 @@ class MediCompare {
         // Register custom roles
         add_action('init', [$this, 'register_roles'], 2);
 
+        // ⭐ Register product category taxonomy (safe, additive, keeps meta)
+        add_action('init', [$this, 'register_product_category_taxonomy'], 3);
+
+        // ⭐ Ensure migration option exists
+        add_action('admin_init', function() {
+            if (get_option('mc_move_anti_inflammatory_to_generics') === false) {
+                add_option('mc_move_anti_inflammatory_to_generics', 'run');
+            }
+        });
+
+        // ⭐ One-time migration trigger
+        add_action('admin_init', function() {
+            if (get_option('mc_run_category_migration') !== 'done') {
+                $this->migrate_product_categories_to_taxonomy();
+                update_option('mc_run_category_migration', 'done');
+            }
+        });
+
+        // ⭐ One-time move Anti Inflammatory → Generics
+        add_action('admin_init', function() {
+            if (get_option('mc_move_anti_inflammatory_to_generics') === 'run') {
+
+                $this->move_anti_inflammatory_to_generics();
+
+                update_option('mc_move_anti_inflammatory_to_generics', 'done');
+            }
+        });
+
+        add_action('admin_init', [$this, 'ensure_search_instructions_page']);
+
+        add_filter('the_content', [$this, 'add_header_to_search_instructions']);
+
+        add_action('wp_footer', [$this, 'render_global_footer']);
+        
+
         // Load admin menu
         require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
 
@@ -62,6 +97,7 @@ class MediCompare {
         // Requirements board
         require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
 
+
         /**
          * ⭐ TEMPORARY HOMEPAGE REDIRECT (toggle controlled)
          * Works on LocalWP (nginx), InfinityFree (Apache), AWS/GCP (nginx)
@@ -81,6 +117,183 @@ class MediCompare {
 
         });
     }
+
+    public function register_product_category_taxonomy() {
+
+        error_log("TAXONOMY FIRED");
+
+        register_taxonomy(
+            'mc_product_category',
+            'mc_product',
+            [
+                'label' => 'Product Categories',
+                'hierarchical' => true,
+                'show_ui' => true,
+                'show_admin_column' => true,
+                'rewrite' => ['slug' => 'product-category'],
+            ]
+        );
+
+        $terms = [
+            'Concession Lines',
+            'Generics',
+            'Category A',
+            'Category M',
+            'OTC',
+            'POM',
+            'Topical',
+            'Analgesic'
+        ];
+
+        foreach ($terms as $term) {
+            if (!term_exists($term, 'mc_product_category')) {
+                wp_insert_term($term, 'mc_product_category');
+            }
+        }
+    }
+
+   /**
+    * ⭐ Migrate existing mc_category meta → taxonomy terms
+    */
+    public function migrate_product_categories_to_taxonomy() {
+
+        // Get all products
+        $products = get_posts([
+            'post_type'      => 'mc_product',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids'
+        ]);
+
+        foreach ($products as $post_id) {
+
+            $meta_category = get_post_meta($post_id, 'mc_category', true);
+
+            if (!$meta_category) {
+                continue;
+            }
+
+            // Ensure term exists
+            if (!term_exists($meta_category, 'mc_product_category')) {
+                wp_insert_term($meta_category, 'mc_product_category');
+            }
+
+            // Assign taxonomy term
+            wp_set_object_terms($post_id, $meta_category, 'mc_product_category', true);
+        }
+    }
+
+    /**
+     * ⭐ Move all Anti Inflammatory products → Generics
+     */
+    public function move_anti_inflammatory_to_generics() {
+
+        // Accept common variations
+        $variants = [
+            'Anti Inflammatory',
+            'Anti-Inflammatory',
+            'anti inflammatory',
+            'anti-inflammatory',
+            'AntiInflammatory'
+        ];
+
+        // Ensure Generics term exists
+        if (!term_exists('Generics', 'mc_product_category')) {
+            wp_insert_term('Generics', 'mc_product_category');
+        }
+
+        // Fetch all products matching any variant
+        $products = get_posts([
+            'post_type'      => 'mc_product',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'mc_category',
+                    'value'   => $variants,
+                    'compare' => 'IN'
+                ]
+            ]
+        ]);
+
+        if (empty($products)) {
+            error_log("No Anti Inflammatory products found.");
+            return;
+        }
+
+        foreach ($products as $post_id) {
+
+            // Update meta
+            update_post_meta($post_id, 'mc_category', 'Generics');
+
+            // Update taxonomy
+            wp_set_object_terms($post_id, 'Generics', 'mc_product_category', false);
+        }
+
+        error_log("Moved " . count($products) . " Anti Inflammatory products → Generics.");
+    }
+
+    /**
+     * ⭐ Auto-create Search Instructions page if missing
+     */
+    public function ensure_search_instructions_page() {
+
+        $page = get_page_by_path('search-instructions');
+
+        if (!$page) {
+            wp_insert_post([
+                'post_title'   => 'Search Instructions',
+                'post_name'    => 'search-instructions',
+                'post_content' => '[mc_search_instructions]',
+                'post_status'  => 'publish',
+                'post_type'    => 'page'
+            ]);
+        }
+    }
+
+   /**
+     * ⭐ Add pharmacy header to Search Instructions page content
+     */
+    public function add_header_to_search_instructions($content) {
+
+        if (!is_page('search-instructions')) {
+            return $content;
+        }
+
+        // Load header template output into a buffer
+        ob_start();
+
+        $mc_assets = plugin_dir_url(__FILE__) . 'assets/img/';
+        include plugin_dir_path(__FILE__) . 'templates/header-pharmacy.php';
+
+        $header_html = ob_get_clean();
+
+        // Prepend header to page content
+        return $header_html . $content;
+    }
+
+    /**
+     * ⭐ Global Footer Output
+     */
+    public function render_global_footer() {
+
+        // Only show on front-end
+        if (is_admin()) return;
+
+        echo '<div style="text-align:center; padding:20px; margin-top:40px; 
+                        font-size:14px; color:#666;">
+                <hr style="margin-bottom:20px;">
+                <strong>MediCompare</strong> &nbsp;|&nbsp; 
+                Version 0.2.1 &nbsp;|&nbsp; 
+                © ' . date('Y') . ' MediCompare Ltd
+                <br>
+                <a href="/search-instructions/">Search Instructions</a> &nbsp;|&nbsp;
+                <a href="/privacy-policy/">Privacy Policy</a> &nbsp;|&nbsp;
+                <a href="/terms/">Terms & Conditions</a>
+            </div>';
+    }
+
 
     /**
      * ⭐ Auto-create Welcome Signup Page

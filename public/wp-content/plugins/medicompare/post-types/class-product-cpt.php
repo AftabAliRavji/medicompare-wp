@@ -38,10 +38,14 @@ class MediCompare_Product_CPT {
             'labels'      => $labels,
             'public'      => false,
             'show_ui'     => true,
-            'show_in_menu'=> false,
+            'show_in_menu'=> true,
             'show_in_admin_bar' => true,
             'menu_icon'   => 'dashicons-pressthis',
             'supports'    => ['title'],
+
+            // ⭐ IMPORTANT: Attach taxonomy so it appears in admin
+            'taxonomies'  => ['mc_product_category'],
+
             'capability_type' => 'post',
             'map_meta_cap'    => true,
             'has_archive'     => false,
@@ -71,186 +75,240 @@ class MediCompare_Product_CPT {
     --------------------------------------------------------- */
     public function render_product_details_meta_box($post) {
 
-    // Load existing meta
-    $product_code = get_post_meta($post->ID, 'mc_product_code', true);
-    $category     = get_post_meta($post->ID, 'mc_category', true);
-    $strength     = get_post_meta($post->ID, 'mc_strength', true);
-    $pack_size    = get_post_meta($post->ID, 'mc_pack_size', true);
-    $description  = get_post_meta($post->ID, 'mc_description', true);
+        // Load existing meta
+        $product_code = get_post_meta($post->ID, 'mc_product_code', true);
+        $category     = get_post_meta($post->ID, 'mc_category', true);
+        $strength     = get_post_meta($post->ID, 'mc_strength', true);
+        $pack_size    = get_post_meta($post->ID, 'mc_pack_size', true);
+        $description  = get_post_meta($post->ID, 'mc_description', true);
 
-    // NEW DM+D fields
-    $dmd_vmp      = get_post_meta($post->ID, 'mc_dmd_vmp', true);
-    $dmd_vmpp     = get_post_meta($post->ID, 'mc_dmd_vmpp', true);
+        // NEW DM+D fields
+        $dmd_vmp      = get_post_meta($post->ID, 'mc_dmd_vmp', true);
+        $dmd_vmpp     = get_post_meta($post->ID, 'mc_dmd_vmpp', true);
 
-    wp_nonce_field('mc_save_product_details', 'mc_product_details_nonce');
-    ?>
+        wp_nonce_field('mc_save_product_details', 'mc_product_details_nonce');
+        ?>
 
-    <table class="form-table">
+        <table class="form-table">
 
-        <tr>
-            <th><label>Product Code</label></th>
-            <td>
-                <input type="text"
-                       name="mc_product_code"
-                       value="<?php echo esc_attr($product_code); ?>"
-                       class="regular-text"
-                       required>
+            <tr>
+                <th><label>Product Code</label></th>
+                <td>
+                    <input type="text"
+                           name="mc_product_code"
+                           value="<?php echo esc_attr($product_code); ?>"
+                           class="regular-text"
+                           required>
 
-                <?php if ($product_code): ?>
-                    <p class="description" style="color:#d63638;">
-                        Changing the product code may affect supplier product links.
-                    </p>
-                <?php else: ?>
-                    <p class="description">Enter a unique product code.</p>
-                <?php endif; ?>
-            </td>
-        </tr>
+                    <?php if ($product_code): ?>
+                        <p class="description" style="color:#d63638;">
+                            Changing the product code may affect supplier product links.
+                        </p>
+                    <?php else: ?>
+                        <p class="description">Enter a unique product code.</p>
+                    <?php endif; ?>
+                </td>
+            </tr>
 
-        <tr>
-            <th><label>Category</label></th>
-            <td>
-                <input type="text"
-                       name="mc_category"
-                       value="<?php echo esc_attr($category); ?>"
-                       class="regular-text">
-            </td>
-        </tr>
+            <tr>
+                <th><label>Category</label></th>
+                <td>
 
-        <tr>
-            <th><label>Strength</label></th>
-            <td>
-                <input type="text"
-                       name="mc_strength"
-                       value="<?php echo esc_attr($strength); ?>"
-                       class="regular-text">
-            </td>
-        </tr>
+                    <?php
+                    // Get existing taxonomy terms
+                    $terms = get_terms([
+                        'taxonomy'   => 'mc_product_category',
+                        'hide_empty' => false,
+                    ]);
+                    ?>
 
-        <tr>
-            <th><label>Pack Size</label></th>
-            <td>
-                <input type="text"
-                       name="mc_pack_size"
-                       value="<?php echo esc_attr($pack_size); ?>"
-                       class="regular-text">
-            </td>
-        </tr>
+                    <select name="mc_category_select" id="mc_category_select">
+                        <option value="">— Select Category —</option>
 
-        <tr>
-            <th><label>Description</label></th>
-            <td>
-                <textarea name="mc_description"
-                          rows="4"
-                          class="large-text"><?php echo esc_textarea($description); ?></textarea>
-            </td>
-        </tr>
+                        <?php foreach ($terms as $term): ?>
+                            <option value="<?php echo esc_attr($term->name); ?>"
+                                <?php selected($category, $term->name); ?>>
+                                <?php echo esc_html($term->name); ?>
+                            </option>
+                        <?php endforeach; ?>
 
-        <!-- ⭐ NEW DM+D FIELDS -->
-        <tr>
-            <th><label>DM+D VMP Code</label></th>
-            <td>
-                <input type="text"
-                       name="mc_dmd_vmp"
-                       value="<?php echo esc_attr($dmd_vmp); ?>"
-                       class="regular-text">
-                <p class="description">Optional. Virtual Medicinal Product (VMP) SNOMED code.</p>
-            </td>
-        </tr>
+                        <option value="__new__">+ Add New Category</option>
+                    </select>
 
-        <tr>
-            <th><label>DM+D VMPP Code</label></th>
-            <td>
-                <input type="text"
-                       name="mc_dmd_vmpp"
-                       value="<?php echo esc_attr($dmd_vmpp); ?>"
-                       class="regular-text">
-                <p class="description">Optional. Virtual Medicinal Product Pack (VMPP) SNOMED code.</p>
-            </td>
-        </tr>
+                    <br><br>
 
-    </table>
+                    <input type="text"
+                        name="mc_category"
+                        id="mc_category_input"
+                        value="<?php echo esc_attr($category); ?>"
+                        class="regular-text"
+                        placeholder="Enter new category"
+                        style="display: none;">
 
-    <?php
-}
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const select = document.getElementById('mc_category_select');
+                        const input  = document.getElementById('mc_category_input');
 
+                        function toggleInput() {
+                            if (select.value === '__new__') {
+                                input.style.display = 'block';
+                                input.value = '';
+                            } else {
+                                input.style.display = 'none';
+                                input.value = select.value;
+                            }
+                        }
+
+                        select.addEventListener('change', toggleInput);
+
+                        // Initial load
+                        toggleInput();
+                    });
+                    </script>
+
+                </td>
+            </tr>
+
+
+            <tr>
+                <th><label>Strength</label></th>
+                <td>
+                    <input type="text"
+                           name="mc_strength"
+                           value="<?php echo esc_attr($strength); ?>"
+                           class="regular-text">
+                </td>
+            </tr>
+
+            <tr>
+                <th><label>Pack Size</label></th>
+                <td>
+                    <input type="text"
+                           name="mc_pack_size"
+                           value="<?php echo esc_attr($pack_size); ?>"
+                           class="regular-text">
+                </td>
+            </tr>
+
+            <tr>
+                <th><label>Description</label></th>
+                <td>
+                    <textarea name="mc_description"
+                              rows="4"
+                              class="large-text"><?php echo esc_textarea($description); ?></textarea>
+                </td>
+            </tr>
+
+            <!-- ⭐ NEW DM+D FIELDS -->
+            <tr>
+                <th><label>DM+D VMP Code</label></th>
+                <td>
+                    <input type="text"
+                           name="mc_dmd_vmp"
+                           value="<?php echo esc_attr($dmd_vmp); ?>"
+                           class="regular-text">
+                    <p class="description">Optional. Virtual Medicinal Product (VMP) SNOMED code.</p>
+                </td>
+            </tr>
+
+            <tr>
+                <th><label>DM+D VMPP Code</label></th>
+                <td>
+                    <input type="text"
+                           name="mc_dmd_vmpp"
+                           value="<?php echo esc_attr($dmd_vmpp); ?>"
+                           class="regular-text">
+                    <p class="description">Optional. Virtual Medicinal Product Pack (VMPP) SNOMED code.</p>
+                </td>
+            </tr>
+
+        </table>
+
+        <?php
+    }
 
     /* ---------------------------------------------------------
        SAVE HANDLER
     --------------------------------------------------------- */
-   public function save_product_details($post_id) {
+    public function save_product_details($post_id) {
 
-    // Prevent recursion
-    if (defined('MC_SAVING_PRODUCT') && MC_SAVING_PRODUCT) {
-        return;
+        // Prevent recursion
+        if (defined('MC_SAVING_PRODUCT') && MC_SAVING_PRODUCT) {
+            return;
+        }
+
+        // Nonce check
+        if (!isset($_POST['mc_product_details_nonce']) ||
+            !wp_verify_nonce($_POST['mc_product_details_nonce'], 'mc_save_product_details')) {
+            return;
+        }
+
+        // Autosave / revisions / permissions
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        if (wp_is_post_revision($post_id)) return;
+        if (wp_is_post_autosave($post_id)) return;
+        if (!current_user_can('edit_post', $post_id)) return;
+
+        // Sanitize fields
+        $product_code = isset($_POST['mc_product_code']) ? sanitize_text_field($_POST['mc_product_code']) : '';
+        // Determine category from dropdown or new input
+        if (isset($_POST['mc_category_select']) && $_POST['mc_category_select'] !== '__new__') {
+            $category = sanitize_text_field($_POST['mc_category_select']);
+        } else {
+            $category = isset($_POST['mc_category']) ? sanitize_text_field($_POST['mc_category']) : '';
+        }
+        $strength     = isset($_POST['mc_strength']) ? sanitize_text_field($_POST['mc_strength']) : '';
+        $pack_size    = isset($_POST['mc_pack_size']) ? sanitize_text_field($_POST['mc_pack_size']) : '';
+        $description  = isset($_POST['mc_description']) ? sanitize_textarea_field($_POST['mc_description']) : '';
+
+        // NEW DM+D fields
+        $dmd_vmp      = isset($_POST['mc_dmd_vmp']) ? sanitize_text_field($_POST['mc_dmd_vmp']) : '';
+        $dmd_vmpp     = isset($_POST['mc_dmd_vmpp']) ? sanitize_text_field($_POST['mc_dmd_vmpp']) : '';
+
+        if ($product_code === '') {
+            return; // product code required
+        }
+
+        // Prevent duplicate product codes
+        $existing = get_posts([
+            'post_type'      => 'mc_product',
+            'post_status'    => 'any',
+            'meta_key'       => 'mc_product_code',
+            'meta_value'     => $product_code,
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+        ]);
+
+        if (!empty($existing) && $existing[0] != $post_id) {
+            wp_die('A product with this product code already exists.');
+        }
+
+        // Prevent recursion during wp_update_post()
+        define('MC_SAVING_PRODUCT', true);
+
+        // Ensure product is published
+        wp_update_post([
+            'ID'          => $post_id,
+            'post_status' => 'publish',
+            'post_author' => get_current_user_id(),
+            'post_name'   => sanitize_title($product_code),
+        ]);
+
+        // Save meta
+        update_post_meta($post_id, 'mc_product_code', $product_code);
+        update_post_meta($post_id, 'mc_category', $category);
+        update_post_meta($post_id, 'mc_strength', $strength);
+        update_post_meta($post_id, 'mc_pack_size', $pack_size);
+        update_post_meta($post_id, 'mc_description', $description);
+
+        // ⭐ NEW DM+D meta fields
+        update_post_meta($post_id, 'mc_dmd_vmp', $dmd_vmp);
+        update_post_meta($post_id, 'mc_dmd_vmpp', $dmd_vmpp);
+
+        // End recursion guard
+        define('MC_SAVING_PRODUCT', false);
     }
-
-    // Nonce check
-    if (!isset($_POST['mc_product_details_nonce']) ||
-        !wp_verify_nonce($_POST['mc_product_details_nonce'], 'mc_save_product_details')) {
-        return;
-    }
-
-    // Autosave / revisions / permissions
-    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-    if (wp_is_post_revision($post_id)) return;
-    if (wp_is_post_autosave($post_id)) return;
-    if (!current_user_can('edit_post', $post_id)) return;
-
-    // Sanitize fields
-    $product_code = isset($_POST['mc_product_code']) ? sanitize_text_field($_POST['mc_product_code']) : '';
-    $category     = isset($_POST['mc_category']) ? sanitize_text_field($_POST['mc_category']) : '';
-    $strength     = isset($_POST['mc_strength']) ? sanitize_text_field($_POST['mc_strength']) : '';
-    $pack_size    = isset($_POST['mc_pack_size']) ? sanitize_text_field($_POST['mc_pack_size']) : '';
-    $description  = isset($_POST['mc_description']) ? sanitize_textarea_field($_POST['mc_description']) : '';
-
-    // NEW DM+D fields
-    $dmd_vmp      = isset($_POST['mc_dmd_vmp']) ? sanitize_text_field($_POST['mc_dmd_vmp']) : '';
-    $dmd_vmpp     = isset($_POST['mc_dmd_vmpp']) ? sanitize_text_field($_POST['mc_dmd_vmpp']) : '';
-
-    if ($product_code === '') {
-        return; // product code required
-    }
-
-    // Prevent duplicate product codes
-    $existing = get_posts([
-        'post_type'      => 'mc_product',
-        'post_status'    => 'any',
-        'meta_key'       => 'mc_product_code',
-        'meta_value'     => $product_code,
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-    ]);
-
-    if (!empty($existing) && $existing[0] != $post_id) {
-        wp_die('A product with this product code already exists.');
-    }
-
-    // Prevent recursion during wp_update_post()
-    define('MC_SAVING_PRODUCT', true);
-
-    // Ensure product is published
-    wp_update_post([
-        'ID'          => $post_id,
-        'post_status' => 'publish',
-        'post_author' => get_current_user_id(),
-        'post_name'   => sanitize_title($product_code),
-    ]);
-
-    // Save meta
-    update_post_meta($post_id, 'mc_product_code', $product_code);
-    update_post_meta($post_id, 'mc_category', $category);
-    update_post_meta($post_id, 'mc_strength', $strength);
-    update_post_meta($post_id, 'mc_pack_size', $pack_size);
-    update_post_meta($post_id, 'mc_description', $description);
-
-    // ⭐ NEW DM+D meta fields
-    update_post_meta($post_id, 'mc_dmd_vmp', $dmd_vmp);
-    update_post_meta($post_id, 'mc_dmd_vmpp', $dmd_vmpp);
-
-    // End recursion guard
-    define('MC_SAVING_PRODUCT', false);
-}
-
 
     /* ---------------------------------------------------------
        ADMIN LIST COLUMNS
@@ -275,7 +333,6 @@ class MediCompare_Product_CPT {
 
         return $new;
     }
-
 
     public function render_product_columns($column, $post_id) {
 
@@ -311,7 +368,6 @@ class MediCompare_Product_CPT {
                 break;
         }
     }
-
 
     public function make_columns_sortable($columns) {
 

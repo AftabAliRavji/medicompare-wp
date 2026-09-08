@@ -827,8 +827,6 @@ public function render_search() {
                     <div id="mc-search-results" class="mc-search-results"></div>
 
                     <div id="mc-selected-item" class="mc-selected-item"></div>
-                    
-                    <?php echo do_shortcode('[mc_search_instructions]'); ?>
 
                 </div>
 

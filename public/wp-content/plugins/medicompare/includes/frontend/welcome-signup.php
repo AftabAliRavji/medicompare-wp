@@ -85,7 +85,7 @@ function mc_welcome_signup_shortcode() {
             <p>Your pharmacy’s smarter way to compare suppliers, reduce costs, and streamline ordering.</p>
 
             <p class="mc-hero-action">
-                Please complete the <strong>form on the right</strong> so our onboarding team can follow up with you regarding next steps.
+                Please complete the <strong>Sign up form</strong> so our onboarding team can follow up with you regarding next steps.
             </p>
         </section>
 

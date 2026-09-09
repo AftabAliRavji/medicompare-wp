@@ -120,6 +120,14 @@ add_action('wp_enqueue_scripts', function() {
         true
     );
 
+    wp_enqueue_script(
+        'mc-global-js',
+        plugin_dir_url(dirname(__FILE__, 2)) . 'assets/js/global.js',
+        [],
+        '1.0',
+        true
+    );
+
 });
 
 

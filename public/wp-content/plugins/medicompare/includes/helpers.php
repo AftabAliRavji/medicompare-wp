@@ -817,6 +817,101 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
         return trim($label);
     }
 
+    if (!defined('ABSPATH')) exit;
+
+    /* ---------------------------------------------------------
+    DISCOVER PANEL — Raw data provider (SQL)
+    --------------------------------------------------------- */
+
+    add_filter('mc_discover_products_data', function ($rows, $pharmacy_id) {
+
+        global $wpdb;
+
+        $rows = $wpdb->get_results("
+            SELECT 
+                p.ID AS product_id,
+                p.post_title AS name,
+                COALESCE(SUM(sp.stock), 0) AS total_stock
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->prefix}medi_supplier_products sp 
+                ON sp.product_id = p.ID
+            WHERE p.post_type = 'mc_product'
+            GROUP BY p.ID
+            ORDER BY p.post_title ASC
+        ", ARRAY_A);
+
+        return $rows;
+    }, 10, 2);
+
+    /* ---------------------------------------------------------
+    DISCOVER PANEL — Processed rows for frontend
+    --------------------------------------------------------- */
+
+    function mc_get_discover_products($pharmacy_id, $low_stock_threshold = 50) {
+
+        $raw_rows = apply_filters('mc_discover_products_data', [], $pharmacy_id);
+        if (empty($raw_rows)) return [];
+
+        $rows = [];
+
+        foreach ($raw_rows as $row) {
+
+            $product_id  = (int) $row['product_id'];
+            $total_stock = (int) $row['total_stock'];
+
+            // Build full product label using existing helper
+            $full_label = mc_get_full_product_label($product_id);
+
+            // Colour banding
+            if ($total_stock == 0) {
+                $band = 'red';
+            } elseif ($total_stock <= $low_stock_threshold) {
+                $band = 'yellow';
+            } else {
+                $band = 'green';
+            }
+
+            $rows[] = [
+                'product_id'  => $product_id,
+                'name'        => $full_label,
+                'total_stock' => $total_stock,
+                'band'        => $band,
+            ];
+        }
+
+        /* ---------------------------------------------------------
+        REMOVE DUPLICATES BY LABEL
+        (Keeps the first occurrence of each product name)
+        --------------------------------------------------------- */
+        $unique = [];
+        foreach ($rows as $row) {
+            // If label already exists, skip it
+            if (!isset($unique[$row['name']])) {
+                $unique[$row['name']] = $row;
+            }
+        }
+        $rows = array_values($unique);
+
+        /* ---------------------------------------------------------
+        SORT: yellow → green → red → alphabetical
+        --------------------------------------------------------- */
+        usort($rows, function ($a, $b) {
+            $order = ['yellow' => 0, 'green' => 1, 'red' => 2];
+
+            $ba = $order[$a['band']] ?? 99;
+            $bb = $order[$b['band']] ?? 99;
+
+            if ($ba === $bb) {
+                return strcasecmp($a['name'], $b['name']);
+            }
+
+            return $ba <=> $bb;
+        });
+
+        return $rows;
+    }
+
+
     /* ---------------------------------------------------------
    NORMALISE ANY NAME (tariff or product)
 --------------------------------------------------------- */

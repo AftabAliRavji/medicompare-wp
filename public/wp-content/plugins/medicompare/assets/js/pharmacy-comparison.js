@@ -548,6 +548,45 @@ jQuery(function ($) {
         }
     });
 
+   /* ---------------------------------------------------------
+   DISCOVER PANEL — Direct comparison bypass
+--------------------------------------------------------- */
+
+    jQuery(document).on('click', '.mc-discover-row', function () {
+
+        const band = jQuery(this).data('band');
+
+        // ❌ Block out-of-stock rows
+        if (band === 'red') {
+            return; // do nothing
+        }
+
+        const productId = jQuery(this).data('product-id');
+        const term      = jQuery(this).data('search');
+
+        // Populate search bar
+        jQuery('#mc-search-input').val(term);
+
+        // Call existing comparison endpoint using product_id
+        jQuery.post(mcComparison.ajaxUrl, {
+            action: 'mc_get_product_suppliers',
+            product_id: productId,
+            nonce: mcComparison.nonce
+        }).done(function(resp) {
+
+            if (!resp || !resp.success || !resp.data) {
+                jQuery('#mc-search-results').empty().removeClass('active');
+                return;
+            }
+
+            jQuery('#mc-search-results')
+                .html(resp.data.html || resp.data)
+                .addClass('active');
+
+            const top = jQuery('#mc-search-results').offset().top - 80;
+            window.scrollTo({ top, behavior: 'smooth' });
+        });
+    });
 
     /* ---------------------------------------------------------
        INITIAL LOAD

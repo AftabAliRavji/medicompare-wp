@@ -1993,6 +1993,174 @@ body.page-id-71 .mc-search-left {
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
+/* ---------------------------------------------------------
+   Discover Panel Intro
+--------------------------------------------------------- */
+
+.mc-discover-intro {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 600; /* semi-bold */
+    color: #374151;   /* slightly lighter than black */
+    display: flex;
+    align-items: center;
+    gap: 10px;        /* spacing between icon and text */
+}
+
+.mc-discover-intro::before {
+    content: "";
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    background-image: url('/wp-content/plugins/medicompare/assets/img/info-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.85; /* slight lightness */
+}
+
+
+/* ---------------------------------------------------------
+   Discover Panel
+--------------------------------------------------------- */
+
+.mc-discover-panel {
+    margin-top: 6px;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1px solid #e3e3e3;
+    background: #f9fafb;
+}
+
+.mc-discover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+}
+
+.mc-discover-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2933;
+}
+
+.mc-discover-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.mc-discover-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mc-discover-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.mc-discover-main {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.mc-discover-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+}
+
+.mc-discover-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-discover-action {
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.mc-stock-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Colour bands */
+.mc-stock-yellow {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.mc-stock-green {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.mc-stock-red {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Row background */
+.mc-discover-row.mc-stock-yellow { background: #fffbeb; }
+.mc-discover-row.mc-stock-green  { background: #f0fdf4; }
+.mc-discover-row.mc-stock-red    { background: #fef2f2; }
+
+.mc-discover-row:hover {
+    box-shadow: 0 0 6px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+}
+
+.mc-discover-scroll {
+    max-height: 350px;   /* fits ~10 items */
+    overflow-y: auto;
+    padding-right: 6px;  /* avoid scrollbar overlap */
+}
+
+/* Discover Panel scroll */
+.mc-discover-scroll {
+    max-height: 350px;   /* ~10 items */
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Out-of-stock rows look disabled */
+.mc-discover-row.mc-stock-red {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.mc-search-heading {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937; /* dark grey, not pure black */
+    margin-bottom: 12px;
+    display: block; /* ensures visibility even if theme hides h2 */
+}
+.entry-content .mc-search-left h2.mc-section-title,
+.entry-content .mc-search-left h2.mc-search-heading {
+    display: block !important;
+    font-size: 24px !important;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 12px;
+}
+
+
+
+
 
 
 

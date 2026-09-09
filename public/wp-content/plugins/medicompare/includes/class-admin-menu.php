@@ -506,6 +506,15 @@ class MediCompare_Admin_Menu {
     public function register_settings() {
 
         register_setting('mc_settings_group', 'mc_search_instructions_text');
+        register_setting(
+            'mc_redirect_settings_group',
+            'mc_low_stock_threshold',
+            [
+                'type'              => 'integer',
+                'sanitize_callback' => 'absint',
+                'default'           => 50,
+            ]
+        );
 
         add_settings_section(
             'mc_search_instructions_section',
@@ -730,13 +739,14 @@ class MediCompare_Admin_Menu {
             <h2 class="title">Search Instructions</h2>
             <p>Click below to edit the instructions shown under the product search box.</p>
 
-            <a href="<?php echo admin_url('admin.php?page=medicompare-search-instructions'); ?>" class="button button-primary">
+            <a href="<?php echo admin_url('admin.php?page=medicompare-search-instructions'); ?>" 
+            class="button button-primary">
                 Edit Search Instructions
             </a>
 
             <hr><br>
 
-            <h2 class="title">Redirect Settings</h2>
+            <h2 class="title">Redirect & Stock Settings</h2>
 
             <form method="post" action="options.php">
                 <?php settings_fields('mc_redirect_settings_group'); ?>
@@ -776,14 +786,30 @@ class MediCompare_Admin_Menu {
                         </td>
                     </tr>
 
+                    <!-- ⭐ NEW: LOW STOCK THRESHOLD -->
+                    <tr>
+                        <th scope="row">Low Stock Threshold</th>
+                        <td>
+                            <input type="number"
+                                name="mc_low_stock_threshold"
+                                value="<?php echo esc_attr(get_option('mc_low_stock_threshold', 50)); ?>"
+                                min="0"
+                                style="width: 80px;" />
+
+                            <p class="description">
+                                Products with stock below this number will be highlighted as low stock (yellow)
+                                in the Discover Panel.
+                            </p>
+                        </td>
+                    </tr>
+
                 </table>
 
-                <?php submit_button('Save Redirect Settings'); ?>
+                <?php submit_button('Save Settings'); ?>
             </form>
         </div>
         <?php
     }
-
 
    public function search_instructions_page() {
         ?>
@@ -2776,12 +2802,14 @@ private function handle_concession_import() {
         UPDATE META FIELDS
         --------------------------------------------------------- */
         update_post_meta($post_id, 'mc_product_code', $product_code);
-        update_post_meta($post_id, 'mc_category', sanitize_text_field($row['category']));
         update_post_meta($post_id, 'mc_strength', sanitize_text_field($row['strength']));
         update_post_meta($post_id, 'mc_pack_size', sanitize_text_field($row['pack_size']));
         update_post_meta($post_id, 'mc_description', sanitize_textarea_field($row['description']));
 
-        // ⭐ NEW DM+D fields
+        // Keep old meta (your choice)
+        update_post_meta($post_id, 'mc_category', sanitize_text_field($row['category']));
+
+        // DM+D fields (unchanged)
         if (!empty($row['dmd_vmp'])) {
             update_post_meta($post_id, 'mc_dmd_vmp', sanitize_text_field($row['dmd_vmp']));
         }
@@ -2790,8 +2818,32 @@ private function handle_concession_import() {
             update_post_meta($post_id, 'mc_dmd_vmpp', sanitize_text_field($row['dmd_vmpp']));
         }
 
+        /* ---------------------------------------------------------
+        TAXONOMY: Assign mc_product_category
+        --------------------------------------------------------- */
+        $raw_category = sanitize_text_field($row['category']);
+        $normalized_category = trim($raw_category);
+
+        if (!empty($normalized_category)) {
+
+            // Check if term exists
+            $term = term_exists($normalized_category, 'mc_product_category');
+
+            // Auto-create missing categories
+            if (!$term) {
+                $term = wp_insert_term($normalized_category, 'mc_product_category');
+            }
+
+            // Assign term to product
+            if (!is_wp_error($term)) {
+                $term_id = is_array($term) ? $term['term_id'] : $term;
+                wp_set_object_terms($post_id, intval($term_id), 'mc_product_category', false);
+            }
+        }
+
         return $status;
     }
+
 
     /* ---------------------------------------------------------
        INSERT / UPDATE PHARMACY

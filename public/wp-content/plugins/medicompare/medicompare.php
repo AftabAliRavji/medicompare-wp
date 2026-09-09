@@ -274,12 +274,14 @@ class MediCompare {
     }
 
     /**
-     * ⭐ Global Footer Output
-     */
+    * ⭐ Global Footer Output
+    */
     public function render_global_footer() {
 
-        // Only show on front-end
         if (is_admin()) return;
+
+        // Include global support modal
+        include WP_PLUGIN_DIR . '/medicompare/templates/support-modal.php';
 
         echo '<div style="text-align:center; padding:20px; margin-top:40px; 
                         font-size:14px; color:#666;">
@@ -290,7 +292,8 @@ class MediCompare {
                 <br>
                 <a href="/search-instructions/">Search Instructions</a> &nbsp;|&nbsp;
                 <a href="/privacy-policy/">Privacy Policy</a> &nbsp;|&nbsp;
-                <a href="/terms/">Terms & Conditions</a>
+                <a href="/terms/">Terms & Conditions</a> &nbsp;|&nbsp;
+                <a href="javascript:void(0);" onclick="mcOpenSupportModal();">Contact Support</a>
             </div>';
     }
 

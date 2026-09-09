@@ -294,89 +294,7 @@ public function render_dashboard() {
 
         </div><!-- end .mc-dashboard-grid -->
 
-        <!-- SUPPORT MODAL -->
-        <div id="mc-support-modal" class="mc-modal">
-            <div class="mc-modal-content">
-                <span class="mc-modal-close" onclick="mcCloseSupportModal();">&times;</span>
-
-                <h2 class="mc-card-title">Contact Support</h2>
-
-                <form method="post">
-                    <?php wp_nonce_field('mc_support_form', 'mc_support_form_nonce'); ?>
-
-                    <p>
-                        <label>Your Message</label><br>
-                        <textarea name="mc_support_message" required></textarea>
-                    </p>
-
-                    <p>
-                        <button type="submit" name="mc_support_submit">Send Message</button>
-                    </p>
-                </form>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- SUCCESS TOAST -->
-    <div id="mc-toast" class="mc-toast">Message sent successfully</div>
-
-    <script>
-        /* ------------------------------
-           OPEN / CLOSE SUPPORT MODAL
-        ------------------------------ */
-        function mcOpenSupportModal() {
-            document.getElementById('mc-support-modal').style.display = 'flex';
-        }
-
-        function mcCloseSupportModal() {
-            document.getElementById('mc-support-modal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('mc-support-modal');
-            if (event.target === modal) {
-                mcCloseSupportModal();
-            }
-        }
-
-        /* ------------------------------
-           TOAST NOTIFICATION
-        ------------------------------ */
-        function mcShowToast() {
-            const toast = document.getElementById('mc-toast');
-            toast.classList.add('mc-toast-show');
-
-            setTimeout(() => {
-                toast.classList.remove('mc-toast-show');
-            }, 3800);
-        }
-
-        /* ------------------------------
-           INTERCEPT SUPPORT FORM SUBMIT
-        ------------------------------ */
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('#mc-support-modal form');
-
-            if (form) {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-
-                    mcCloseSupportModal();
-                    mcShowToast();
-
-                    const formData = new FormData(form);
-
-                    fetch("", {
-                        method: "POST",
-                        body: formData
-                    }).then(() => {
-                        console.log("Support message sent via AJAX");
-                    });
-                });
-            }
-        });
-    </script>
+       <?php include WP_PLUGIN_DIR . '/medicompare/templates/support-modal.php'; ?>
     
     <button id="mc-back-to-top">↑ Back to Top</button>
     
@@ -677,39 +595,39 @@ public function handle_edit_details_submit() {
 }
 
 
-/* -----------------------------------------------
-  SUPPORT HANDLER TO SEND TO FORM AS AN EMAIL
--------------------------------------------------*/
-public function handle_support_form() {
+    /* -----------------------------------------------
+    SUPPORT HANDLER TO SEND TO FORM AS AN EMAIL
+    -------------------------------------------------*/
+    public function handle_support_form() {
 
-    if (!isset($_POST['mc_support_submit'])) {
-        return;
+        if (!isset($_POST['mc_support_submit'])) {
+            return;
+        }
+
+        if (
+            !isset($_POST['mc_support_form_nonce']) ||
+            !wp_verify_nonce($_POST['mc_support_form_nonce'], 'mc_support_form')
+        ) {
+            return;
+        }
+
+        if (!is_user_logged_in()) return;
+
+        $user = wp_get_current_user();
+        $message = sanitize_textarea_field($_POST['mc_support_message']);
+
+        // Send email to support
+        wp_mail(
+            'support@medicompare.local',
+            'Support Request from ' . $user->user_email,
+            "User: " . $user->user_email . "\n\nMessage:\n" . $message
+        );
+
+        // ⭐ Redirect back to the page where the form was submitted
+        $current_url = home_url($_SERVER['REQUEST_URI']);
+        wp_redirect(add_query_arg('support_sent', '1', $current_url));
+        exit;
     }
-
-    if (
-        !isset($_POST['mc_support_form_nonce']) ||
-        !wp_verify_nonce($_POST['mc_support_form_nonce'], 'mc_support_form')
-    ) {
-        return;
-    }
-
-    if (!is_user_logged_in()) return;
-
-    $user = wp_get_current_user();
-    $message = sanitize_textarea_field($_POST['mc_support_message']);
-
-    // Send email to support
-    wp_mail(
-        'support@medicompare.local',
-        'Support Request from ' . $user->user_email,
-        "User: " . $user->user_email . "\n\nMessage:\n" . $message
-    );
-
-    // Redirect with success flag
-    wp_redirect(add_query_arg('support_sent', '1', site_url('/pharmacy/dashboard/')));
-    exit;
-}
-
 
 
  /* ---------------------------------------------------------
@@ -817,16 +735,68 @@ public function render_search() {
                 <!-- LEFT SIDE -->
                 <div class="mc-search-left">
 
-                    <h2 class="mc-section-title">Search Products & Compare Suppliers</h2>
+                    <h2 class="mc-search-heading">Search Products & Compare Suppliers</h2>
 
                     <div class="mc-search-bar">
-                        <label for="mc-search-input">Product name or code</label><br>
-                        <input type="text" id="mc-search-input" placeholder="Start typing product name or code to start search and comparison...">
+                        <label for="mc-search-input">Search Product name or code</label><br>
+                        <input type="text" id="mc-search-input"
+                            placeholder="Start typing product name or code to start search and comparison...">
                     </div>
 
+                    <!-- ⭐ Comparison results ALWAYS appear first -->
                     <div id="mc-search-results" class="mc-search-results"></div>
 
+                    <!-- ⭐ Selected item ALWAYS appears above Discover Panel -->
                     <div id="mc-selected-item" class="mc-selected-item"></div>
+
+                    <!-- ⭐ Intro text + Discover Panel ALWAYS BELOW existing behaviour -->
+                    <p class="mc-discover-intro">
+                        You can also select a product directly from the list below — this will take you straight to the comparison.
+                    </p>
+
+                    <?php
+                        $low_stock_threshold = (int) get_option('mc_low_stock_threshold', 50);
+                        $discover_rows = mc_get_discover_products($pharmacy->ID, $low_stock_threshold);
+                    ?>
+
+                    <?php if (!empty($discover_rows)): ?>
+                        <div class="mc-discover-panel mc-discover-scroll">
+
+                            <div class="mc-discover-header">
+                                <span class="mc-discover-title">Discover products by stock</span>
+                                <span class="mc-discover-subtitle">
+                                    Low stock highlighted first (threshold: <?php echo esc_html($low_stock_threshold); ?>)
+                                </span>
+                            </div>
+
+                            <div class="mc-discover-body">
+                                <?php foreach ($discover_rows as $row): ?>
+                                    <?php
+                                        $band_class = 'mc-stock-' . $row['band'];
+                                        $search_term = $row['name'];
+                                    ?>
+                                    <div class="mc-discover-row <?php echo esc_attr($band_class); ?>"
+                                        data-product-id="<?php echo (int) $row['product_id']; ?>"
+                                        data-search="<?php echo esc_attr($search_term); ?>"
+                                        data-band="<?php echo esc_attr($row['band']); ?>">
+
+                                        <div class="mc-discover-main">
+                                            <span class="mc-discover-name"><?php echo esc_html($row['name']); ?></span>
+                                        </div>
+
+                                        <div class="mc-discover-meta">
+                                            <span class="mc-stock-pill <?php echo esc_attr($band_class); ?>">
+                                                Stock: <?php echo (int) $row['total_stock']; ?>
+                                            </span>
+                                            <span class="mc-discover-action">Click to compare</span>
+                                        </div>
+
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                        </div>
+                    <?php endif; ?>
 
                 </div>
 

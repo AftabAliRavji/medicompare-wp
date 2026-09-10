@@ -3306,22 +3306,142 @@ private function handle_concession_import() {
     }
 
     /* ---------------------------------------------------------
-       SUPPLIER PRODUCTS ALL PAGE (FIXED)
+        SUPPLIER PRODUCTS ALL PAGE (BY SUPPLIER / ALL SUPPLIERS)
     --------------------------------------------------------- */
     public function supplier_products_all_page() {
 
         $suppliers = $this->get_suppliers();
-        $selected_supplier_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
 
-        // FIX: Provide variable expected by the view file
+        // View mode: 'supplier' or 'all'
+        $filter_type = isset($_GET['filter_type']) ? sanitize_text_field($_GET['filter_type']) : 'supplier';
+        if (!in_array($filter_type, ['supplier', 'all'])) {
+            $filter_type = 'supplier';
+        }
+
+        // Selected supplier (for 'By Supplier' mode)
+        $selected_supplier_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
         $selected_supplier = $selected_supplier_id;
 
+        // Selected product (for refinement)
+        $selected_product_id = isset($_GET['product_id']) ? intval($_GET['product_id']) : 0;
+
         $products = [];
-        if ($selected_supplier_id) {
+
+        if ($filter_type === 'supplier' && $selected_supplier_id) {
+            // Existing function: products for one supplier
             $products = $this->get_supplier_products($selected_supplier_id);
+        } elseif ($filter_type === 'all') {
+            // NEW: products for ALL suppliers
+            $products = $this->get_all_supplier_products();
+        }
+
+        // Build product list for refinement dropdown (from loaded products)
+        $product_options = [];
+        foreach ($products as $row) {
+
+            // Build full display name
+            $display_name = $row['product_title'];
+
+            if (!empty($row['strength']) || !empty($row['pack_size'])) {
+                $display_name .= " (" . $row['strength'] . " · " . $row['pack_size'] . ")";
+            }
+
+            $product_options[$row['product_id']] = $display_name;
         }
 
         include __DIR__ . '/admin-pages/supplier-products-all.php';
+    }
+
+
+
+
+    /* ---------------------------------------------------------
+    GET SUPPLIER PRODUCTS WITH FILTERS (FIXED)
+    --------------------------------------------------------- */
+    public function get_supplier_products_filtered($filter_type, $search_term, $category) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'medi_supplier_products';
+
+        $where = "WHERE 1=1";
+
+        // PRODUCT NAME FILTER
+        if ($filter_type === 'product' && $search_term !== '') {
+            $where .= $wpdb->prepare(" AND p.post_title LIKE %s", '%' . $wpdb->esc_like($search_term) . '%');
+        }
+
+        // CATEGORY FILTER
+        if ($filter_type === 'category' && $category !== '') {
+            $where .= $wpdb->prepare(" AND pm_cat.meta_value = %s", $category);
+        }
+
+        // ⭐ FIXED SQL — INNER JOIN suppliers so supplier_name is ALWAYS present
+        $sql = "
+            SELECT 
+                sp.*,
+                p.post_title AS product_title,
+                pm_strength.meta_value AS strength,
+                pm_pack.meta_value AS pack_size,
+                pm_cat.meta_value AS category,
+                s.name AS supplier_name
+            FROM {$table} sp
+            INNER JOIN {$wpdb->prefix}medi_suppliers s 
+                ON s.id = sp.supplier_id
+            LEFT JOIN {$wpdb->posts} p 
+                ON sp.product_id = p.ID
+            LEFT JOIN {$wpdb->postmeta} pm_strength 
+                ON pm_strength.post_id = sp.product_id AND pm_strength.meta_key = 'mc_strength'
+            LEFT JOIN {$wpdb->postmeta} pm_pack 
+                ON pm_pack.post_id = sp.product_id AND pm_pack.meta_key = 'mc_pack_size'
+            LEFT JOIN {$wpdb->postmeta} pm_cat 
+                ON pm_cat.post_id = sp.product_id AND pm_cat.meta_key = 'mc_product_category'
+            {$where}
+            ORDER BY p.post_title ASC
+        ";
+
+        return $wpdb->get_results($sql, ARRAY_A);
+    }
+
+   /* ---------------------------------------------------------
+   GET ALL SUPPLIER PRODUCTS (ALL SUPPLIERS)
+    --------------------------------------------------------- */
+    public function get_all_supplier_products() {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'medi_supplier_products';
+
+        $sql = "
+            SELECT 
+                sp.*,
+                p.post_title AS product_title,
+                pm_strength.meta_value AS strength,
+                pm_pack.meta_value AS pack_size,
+                s.post_title AS supplier_name
+            FROM {$table} sp
+
+            /* Supplier name from wp_posts */
+            LEFT JOIN {$wpdb->posts} s
+                ON s.ID = sp.supplier_id
+            AND s.post_type = 'mc_supplier'
+
+            /* Product title */
+            LEFT JOIN {$wpdb->posts} p
+                ON sp.product_id = p.ID
+
+            /* Strength */
+            LEFT JOIN {$wpdb->postmeta} pm_strength
+                ON pm_strength.post_id = sp.product_id
+            AND pm_strength.meta_key = 'mc_strength'
+
+            /* Pack size */
+            LEFT JOIN {$wpdb->postmeta} pm_pack
+                ON pm_pack.post_id = sp.product_id
+            AND pm_pack.meta_key = 'mc_pack_size'
+
+            ORDER BY p.post_title ASC
+        ";
+
+        return $wpdb->get_results($sql, ARRAY_A);
     }
 
     /* ---------------------------------------------------------

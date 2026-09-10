@@ -4,172 +4,122 @@
     <form method="get">
         <input type="hidden" name="page" value="supplier-products-all">
 
-        <label for="supplier_id"><strong>Supplier:</strong></label>
-        <select name="supplier_id" id="supplier_id" onchange="this.form.submit()">
-            <option value="">Select Supplier</option>
-
-            <?php foreach ($suppliers as $id => $name): ?>
-                <option value="<?php echo esc_attr($id); ?>"
-                    <?php selected($selected_supplier, $id); ?>>
-                    <?php echo esc_html($name); ?>
-                </option>
-            <?php endforeach; ?>
+        <!-- VIEW MODE -->
+        <label><strong>View:</strong></label>
+        <select name="filter_type" onchange="this.form.submit()">
+            <option value="supplier" <?php selected($filter_type, 'supplier'); ?>>By Supplier</option>
+            <option value="all" <?php selected($filter_type, 'all'); ?>>ALL Suppliers</option>
         </select>
-    </form>
 
-    <?php if ($selected_supplier): ?>
+        <!-- SUPPLIER DROPDOWN (only when 'By Supplier') -->
+        <?php if ($filter_type === 'supplier'): ?>
+            <label for="supplier_id"><strong>Supplier:</strong></label>
+            <select name="supplier_id" id="supplier_id" onchange="this.form.submit()">
+                <option value="">Select Supplier</option>
 
-        <h2>Products for: <?php echo esc_html($suppliers[$selected_supplier]); ?></h2>
-
-        <?php if (!empty($products)): ?>
-
-            <table class="widefat striped">
-                <thead>
-                    <tr>
-                        <th>Product Code</th>
-                        <th>Product Name</th>
-                        <th>Price (£)</th>
-                        <th>Stock</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($products as $row): ?>
-                        <tr>
-                            <td><?php echo esc_html($row['product_id']); ?></td>
-
-                            <?php
-                            $display_name = $row['product_title'];
-
-                            if (!empty($row['strength']) || !empty($row['pack_size'])) {
-                                $display_name .= " (" . $row['strength'] . " · " . $row['pack_size'] . ")";
-                            }
-                            ?>
-
-                            <td><?php echo esc_html($display_name); ?></td>
-
-                            <!-- Editable PRICE -->
-                            <td>
-                                <input type="number"
-                                       step="0.01"
-                                       class="mc-edit-price"
-                                       data-product="<?php echo $row['product_id']; ?>"
-                                       data-supplier="<?php echo $selected_supplier; ?>"
-                                       value="<?php echo esc_attr($row['price']); ?>"
-                                       style="width:80px;">
-                            </td>
-
-                            <!-- Editable STOCK -->
-                            <td>
-                                <input type="number"
-                                       class="mc-edit-stock"
-                                       data-product="<?php echo $row['product_id']; ?>"
-                                       data-supplier="<?php echo $selected_supplier; ?>"
-                                       value="<?php echo esc_attr($row['stock']); ?>"
-                                       style="width:80px;">
-                            </td>
-
-                            <td><?php echo esc_html($row['last_updated']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-
-        <?php else: ?>
-
-            <p>No products found for this supplier.</p>
-
+                <?php foreach ($suppliers as $id => $name): ?>
+                    <option value="<?php echo esc_attr($id); ?>"
+                        <?php selected($selected_supplier, $id); ?>>
+                        <?php echo esc_html($name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         <?php endif; ?>
 
+        <!-- PRODUCT NAME REFINEMENT (only when products are loaded) -->
+        <?php if (!empty($products) && !empty($product_options)): ?>
+            &nbsp;&nbsp;
+            <label for="product_id"><strong>Refine by Product:</strong></label>
+            <select name="product_id" id="product_id" onchange="this.form.submit()">
+                <option value="">All Products</option>
+                <?php foreach ($product_options as $pid => $pname): ?>
+                    <option value="<?php echo esc_attr($pid); ?>"
+                        <?php selected($selected_product_id, $pid); ?>>
+                        <?php echo esc_html($pname); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        <?php endif; ?>
+    </form>
+
+    <hr>
+
+    <?php if (!empty($products)): ?>
+
+        <table class="widefat striped">
+            <thead>
+                <tr>
+                    <?php if ($filter_type === 'all'): ?>
+                        <th>Supplier</th>
+                    <?php endif; ?>
+
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Price (£)</th>
+                    <th>Stock</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php foreach ($products as $row): ?>
+
+                    <?php
+                    // If a specific product is selected, skip non-matching rows
+                    if (!empty($selected_product_id) && intval($row['product_id']) !== intval($selected_product_id)) {
+                        continue;
+                    }
+
+                    // Build full product name
+                    $display_name = $row['product_title'];
+                    if (!empty($row['strength']) || !empty($row['pack_size'])) {
+                        $display_name .= " (" . $row['strength'] . " · " . $row['pack_size'] . ")";
+                    }
+                    ?>
+
+                    <tr class="mc-supplier-product-row">
+                        <?php if ($filter_type === 'all'): ?>
+                            <td><?php echo esc_html($row['supplier_name']); ?></td>
+                        <?php endif; ?>
+
+                        <td><?php echo esc_html($row['product_id']); ?></td>
+                        <td><?php echo esc_html($display_name); ?></td>
+
+                        <!-- Editable PRICE -->
+                        <td>
+                            <input type="number"
+                                   step="0.01"
+                                   class="mc-edit-price"
+                                   data-product="<?php echo $row['product_id']; ?>"
+                                   data-supplier="<?php echo $row['supplier_id']; ?>"
+                                   value="<?php echo esc_attr($row['price']); ?>"
+                                   style="width:80px;">
+                        </td>
+
+                        <!-- Editable STOCK -->
+                        <td>
+                            <input type="number"
+                                   class="mc-edit-stock"
+                                   data-product="<?php echo $row['product_id']; ?>"
+                                   data-supplier="<?php echo $row['supplier_id']; ?>"
+                                   value="<?php echo esc_attr($row['stock']); ?>"
+                                   style="width:80px;">
+                        </td>
+
+                        <td><?php echo esc_html($row['last_updated']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+    <?php else: ?>
+        <p>No products found.</p>
     <?php endif; ?>
 </div>
 
-    <!-- AJAX SCRIPT -->
-    <script>
-    jQuery(function($){
-
-        function sendUpdate(inputEl, productId, supplierId, field, value) {
-
-            // Remove previous status icons
-            inputEl.next('.mc-status-icon').remove();
-
-            $.post(ajaxurl, {
-                action: 'mc_update_supplier_product',
-                product_id: productId,
-                supplier_id: supplierId,
-                field: field,
-                value: value
-            }, function(response){
-
-                if (response.success) {
-
-                    // GREEN TICK ✔
-                    const tick = $('<span class="mc-status-icon" style="color:green; margin-left:6px;">✔</span>');
-                    inputEl.after(tick);
-
-                    setTimeout(() => tick.fadeOut(400, () => tick.remove()), 1500);
-
-                    inputEl.removeClass('mc-error');
-
-                } else {
-
-                    // RED ERROR ✖
-                    const cross = $('<span class="mc-status-icon" style="color:red; margin-left:6px;">✖</span>');
-                    inputEl.after(cross);
-
-                    setTimeout(() => cross.fadeOut(800, () => cross.remove()), 2000);
-
-                    inputEl.addClass('mc-error');
-                }
-            });
-        }
-
-        // PRICE update
-        $(document).on('change', '.mc-edit-price', function(){
-            const el         = $(this);
-            const productId  = el.data('product');
-            const supplierId = el.data('supplier');
-            const value      = el.val();
-
-            sendUpdate(el, productId, supplierId, 'price', value);
-        });
-
-        // STOCK update (with negative prevention)
-        $(document).on('change', '.mc-edit-stock', function(){
-            const el         = $(this);
-            const productId  = el.data('product');
-            const supplierId = el.data('supplier');
-            let value        = parseInt(el.val(), 10);
-
-            // Prevent negative stock
-            if (value < 0) {
-
-                // Force back to zero
-                el.val(0);
-
-                // Red highlight + ✖ icon
-                el.addClass('mc-error');
-
-                const cross = $('<span class="mc-status-icon" style="color:red; margin-left:6px;">✖</span>');
-                el.after(cross);
-
-                setTimeout(() => cross.fadeOut(800, () => cross.remove()), 2000);
-
-                return; // Do NOT send AJAX
-            }
-
-            sendUpdate(el, productId, supplierId, 'stock', value);
-        });
-
-    });
-    </script>
-
-    <style>
-    /* Red highlight on error */
-    .mc-error {
-        border: 2px solid red !important;
-        background: #ffecec !important;
-    }
-    </style>
-
-
+<style>
+.mc-error {
+    border: 2px solid red !important;
+    background: #ffecec !important;
+}
+</style>

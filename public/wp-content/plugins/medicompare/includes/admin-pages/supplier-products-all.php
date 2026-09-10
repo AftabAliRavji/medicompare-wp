@@ -26,7 +26,7 @@
             </select>
         <?php endif; ?>
 
-        <!-- PRODUCT NAME REFINEMENT (only when products are loaded) -->
+        <!-- PRODUCT NAME REFINEMENT -->
         <?php if (!empty($products) && !empty($product_options)): ?>
             &nbsp;&nbsp;
             <label for="product_id"><strong>Refine by Product:</strong></label>
@@ -65,12 +65,10 @@
                 <?php foreach ($products as $row): ?>
 
                     <?php
-                    // If a specific product is selected, skip non-matching rows
                     if (!empty($selected_product_id) && intval($row['product_id']) !== intval($selected_product_id)) {
                         continue;
                     }
 
-                    // Build full product name
                     $display_name = $row['product_title'];
                     if (!empty($row['strength']) || !empty($row['pack_size'])) {
                         $display_name .= " (" . $row['strength'] . " · " . $row['pack_size'] . ")";
@@ -85,21 +83,23 @@
                         <td><?php echo esc_html($row['product_id']); ?></td>
                         <td><?php echo esc_html($display_name); ?></td>
 
-                        <!-- Editable PRICE -->
+                        <!-- PRICE -->
                         <td>
                             <input type="number"
                                    step="0.01"
-                                   class="mc-edit-price"
+                                   class="mc-edit mc-price"
+                                   data-field="price"
                                    data-product="<?php echo $row['product_id']; ?>"
                                    data-supplier="<?php echo $row['supplier_id']; ?>"
                                    value="<?php echo esc_attr($row['price']); ?>"
                                    style="width:80px;">
                         </td>
 
-                        <!-- Editable STOCK -->
+                        <!-- STOCK -->
                         <td>
                             <input type="number"
-                                   class="mc-edit-stock"
+                                   class="mc-edit mc-stock"
+                                   data-field="stock"
                                    data-product="<?php echo $row['product_id']; ?>"
                                    data-supplier="<?php echo $row['supplier_id']; ?>"
                                    value="<?php echo esc_attr($row['stock']); ?>"
@@ -123,3 +123,133 @@
     background: #ffecec !important;
 }
 </style>
+
+<script>
+jQuery(function($){
+
+    function updateField(el) {
+
+        // Don't send another request while one is already running
+        if (el.data('updating')) {
+            return;
+        }
+
+        const field      = el.data('field');
+        const productId  = el.data('product');
+        const supplierId = el.data('supplier');
+        let value        = el.val();
+
+        // Prevent negative stock
+        if (field === 'stock') {
+            let intVal = parseInt(value, 10);
+
+            if (intVal < 0 || isNaN(intVal)) {
+                el.val(0);
+                value = 0;
+            }
+        }
+
+        // If value hasn't changed, skip update
+        const last = el.data('last-saved');
+
+        if (last !== undefined && String(last) === String(value)) {
+            return;
+        }
+
+        // Mark this input as currently updating
+        el.data('updating', true);
+
+        // Remove old icons
+        el.next('.mc-status-icon').remove();
+
+        $.post(ajaxurl, {
+            action: 'mc_update_supplier_product',
+            product_id: productId,
+            supplier_id: supplierId,
+            field: field,
+            value: value
+        }, function(response){
+
+            const ok = (
+                response !== null &&
+                response !== undefined &&
+                response !== '' &&
+                response !== '0'
+            );
+
+            if (ok) {
+
+                const tick = $('<span class="mc-status-icon" style="color:green; margin-left:6px;">✔</span>');
+
+                el.after(tick);
+
+                setTimeout(function(){
+                    tick.fadeOut(400, function(){
+                        tick.remove();
+                    });
+                }, 1500);
+
+                el.removeClass('mc-error');
+
+                // Store the successfully saved value
+                el.data('last-saved', String(value));
+
+            } else {
+
+                const cross = $('<span class="mc-status-icon" style="color:red; margin-left:6px;">✖</span>');
+
+                el.after(cross);
+
+                setTimeout(function(){
+                    cross.fadeOut(800, function(){
+                        cross.remove();
+                    });
+                }, 2000);
+
+                el.addClass('mc-error');
+            }
+
+        }).fail(function(){
+
+            const cross = $('<span class="mc-status-icon" style="color:red; margin-left:6px;">✖</span>');
+
+            el.after(cross);
+
+            setTimeout(function(){
+                cross.fadeOut(800, function(){
+                    cross.remove();
+                });
+            }, 2000);
+
+            el.addClass('mc-error');
+
+        }).always(function(){
+
+            // Allow another update after this request has finished
+            el.data('updating', false);
+
+        });
+    }
+
+
+    // BLUR → update
+    $(document).on('blur', '.mc-edit', function(){
+        updateField($(this));
+    });
+
+
+    // ENTER → update
+    $(document).on('keydown', '.mc-edit', function(e){
+
+        if (e.key === 'Enter') {
+
+            e.preventDefault();
+
+            const el = $(this);
+
+            updateField(el);
+        }
+    });
+
+});
+</script>

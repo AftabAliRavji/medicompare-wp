@@ -804,7 +804,13 @@ public function render_search() {
                                         data-band="<?php echo esc_attr($row['band']); ?>">
 
                                         <div class="mc-discover-main">
-                                            <span class="mc-discover-name"><?php echo esc_html($row['name']); ?></span>
+                                            <span class="mc-discover-name">
+                                                <?php echo esc_html($row['name']); ?>
+
+                                                <?php if (!empty($row['override_label'])): ?>
+                                                    <span class="mc-hot-seller-badge">Hot Seller</span>
+                                                <?php endif; ?>
+                                            </span>
                                         </div>
 
                                         <div class="mc-discover-meta">

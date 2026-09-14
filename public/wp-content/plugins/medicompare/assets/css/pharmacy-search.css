@@ -2180,6 +2180,20 @@ body.page-id-71 .mc-search-left {
 .mc-purple-btn { background: #5e35b1; }
 .mc-teal-btn { background: #009688; }
 
+.mc-hot-seller-badge {
+    display: inline-block;
+    background: #ff7a00; /* vibrant orange */
+    color: #fff;
+    padding: 2px 8px;
+    margin-left: 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+
 
 
 

@@ -50,7 +50,7 @@ add_shortcode('mc_pharmacy_portal', function () {
         <!-- LEFT SIDE: FEATURE CARDS + ONBOARDING -->
         <div class="mc-portal-left">
 
-            <h1 class="mc-portal-title">sourcemedpharma (SMP) Pharmacy Portal</h1>
+            <h1 class="mc-portal-title">SMP Pharmacy Portal</h1>
             <p class="mc-portal-subtitle">A modern platform built for independent pharmacies.</p>
 
             <div class="mc-feature-row">

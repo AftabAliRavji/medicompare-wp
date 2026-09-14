@@ -75,13 +75,13 @@ function mc_welcome_signup_shortcode() {
         <!-- LOGO -->
         <div class="mc-portal-header">
             <div class="mc-portal-logo">
-                <img src="<?php echo $mc_assets . 'logo.png'; ?>" alt="MediCompare">
+                <img src="<?php echo $mc_assets . 'logo.png'; ?>" alt="sourcemedpharma (SMP)">
             </div>
         </div>
 
         <!-- HERO -->
         <section class="mc-hero">
-            <h1>Welcome to MediCompare</h1>
+            <h1>Welcome to sourcemedpharma (SMP)</h1>
             <p>Your pharmacy’s smarter way to compare suppliers, reduce costs, and streamline ordering.</p>
 
             <p class="mc-hero-action">
@@ -97,7 +97,7 @@ function mc_welcome_signup_shortcode() {
                 <!-- LEFT: FEATURES (moved up, same markup as before) -->
                 <div class="mc-video-container">
                     <section class="mc-features">
-                        <h2 class="mc-card-title">What MediCompare Offers</h2>
+                        <h2 class="mc-card-title">What sourcemedpharma (SMP) Offers</h2>
 
                         <div class="mc-feature-grid">
 
@@ -143,7 +143,7 @@ function mc_welcome_signup_shortcode() {
 
                             <div class="mc-feature-card mc-feature-card-autoheight">
                                 <h3>Mobile Friendly</h3>
-                                <p>Use MediCompare on any device — desktop, tablet, or mobile.</p>
+                                <p>Use sourcemedpharma (SMP) on any device — desktop, tablet, or mobile.</p>
                                 <div class="mc-feature-preview">
                                     <div class="mc-feature-preview-box mc-preview-mobile">
                                         <div class="mc-mobile-screen"></div>

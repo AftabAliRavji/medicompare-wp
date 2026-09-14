@@ -819,30 +819,73 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
 
     if (!defined('ABSPATH')) exit;
 
+
     /* ---------------------------------------------------------
     DISCOVER PANEL — Raw data provider (SQL)
     --------------------------------------------------------- */
 
     add_filter('mc_discover_products_data', function ($rows, $pharmacy_id) {
 
-        global $wpdb;
+    global $wpdb;
 
-        $rows = $wpdb->get_results("
+    $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
+    $posts_table             = $wpdb->posts;
+    $postmeta_table          = $wpdb->postmeta;
+
+    /* ---------------------------------------------------------
+       Supplier restrictions (same as comparison)
+    --------------------------------------------------------- */
+    $restriction_raw = get_post_meta($pharmacy_id, '_mc_supplier_restrictions', true);
+    $restriction_sql = '';
+
+    if ($restriction_raw && $restriction_raw !== 'ALL') {
+        $allowed_suppliers = json_decode($restriction_raw, true);
+
+        if (is_array($allowed_suppliers) && !empty($allowed_suppliers)) {
+            $allowed_list = implode(',', array_map('intval', $allowed_suppliers));
+            $restriction_sql = " AND sp.supplier_id IN ($allowed_list) ";
+        }
+    }
+
+    /* ---------------------------------------------------------
+       ⭐ UPDATED DISCOVERY SQL — LEFT JOIN (keeps 0-stock products)
+    --------------------------------------------------------- */
+        $sql = "
             SELECT 
                 p.ID AS product_id,
                 p.post_title AS name,
                 COALESCE(SUM(sp.stock), 0) AS total_stock
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->prefix}medi_supplier_products sp 
+            FROM {$posts_table} p
+
+            /* LEFT JOIN so products with no valid suppliers still appear */
+            LEFT JOIN {$supplier_products_table} sp
                 ON sp.product_id = p.ID
+                $restriction_sql
+
+            /* Supplier CPT must exist AND be publish (but still LEFT JOIN) */
+            LEFT JOIN {$posts_table} s
+                ON s.ID = sp.supplier_id
+                AND s.post_status = 'publish'
+
+            /* Supplier must be active (but still LEFT JOIN) */
+            LEFT JOIN {$postmeta_table} sm
+                ON sm.post_id = sp.supplier_id
+                AND sm.meta_key = 'mc_supplier_status'
+                AND sm.meta_value = 'active'
+
             WHERE p.post_type = 'mc_product'
+            AND p.post_status = 'publish'
+
             GROUP BY p.ID
             ORDER BY p.post_title ASC
-        ", ARRAY_A);
+        ";
+
+        $rows = $wpdb->get_results($sql, ARRAY_A);
 
         return $rows;
     }, 10, 2);
 
+    
     /* ---------------------------------------------------------
     DISCOVER PANEL — Processed rows for frontend
     --------------------------------------------------------- */
@@ -862,7 +905,10 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
             // Build full product label using existing helper
             $full_label = mc_get_full_product_label($product_id);
 
-            // Colour banding
+            // ⭐ NEW: Check override flag
+            $force_low = get_post_meta($product_id, 'mc_force_low_stock', true);
+
+            // Normal banding
             if ($total_stock == 0) {
                 $band = 'red';
             } elseif ($total_stock <= $low_stock_threshold) {
@@ -871,21 +917,25 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
                 $band = 'green';
             }
 
+            // ⭐ Override forces yellow
+            if ($force_low === 'yes') {
+                $band = 'yellow';
+            }
+
             $rows[] = [
-                'product_id'  => $product_id,
-                'name'        => $full_label,
-                'total_stock' => $total_stock,
-                'band'        => $band,
+                'product_id'          => $product_id,
+                'name'                => $full_label,
+                'total_stock'         => $total_stock,
+                'band'                => $band,
+                'force_low_override'  => ($force_low === 'yes'),
             ];
         }
 
         /* ---------------------------------------------------------
         REMOVE DUPLICATES BY LABEL
-        (Keeps the first occurrence of each product name)
         --------------------------------------------------------- */
         $unique = [];
         foreach ($rows as $row) {
-            // If label already exists, skip it
             if (!isset($unique[$row['name']])) {
                 $unique[$row['name']] = $row;
             }
@@ -893,9 +943,20 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
         $rows = array_values($unique);
 
         /* ---------------------------------------------------------
-        SORT: yellow → green → red → alphabetical
+        SORT ORDER:
+        1. Override yellow
+        2. Normal yellow
+        3. Green
+        4. Red
+        5. Alphabetical within band
         --------------------------------------------------------- */
         usort($rows, function ($a, $b) {
+
+            // ⭐ Override always first
+            if ($a['force_low_override'] && !$b['force_low_override']) return -1;
+            if ($b['force_low_override'] && !$a['force_low_override']) return 1;
+
+            // Normal band sorting
             $order = ['yellow' => 0, 'green' => 1, 'red' => 2];
 
             $ba = $order[$a['band']] ?? 99;

@@ -2158,6 +2158,29 @@ body.page-id-71 .mc-search-left {
     margin-bottom: 12px;
 }
 
+.mc-topbar-links {
+    display: flex;
+    gap: 20px;
+    margin-left: 20px;
+    align-items: center;
+}
+
+.mc-nav-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #fff !important;
+}
+
+.mc-blue-btn   { background: #0073aa; }
+.mc-green-btn  { background: #46b450; }
+.mc-orange-btn { background: #ff9800; }
+.mc-red-btn    { background: #dc3232; }
+.mc-purple-btn { background: #5e35b1; }
+.mc-teal-btn { background: #009688; }
+
+
 
 
 

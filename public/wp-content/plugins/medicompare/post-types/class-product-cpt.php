@@ -86,6 +86,9 @@ class MediCompare_Product_CPT {
         $dmd_vmp      = get_post_meta($post->ID, 'mc_dmd_vmp', true);
         $dmd_vmpp     = get_post_meta($post->ID, 'mc_dmd_vmpp', true);
 
+        // ⭐ NEW OVERRIDE FIELD
+        $force_low    = get_post_meta($post->ID, 'mc_force_low_stock', true);
+
         wp_nonce_field('mc_save_product_details', 'mc_product_details_nonce');
         ?>
 
@@ -144,32 +147,30 @@ class MediCompare_Product_CPT {
                         class="regular-text"
                         placeholder="Enter new category"
                         style="display: none;">
-
-                    <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const select = document.getElementById('mc_category_select');
-                        const input  = document.getElementById('mc_category_input');
-
-                        function toggleInput() {
-                            if (select.value === '__new__') {
-                                input.style.display = 'block';
-                                input.value = '';
-                            } else {
-                                input.style.display = 'none';
-                                input.value = select.value;
-                            }
-                        }
-
-                        select.addEventListener('change', toggleInput);
-
-                        // Initial load
-                        toggleInput();
-                    });
-                    </script>
-
                 </td>
             </tr>
 
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const select = document.getElementById('mc_category_select');
+                    const input  = document.getElementById('mc_category_input');
+
+                    function toggleInput() {
+                        if (select.value === '__new__') {
+                            input.style.display = 'block';
+                            input.value = '';
+                        } else {
+                            input.style.display = 'none';
+                            input.value = select.value;
+                        }
+                    }
+
+                    select.addEventListener('change', toggleInput);
+
+                    // Initial load
+                    toggleInput();
+                });
+            </script>
 
             <tr>
                 <th><label>Strength</label></th>
@@ -220,6 +221,19 @@ class MediCompare_Product_CPT {
                            value="<?php echo esc_attr($dmd_vmpp); ?>"
                            class="regular-text">
                     <p class="description">Optional. Virtual Medicinal Product Pack (VMPP) SNOMED code.</p>
+                </td>
+            </tr>
+
+            <!-- ⭐ NEW OVERRIDE CHECKBOX -->
+            <tr>
+                <th><label>Force Low Stock Highlight</label></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="mc_force_low_stock" value="yes"
+                            <?php checked($force_low, 'yes'); ?>>
+                        Always show this product as LOW STOCK (yellow)
+                    </label>
+                    <p class="description">Overrides automatic stock threshold logic.</p>
                 </td>
             </tr>
 
@@ -306,6 +320,10 @@ class MediCompare_Product_CPT {
         update_post_meta($post_id, 'mc_dmd_vmp', $dmd_vmp);
         update_post_meta($post_id, 'mc_dmd_vmpp', $dmd_vmpp);
 
+        // ⭐ NEW OVERRIDE SAVE
+        $force_low_stock = isset($_POST['mc_force_low_stock']) ? 'yes' : 'no';
+        update_post_meta($post_id, 'mc_force_low_stock', $force_low_stock);
+
         // End recursion guard
         define('MC_SAVING_PRODUCT', false);
     }
@@ -328,6 +346,9 @@ class MediCompare_Product_CPT {
         // ⭐ NEW DM+D columns
         $new['dmd_vmp']      = 'DM+D VMP';
         $new['dmd_vmpp']     = 'DM+D VMPP';
+
+        // ⭐ NEW OVERRIDE COLUMN
+        $new['force_low_stock'] = 'Force Low Stock';
 
         $new['date']         = $columns['date'];
 
@@ -365,6 +386,12 @@ class MediCompare_Product_CPT {
 
             case 'dmd_vmpp':
                 echo esc_html(get_post_meta($post_id, 'mc_dmd_vmpp', true));
+                break;
+
+            // ⭐ NEW OVERRIDE COLUMN
+            case 'force_low_stock':
+                $flag = get_post_meta($post_id, 'mc_force_low_stock', true);
+                echo ($flag === 'yes') ? 'Yes' : '';
                 break;
         }
     }

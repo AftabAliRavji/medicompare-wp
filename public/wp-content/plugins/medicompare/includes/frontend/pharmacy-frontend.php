@@ -709,6 +709,32 @@ public function render_search() {
                     ← Back to Dashboard
                 </a>
 
+                <!-- EXTRA NAV BUTTONS -->
+                <div class="mc-topbar-links">
+
+                    <a href="<?php echo esc_url(site_url('/pharmacy/edit-details/')); ?>"
+                    class="mc-topbar-btn mc-nav-btn mc-teal-btn">
+                        Pharmacy Details
+                    </a>
+
+                    <a href="<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>" 
+                    class="mc-topbar-btn mc-nav-btn mc-green-btn">
+                        Subscription
+                    </a>
+
+                    <a href="<?php echo esc_url(site_url('/pharmacy/orders/')); ?>"
+                    class="mc-topbar-btn mc-nav-btn mc-orange-btn">
+                        Transferred Orders
+                    </a>
+
+                    <button type="button"
+                        class="mc-topbar-btn mc-nav-btn mc-purple-btn"
+                        onclick="mcOpenSupportModal();">
+                        Contact Support
+                    </button>
+
+                </div>
+
                 <div class="mc-topbar-right">
                     <span class="mc-topbar-badge mc-welcome-badge">
                         Welcome, <?php echo esc_html($current_user->user_email); ?>
@@ -738,9 +764,9 @@ public function render_search() {
                     <h2 class="mc-search-heading">Search Products & Compare Suppliers</h2>
 
                     <div class="mc-search-bar">
-                        <label for="mc-search-input">Search Product name or code</label><br>
+                        <label for="mc-search-input">Search Product name</label><br>
                         <input type="text" id="mc-search-input"
-                            placeholder="Start typing product name or code to start search and comparison...">
+                            placeholder="Start typing product name to start search and comparison...">
                     </div>
 
                     <!-- ⭐ Comparison results ALWAYS appear first -->
@@ -764,9 +790,6 @@ public function render_search() {
 
                             <div class="mc-discover-header">
                                 <span class="mc-discover-title">Discover products by stock</span>
-                                <span class="mc-discover-subtitle">
-                                    Low stock highlighted first (threshold: <?php echo esc_html($low_stock_threshold); ?>)
-                                </span>
                             </div>
 
                             <div class="mc-discover-body">
@@ -788,7 +811,7 @@ public function render_search() {
                                             <span class="mc-stock-pill <?php echo esc_attr($band_class); ?>">
                                                 Stock: <?php echo (int) $row['total_stock']; ?>
                                             </span>
-                                            <span class="mc-discover-action">Click to compare</span>
+                                            <span class="mc-discover-action">Click to Compare</span>
                                         </div>
 
                                     </div>

@@ -286,9 +286,9 @@ class MediCompare {
         echo '<div style="text-align:center; padding:20px; margin-top:40px; 
                         font-size:14px; color:#666;">
                 <hr style="margin-bottom:20px;">
-                <strong>MediCompare</strong> &nbsp;|&nbsp; 
+                <strong>sourcemedpharma</strong> &nbsp;|&nbsp; 
                 Version 0.2.1 &nbsp;|&nbsp; 
-                © ' . date('Y') . ' MediCompare Ltd
+                © ' . date('Y') . ' sourcemedpharma Ltd
                 <br>
                 <a href="/search-instructions/">Search Instructions</a> &nbsp;|&nbsp;
                 <a href="/privacy-policy/">Privacy Policy</a> &nbsp;|&nbsp;

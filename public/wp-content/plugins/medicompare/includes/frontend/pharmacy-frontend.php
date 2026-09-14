@@ -727,11 +727,11 @@ public function render_search() {
                         Transferred Orders
                     </a>
 
-                    <button type="button"
-                        class="mc-topbar-btn mc-nav-btn mc-purple-btn"
-                        onclick="mcOpenSupportModal();">
-                        Contact Support
-                    </button>
+                    <a href="javascript:void(0);"
+                    class="mc-topbar-btn mc-nav-btn mc-purple-btn"
+                    onclick="mcOpenSupportModal();">
+                    Contact Support
+                </a>
 
                 </div>
 

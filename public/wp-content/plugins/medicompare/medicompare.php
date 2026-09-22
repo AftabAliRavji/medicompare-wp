@@ -279,6 +279,9 @@ class MediCompare {
     public function render_global_footer() {
 
         if (is_admin()) return;
+        // Hide on welcome signup page
+        if (is_page('welcome-signup')) return;
+        
 
         // Include global support modal
         include WP_PLUGIN_DIR . '/medicompare/templates/support-modal.php';

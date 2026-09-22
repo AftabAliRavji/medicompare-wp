@@ -97,7 +97,7 @@ function mc_welcome_signup_shortcode() {
                 <!-- LEFT: FEATURES (moved up, same markup as before) -->
                 <div class="mc-video-container">
                     <section class="mc-features">
-                        <h2 class="mc-card-title">What sourcemedpharma (SMP) Offers</h2>
+                        <h2 class="mc-card-title">What SMP Offers</h2>
 
                         <div class="mc-feature-grid">
 

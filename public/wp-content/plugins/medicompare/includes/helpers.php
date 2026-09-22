@@ -851,34 +851,45 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
        ⭐ UPDATED DISCOVERY SQL — LEFT JOIN (keeps 0-stock products)
     --------------------------------------------------------- */
         $sql = "
-            SELECT 
-                p.ID AS product_id,
-                p.post_title AS name,
-                COALESCE(SUM(sp.stock), 0) AS total_stock
-            FROM {$posts_table} p
+        SELECT 
+            p.ID AS product_id,
+            p.post_title AS name,
 
-            /* LEFT JOIN so products with no valid suppliers still appear */
-            LEFT JOIN {$supplier_products_table} sp
-                ON sp.product_id = p.ID
-                $restriction_sql
+            /* ⭐ Correct stock calculation */
+            COALESCE(SUM(
+                CASE 
+                    WHEN sp.product_id IS NOT NULL
+                        AND s.ID IS NOT NULL
+                        AND s.post_status = 'publish'
+                        AND sm.meta_value = 'active'
+                    THEN sp.stock
+                    ELSE 0
+                END
+            ), 0) AS total_stock
 
-            /* Supplier CPT must exist AND be publish (but still LEFT JOIN) */
-            LEFT JOIN {$posts_table} s
-                ON s.ID = sp.supplier_id
-                AND s.post_status = 'publish'
+        FROM {$posts_table} p
 
-            /* Supplier must be active (but still LEFT JOIN) */
-            LEFT JOIN {$postmeta_table} sm
-                ON sm.post_id = sp.supplier_id
-                AND sm.meta_key = 'mc_supplier_status'
-                AND sm.meta_value = 'active'
+        /* ⭐ LEFT JOIN supplier products */
+        LEFT JOIN {$supplier_products_table} sp
+            ON sp.product_id = p.ID
+            $restriction_sql
 
-            WHERE p.post_type = 'mc_product'
-            AND p.post_status = 'publish'
+        /* ⭐ Supplier CPT must be publish */
+        LEFT JOIN {$posts_table} s
+            ON s.ID = sp.supplier_id
+            AND s.post_status = 'publish'
 
-            GROUP BY p.ID
-            ORDER BY p.post_title ASC
-        ";
+        /* ⭐ Supplier must be active */
+        LEFT JOIN {$postmeta_table} sm
+            ON sm.post_id = sp.supplier_id
+            AND sm.meta_key = 'mc_supplier_status'
+
+        WHERE p.post_type = 'mc_product'
+        AND p.post_status = 'publish'
+
+        GROUP BY p.ID
+        ORDER BY p.post_title ASC
+    ";
 
         $rows = $wpdb->get_results($sql, ARRAY_A);
 
@@ -928,6 +939,7 @@ function mc_add_supplier_payment($supplier_id, $invoice_id, $amount, $paid_date,
                 'total_stock'         => $total_stock,
                 'band'                => $band,
                 'force_low_override'  => ($force_low === 'yes'),
+                'override_label' => ($force_low === 'yes'),
             ];
         }
 

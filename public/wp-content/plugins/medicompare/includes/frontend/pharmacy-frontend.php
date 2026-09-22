@@ -727,11 +727,11 @@ public function render_search() {
                         Transferred Orders
                     </a>
 
-                    <button type="button"
-                        class="mc-topbar-btn mc-nav-btn mc-purple-btn"
-                        onclick="mcOpenSupportModal();">
-                        Contact Support
-                    </button>
+                    <a href="javascript:void(0);"
+                    class="mc-topbar-btn mc-nav-btn mc-purple-btn"
+                    onclick="mcOpenSupportModal();">
+                    Contact Support
+                </a>
 
                 </div>
 
@@ -804,7 +804,13 @@ public function render_search() {
                                         data-band="<?php echo esc_attr($row['band']); ?>">
 
                                         <div class="mc-discover-main">
-                                            <span class="mc-discover-name"><?php echo esc_html($row['name']); ?></span>
+                                            <span class="mc-discover-name">
+                                                <?php echo esc_html($row['name']); ?>
+
+                                                <?php if (!empty($row['override_label'])): ?>
+                                                    <span class="mc-hot-seller-badge">Hot Seller</span>
+                                                <?php endif; ?>
+                                            </span>
                                         </div>
 
                                         <div class="mc-discover-meta">

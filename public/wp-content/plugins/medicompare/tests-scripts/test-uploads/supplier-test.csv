@@ -1,0 +1,5 @@
+supplier_name,email,phone,address_1,address_2,city,county,postcode,country,account_manager,supplier_code,status
+Supplier A,aftab.ravji@icloud.com,07983971538,123 Main Street,,Peterborough,Cambridgeshire,PE1 1AA,United Kingdom,Aftab Ravji,SUPPA,active
+Supplier B,y2abss@gmail.com,07123456789,45 High Road,Unit 2,London,Greater London,N1 4AB,United Kingdom,Abbas Bhimani,SUPPB,active
+Supplier C,supplierc@example.com,02079460000,78 Market Lane,,Manchester,Greater Manchester,M1 2AB,United Kingdom,John Smith,SUPPC,suspended
+Supplier D,supplierd@example.com,01611234567,12 Station Road,Suite 5,Leeds,West Yorkshire,LS1 4DY,United Kingdom,Sarah Jones,SUPPD,active

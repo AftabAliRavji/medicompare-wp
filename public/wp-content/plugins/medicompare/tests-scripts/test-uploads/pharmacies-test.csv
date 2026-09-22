@@ -1,0 +1,4 @@
+pharmacy_code,pharmacy_name,email,phone,address_line_1,address_line_2,city,postcode,gphc_number,contact_name,status
+NETHPHARM01,Netherton Pharmacy,Y2abss@gmail.com,01733 123456,123 Netherton Road,,Peterborough,PE3 9XYZ,9012345,John Smith,active
+WALTONPHARM01,Walton Pharmacy,waltonpharm@gmail.com,01733 888111,45 Lincoln Road,,Peterborough,PE4 6ABC,8765432,Sarah Collins,pending_verification
+BRETTONPHARM01,Bretton Pharmacy,brettonpharmacy@gmail.com,01733 777222,12 Bretton Centre,,Peterborough,PE3 8DEF,7654321,Michael Turner,active

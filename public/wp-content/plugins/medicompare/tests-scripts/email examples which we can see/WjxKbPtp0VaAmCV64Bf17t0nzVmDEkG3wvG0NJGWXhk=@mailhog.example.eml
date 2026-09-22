@@ -1,0 +1,69 @@
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Received: from medicompare.local by mailhog.example (MailHog)
+          id WjxKbPtp0VaAmCV64Bf17t0nzVmDEkG3wvG0NJGWXhk=@mailhog.example; Mon, 15 Jun 2026 19:59:38 +0100
+Date: Mon, 15 Jun 2026 18:59:37 +0000
+To: dev-email@wpengine.local
+Subject: =?UTF-8?Q?New_Pharmacy_Order_=E2=80=94_Fatemah_pharmacy_=E2=80=94_Order_10007?=
+Message-ID: <SbvaNW9J5hRP9DH8lNRKbGldsTKupU6IhoGTQvg6rg@medicompare.local>
+X-Mailer: WPMailSMTP/Mailer/smtp 4.8.0
+From: MediCompare <dev-email@wpengine.local>
+MIME-Version: 1.0
+Return-Path: <dev-email@wpengine.local>
+
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif;">
+
+<h2>New Pharmacy Order — Fatemah pharmacy</h2>
+
+<h3>Order Details</h3>
+<ul>
+    <li><strong>Order Number:</strong> 10007</li>
+    <li><strong>Order Date:</strong> 15 Jun 2026 18:59</li>
+</ul>
+
+<h3>Pharmacy Information</h3>
+<ul>
+    <li><strong>Name:</strong> Fatemah pharmacy</li>
+    <li><strong>Email:</strong> fate@fatem.com</li>
+    <li><strong>Phone:</strong> 01733 71888</li>
+</ul>
+
+<h3>Supplier Breakdown</h3>
+<table border="1" cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th align="left">Supplier</th>
+            <th align="left">Sub‑Order</th>
+            <th align="left">Supplier Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+                <td>Supplier D</td>
+                <td>10007-SUPPD</td>
+                <td>£2.30</td>
+            </tr><tr>
+                <td>Supplier A</td>
+                <td>10007-SUPPA</td>
+                <td>£52.50</td>
+            </tr><tr>
+                <td>Supplier B</td>
+                <td>10007-SUPPB</td>
+                <td>£34.00</td>
+            </tr>
+    </tbody>
+</table>
+
+<h3>Grand Total</h3>
+<p><strong>£88.80</strong></p>
+
+<h3>Admin Links</h3>
+<ul>
+    <li><a href="http://medicompare.local/wp-admin/admin.php?page=medi_order&id=10007">View Order in Admin</a></li>
+    <li><a href="http://medicompare.local/wp-admin/post.php?post=54&action=edit">View Pharmacy in Admin</a></li>
+</ul>
+
+</body>
+</html>

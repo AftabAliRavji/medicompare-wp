@@ -1,0 +1,172 @@
+product_code,product_name,category,strength,pack_size,description,dmd_vmp,dmd_vmpp
+IBUPR100G30,Ibuprofen Gel,Topical,100g,30,Anti-inflammatory gel for muscular pain relief.,41740611000001102,1062311000001101
+IBUPR200G50,Ibuprofen Gel,Topical,200g,50,Stronger anti-inflammatory gel for severe muscular pain.,,
+PARA100G30,Paracetamol Tablets,Analgesic,100mg,30,Standard pain relief medication.,,
+PARA500TAB,Paracetamol Tablets,Analgesic,500mg,16,Stronger dose for acute pain relief.,42109611000001109,1064711000001107
+AMOX500CAP,Amoxicillin Capsules,Antibiotic,500mg,21,Broad-spectrum antibiotic used for bacterial infections.,39732411000001106,1037711000001109
+CETIR10TAB,Cetirizine Tablets,Antihistamine,10mg,30,Used for allergy relief including hay fever and urticaria.,42186511000001101,1225511000001102
+LANSO30CAP,Lansoprazole Capsules,Proton Pump Inhibitor,30mg,28,Reduces stomach acid and treats reflux/ulcers.,42354611000001108,1313811000001102
+OMEP20CAP,Omeprazole Capsules,Proton Pump Inhibitor,20mg,28,Alternative PPI for acid reflux and stomach ulcers.,42356411000001102,1068411000001105
+NAPRO250TAB,Naproxen Tablets,Anti-inflammatory,250mg,28,Anti-inflammatory used for pain and swelling.,42107511000001103,1204111000001102
+IBUCRE100G,Ibuprofen Cream,Topical,100g,1,Anti-inflammatory cream for joint and muscle pain.,,
+IBULIQ200MG,Ibuprofen Liquid Capsules,Analgesic,200mg,16,Fast-acting liquid capsules for pain relief.,42104711000001101,3917211000001106
+IBUSUS1005,Ibuprofen Oral Suspension,Analgesic,100mg/5ml,150ml,Pain and fever relief for children.,39108111000001104,1104011000001101
+IBULYS342,Ibuprofen Lysine Tablets,Analgesic,342mg,12,Fast-acting ibuprofen lysine formulation.,4557011000001104,17538711000001109
+CARBIOB100,Carbomer + Ibuprofen Gel,Topical,100g,30,Combination gel for targeted pain relief.,41740711000001106,3597111000001106
+DEEPHEATIBU,Deep Heat with Ibuprofen,Topical,50g,1,Warming cream infused with ibuprofen for muscle pain.,41740811000001103,1309911000001108
+PAINRELIEFGEL,Ibuprofen-Based Pain Relief Gel,Topical,5%,50g,General pain relief gel containing ibuprofen.,41740811000001103,1309911000001108
+DICLO50G,Diclofenac Gel,Topical,50g,1,Anti-inflammatory gel for joint and muscle pain.,22480211000001104,22479411000001100
+DICLO75TAB,Diclofenac Tablets,Anti-inflammatory,75mg,28,Used for pain and inflammation.,42101911000001102,1235911000001106
+ASPIR75TAB,Aspirin Tablets,Analgesic,75mg,28,Low-dose aspirin for cardiovascular protection.,42292011000001108,1041711000001104
+ASPIR300TAB,Aspirin Tablets,Analgesic,300mg,32,Pain relief and anti-inflammatory use.,39695211000001102,1275511000001101
+CODEI30TAB,Codeine Tablets,Analgesic,30mg,28,Prescription-only opioid pain relief.,42010411000001105,966311000001106
+TRAMA50CAP,Tramadol Capsules,Analgesic,50mg,30,Moderate to severe pain relief.,42017811000001106,1082611000001109
+AMOX250CAP,Amoxicillin Capsules,Antibiotic,250mg,21,Lower strength antibiotic for bacterial infections.,39732311000001104,1200411000001101
+DOXY100CAP,Doxycycline Capsules,Antibiotic,100mg,28,Used for bacterial and respiratory infections.,41948311000001104,2850611000001102
+FLUC150CAP,Fluconazole Capsule,Antifungal,150mg,1,Single-dose treatment for fungal infections.,41787011000001104,1205911000001100
+LORAT10TAB,Loratadine Tablets,Antihistamine,10mg,30,Non-drowsy allergy relief.,42192711000001108,3325711000001107
+FEXOF180TAB,Fexofenadine Tablets,Antihistamine,180mg,30,Strong non-drowsy antihistamine.,42189211000001108,1251611000001102
+RANIT150TAB,Ranitidine Tablets,Acid Reducer,150mg,60,Reduces stomach acid and treats indigestion.,42202211000001101,42183211000001106
+GAVISUS250,Gaviscon Suspension,Antacid,250mg/5ml,300ml,Relieves heartburn and indigestion.,,
+SALBUT100INH,Salbutamol Inhaler,Respiratory,100mcg,200,Relieves asthma symptoms and breathing difficulty.,39113611000001102,1056811000001104
+BECLO250INH,Beclometasone Inhaler,Respiratory,250mcg,200,Prevents asthma symptoms and inflammation.,10621111000001100,10619511000001101
+AMOX125SUS100,Amoxicillin Oral Suspension,Antibiotic,125mg/5ml,100ml,Sugar-free oral suspension for paediatric bacterial infections.,41940811000001105,1006611000001106
+AMOX125SUSSF100,Amoxicillin Oral Suspension Sugar Free,Antibiotic,125mg/5ml,100ml,Paediatric sugar-free suspension for bacterial infections.,35901911000001104,1197211000001101
+AMOX250CAP15,Amoxicillin Capsules,Antibiotic,250mg,15,Short-course antibiotic capsules for bacterial infections.,39732311000001104,1317011000001102
+AMOX250CAP21,Amoxicillin Capsules,Antibiotic,250mg,21,Standard-course antibiotic capsules for bacterial infections.,39732311000001104,1200411000001101
+AMOX250SUS100,Amoxicillin Oral Suspension,Antibiotic,250mg/5ml,100ml,Oral suspension for paediatric bacterial infections.,41941111000001109,960811000001104
+AMOX250SUSSF100,Amoxicillin Oral Suspension Sugar Free,Antibiotic,250mg/5ml,100ml,Sugar-free suspension for paediatric bacterial infections.,39021911000001105,1031411000001106
+AMOX3GPOW2,Amoxicillin Oral Powder Sachets,Antibiotic,3g,2,Sugar-free powder sachets for high-dose infection treatment.,35902111000001107,3241211000001105
+AMOX500CAP15,Amoxicillin Capsules,Antibiotic,500mg,15,Short-course antibiotic capsules for bacterial infections.,39732411000001106,10741811000001101
+AMOX500CAP21,Amoxicillin Capsules,Antibiotic,500mg,21,Standard-course antibiotic capsules for bacterial infections.,39732411000001106,1037711000001109
+AMOX500INJ10,Amoxicillin Injection Vials,Antibiotic,500mg,10,Vials for injectable broad-spectrum antibiotic therapy.,41941211000001103,1067811000001108
+AMOX500SUSSF100,Amoxicillin Oral Suspension Sugar Free,Antibiotic,500mg/5ml,100ml,Sugar-free suspension for severe paediatric infections.,41941311000001106,39339011000001108
+CETIR1MLSF200,Cetirizine Oral Solution Sugar Free,Antihistamine,1mg/ml,200ml,Sugar-free oral solution for allergy relief.,37082911000001103,1107311000001107
+LANSO15CAP28,Lansoprazole Capsules,Proton Pump Inhibitor,15mg,28,Low-dose PPI capsules for acid reflux treatment.,42354511000001109,1207511000001103
+LANSO15ODT28,Lansoprazole Orodispersible Tablets,Proton Pump Inhibitor,15mg,28,Orodispersible PPI tablets for reflux and ulcer treatment.,4053411000001103,4040611000001106
+LANSO30ODT28,Lansoprazole Orodispersible Tablets,Proton Pump Inhibitor,30mg,28,Orodispersible PPI tablets for reflux and ulcer treatment.,4053511000001104,4041611000001101
+NAPRO125SUS100,Naproxen Oral Suspension Sugar Free,Anti-inflammatory,125mg/5ml,100ml,Sugar-free suspension for paediatric pain and inflammation.,32638811000001105,32636811000001109
+NAPRO250EFF20,Naproxen Effervescent Tablets,Anti-inflammatory,250mg,20,Sugar-free effervescent tablets for pain and inflammation.,31306711000001103,31279711000001105
+NAPRO250GR56,Naproxen Gastro-resistant Tablets,Anti-inflammatory,250mg,56,Gastro-resistant tablets for pain and inflammation.,42107411000001102,1001411000001102
+NAPRO250TAB28,Naproxen Tablets,Anti-inflammatory,250mg,28,Standard naproxen tablets for pain and swelling.,42107511000001103,1204111000001102
+NAPRO250SUS100,Naproxen Oral Suspension,Anti-inflammatory,250mg/5ml,100ml,Oral suspension for paediatric pain and inflammation.,8669711000001109,33743811000001104
+NAPRO375GR56,Naproxen Gastro-resistant Tablets,Anti-inflammatory,375mg,56,Gastro-resistant tablets for chronic pain and inflammation.,36564511000001103,1240511000001105
+NAPRO500ESOM60,Naproxen/Eesomeprazole Modified-release Tablets,Anti-inflammatory,500mg/20mg,60,Combination modified-release tablets for pain and gastric protection.,18245811000001107,18233511000001106
+NAPRO500GR56,Naproxen Gastro-resistant Tablets,Anti-inflammatory,500mg,56,Gastro-resistant tablets for pain and inflammation.,42107611000001104,1212011000001107
+NAPRO500TAB28,Naproxen Tablets,Anti-inflammatory,500mg,28,Standard naproxen tablets for pain and swelling.,42107811000001100,1250511000001108
+CARB974GEL10,Carbomer Eye Gel,Topical,0.25%,10g,Eye gel for lubrication and dry eye relief.,5611711000001103,5609411000001107
+CARB980DROP10,Carbomer Eye Drops,Topical,0.2%,10g,Eye drops for lubrication and dry eye relief.,42186211000001104,3150611000001101
+CARB980UD30,Carbomer Eye Drops Unit Dose,Topical,0.2%,30,Preservative-free unit-dose eye drops for dry eye relief.,37082811000001108,5008011000001104
+IBUPR10GEL100,Ibuprofen Gel,Topical,10%,100g,High-strength ibuprofen gel for targeted pain relief.,41740611000001102,1062311000001101
+IBUPR100CHEW12,Ibuprofen Chewable Capsules,Analgesic,100mg,12,Chewable ibuprofen capsules for pain relief.,32392411000001107,32390711000001100
+IBUPR200CAP30,Ibuprofen Capsules,Analgesic,200mg,30,Ibuprofen capsules for pain and inflammation.,42104711000001101,3917211000001106
+IBUPR200PLAST2,Ibuprofen Medicated Plasters,Topical,200mg,2,Medicated plasters for targeted pain relief.,35776211000001101,35748111000001107
+IBUPR200PLAST4,Ibuprofen Medicated Plasters,Topical,200mg,4,Medicated plasters for targeted pain relief.,35776211000001101,35748211000001101
+IBUPR200ODT12,Ibuprofen Orodispersible Tablets,Analgesic,200mg,12,Orodispersible ibuprofen tablets for rapid pain relief.,3875511000001104,3869011000001104
+IBUPR200TAB24,Ibuprofen Tablets,Analgesic,200mg,24,Standard ibuprofen tablets for pain and inflammation.,42104811000001109,1116511000001101
+IBUPR200TAB84,Ibuprofen Tablets,Analgesic,200mg,84,Standard ibuprofen tablets for pain and inflammation.,42104811000001109,1261711000001103
+IBUPR200SUS100,Ibuprofen Oral Suspension,Analgesic,200mg/5ml,100ml,Sugar-free ibuprofen suspension for pain and fever.,36608611000001101,36602911000001109
+IBUPR300CAP24,Ibuprofen Modified-release Capsules,Analgesic,300mg,24,Modified-release capsules for prolonged pain relief.,36045311000001100,3158311000001108
+IBUPR400CAP20,Ibuprofen Capsules,Analgesic,400mg,20,High-strength ibuprofen capsules for pain relief.,10774611000001104,10752311000001104
+IBUPR400TAB24,Ibuprofen Tablets,Analgesic,400mg,24,High-strength ibuprofen tablets for pain relief.,42104911000001104,948611000001108
+IBUPR400TAB84,Ibuprofen Tablets,Analgesic,400mg,84,High-strength ibuprofen tablets for pain relief.,42104911000001104,1274111000001106
+IBUPR5LMGEL30,Ibuprofen/Levomenthol Gel,Topical,5%/3%,30g,Cooling gel combining ibuprofen and levomenthol.,41740711000001106,3597311000001108
+IBUPR5LMGEL50,Ibuprofen/Levomenthol Gel,Topical,5%/3%,50g,Cooling gel combining ibuprofen and levomenthol.,41740711000001106,3597011000001105
+IBUPR5LMGEL100,Ibuprofen/Levomenthol Gel,Topical,5%/3%,100g,Cooling gel combining ibuprofen and levomenthol.,41740711000001106,3597111000001106
+IBUPR5GEL50,Ibuprofen Gel,Topical,5%,50g,Low-strength ibuprofen gel for pain relief.,41740811000001103,1309911000001108
+IBUPR5GEL100,Ibuprofen Gel,Topical,5%,100g,Low-strength ibuprofen gel for pain relief.,41740811000001103,1202111000001105
+IBUPR5SPRAY35,Ibuprofen Spray,Topical,5%,35ml,Ibuprofen spray for targeted pain relief.,42105111000001103,1029111000001104
+IBUPR5SPRAY100,Ibuprofen Spray,Topical,5%,100ml,Ibuprofen spray for targeted pain relief.,42105111000001103,1091111000001105
+IBUPR600SACH20,Ibuprofen Effervescent Granules,Analgesic,600mg,20,Sachets for rapid ibuprofen absorption.,42105211000001109,3238811000001101
+IBUPR600TAB84,Ibuprofen Tablets,Analgesic,600mg,84,High-strength ibuprofen tablets for severe pain.,42105311000001101,1069911000001105
+IBUPR800TAB56,Ibuprofen Modified-release Tablets,Analgesic,800mg,56,Modified-release tablets for prolonged pain relief.,39110311000001101,971811000001102
+DICLO0DROP5,Diclofenac Eye Drops,Anti-inflammatory,0.1%,5ml,Eye drops for inflammation and pain relief.,4652311000001109,4637311000001105
+DICLO0UD40,Diclofenac Eye Drops Unit Dose,Anti-inflammatory,0.1%,40,Preservative-free unit-dose eye drops for inflammation.,36098011000001102,3834511000001103
+DICLO100SUP10,Diclofenac Suppositories,Anti-inflammatory,100mg,10,Suppositories for pain and inflammation relief.,42101311000001103,955411000001103
+DICLO12SUP10,Diclofenac Suppositories,Anti-inflammatory,12.5mg,10,Low-dose suppositories for pain and inflammation.,35313311000001107,1108611000001103
+DICLO140PLAST5,Diclofenac Medicated Plasters,Topical,140mg,5,Medicated plasters for targeted pain relief.,30318011000001108,30246611000001103
+DICLO25SUP10,Diclofenac Suppositories,Anti-inflammatory,25mg,10,Suppositories for pain and inflammation relief.,42101411000001105,1070511000001101
+DICLO50SUP10,Diclofenac Suppositories,Anti-inflammatory,50mg,10,Suppositories for pain and inflammation relief.,42101511000001109,994011000001101
+DICLO75INJ10,Diclofenac Injection Ampoules,Anti-inflammatory,75mg/3ml,10,Injection for acute pain and inflammation.,36098111000001101,1325511000001109
+DICLO116GEL100,Diclofenac Diethylammonium Gel,Topical,1.16%,100g,Gel for targeted anti-inflammatory relief.,37899511000001101,2893211000001102
+DICLO232GEL30,Diclofenac Diethylammonium Gel,Topical,2.32%,30g,High-strength gel for targeted pain relief.,22480211000001104,22479511000001101
+DICLO232GEL50,Diclofenac Diethylammonium Gel,Topical,2.32%,50g,High-strength gel for targeted pain relief.,22480211000001104,22479411000001100
+DICLO232GEL100,Diclofenac Diethylammonium Gel,Topical,2.32%,100g,High-strength gel for targeted pain relief.,22480211000001104,26352411000001101
+DICLO50POT30,Diclofenac Potassium Tablets,Anti-inflammatory,50mg,30,Fast-acting diclofenac potassium tablets.,42101711000001104,10485711000001109
+DICLO1GEL100,Diclofenac Sodium Gel,Topical,1%,100g,Gel for targeted anti-inflammatory relief.,37899411000001100,37897311000001102
+DICLO100CAP28,Diclofenac Modified-release Capsules,Anti-inflammatory,100mg,28,Modified-release capsules for prolonged pain relief.,37084611000001101,1299211000001109
+DICLO100TAB28,Diclofenac Modified-release Tablets,Anti-inflammatory,100mg,28,Modified-release tablets for prolonged pain relief.,36563711000001106,1061411000001103
+DICLO25GR84,Diclofenac Gastro-resistant Tablets,Anti-inflammatory,25mg,84,Gastro-resistant tablets for pain and inflammation.,36566511000001109,1179911000001108
+DICLO3GEL50,Diclofenac Sodium Gel,Topical,3%,50g,High-strength gel for targeted pain relief.,41738811000001101,13890611000001102
+DICLO50MIS60,Diclofenac/Misoprostol Tablets,Anti-inflammatory,50mg/200mcg,60,Combination tablets for pain relief and gastric protection.,42101811000001107,3159711000001103
+DICLO50GR28,Diclofenac Gastro-resistant Tablets,Anti-inflammatory,50mg,28,Gastro-resistant tablets for pain and inflammation.,42101911000001102,1235911000001106
+DICLO75MIS60,Diclofenac/Misoprostol Tablets,Anti-inflammatory,75mg/200mcg,60,Combination tablets for pain relief and gastric protection.,42102011000001109,3160711000001102
+DICLO75CAP56,Diclofenac Modified-release Capsules,Anti-inflammatory,75mg,56,Modified-release capsules for prolonged pain relief.,42102111000001105,3953111000001104
+DICLO75CAPMR56,Diclofenac Modified-release Capsules,Anti-inflammatory,75mg,56,Modified-release capsules for prolonged pain relief.,37084911000001107,1145711000001108
+DICLO75TABMR28,Diclofenac Modified-release Tablets,Anti-inflammatory,75mg,28,Modified-release tablets for prolonged pain relief.,39024511000001101,1219911000001101
+DICLO75TABMR56,Diclofenac Modified-release Tablets,Anti-inflammatory,75mg,56,Modified-release tablets for prolonged pain relief.,39024511000001101,1088811000001105
+CODEI15TAB28,Codeine Tablets,Analgesic,15mg,28,Low-dose codeine tablets for pain relief.,42010311000001103,1316211000001105
+CODEI15TAB100,Codeine Tablets,Analgesic,15mg,100,Low-dose codeine tablets for pain relief.,42010311000001103,1307711000001103
+CODEI15LIN200,Codeine Linctus,Analgesic,15mg/5ml,200ml,Linctus for cough and pain relief.,15065911000001106,1097111000001103
+CODEI15LINSF200,Codeine Linctus Sugar Free,Analgesic,15mg/5ml,200ml,Sugar-free linctus for cough and pain relief.,38896411000001100,3444911000001104
+CODEI30TAB100,Codeine Tablets,Analgesic,30mg,100,Standard codeine tablets for pain relief.,42010411000001105,1022311000001105
+CODEI60TAB28,Codeine Tablets,Analgesic,60mg,28,High-strength codeine tablets for severe pain.,42010511000001109,942511000001107
+TRAMA100CAP60,Tramadol Modified-release Capsules,Analgesic,100mg,60,Modified-release capsules for chronic pain relief.,35920211000001106,1040311000001108
+TRAMA100INJ5,Tramadol Injection Ampoules,Analgesic,100mg/2ml,5,Injection for acute pain management.,35920411000001105,1141411000001100
+TRAMA150CAP60,Tramadol Modified-release Capsules,Analgesic,150mg,60,Modified-release capsules for chronic pain relief.,35920511000001109,1234711000001105
+TRAMA200CAP60,Tramadol Modified-release Capsules,Analgesic,200mg,60,Modified-release capsules for chronic pain relief.,35920711000001104,944111000001106
+TRAMA375PARA60,Tramadol/Paracetamol Tablets,Analgesic,37.5mg/325mg,60,Combination tablets for pain relief.,7386811000001106,7381511000001104
+TRAMA50CAP100,Tramadol Capsules,Analgesic,50mg,100,Standard tramadol capsules for pain relief.,42017811000001106,1053111000001101
+TRAMA50CAPMR60,Tramadol Modified-release Capsules,Analgesic,50mg,60,Modified-release capsules for prolonged pain relief.,35940111000001103,1161211000001108
+TRAMA50TABMR60,Tramadol Modified-release Tablets,Analgesic,50mg,60,Modified-release tablets for prolonged pain relief.,12037411000001103,11985211000001105
+TRAMA50ODT60,Tramadol Orodispersible Tablets,Analgesic,50mg,60,Orodispersible tablets for rapid pain relief.,5212811000001100,8480911000001101
+TRAMA50SOL100,Tramadol Soluble Tablets,Analgesic,50mg,100,Sugar-free soluble tablets for pain relief.,39714911000001102,1234111000001109
+TRAMA75DEX20,Tramadol/Dexketoprofen Tablets,Analgesic,75mg/25mg,20,Combination tablets for pain and inflammation.,35029711000001104,35028911000001105
+DOXY100TAB8,Doxycycline Tablets,Antibiotic,100mg,8,Short-course doxycycline tablets for bacterial infections.,39710311000001106,2847111000001109
+DOXY20TAB56,Doxycycline Tablets,Antibiotic,20mg,56,Low-dose doxycycline tablets for chronic conditions.,41948511000001105,3959311000001104
+DOXY40CAP14,Doxycycline Modified-release Capsules,Antibiotic,40mg,14,Modified-release capsules for chronic conditions.,36564611000001104,21027711000001109
+DOXY50CAP28,Doxycycline Capsules,Antibiotic,50mg,28,Standard doxycycline capsules for bacterial infections.,41948611000001109,2847411000001104
+FLUC150PACK1,Fluconazole/Clotrimazole Pack,Antifungal,150mg/2%,1,Combined antifungal capsule and cream pack.,38894611000001106,7389211000001101
+FLUC200CAP7,Fluconazole Capsules,Antifungal,200mg,7,High-dose fluconazole capsules for fungal infections.,41787111000001103,1038011000001108
+FLUC200SUS35,Fluconazole Oral Suspension,Antifungal,200mg/5ml,35ml,Oral suspension for fungal infections.,41787211000001109,1103111000001102
+FLUC50CAP7,Fluconazole Capsules,Antifungal,50mg,7,Low-dose fluconazole capsules for fungal infections.,41787311000001101,1142111000001100
+FLUC50SUS35,Fluconazole Oral Suspension,Antifungal,50mg/5ml,35ml,Oral suspension for fungal infections.,41787411000001108,1291911000001104
+LORAT5SUS100,Loratadine Oral Solution,Antihistamine,5mg/5ml,100ml,Oral solution for allergy relief.,38896711000001106,3327611000001105
+FEXOF120TAB30,Fexofenadine Tablets,Antihistamine,120mg,30,Non-drowsy antihistamine tablets.,42189111000001102,1201511000001109
+FEXOF30TAB60,Fexofenadine Tablets,Antihistamine,30mg,60,Low-dose antihistamine tablets.,42189311000001100,4722511000001107
+SALBUT100BAI200,Salbutamol Breath Actuated Inhaler,Respiratory,100mcg,200,Breath-actuated inhaler for asthma relief.,39112711000001103,3213411000001104
+SALBUT100DPI200,Salbutamol Dry Powder Inhaler,Respiratory,100mcg,200,Dry powder inhaler for asthma relief.,9207411000001106,9205111000001105
+SALBUT100INH150,Salbutamol Inhaler,Respiratory,100mcg,200,CFC-free inhaler for asthma relief.,39113611000001102,1056811000001104
+SALBUT25NEB20,Salbutamol Nebuliser Liquid,Respiratory,2.5mg/2.5ml,20,Unit-dose nebuliser liquid for asthma relief.,43207011000001101,43188511000001109
+SALBUT200DPI60,Salbutamol Dry Powder Inhaler,Respiratory,200mcg,60,Dry powder inhaler for asthma relief.,39113311000001107,3382311000001108
+SALBUT200DPI200,Salbutamol Dry Powder Inhaler,Respiratory,200mcg,200,Dry powder inhaler for asthma relief.,39113311000001107,9204811000001104
+SALBUT2TAB28,Salbutamol Tablets,Respiratory,2mg,28,Oral salbutamol tablets for bronchodilation.,42297511000001102,1277511000001105
+SALBUT2SUS150,Salbutamol Oral Solution,Respiratory,2mg/5ml,150ml,Sugar-free oral solution for asthma relief.,39109411000001101,1182211000001103
+SALBUT4TAB28,Salbutamol Tablets,Respiratory,4mg,28,Oral salbutamol tablets for bronchodilation.,39703611000001107,949411000001102
+SALBUT500INJ5,Salbutamol Injection Ampoules,Respiratory,500mcg/1ml,5,Injection for acute asthma management.,38895911000001101,3926811000001103
+SALBUT5NEB20,Salbutamol Nebuliser Liquid,Respiratory,5mg/2.5ml,20,Unit-dose nebuliser liquid for asthma relief.,43207111000001100,43188811000001107
+SALBUT5NEBV20,Salbutamol Nebuliser Vials,Respiratory,5mg/2.5ml,20,Nebuliser vials for asthma relief.,39710011000001108,3379211000001101
+SALBUT5INF10,Salbutamol Infusion Ampoules,Respiratory,5mg/5ml,10,Ampoules for salbutamol infusion therapy.,39025311000001106,1116211000001104
+SALBUT5NEB20ML,Salbutamol Nebuliser Liquid,Respiratory,5mg/ml,20ml,Nebuliser liquid for asthma relief.,39709511000001105,4843611000001101
+BECLO025CRM30,Beclometasone Cream,Respiratory,0.025%,30g,Cream for inflammatory skin conditions.,41891111000001107,1249911000001109
+BECLO025OINT30,Beclometasone Ointment,Respiratory,0.025%,30g,Ointment for inflammatory skin conditions.,41891211000001101,1204311000001100
+BECLO100FORM120,Beclometasone/Formoterol Dry Powder Inhaler,Respiratory,100mcg/6mcg,120,Dry powder inhaler for asthma control.,26148711000001101,26111011000001102
+BECLO100FORMINH120,Beclometasone/Formoterol Inhaler,Respiratory,100mcg/6mcg,120,CFC-free inhaler for asthma control.,12911011000001100,12906311000001107
+BECLO100BAI200,Beclometasone Breath Actuated Inhaler,Respiratory,100mcg,200,Breath-actuated inhaler for asthma control.,35907911000001107,3177611000001104
+BECLO100INH200,Beclometasone Inhaler,Respiratory,100mcg,200,CFC-free inhaler for asthma control.,35908111000001105,3175511000001107
+BECLO200FORM120,Beclometasone/Formoterol Dry Powder Inhaler,Respiratory,200mcg/6mcg,120,Dry powder inhaler for asthma control.,31087511000001105,31063011000001105
+BECLO200FORMINH120,Beclometasone/Formoterol Inhaler,Respiratory,200mcg/6mcg,120,CFC-free inhaler for asthma control.,31087411000001106,31063311000001108
+BECLO200DPI200,Beclometasone Dry Powder Inhaler,Respiratory,200mcg,200,Dry powder inhaler for asthma control.,35908411000001100,9525011000001109
+BECLO200INH200,Beclometasone Inhaler,Respiratory,200mcg,200,CFC-free inhaler for asthma control.,10621011000001101,10619211000001104
+BECLO250INH200,Beclometasone Inhaler,Respiratory,250mcg,200,High-dose inhaler for asthma control.,10621111000001100,10619511000001101
+BECLO50BAI200,Beclometasone Breath Actuated Inhaler,Respiratory,50mcg,200,Breath-actuated inhaler for asthma control.,35909311000001101,3177311000001109
+BECLO50INH200,Beclometasone Inhaler,Respiratory,50mcg,200,CFC-free inhaler for asthma control.,35909611000001106,3176611000001101
+BECLO50NAS200,Beclometasone Nasal Spray,Respiratory,50mcg,200,Nasal spray for allergic rhinitis.,39111911000001107,2938611000001108
+BECLO5TAB30,Beclometasone Tablets,Respiratory,5mg,30,Gastro-resistant tablets for inflammatory conditions.,11880411000001105,11835511000001108
+DEEPFREEZE50G,Deep Freeze Cold Gel,Topical,50g,1,Cooling gel for muscle and joint pain relief.,51740611000001102,2162311000001101
+ANADINEXTRA16,Anadin Extra Tablets,Analgesic,500mg/65mg,16,Fast-acting pain relief tablets combining paracetamol and caffeine.,52109611000001109,2064711000001107
+GAVISCONCHEW24,Gaviscon Chewable Tablets,Antacid,250mg,24,Chewable antacid tablets for indigestion and heartburn relief.,51787011000001104,2205911000001100
+VICKSINHALER,Vicks Nasal Inhaler,Respiratory,Standard,1,Nasal inhaler providing fast relief from nasal congestion.,53186511000001101,2225511000001102
+PIRITON10TAB,Piriton Allergy Tablets,Antihistamine,10mg,30,Allergy relief tablets for hay fever and skin allergies.,52354611000001108,2313811000001102
+CANESTEN1CREAM,Canesten Antifungal Cream,Antifungal,1%,20g,Topical antifungal cream for treating fungal skin infections.,52356411000001102,2268411000001105
+

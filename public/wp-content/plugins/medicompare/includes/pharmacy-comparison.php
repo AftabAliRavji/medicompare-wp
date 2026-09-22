@@ -714,9 +714,10 @@ class MediCompare_Pharmacy_Comparison {
     }
 
     /* ---------------------------------------------------------
-        RENDER PENDING ORDER HTML (WITH EDITABLE QTY + ✔️ UPDATE)
+    RENDER PENDING ORDER HTML (WITH MINIMUM SPEND STATUS)
     --------------------------------------------------------- */
     private function render_pending_order_html($pharmacy_id) {
+
         global $wpdb;
 
         $pending_orders_table = $wpdb->prefix . 'medi_pending_orders';
@@ -749,7 +750,10 @@ class MediCompare_Pharmacy_Comparison {
             ORDER BY s.post_title ASC, p.post_title ASC
         ";
 
-        $items = $wpdb->get_results($wpdb->prepare($sql, $pending_order_id), ARRAY_A);
+        $items = $wpdb->get_results(
+            $wpdb->prepare($sql, $pending_order_id),
+            ARRAY_A
+        );
 
         if (!$items) {
             return '<p>No items in pending order.</p>';
@@ -759,23 +763,34 @@ class MediCompare_Pharmacy_Comparison {
         $overall_total = 0;
 
         foreach ($items as $item) {
+
             $sid = $item['supplier_id'];
 
             if (!isset($grouped[$sid])) {
+
+                $minimum_spend = (float) get_post_meta(
+                    $sid,
+                    'mc_supplier_minimum_order_spend',
+                    true
+                );
+
                 $grouped[$sid] = [
-                    'supplier_name' => $item['supplier_name'],
-                    'items'         => [],
-                    'supplier_total'=> 0,
+                    'supplier_name'  => $item['supplier_name'],
+                    'items'          => [],
+                    'supplier_total' => 0,
+                    'minimum_spend'  => $minimum_spend,
                 ];
             }
 
             $grouped[$sid]['items'][] = $item;
             $grouped[$sid]['supplier_total'] += $item['line_total'];
+
             $overall_total += $item['line_total'];
         }
 
         ob_start();
         ?>
+
         <div class="mc-pending-order-wrapper">
 
             <h3 class="mc-pending-order-title">
@@ -783,6 +798,7 @@ class MediCompare_Pharmacy_Comparison {
             </h3>
 
             <table class="mc-pending-order-table mc-table-clean">
+
                 <thead>
                     <tr>
                         <th>Product</th>
@@ -795,17 +811,29 @@ class MediCompare_Pharmacy_Comparison {
                 </thead>
 
                 <tbody>
+
+                <?php
+                $has_transferable_supplier = false;
+                ?>
+
                 <?php foreach ($grouped as $supplier_id => $data): ?>
 
                     <?php foreach ($data['items'] as $item): ?>
+
                         <?php
-                            $full_label = mc_get_full_product_label($item['product_id']);
+                        $full_label = mc_get_full_product_label(
+                            $item['product_id']
+                        );
                         ?>
+
                         <tr>
-                            <td><?php echo esc_html($full_label); ?></td>
 
                             <td>
-                                <input 
+                                <?php echo esc_html($full_label); ?>
+                            </td>
+
+                            <td>
+                                <input
                                     type="number"
                                     class="mc-edit-qty"
                                     value="<?php echo (int)$item['quantity']; ?>"
@@ -815,12 +843,21 @@ class MediCompare_Pharmacy_Comparison {
                                 >
                             </td>
 
-                            <td>£<?php echo number_format($item['unit_price'], 2); ?></td>
-                            <td><?php echo esc_html($data['supplier_name']); ?></td>
-                            <td>£<?php echo number_format($item['line_total'], 2); ?></td>
+                            <td>
+                                £<?php echo number_format($item['unit_price'], 2); ?>
+                            </td>
+
+                            <td>
+                                <?php echo esc_html($data['supplier_name']); ?>
+                            </td>
+
+                            <td>
+                                £<?php echo number_format($item['line_total'], 2); ?>
+                            </td>
 
                             <td class="mc-actions">
-                                <button 
+
+                                <button
                                     type="button"
                                     class="mc-update-row"
                                     data-item-id="<?php echo esc_attr($item['id']); ?>"
@@ -829,7 +866,7 @@ class MediCompare_Pharmacy_Comparison {
                                     ✔️
                                 </button>
 
-                                <button 
+                                <button
                                     type="button"
                                     class="mc-remove-pending-item"
                                     data-item-id="<?php echo esc_attr($item['id']); ?>"
@@ -837,22 +874,93 @@ class MediCompare_Pharmacy_Comparison {
                                 >
                                     ❌
                                 </button>
+
                             </td>
+
                         </tr>
+
                     <?php endforeach; ?>
 
-                    <tr class="mc-supplier-subtotal-row">
-                        <td colspan="4" style="text-align:right; font-weight:600;">
-                            <?php echo esc_html($data['supplier_name']); ?> Total:
+                    <?php
+
+                    $minimum_spend = (float) $data['minimum_spend'];
+
+                    $supplier_total = (float) $data['supplier_total'];
+
+                    $minimum_spend_met = (
+                        $minimum_spend <= 0 ||
+                        $supplier_total >= $minimum_spend
+                    );
+
+                    if ($minimum_spend_met) {
+                        $has_transferable_supplier = true;
+                    }
+
+                    $remaining = max(
+                        0,
+                        $minimum_spend - $supplier_total
+                    );
+
+                    $row_style = $minimum_spend_met
+                        ? 'background:#e7f7ed;border-top:2px solid #46b450;'
+                        : 'background:#fdeaea;border-top:2px solid #dc3232;';
+
+                    $status_text = $minimum_spend_met
+                        ? '✅ MET'
+                        : '❌ NOT MET (£' . number_format($remaining, 2) . ' remaining)';
+
+                    ?>
+
+                    <tr class="mc-supplier-subtotal-row <?php echo $minimum_spend_met ? 'mc-min-spend-row-met' : 'mc-min-spend-row-not-met'; ?>">
+
+                        <td colspan="6" class="mc-min-spend-container">
+
+                            <div class="mc-min-spend-flex">
+
+                                <div class="mc-min-spend-left">
+
+                                    Minimum Spend:
+                                    £<?php echo number_format($minimum_spend, 2); ?>
+
+                                    <span class="mc-min-spend-separator">|</span>
+
+                                    <?php if ($minimum_spend_met): ?>
+
+                                        <span class="mc-min-spend-badge mc-min-spend-badge-met">
+                                            MET
+                                        </span>
+
+                                    <?php else: ?>
+
+                                        <span class="mc-min-spend-badge mc-min-spend-badge-not-met">
+                                            NOT MET
+                                        </span>
+
+                                        <span class="mc-min-spend-remaining">
+                                            £<?php echo number_format($remaining, 2); ?> remaining
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                </div>
+
+                                <div class="mc-min-spend-total">
+
+                                    <?php echo esc_html($data['supplier_name']); ?> Total:
+                                    £<?php echo number_format($supplier_total, 2); ?>
+
+                                </div>
+
+                            </div>
+
                         </td>
-                        <td style="font-weight:600;">
-                            £<?php echo number_format($data['supplier_total'], 2); ?>
-                        </td>
-                        <td></td>
+
                     </tr>
 
                 <?php endforeach; ?>
+
                 </tbody>
+
             </table>
 
             <p class="mc-overall-total">
@@ -861,9 +969,16 @@ class MediCompare_Pharmacy_Comparison {
             </p>
 
         </div>
-        <?php
 
-        return ob_get_clean();
+    <input
+        type="hidden"
+        id="mc-has-transferable-supplier"
+        value="<?php echo $has_transferable_supplier ? '1' : '0'; ?>"
+    >
+
+    <?php
+
+    return ob_get_clean();
     }
 
 
@@ -1038,6 +1153,46 @@ class MediCompare_Pharmacy_Comparison {
         if (!$items) {
             wp_send_json_error(['message' => 'Pending order is empty.']);
         }
+
+                /*
+        ---------------------------------------------------------
+        MINIMUM SPEND FILTER
+        ---------------------------------------------------------
+        */
+
+        $transferable_supplier_ids = get_transferable_supplier_ids($items);
+
+        if (empty($transferable_supplier_ids)) {
+
+            wp_send_json_error([
+                'message' => 'No supplier orders currently meet their minimum spend requirements.'
+            ]);
+
+        }
+
+        $transferable_items = [];
+        $remaining_items    = [];
+
+        foreach ($items as $item) {
+
+            if (
+                in_array(
+                    (int) $item['supplier_id'],
+                    $transferable_supplier_ids,
+                    true
+                )
+            ) {
+
+                $transferable_items[] = $item;
+
+            } else {
+
+                $remaining_items[] = $item;
+
+            }
+        }
+
+        $items = $transferable_items;
 
         // 1) validate supplier stock
         $insufficient = [];
@@ -1284,10 +1439,95 @@ class MediCompare_Pharmacy_Comparison {
             ['id' => $order_id]
         );
 
-        $wpdb->delete($pending_items_table, ['pending_order_id' => $pending_order_id]);
-        $wpdb->delete($pending_orders_table, ['id' => $pending_order_id]);
+        /*
+        ---------------------------------------------------------
+        REMOVE ONLY TRANSFERRED ITEMS
+        ---------------------------------------------------------
+        */
 
-        wp_send_json_success(['message' => 'Order transferred successfully.']);
+        foreach ($transferable_supplier_ids as $supplier_id) {
+
+            $wpdb->delete(
+                $pending_items_table,
+                [
+                    'pending_order_id' => $pending_order_id,
+                    'supplier_id'      => $supplier_id,
+                ]
+            );
+        }
+
+        /*
+        ---------------------------------------------------------
+        IF NO PENDING ITEMS REMAIN, REMOVE HEADER RECORD
+        ---------------------------------------------------------
+        */
+
+        $remaining_item_count = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "
+                SELECT COUNT(*)
+                FROM {$pending_items_table}
+                WHERE pending_order_id = %d
+                ",
+                $pending_order_id
+            )
+        );
+
+        if ($remaining_item_count === 0) {
+
+            $wpdb->delete(
+                $pending_orders_table,
+                [
+                    'id' => $pending_order_id
+                ]
+            );
+
+        }
+
+        /*
+        ---------------------------------------------------------
+        USER MESSAGE
+        ---------------------------------------------------------
+        */
+
+        $transferred_supplier_count = count(
+            $transferable_supplier_ids
+        );
+
+        $remaining_supplier_count = 0;
+
+        if (!empty($remaining_items)) {
+
+            $remaining_supplier_count = count(
+                array_unique(
+                    array_column(
+                        $remaining_items,
+                        'supplier_id'
+                    )
+                )
+            );
+        }
+
+        if ($remaining_supplier_count > 0) {
+
+            wp_send_json_success([
+                'message' =>
+                    sprintf(
+                        '%d supplier order(s) transferred successfully. %d supplier order(s) remain in Pending Orders because their minimum spend requirement has not yet been met.',
+                        $transferred_supplier_count,
+                        $remaining_supplier_count
+                    )
+            ]);
+
+        }
+
+        wp_send_json_success([
+            'message' =>
+                sprintf(
+                    '%d supplier order(s) transferred successfully.',
+                    $transferred_supplier_count
+                )
+        ]);
     }
 
 /* ---------------------------------------------------------

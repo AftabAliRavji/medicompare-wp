@@ -2193,27 +2193,80 @@ body.page-id-71 .mc-search-left {
     text-transform: uppercase;
 }
 
+/* ---------------------------------------------------------
+   MINIMUM SPEND ROWS
+--------------------------------------------------------- */
 
+.mc-min-spend-row-met td {
+    background: #eef9f1 !important;
+    border-top: 2px solid #2e8b57 !important;
+}
 
+.mc-min-spend-row-not-met td {
+    background: #fff2f2 !important;
+    border-top: 2px solid #cc0000 !important;
+}
 
+.mc-min-spend-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+}
 
+.mc-min-spend-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
 
+.mc-min-spend-total {
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 700;
+}
 
+.mc-min-spend-separator {
+    opacity: 0.5;
+}
 
+.mc-min-spend-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
+    padding: 3px 10px;
 
+    border-radius: 999px;
 
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
 
+    margin: 0 6px;
 
+    text-align: center;
+}
 
+.mc-min-spend-badge-met {
+    background: #2e8b57;
+    color: #ffffff;
 
+    min-width: 52px;
+}
 
+.mc-min-spend-badge-not-met {
+    background: #cc0000;
+    color: #ffffff;
 
+    min-width: 72px;
+}
 
-
-
-
-
-
-
-
+.mc-min-spend-remaining {
+    color: #7a0000;
+    font-weight: 600;
+}

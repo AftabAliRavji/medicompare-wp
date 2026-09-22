@@ -2015,6 +2015,45 @@ function gmail_extract_html_recursive($parts) {
     return $best;
 }
 
+/* ---------------------------------------------------------
+   GET SUPPLIERS THAT HAVE MET MINIMUM SPEND
+--------------------------------------------------------- */
+ function get_transferable_supplier_ids($items) {
+
+    $supplier_totals = [];
+
+    foreach ($items as $item) {
+
+        $supplier_id = (int) $item['supplier_id'];
+
+        if (!isset($supplier_totals[$supplier_id])) {
+            $supplier_totals[$supplier_id] = 0;
+        }
+
+        $supplier_totals[$supplier_id] += (float) $item['line_total'];
+    }
+
+    $transferable_supplier_ids = [];
+
+    foreach ($supplier_totals as $supplier_id => $supplier_total) {
+
+        $minimum_spend = (float) get_post_meta(
+            $supplier_id,
+            'mc_supplier_minimum_order_spend',
+            true
+        );
+
+        if (
+            $minimum_spend <= 0 ||
+            $supplier_total >= $minimum_spend
+        ) {
+            $transferable_supplier_ids[] = $supplier_id;
+        }
+    }
+
+    return $transferable_supplier_ids;
+}
+
 
 
     //for debug only

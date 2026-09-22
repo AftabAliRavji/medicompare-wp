@@ -1,25 +1,30 @@
 <?php
-if (!defined('ABSPATH')) exit;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class MediCompare_Supplier_CPT {
 
     /* ---------------------------------------------------------
        META KEYS
     --------------------------------------------------------- */
-    const META_EMAIL     = 'mc_supplier_email';
-    const META_PHONE     = 'mc_supplier_phone';
-    const META_CODE      = 'mc_supplier_code';
-    const META_STATUS    = 'mc_supplier_status';
-    const META_MANAGER   = 'mc_supplier_manager';
 
-    const META_ADDR1     = 'mc_supplier_address_1';
-    const META_ADDR2     = 'mc_supplier_address_2';
-    const META_CITY      = 'mc_supplier_city';
-    const META_COUNTY    = 'mc_supplier_county';
-    const META_POSTCODE  = 'mc_supplier_postcode';
-    const META_COUNTRY   = 'mc_supplier_country';
+    const META_EMAIL         = 'mc_supplier_email';
+    const META_PHONE         = 'mc_supplier_phone';
+    const META_CODE          = 'mc_supplier_code';
+    const META_STATUS        = 'mc_supplier_status';
+    const META_MANAGER       = 'mc_supplier_manager';
+    const META_MINIMUM_SPEND = 'mc_supplier_minimum_order_spend';
 
-    const META_AUTO_SEND = 'mc_auto_send_commission_email'; // ⭐ NEW
+    const META_ADDR1         = 'mc_supplier_address_1';
+    const META_ADDR2         = 'mc_supplier_address_2';
+    const META_CITY          = 'mc_supplier_city';
+    const META_COUNTY        = 'mc_supplier_county';
+    const META_POSTCODE      = 'mc_supplier_postcode';
+    const META_COUNTRY       = 'mc_supplier_country';
+
+    const META_AUTO_SEND     = 'mc_auto_send_commission_email';
 
     public function __construct() {
 
@@ -28,15 +33,33 @@ class MediCompare_Supplier_CPT {
         add_action('add_meta_boxes', [$this, 'register_meta_boxes']);
         add_action('save_post_mc_supplier', [$this, 'save_meta'], 10, 2);
 
-        add_filter('manage_mc_supplier_posts_columns', [$this, 'add_admin_columns']);
-        add_action('manage_mc_supplier_posts_custom_column', [$this, 'render_admin_columns'], 10, 2);
+        add_filter(
+            'manage_mc_supplier_posts_columns',
+            [$this, 'add_admin_columns']
+        );
 
-        add_filter('manage_edit-mc_supplier_sortable_columns', [$this, 'sortable_columns']);
+        add_action(
+            'manage_mc_supplier_posts_custom_column',
+            [$this, 'render_admin_columns'],
+            10,
+            2
+        );
+
+        add_filter(
+            'manage_edit-mc_supplier_sortable_columns',
+            [$this, 'sortable_columns']
+        );
+
+        add_action(
+            'pre_get_posts',
+            [$this, 'handle_admin_column_sorting']
+        );
     }
 
     /* ---------------------------------------------------------
        REGISTER CPT
     --------------------------------------------------------- */
+
     public function register_cpt() {
 
         $labels = [
@@ -54,12 +77,12 @@ class MediCompare_Supplier_CPT {
         ];
 
         $args = [
-            'labels'             => $labels,
-            'public'             => false,
-            'show_ui'            => true,
-            'show_in_menu'       => false,
-            'supports'           => ['title'],
-            'menu_icon'          => 'dashicons-groups',
+            'labels'       => $labels,
+            'public'       => false,
+            'show_ui'      => true,
+            'show_in_menu' => false,
+            'supports'     => ['title'],
+            'menu_icon'    => 'dashicons-groups',
         ];
 
         register_post_type('mc_supplier', $args);
@@ -68,6 +91,7 @@ class MediCompare_Supplier_CPT {
     /* ---------------------------------------------------------
        META BOXES
     --------------------------------------------------------- */
+
     public function register_meta_boxes() {
 
         add_meta_box(
@@ -91,62 +115,216 @@ class MediCompare_Supplier_CPT {
 
     public function render_meta_box($post) {
 
-        wp_nonce_field('mc_supplier_save_meta', 'mc_supplier_meta_nonce');
+        wp_nonce_field(
+            'mc_supplier_save_meta',
+            'mc_supplier_meta_nonce'
+        );
 
-        $email     = get_post_meta($post->ID, self::META_EMAIL, true);
-        $phone     = get_post_meta($post->ID, self::META_PHONE, true);
-        $code      = get_post_meta($post->ID, self::META_CODE, true);
-        $status    = get_post_meta($post->ID, self::META_STATUS, true) ?: 'active';
-        $manager   = get_post_meta($post->ID, self::META_MANAGER, true);
-        $auto_send = get_post_meta($post->ID, self::META_AUTO_SEND, true); // ⭐ NEW
+        $email = get_post_meta(
+            $post->ID,
+            self::META_EMAIL,
+            true
+        );
+
+        $phone = get_post_meta(
+            $post->ID,
+            self::META_PHONE,
+            true
+        );
+
+        $code = get_post_meta(
+            $post->ID,
+            self::META_CODE,
+            true
+        );
+
+        $status = get_post_meta(
+            $post->ID,
+            self::META_STATUS,
+            true
+        );
+
+        if ($status === '') {
+            $status = 'active';
+        }
+
+        $manager = get_post_meta(
+            $post->ID,
+            self::META_MANAGER,
+            true
+        );
+
+        $minimum_spend = get_post_meta(
+            $post->ID,
+            self::META_MINIMUM_SPEND,
+            true
+        );
+
+        if ($minimum_spend === '') {
+            $minimum_spend = '0.00';
+        }
+
+        $auto_send = get_post_meta(
+            $post->ID,
+            self::META_AUTO_SEND,
+            true
+        );
 
         ?>
         <table class="form-table">
 
             <tr>
-                <th>Email</th>
-                <td><input type="email" name="mc_supplier_email" class="regular-text"
-                           value="<?php echo esc_attr($email); ?>"></td>
-            </tr>
+                <th>
+                    <label for="mc_supplier_email">
+                        Email
+                    </label>
+                </th>
 
-            <tr>
-                <th>Phone</th>
-                <td><input type="text" name="mc_supplier_phone" class="regular-text"
-                           value="<?php echo esc_attr($phone); ?>"></td>
-            </tr>
-
-            <tr>
-                <th>Account Manager</th>
-                <td><input type="text" name="mc_supplier_manager" class="regular-text"
-                           value="<?php echo esc_attr($manager); ?>"></td>
-            </tr>
-
-            <tr>
-                <th>Supplier Code</th>
-                <td><input type="text" name="mc_supplier_code" class="regular-text"
-                           value="<?php echo esc_attr($code); ?>"></td>
-            </tr>
-
-            <tr>
-                <th>Status</th>
                 <td>
-                    <select name="mc_supplier_status">
-                        <option value="active"    <?php selected($status, 'active'); ?>>Active</option>
-                        <option value="suspended" <?php selected($status, 'suspended'); ?>>Suspended</option>
-                        <option value="test"      <?php selected($status, 'test'); ?>>Test</option>
+                    <input
+                        type="email"
+                        id="mc_supplier_email"
+                        name="mc_supplier_email"
+                        class="regular-text"
+                        value="<?php echo esc_attr($email); ?>"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    <label for="mc_supplier_phone">
+                        Phone
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_phone"
+                        name="mc_supplier_phone"
+                        class="regular-text"
+                        value="<?php echo esc_attr($phone); ?>"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    <label for="mc_supplier_manager">
+                        Account Manager
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_manager"
+                        name="mc_supplier_manager"
+                        class="regular-text"
+                        value="<?php echo esc_attr($manager); ?>"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    <label for="mc_supplier_code">
+                        Supplier Code
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_code"
+                        name="mc_supplier_code"
+                        class="regular-text"
+                        value="<?php echo esc_attr($code); ?>"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    <label for="mc_supplier_minimum_order_spend">
+                        Minimum Order Spend
+                    </label>
+                </th>
+
+                <td>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span aria-hidden="true">£</span>
+
+                        <input
+                            type="number"
+                            id="mc_supplier_minimum_order_spend"
+                            name="mc_supplier_minimum_order_spend"
+                            class="small-text"
+                            value="<?php echo esc_attr($minimum_spend); ?>"
+                            min="0"
+                            step="0.01"
+                            inputmode="decimal"
+                        >
+                    </div>
+
+                    <p class="description">
+                        Enter the minimum supplier order value. Use 0.00 if this
+                        supplier has no minimum order requirement.
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    <label for="mc_supplier_status">
+                        Status
+                    </label>
+                </th>
+
+                <td>
+                    <select
+                        id="mc_supplier_status"
+                        name="mc_supplier_status"
+                    >
+                        <option
+                            value="active"
+                            <?php selected($status, 'active'); ?>
+                        >
+                            Active
+                        </option>
+
+                        <option
+                            value="suspended"
+                            <?php selected($status, 'suspended'); ?>
+                        >
+                            Suspended
+                        </option>
+
+                        <option
+                            value="test"
+                            <?php selected($status, 'test'); ?>
+                        >
+                            Test
+                        </option>
                     </select>
                 </td>
             </tr>
 
-            <!-- ⭐ NEW: Auto-send toggle -->
             <tr>
-                <th>Auto-send Commission Email</th>
+                <th>
+                    Auto-send Commission Email
+                </th>
+
                 <td>
                     <label>
-                        <input type="checkbox"
-                               name="mc_auto_send_commission_email"
-                               value="yes"
-                               <?php checked($auto_send, 'yes'); ?>>
+                        <input
+                            type="checkbox"
+                            name="mc_auto_send_commission_email"
+                            value="yes"
+                            <?php checked($auto_send, 'yes'); ?>
+                        >
+
                         Automatically send commission report every 7 days
                     </label>
                 </td>
@@ -158,50 +336,155 @@ class MediCompare_Supplier_CPT {
 
     public function render_address_meta_box($post) {
 
-        $addr1    = get_post_meta($post->ID, self::META_ADDR1, true);
-        $addr2    = get_post_meta($post->ID, self::META_ADDR2, true);
-        $city     = get_post_meta($post->ID, self::META_CITY, true);
-        $county   = get_post_meta($post->ID, self::META_COUNTY, true);
-        $postcode = get_post_meta($post->ID, self::META_POSTCODE, true);
-        $country  = get_post_meta($post->ID, self::META_COUNTRY, true) ?: 'United Kingdom';
+        $addr1 = get_post_meta(
+            $post->ID,
+            self::META_ADDR1,
+            true
+        );
+
+        $addr2 = get_post_meta(
+            $post->ID,
+            self::META_ADDR2,
+            true
+        );
+
+        $city = get_post_meta(
+            $post->ID,
+            self::META_CITY,
+            true
+        );
+
+        $county = get_post_meta(
+            $post->ID,
+            self::META_COUNTY,
+            true
+        );
+
+        $postcode = get_post_meta(
+            $post->ID,
+            self::META_POSTCODE,
+            true
+        );
+
+        $country = get_post_meta(
+            $post->ID,
+            self::META_COUNTRY,
+            true
+        );
+
+        if ($country === '') {
+            $country = 'United Kingdom';
+        }
 
         ?>
         <table class="form-table">
 
             <tr>
-                <th>Address Line 1</th>
-                <td><input type="text" name="mc_supplier_address_1" class="regular-text"
-                           value="<?php echo esc_attr($addr1); ?>"></td>
+                <th>
+                    <label for="mc_supplier_address_1">
+                        Address Line 1
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_address_1"
+                        name="mc_supplier_address_1"
+                        class="regular-text"
+                        value="<?php echo esc_attr($addr1); ?>"
+                    >
+                </td>
             </tr>
 
             <tr>
-                <th>Address Line 2</th>
-                <td><input type="text" name="mc_supplier_address_2" class="regular-text"
-                           value="<?php echo esc_attr($addr2); ?>"></td>
+                <th>
+                    <label for="mc_supplier_address_2">
+                        Address Line 2
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_address_2"
+                        name="mc_supplier_address_2"
+                        class="regular-text"
+                        value="<?php echo esc_attr($addr2); ?>"
+                    >
+                </td>
             </tr>
 
             <tr>
-                <th>City</th>
-                <td><input type="text" name="mc_supplier_city" class="regular-text"
-                           value="<?php echo esc_attr($city); ?>"></td>
+                <th>
+                    <label for="mc_supplier_city">
+                        City
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_city"
+                        name="mc_supplier_city"
+                        class="regular-text"
+                        value="<?php echo esc_attr($city); ?>"
+                    >
+                </td>
             </tr>
 
             <tr>
-                <th>County</th>
-                <td><input type="text" name="mc_supplier_county" class="regular-text"
-                           value="<?php echo esc_attr($county); ?>"></td>
+                <th>
+                    <label for="mc_supplier_county">
+                        County
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_county"
+                        name="mc_supplier_county"
+                        class="regular-text"
+                        value="<?php echo esc_attr($county); ?>"
+                    >
+                </td>
             </tr>
 
             <tr>
-                <th>Postcode</th>
-                <td><input type="text" name="mc_supplier_postcode" class="regular-text"
-                           value="<?php echo esc_attr($postcode); ?>"></td>
+                <th>
+                    <label for="mc_supplier_postcode">
+                        Postcode
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_postcode"
+                        name="mc_supplier_postcode"
+                        class="regular-text"
+                        value="<?php echo esc_attr($postcode); ?>"
+                    >
+                </td>
             </tr>
 
             <tr>
-                <th>Country</th>
-                <td><input type="text" name="mc_supplier_country" class="regular-text"
-                           value="<?php echo esc_attr($country); ?>"></td>
+                <th>
+                    <label for="mc_supplier_country">
+                        Country
+                    </label>
+                </th>
+
+                <td>
+                    <input
+                        type="text"
+                        id="mc_supplier_country"
+                        name="mc_supplier_country"
+                        class="regular-text"
+                        value="<?php echo esc_attr($country); ?>"
+                    >
+                </td>
             </tr>
 
         </table>
@@ -211,67 +494,197 @@ class MediCompare_Supplier_CPT {
     /* ---------------------------------------------------------
        SAVE META
     --------------------------------------------------------- */
+
     public function save_meta($post_id, $post) {
 
-        if (!isset($_POST['mc_supplier_meta_nonce']) ||
-            !wp_verify_nonce($_POST['mc_supplier_meta_nonce'], 'mc_supplier_save_meta')) {
+        if (
+            !isset($_POST['mc_supplier_meta_nonce']) ||
+            !wp_verify_nonce(
+                sanitize_text_field(
+                    wp_unslash($_POST['mc_supplier_meta_nonce'])
+                ),
+                'mc_supplier_save_meta'
+            )
+        ) {
             return;
         }
 
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if ($post->post_type !== 'mc_supplier') return;
+        if (
+            defined('DOING_AUTOSAVE') &&
+            DOING_AUTOSAVE
+        ) {
+            return;
+        }
+
+        if ($post->post_type !== 'mc_supplier') {
+            return;
+        }
+
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
+        $minimum_spend_raw = isset(
+            $_POST['mc_supplier_minimum_order_spend']
+        )
+            ? wp_unslash(
+                $_POST['mc_supplier_minimum_order_spend']
+            )
+            : '0';
+
+        $minimum_spend_raw = sanitize_text_field(
+            $minimum_spend_raw
+        );
+
+        $minimum_spend_raw = str_replace(
+            [',', '£'],
+            '',
+            $minimum_spend_raw
+        );
+
+        $minimum_spend = max(
+            0,
+            (float) $minimum_spend_raw
+        );
+
+        $minimum_spend = number_format(
+            $minimum_spend,
+            2,
+            '.',
+            ''
+        );
+
+        $allowed_statuses = [
+            'active',
+            'suspended',
+            'test',
+        ];
+
+        $status = isset($_POST['mc_supplier_status'])
+            ? sanitize_text_field(
+                wp_unslash($_POST['mc_supplier_status'])
+            )
+            : 'active';
+
+        if (!in_array($status, $allowed_statuses, true)) {
+            $status = 'active';
+        }
 
         $fields = [
-            self::META_EMAIL     => sanitize_email($_POST['mc_supplier_email'] ?? ''),
-            self::META_PHONE     => sanitize_text_field($_POST['mc_supplier_phone'] ?? ''),
-            self::META_CODE      => sanitize_text_field($_POST['mc_supplier_code'] ?? ''),
-            self::META_STATUS    => sanitize_text_field($_POST['mc_supplier_status'] ?? 'active'),
-            self::META_MANAGER   => sanitize_text_field($_POST['mc_supplier_manager'] ?? ''),
+            self::META_EMAIL => sanitize_email(
+                wp_unslash(
+                    $_POST['mc_supplier_email'] ?? ''
+                )
+            ),
 
-            self::META_ADDR1     => sanitize_text_field($_POST['mc_supplier_address_1'] ?? ''),
-            self::META_ADDR2     => sanitize_text_field($_POST['mc_supplier_address_2'] ?? ''),
-            self::META_CITY      => sanitize_text_field($_POST['mc_supplier_city'] ?? ''),
-            self::META_COUNTY    => sanitize_text_field($_POST['mc_supplier_county'] ?? ''),
-            self::META_POSTCODE  => sanitize_text_field($_POST['mc_supplier_postcode'] ?? ''),
-            self::META_COUNTRY   => sanitize_text_field($_POST['mc_supplier_country'] ?? 'United Kingdom'),
+            self::META_PHONE => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_phone'] ?? ''
+                )
+            ),
+
+            self::META_CODE => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_code'] ?? ''
+                )
+            ),
+
+            self::META_STATUS => $status,
+
+            self::META_MANAGER => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_manager'] ?? ''
+                )
+            ),
+
+            self::META_MINIMUM_SPEND => $minimum_spend,
+
+            self::META_ADDR1 => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_address_1'] ?? ''
+                )
+            ),
+
+            self::META_ADDR2 => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_address_2'] ?? ''
+                )
+            ),
+
+            self::META_CITY => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_city'] ?? ''
+                )
+            ),
+
+            self::META_COUNTY => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_county'] ?? ''
+                )
+            ),
+
+            self::META_POSTCODE => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_postcode'] ?? ''
+                )
+            ),
+
+            self::META_COUNTRY => sanitize_text_field(
+                wp_unslash(
+                    $_POST['mc_supplier_country'] ?? 'United Kingdom'
+                )
+            ),
         ];
 
         foreach ($fields as $key => $value) {
-            update_post_meta($post_id, $key, $value);
+            update_post_meta(
+                $post_id,
+                $key,
+                $value
+            );
         }
 
-        // ⭐ NEW: Save auto-send toggle
-        if (isset($_POST['mc_auto_send_commission_email'])) {
-            update_post_meta($post_id, self::META_AUTO_SEND, 'yes');
-        } else {
-            update_post_meta($post_id, self::META_AUTO_SEND, 'no');
-        }
+        $auto_send = isset(
+            $_POST['mc_auto_send_commission_email']
+        )
+            ? 'yes'
+            : 'no';
+
+        update_post_meta(
+            $post_id,
+            self::META_AUTO_SEND,
+            $auto_send
+        );
     }
 
     /* ---------------------------------------------------------
        ADMIN COLUMNS
     --------------------------------------------------------- */
+
     public function add_admin_columns($columns) {
 
         $new = [];
 
-        $new['cb']   = $columns['cb'];
-        $new['title'] = 'Supplier';
+        if (isset($columns['cb'])) {
+            $new['cb'] = $columns['cb'];
+        }
 
-        $new['email']     = 'Email';
-        $new['phone']     = 'Phone';
-        $new['code']      = 'Code';
-        $new['status']    = 'Status';
-        $new['manager']   = 'Account Manager';
+        $new['title']         = 'Supplier';
+        $new['email']         = 'Email';
+        $new['phone']         = 'Phone';
+        $new['code']          = 'Code';
+        $new['minimum_spend'] = 'Minimum Spend';
+        $new['status']        = 'Status';
+        $new['manager']       = 'Account Manager';
 
-        $new['addr1']     = 'Address 1';
-        $new['addr2']     = 'Address 2';
-        $new['city']      = 'City';
-        $new['county']    = 'County';
-        $new['postcode']  = 'Postcode';
-        $new['country']   = 'Country';
+        $new['addr1']         = 'Address 1';
+        $new['addr2']         = 'Address 2';
+        $new['city']          = 'City';
+        $new['county']        = 'County';
+        $new['postcode']      = 'Postcode';
+        $new['country']       = 'Country';
 
-        $new['auto_send'] = 'Auto‑Send'; // ⭐ NEW COLUMN
+        $new['auto_send']     = 'Auto-Send';
 
         return $new;
     }
@@ -281,84 +694,200 @@ class MediCompare_Supplier_CPT {
         switch ($column) {
 
             case 'email':
-                echo esc_html(get_post_meta($post_id, self::META_EMAIL, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_EMAIL,
+                        true
+                    )
+                );
                 break;
 
             case 'phone':
-                echo esc_html(get_post_meta($post_id, self::META_PHONE, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_PHONE,
+                        true
+                    )
+                );
                 break;
 
             case 'code':
-                echo esc_html(get_post_meta($post_id, self::META_CODE, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_CODE,
+                        true
+                    )
+                );
+                break;
+
+            case 'minimum_spend':
+                $minimum_spend = get_post_meta(
+                    $post_id,
+                    self::META_MINIMUM_SPEND,
+                    true
+                );
+
+                $minimum_spend = is_numeric($minimum_spend)
+                    ? (float) $minimum_spend
+                    : 0;
+
+                echo esc_html(
+                    '£' . number_format_i18n(
+                        $minimum_spend,
+                        2
+                    )
+                );
                 break;
 
             case 'status':
-                echo esc_html(ucfirst(get_post_meta($post_id, self::META_STATUS, true)));
+                $status = get_post_meta(
+                    $post_id,
+                    self::META_STATUS,
+                    true
+                );
+
+                echo esc_html(
+                    $status !== ''
+                        ? ucfirst($status)
+                        : 'Active'
+                );
                 break;
 
             case 'manager':
-                echo esc_html(get_post_meta($post_id, self::META_MANAGER, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_MANAGER,
+                        true
+                    )
+                );
                 break;
 
             case 'addr1':
-                echo esc_html(get_post_meta($post_id, self::META_ADDR1, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_ADDR1,
+                        true
+                    )
+                );
                 break;
 
             case 'addr2':
-                echo esc_html(get_post_meta($post_id, self::META_ADDR2, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_ADDR2,
+                        true
+                    )
+                );
                 break;
 
             case 'city':
-                echo esc_html(get_post_meta($post_id, self::META_CITY, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_CITY,
+                        true
+                    )
+                );
                 break;
 
             case 'county':
-                echo esc_html(get_post_meta($post_id, self::META_COUNTY, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_COUNTY,
+                        true
+                    )
+                );
                 break;
 
             case 'postcode':
-                echo esc_html(get_post_meta($post_id, self::META_POSTCODE, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_POSTCODE,
+                        true
+                    )
+                );
                 break;
 
             case 'country':
-                echo esc_html(get_post_meta($post_id, self::META_COUNTRY, true));
+                echo esc_html(
+                    get_post_meta(
+                        $post_id,
+                        self::META_COUNTRY,
+                        true
+                    )
+                );
                 break;
 
-            // ⭐ NEW — Auto-send column renderer
             case 'auto_send':
-                $auto = get_post_meta($post_id, self::META_AUTO_SEND, true);
-                echo $auto === 'yes' ? 'Yes' : 'No';
+                $auto_send = get_post_meta(
+                    $post_id,
+                    self::META_AUTO_SEND,
+                    true
+                );
+
+                echo esc_html(
+                    $auto_send === 'yes'
+                        ? 'Yes'
+                        : 'No'
+                );
                 break;
 
-            // ⭐ Existing commission rule renderer
             case 'commission_rule':
+                $rule_type = get_post_meta(
+                    $post_id,
+                    'mc_commission_rule_type',
+                    true
+                );
 
-                $rule_type   = get_post_meta($post_id, 'mc_commission_rule_type', true);
-                $custom_rate = get_post_meta($post_id, 'mc_commission_custom_rate', true);
+                $custom_rate = get_post_meta(
+                    $post_id,
+                    'mc_commission_custom_rate',
+                    true
+                );
 
                 if (!$rule_type) {
-                    echo '—';
+                    echo esc_html('—');
                     break;
                 }
 
                 switch ($rule_type) {
+
                     case 'flat_5':
-                        echo 'Flat 5%';
+                        echo esc_html('Flat 5%');
                         break;
+
                     case 'flat_3':
-                        echo 'Flat 3%';
+                        echo esc_html('Flat 3%');
                         break;
+
                     case 'flat_25':
-                        echo 'Flat 2.5%';
+                        echo esc_html('Flat 2.5%');
                         break;
+
                     case 'custom_flat':
-                        echo 'Custom ' . (float)$custom_rate . '%';
+                        echo esc_html(
+                            'Custom ' .
+                            (float) $custom_rate .
+                            '%'
+                        );
                         break;
+
                     case 'default_tiers':
                     default:
-                        echo 'Tiered 5% / 3% / 2.5%';
+                        echo esc_html(
+                            'Tiered 5% / 3% / 2.5%'
+                        );
                         break;
                 }
+
                 break;
         }
     }
@@ -366,19 +895,43 @@ class MediCompare_Supplier_CPT {
     /* ---------------------------------------------------------
        SORTABLE COLUMNS
     --------------------------------------------------------- */
+
     public function sortable_columns($columns) {
 
-        $columns['code']     = 'code';
-        $columns['city']     = 'city';
-        $columns['postcode'] = 'postcode';
-        $columns['status']   = 'status';
-
+        $columns['code']            = 'code';
+        $columns['city']            = 'city';
+        $columns['postcode']        = 'postcode';
+        $columns['status']          = 'status';
+        $columns['minimum_spend']   = 'minimum_spend';
         $columns['commission_rule'] = 'commission_rule';
-
-        // ⭐ NEW — Make auto-send sortable
-        $columns['auto_send'] = 'auto_send';
+        $columns['auto_send']       = 'auto_send';
 
         return $columns;
+    }
+
+    public function handle_admin_column_sorting($query) {
+
+        if (!is_admin() || !$query->is_main_query()) {
+            return;
+        }
+
+        if ($query->get('post_type') !== 'mc_supplier') {
+            return;
+        }
+
+        if ($query->get('orderby') !== 'minimum_spend') {
+            return;
+        }
+
+        $query->set(
+            'meta_key',
+            self::META_MINIMUM_SPEND
+        );
+
+        $query->set(
+            'orderby',
+            'meta_value_num'
+        );
     }
 }
 

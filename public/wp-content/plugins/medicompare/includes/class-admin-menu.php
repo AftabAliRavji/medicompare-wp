@@ -3126,7 +3126,7 @@ private function handle_concession_import() {
         include __DIR__ . '/admin-pages/upload-pharmacies.php';
     }
     /* ---------------------------------------------------------
-       SUPPLIER CSV PARSER (FIXED)
+    SUPPLIER CSV PARSER (FIXED)
     --------------------------------------------------------- */
     public function process_supplier_csv_upload() {
 
@@ -3140,6 +3140,7 @@ private function handle_concession_import() {
         }
 
         $allowed = ['text/csv', 'application/vnd.ms-excel'];
+
         if (!in_array($file['type'], $allowed)) {
             return ['error' => 'Invalid file type. Please upload a CSV file.'];
         }
@@ -3159,13 +3160,22 @@ private function handle_concession_import() {
         $header = array_map('strtolower', $header);
 
         $required = [
-            'supplier_name','email','phone','address_1','address_2',
-            'city','county','postcode','country','account_manager',
-            'supplier_code','status'
+            'supplier_name',
+            'email',
+            'phone',
+            'address_1',
+            'address_2',
+            'city',
+            'county',
+            'postcode',
+            'country',
+            'account_manager',
+            'supplier_code',
+            'status'
         ];
 
         foreach ($required as $col) {
-            if (!in_array($col, $header)) {
+            if (!in_array($col, $header, true)) {
                 return ['error' => "Missing required column: $col"];
             }
         }
@@ -3173,24 +3183,30 @@ private function handle_concession_import() {
         $mapped = [];
 
         foreach ($rows as $row) {
-            if (count($row) !== count($header)) continue;
+
+            if (count($row) !== count($header)) {
+                continue;
+            }
 
             $row = array_map('trim', $row);
             $data = array_combine($header, $row);
 
             $mapped[] = [
-                'supplier_name'  => $data['supplier_name'],
-                'email'          => $data['email'],
-                'phone'          => $data['phone'],
-                'address_1'      => $data['address_1'],
-                'address_2'      => $data['address_2'],
-                'city'           => $data['city'],
-                'county'         => $data['county'],
-                'postcode'       => $data['postcode'],
-                'country'        => $data['country'],
-                'account_manager'=> $data['account_manager'],
-                'supplier_code'  => $data['supplier_code'],
-                'status'         => $data['status'],
+                'supplier_name'        => $data['supplier_name'],
+                'email'                => $data['email'],
+                'phone'                => $data['phone'],
+                'address_1'            => $data['address_1'],
+                'address_2'            => $data['address_2'],
+                'city'                 => $data['city'],
+                'county'               => $data['county'],
+                'postcode'             => $data['postcode'],
+                'country'              => $data['country'],
+                'account_manager'      => $data['account_manager'],
+                'supplier_code'        => $data['supplier_code'],
+                'status'               => $data['status'],
+
+                // Optional column
+                'minimum_order_spend'  => $data['minimum_order_spend'] ?? '',
             ];
         }
 
@@ -3201,11 +3217,12 @@ private function handle_concession_import() {
     }
 
     /* ---------------------------------------------------------
-       INSERT / UPDATE SUPPLIER (NEW)
+   INSERT / UPDATE SUPPLIER (NEW)
     --------------------------------------------------------- */
     public function insert_or_update_supplier_from_csv_row($row) {
 
         $name = trim($row['supplier_name']);
+
         if ($name === '') {
             return 'skipped';
         }
@@ -3213,9 +3230,12 @@ private function handle_concession_import() {
         $existing = get_page_by_title($name, OBJECT, 'mc_supplier');
 
         if ($existing) {
+
             $post_id = $existing->ID;
             $status  = 'updated';
+
         } else {
+
             $post_id = wp_insert_post([
                 'post_title'  => $name,
                 'post_type'   => 'mc_supplier',
@@ -3229,6 +3249,34 @@ private function handle_concession_import() {
             $status = 'inserted';
         }
 
+        /*
+        ---------------------------------------------------------
+        Optional Minimum Order Spend
+        ---------------------------------------------------------
+        */
+
+        $minimum_spend = isset($row['minimum_order_spend'])
+            ? sanitize_text_field($row['minimum_order_spend'])
+            : '';
+
+        $minimum_spend = str_replace(
+            ['£', ','],
+            '',
+            $minimum_spend
+        );
+
+        $minimum_spend = max(
+            0,
+            (float) $minimum_spend
+        );
+
+        $minimum_spend = number_format(
+            $minimum_spend,
+            2,
+            '.',
+            ''
+        );
+
         $meta = [
             'mc_supplier_email'      => sanitize_email($row['email']),
             'mc_supplier_phone'      => sanitize_text_field($row['phone']),
@@ -3240,13 +3288,16 @@ private function handle_concession_import() {
             'mc_supplier_country'    => sanitize_text_field($row['country']),
             'mc_supplier_manager'    => sanitize_text_field($row['account_manager']),
             'mc_supplier_code'       => sanitize_text_field($row['supplier_code']),
+
+            // NEW
+            'mc_supplier_minimum_order_spend' => $minimum_spend,
+
             'mc_supplier_status'     => sanitize_text_field($row['status']),
 
             // ⭐ NEW: default commission rule (can be changed per supplier later)
-            'mc_commission_rule_type'   => 'default_tiers', // applies 1,2,3 based on accumulated orders
-            'mc_commission_custom_rate' => '',              // used only for custom/flat rules
+            'mc_commission_rule_type'   => 'default_tiers',
+            'mc_commission_custom_rate' => '',
         ];
-
 
         foreach ($meta as $key => $value) {
             update_post_meta($post_id, $key, $value);

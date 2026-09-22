@@ -10,48 +10,80 @@ jQuery(function ($) {
     var debounceTimer = null;
 
     /* ---------------------------------------------------------
-       ENABLE / DISABLE TRANSFER BUTTON
+   ENABLE / DISABLE TRANSFER BUTTON
     --------------------------------------------------------- */
-    function mc_updateTransferButton(hasPending) {
-        const btn = document.getElementById('mc-transfer-order-btn');
-        if (!btn) return;
+    function mc_updateTransferButton(canTransfer) {
 
-        if (hasPending) {
+        const btn = document.getElementById('mc-transfer-order-btn');
+
+        if (!btn) {
+            return;
+        }
+
+        if (canTransfer) {
+
             btn.classList.remove('mc-transfer-btn-disabled');
             btn.disabled = false;
+
         } else {
+
             btn.classList.add('mc-transfer-btn-disabled');
             btn.disabled = true;
+
         }
     }
 
   /* ---------------------------------------------------------
    LOAD PENDING ORDER
---------------------------------------------------------- */
+    --------------------------------------------------------- */
     function loadPendingOrder() {
+
         $.post(mcComparison.ajaxUrl, {
             action: 'mc_get_pending_order',
             nonce: mcComparison.nonce
         }).done(function (resp) {
+
             if (resp.success) {
+
                 $pendingOrderPanel.html(resp.data.html);
 
-                const hasPending = !resp.data.html.includes("No pending order");
-                mc_updateTransferButton(hasPending);
+                const hasPending =
+                    !resp.data.html.includes('No pending order');
 
-                // ⭐ FIX: show / hide + enable / disable buttons based on pending state
+                const tempHtml = $('<div>').html(resp.data.html);
+
+                const hasTransferableSupplier =
+                    tempHtml.find('#mc-has-transferable-supplier').val() === '1';
+
+                mc_updateTransferButton(
+                    hasPending && hasTransferableSupplier
+                );
+
                 if (hasPending) {
+
                     $('#mc-cancel-order-btn')
                         .removeClass('mc-disabled')
                         .prop('disabled', false)
                         .show();
 
-                    $('#mc-transfer-order-btn')
-                        .removeClass('mc-disabled mc-transfer-btn-disabled')
-                        .prop('disabled', false)
-                        .show();
+                    if (hasTransferableSupplier) {
+
+                        $('#mc-transfer-order-btn')
+                            .removeClass('mc-disabled mc-transfer-btn-disabled')
+                            .prop('disabled', false)
+                            .show();
+
+                    } else {
+
+                        $('#mc-transfer-order-btn')
+                            .addClass('mc-disabled mc-transfer-btn-disabled')
+                            .prop('disabled', true)
+                            .show();
+
+                    }
+
                 } else {
-                    // No pending order → both buttons should look and behave disabled
+
                     $('#mc-cancel-order-btn')
                         .addClass('mc-disabled')
                         .prop('disabled', true)
@@ -61,13 +93,19 @@ jQuery(function ($) {
                         .addClass('mc-disabled mc-transfer-btn-disabled')
                         .prop('disabled', true)
                         .show();
+
                 }
 
             } else {
-                $pendingOrderPanel.html('<p>' + (resp.data?.message || 'Error loading pending order.') + '</p>');
+
+                $pendingOrderPanel.html(
+                    '<p>' +
+                    (resp.data?.message || 'Error loading pending order.') +
+                    '</p>'
+                );
+
                 mc_updateTransferButton(false);
 
-                // On error, treat as no pending order: disable both buttons
                 $('#mc-cancel-order-btn')
                     .addClass('mc-disabled')
                     .prop('disabled', true)
@@ -77,10 +115,12 @@ jQuery(function ($) {
                     .addClass('mc-disabled mc-transfer-btn-disabled')
                     .prop('disabled', true)
                     .show();
-            }
-        });
-    }
 
+            }
+
+        });
+
+    }
 
     /* ---------------------------------------------------------
        LOAD TRANSFERRED ORDERS
@@ -490,32 +530,62 @@ jQuery(function ($) {
         });
 
     /* ---------------------------------------------------------
-       TRANSFER ORDER
+    TRANSFER ORDER
     --------------------------------------------------------- */
     $transferBtn.on('click', function () {
-        if (!confirm('Transfer this pending order and place it?')) return;
 
-        $transferBtn.prop('disabled', true).text('Transferring...');
+        if (!confirm('Transfer this pending order and place it?')) {
+            return;
+        }
+
+        $transferBtn
+            .prop('disabled', true)
+            .text('Transferring...');
 
         $.post(mcComparison.ajaxUrl, {
             action: 'mc_transfer_order',
             nonce: mcComparison.nonce
         }).done(function (resp) {
-            $transferBtn.prop('disabled', false).text('Transfer Pending Order');
+
+            $transferBtn
+                .prop('disabled', false)
+                .text('Transfer Pending Order');
 
             if (resp.success) {
-                alert('Order transferred successfully.');
+
+                alert(
+                    resp.data?.message ||
+                    'Order transferred successfully.'
+                );
 
                 $selectedItem.empty();
+
                 loadPendingOrder();
                 loadTransferredOrders();
 
                 $('.mc-order-tab[data-tab="transferred"]').click();
 
             } else {
-                alert(resp.data?.message || 'Error transferring order.');
+
+                alert(
+                    resp.data?.message ||
+                    'Error transferring order.'
+                );
+
             }
+
+        }).fail(function () {
+
+            $transferBtn
+                .prop('disabled', false)
+                .text('Transfer Pending Order');
+
+            alert(
+                'Unable to transfer the order. Please try again.'
+            );
+
         });
+
     });
 
     /* ---------------------------------------------------------

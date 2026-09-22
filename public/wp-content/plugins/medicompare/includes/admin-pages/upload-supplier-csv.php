@@ -1,14 +1,21 @@
 <div class="wrap">
     <h1>Upload Supplier CSV</h1>
 
-    <p>Expected CSV columns:</p>
+    <p><strong>Expected CSV columns:</strong></p>
+
     <code>
-        supplier_name, email, phone, address_1, address_2, city, county, postcode, country, account_manager, supplier_code, status,
-        commission_rule_type, commission_custom_rate
+        supplier_name, email, phone, address_1, address_2, city, county, postcode, country, account_manager, supplier_code, status, minimum_order_spend
     </code>
 
+    <p style="margin-top:10px;">
+        <strong>minimum_order_spend</strong> is optional.
+        If the column is omitted or left blank, the supplier will default to a minimum spend of <strong>£0.00</strong>.
+    </p>
+
     <?php if (!empty($result['error'])): ?>
-        <div class="notice notice-error"><p><?php echo esc_html($result['error']); ?></p></div>
+        <div class="notice notice-error">
+            <p><?php echo esc_html($result['error']); ?></p>
+        </div>
     <?php endif; ?>
 
     <?php if ($mode === 'import' && !empty($result['success'])): ?>
@@ -54,11 +61,26 @@
     <form method="post" enctype="multipart/form-data" style="margin-top:30px;">
         <table class="form-table">
             <tr>
-                <th><label for="csv_file">CSV File</label></th>
-                <td><input type="file" name="csv_file" id="csv_file" accept=".csv" required></td>
+                <th>
+                    <label for="csv_file">CSV File</label>
+                </th>
+                <td>
+                    <input
+                        type="file"
+                        name="csv_file"
+                        id="csv_file"
+                        accept=".csv"
+                        required
+                    >
+                </td>
             </tr>
         </table>
 
-        <?php submit_button('Preview Supplier CSV', 'secondary', 'preview_supplier_csv'); ?>
+        <?php submit_button(
+            'Preview Supplier CSV',
+            'secondary',
+            'preview_supplier_csv'
+        ); ?>
     </form>
+
 </div>

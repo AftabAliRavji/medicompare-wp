@@ -416,6 +416,21 @@ jQuery(function ($) {
     });
 
     /* ---------------------------------------------------------
+   ADD ITEM TO PENDING ORDER ON ENTER KEY
+--------------------------------------------------------- */
+    $selectedItem.on('keydown', '#mc-selected-qty', function(e) {
+
+        if (e.key === 'Enter') {
+
+            e.preventDefault();
+
+            $('#mc-add-to-pending').trigger('click');
+
+        }
+
+    });
+
+    /* ---------------------------------------------------------
        REMOVE ITEM FROM PENDING ORDER
     --------------------------------------------------------- */
     $pendingOrderPanel.on('click', '.mc-remove-pending-item', function () {

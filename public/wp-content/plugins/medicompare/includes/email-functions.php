@@ -116,6 +116,26 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
     }
   }
 
+  public function generate_custom_email_html(
+    $subject,
+    $content
+    ) {
+
+        $template = $this->load_template(
+            'custom-email-template.php'
+        );
+
+        $template = $this->fill_template(
+            $template,
+            [
+                'email_subject' => $subject,
+                'custom_content' => $content,
+            ]
+        );
+
+        return $template;
+    }
+
 
     /* ---------------------------------------------------------
        SEND PHARMACY CONFIRMATION EMAIL
@@ -241,6 +261,45 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
             $body,
             ['Content-Type: text/html; charset=UTF-8']
         );
+    }
+
+    /* ---------------------------------------------------------
+        SEND CUSTOM EMAIL
+    --------------------------------------------------------- */
+    public function send_custom_email(
+        $recipients,
+        $subject,
+        $content
+    ) {
+
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $template = $this->load_template(
+            'custom-email-template.php'
+        );
+
+        $body = $this->fill_template(
+            $template,
+            [
+                'email_subject' => $subject,
+                'custom_content' => wpautop($content),
+            ]
+        );
+
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: SourceMed Pharma <support@sourcemedpharma.com>'
+        ];
+
+        return wp_mail(
+            $recipients,
+            $subject,
+            $body,
+            $headers
+        );
+
     }
 
 }

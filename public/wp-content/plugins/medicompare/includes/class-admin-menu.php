@@ -27,6 +27,12 @@ class MediCompare_Admin_Menu {
         add_action('wp_ajax_medicompare_detect_supplier', [$this, 'ajax_detect_supplier']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
 
+        add_action('wp_ajax_mc_get_email_pharmacies', [$this, 'ajax_get_email_pharmacies']);
+        add_action('wp_ajax_mc_get_email_suppliers', [$this, 'ajax_get_email_suppliers']);
+
+        add_action('wp_ajax_mc_send_custom_email', [$this, 'ajax_send_custom_email']);
+        add_action('wp_ajax_mc_preview_custom_email',[$this, 'ajax_preview_custom_email']);
+
 
          //subscription actions
          add_action('admin_post_mc_save_subscription_meta', [$this, 'save_subscription_meta']);
@@ -80,16 +86,21 @@ class MediCompare_Admin_Menu {
 
     }
 
+    // Enqueue Assets like css, js 
     public function enqueue_admin_assets($hook) {
 
         // Load CSS on all MediCompare admin pages
         if (strpos($hook, 'medicompare') !== false) {
+
             wp_enqueue_style(
                 'medicompare-admin-css',
                 plugin_dir_url(__FILE__) . '../assets/css/admin.css',
                 [],
-                filemtime(plugin_dir_path(__FILE__) . '../assets/css/admin.css')
+                filemtime(
+                    plugin_dir_path(__FILE__) . '../assets/css/admin.css'
+                )
             );
+
         }
 
         // Load JS ONLY on Transferred Orders page
@@ -99,9 +110,35 @@ class MediCompare_Admin_Menu {
                 'mc-admin-order-transfer',
                 plugin_dir_url(__FILE__) . '../assets/js/admin-order-transfer.js',
                 [],
-                filemtime(plugin_dir_path(__FILE__) . '../assets/js/admin-order-transfer.js'),
+                filemtime(
+                    plugin_dir_path(__FILE__) . '../assets/js/admin-order-transfer.js'
+                ),
                 true
             );
+
+        }
+
+        // Email Centre
+        if ($hook === 'medicompare_page_medi-email-centre') {
+
+            wp_enqueue_script(
+                'mc-email-centre',
+                plugin_dir_url(__FILE__) . '../assets/js/email-centre.js',
+                ['jquery'],
+                filemtime(
+                    plugin_dir_path(__FILE__) . '../assets/js/email-centre.js'
+                ),
+                true
+            );
+
+            wp_localize_script(
+                'mc-email-centre',
+                'mcEmailCentre',
+                [
+                    'ajaxUrl' => admin_url('admin-ajax.php')
+                ]
+            );
+
         }
     }
 
@@ -277,6 +314,15 @@ class MediCompare_Admin_Menu {
         'manage_options',
         'medicompare',
         [$this, 'dashboard_page']
+    );
+
+    add_submenu_page(
+        'medicompare',
+        'Email Centre',
+        'Email Centre',
+        'manage_options',
+        'medi-email-centre',
+        [$this, 'email_centre_page']
     );
 
     /* ---------------------------------------------------------
@@ -837,6 +883,204 @@ class MediCompare_Admin_Menu {
     MediCompare_Admin_Dashboard_Widget::render_inline_widget();
 
     echo '</div>';
+    }
+
+    /* ---------------------------------------------------------
+   EMAIL CENTRE
+    --------------------------------------------------------- */
+    public function email_centre_page() {
+
+        ?>
+
+        <div class="wrap">
+
+            <h1>Email Centre</h1>
+
+            <hr>
+
+            <h2 class="nav-tab-wrapper">
+
+                <a href="#"
+                class         </a>
+
+                <a href="#"
+                class="g Soon)
+                </a>
+
+                <a href="#"
+        History (Coming Soon)
+                </a>
+
+            </h2>
+
+            <div style="background:#fff;padding:20px;margin-top:20px;border:1px solid #ccd0d4;">
+
+                <table class="form-table">
+
+                    <tr>
+                        <th scope="row">
+                            From
+                        </th>
+
+                        <td>
+                            <input
+                                type="text"
+                                value="support@sourcemedpharma.com"
+                                class="regular-text"
+                                readonly
+                            >
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            Recipient Type
+                        </th>
+
+                        <td>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="mc_recipient_type"
+                                    value="pharmacy"
+                                >
+                                Pharmacy
+                            </label>
+
+                            <br>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="mc_recipient_type"
+                                    value="supplier"
+                                >
+                                Supplier
+                            </label>
+
+                            <br>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="mc_recipient_type"
+                                    value="manual"
+                                >
+                                Manual Email
+                            </label>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            Recipients
+                        </th>
+
+                        <td>
+
+                            <div id="mc-recipient-container">
+
+                                <p style="margin:0;color:#666;">
+                                    Select a recipient type above.
+                                </p>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            Subject
+                        </th>
+
+                        <td>
+
+                            <input
+                                type="text"
+                                id="mc-email-subject"
+                                class="regular-text"
+                                style="width:600px;"
+                            >
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            Template
+                        </th>
+
+                        <td>
+
+                            <select id="mc-email-template">
+
+                                <option value="general">
+                                    General Email
+                                </option>
+
+                            </select>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+                <h2>Message</h2>
+
+                <?php
+
+                wp_editor(
+                    '',
+                    'mc_email_body',
+                    [
+                        'textarea_name' => 'mc_email_body',
+                        'textarea_rows' => 12,
+                        'media_buttons' => false,
+                    ]
+                );
+
+                ?>
+
+                <br>
+
+                <p>
+
+                    <button
+                        type="button"
+                        class="button button-secondary"
+                        id="mc-preview-email"
+                    >
+                        Preview Email
+                    </button>
+                    <div
+                        id="mc-email-preview"
+                        style="
+                            display:none;
+                            margin-top:20px;
+                            padding:20px;
+                            background:#fff;
+                            border:1px solid #ccd0d4;
+                        "
+                    ></div>
+
+                    <button
+                        type="button"
+                        class="button button-primary"
+                        id="mc-send-email"
+                    >
+                        Send Email
+                    </button>
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <?php
     }
 
 
@@ -4520,6 +4764,138 @@ public function transferred_orders_page() {
             [],
             filemtime(plugin_dir_path(__FILE__) . '../assets/css/subscription-control.css')
         );
+    }
+
+    /* ---------------------------------------------------------
+   AJAX: GET EMAIL PHARMACIES
+    --------------------------------------------------------- */
+    public function ajax_get_email_pharmacies() {
+
+        $pharmacies = get_posts([
+            'post_type'      => 'mc_pharmacy',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ]);
+
+        $results = [];
+
+        foreach ($pharmacies as $pharmacy) {
+
+            $email = get_post_meta(
+                $pharmacy->ID,
+                '_mc_email',
+                true
+            );
+
+            $results[] = [
+                'id'    => $pharmacy->ID,
+                'name'  => $pharmacy->post_title,
+                'email' => $email,
+            ];
+
+        }
+
+        wp_send_json_success($results);
+    }
+
+    /* ---------------------------------------------------------
+   AJAX: GET EMAIL SUPPLIERS
+    --------------------------------------------------------- */
+    public function ajax_get_email_suppliers() {
+
+        $suppliers = get_posts([
+            'post_type'      => 'mc_supplier',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ]);
+
+        $results = [];
+
+        foreach ($suppliers as $supplier) {
+
+            $email = get_post_meta(
+                $supplier->ID,
+                'mc_supplier_email',
+                true
+            );
+
+            $results[] = [
+                'id'    => $supplier->ID,
+                'name'  => $supplier->post_title,
+                'email' => $email,
+            ];
+
+        }
+
+        wp_send_json_success($results);
+    }
+
+    /* ---------------------------------------------------------
+        AJAX: PREVIEW CUSTOM EMAIL
+    --------------------------------------------------------- */
+    public function ajax_preview_custom_email() {
+
+        $subject = sanitize_text_field(
+            $_POST['subject'] ?? ''
+        );
+
+        $content = wp_kses_post(
+            $_POST['content'] ?? ''
+        );
+
+        require_once plugin_dir_path(__FILE__) . 'email-functions.php';
+
+        $email_engine = new MediCompare_Email_Engine();
+
+        $html = $email_engine->generate_custom_email_html(
+            $subject,
+            wpautop($content)
+        );
+
+        wp_send_json_success([
+            'html' => $html
+        ]);
+
+    }
+
+    /* ---------------------------------------------------------
+        AJAX: SEND CUSTOM EMAIL
+    --------------------------------------------------------- */
+        public function send_custom_email($recipients,$subject,$content) 
+        {
+
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $template = $this->load_template(
+            'custom-email-template.php'
+        );
+
+        $body = $this->fill_template(
+            $template,
+            [
+                'email_subject' => $subject,
+                'custom_content' => wpautop($content),
+            ]
+        );
+
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: SourceMed Pharma <support@sourcemedpharma.com>'
+        ];
+
+        return wp_mail(
+            $recipients,
+            $subject,
+            $body,
+            $headers
+        );
+
     }
 
 }

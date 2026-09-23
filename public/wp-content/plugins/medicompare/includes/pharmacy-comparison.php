@@ -445,7 +445,9 @@ class MediCompare_Pharmacy_Comparison {
         1️⃣ FETCH REFERENCE PRICES
         --------------------------------------------------------- */
         $concession_row = $wpdb->get_row($wpdb->prepare("
-            SELECT price AS concession_price
+            SELECT
+                price AS concession_price,
+                last_updated
             FROM {$wpdb->prefix}medi_reference_prices
             WHERE product_id = %d
             AND type = 'concession'
@@ -557,6 +559,12 @@ class MediCompare_Pharmacy_Comparison {
                 'pack_size'           => null,
                 'description'         => null,
                 'is_concession'       => true,
+                'concession_month'    => strtoupper(
+                    date(
+                        'M Y',
+                        strtotime($concession_row['last_updated'])
+                    )
+                ),
                 'is_tariff'           => false,
                 'is_clawback'         => false
             ];
@@ -649,7 +657,16 @@ class MediCompare_Pharmacy_Comparison {
                     <td>
                         £<?php echo number_format((float) $row['price'], 2); ?>
                         <?php if ($is_concession): ?>
-                            <span class="mc-concession-label">(Concession)</span>
+                            <span class="mc-concession-label">
+                                (Concession)
+                            </span>
+
+                            <span class="mc-concession-month">
+                                <?php echo esc_html(
+                                    $row['concession_month'] ?? ''
+                                ); ?>
+                            </span>
+
                         <?php elseif ($is_tariff): ?>
                             <span class="mc-tariff-label">(Tariff)</span>
                         <?php elseif ($is_clawback): ?>

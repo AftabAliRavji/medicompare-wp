@@ -55,7 +55,7 @@
 <h3>Grand Total</h3>
 <p><strong>£{{grand_total}}</strong></p>
 
-<p>Thank you for using MediCompare.</p>
+<p>Thank you for using Source Med Pharma.</p>
 
 </body>
 </html>

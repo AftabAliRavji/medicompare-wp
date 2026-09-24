@@ -18,7 +18,7 @@
 <h2>Concession Email Inbox</h2>
 
 <?php
-$messages = gmail_list_messages('from:ncs@nhsbsa.nhs.uk');
+$messages = gmail_list_messages();
 ?>
 
 <?php if (isset($messages['error'])): ?>

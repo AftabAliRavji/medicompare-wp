@@ -1833,123 +1833,290 @@ function mc_normalise_concession_price($priceRaw) {
 
 
 
-        /**
-     * Get Gmail access token from stored refresh token
-     */
-    function get_gmail_access_token() {
+     /**
+ * Safely write Gmail diagnostics to the WordPress debug log.
+ */
+function mc_gmail_debug($label, $value = null) {
 
-        $client_id     = get_option('medicompare_gmail_client_id');
-        $client_secret = get_option('medicompare_gmail_client_secret');
-        $refresh_token = get_option('medicompare_gmail_refresh_token');
+    if (!defined('WP_DEBUG') || !WP_DEBUG) {
+        return;
+    }
 
-        if (!$client_id || !$client_secret || !$refresh_token) {
-            return null;
-        }
+    if (is_array($value) || is_object($value)) {
+        $value = wp_json_encode($value);
+    }
 
-        $response = wp_remote_post('https://oauth2.googleapis.com/token', [
-            'body' => [
+    error_log(
+        '[MediCompare Gmail] ' .
+        $label .
+        ($value !== null ? ': ' . $value : '')
+    );
+}
+
+
+/**
+ * Get Gmail access token from stored refresh token.
+ */
+function get_gmail_access_token() {
+
+    $client_id = trim(
+        (string) get_option('medicompare_gmail_client_id')
+    );
+
+    $client_secret = trim(
+        (string) get_option('medicompare_gmail_client_secret')
+    );
+
+    $refresh_token = trim(
+        (string) get_option('medicompare_gmail_refresh_token')
+    );
+
+    mc_gmail_debug('OAuth credentials present', [
+        'client_id'     => !empty($client_id),
+        'client_secret' => !empty($client_secret),
+        'refresh_token' => !empty($refresh_token),
+    ]);
+
+    if (!$client_id || !$client_secret || !$refresh_token) {
+        mc_gmail_debug('OAuth failed', 'One or more credentials are missing');
+
+        return [
+            'error' => 'Gmail OAuth credentials are missing from the MediCompare settings.',
+        ];
+    }
+
+    $response = wp_remote_post(
+        'https://oauth2.googleapis.com/token',
+        [
+            'timeout' => 30,
+            'body'    => [
                 'client_id'     => $client_id,
                 'client_secret' => $client_secret,
                 'refresh_token' => $refresh_token,
                 'grant_type'    => 'refresh_token',
             ],
-        ]);
+        ]
+    );
 
-        if (is_wp_error($response)) {
-            return null;
-        }
+    if (is_wp_error($response)) {
+        mc_gmail_debug(
+            'OAuth WordPress HTTP error',
+            $response->get_error_message()
+        );
 
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-
-        return !empty($body['access_token']) ? $body['access_token'] : null;
+        return [
+            'error' => 'OAuth connection error: ' .
+                $response->get_error_message(),
+        ];
     }
 
+    $status_code = wp_remote_retrieve_response_code($response);
+    $raw_body    = wp_remote_retrieve_body($response);
+    $body        = json_decode($raw_body, true);
 
-    /**
-     * Perform a GET request to Gmail API
+    mc_gmail_debug('OAuth HTTP status', $status_code);
+
+    /*
+     * Do not log access_token or refresh_token values.
      */
-    function gmail_api_get($endpoint, $params = []) {
+    if ($status_code !== 200 || empty($body['access_token'])) {
 
-        $access_token = get_gmail_access_token();
-        if (!$access_token) {
-            return null;
-        }
+        $oauth_error = $body['error'] ?? 'unknown_oauth_error';
 
-        $url = add_query_arg($params, 'https://gmail.googleapis.com/gmail/v1/users/me/' . ltrim($endpoint, '/'));
+        $oauth_description = $body['error_description']
+            ?? 'Google did not return an access token.';
 
-        $response = wp_remote_get($url, [
+        mc_gmail_debug('OAuth token error', [
+            'status'            => $status_code,
+            'error'             => $oauth_error,
+            'error_description' => $oauth_description,
+        ]);
+
+        return [
+            'error' => sprintf(
+                'Gmail OAuth failed: %s. %s',
+                $oauth_error,
+                $oauth_description
+            ),
+        ];
+    }
+
+    mc_gmail_debug('OAuth connection', 'Access token obtained successfully');
+
+    return [
+        'access_token' => $body['access_token'],
+    ];
+}
+
+
+/**
+ * Perform a GET request to the Gmail API.
+ */
+function gmail_api_get($endpoint, $params = []) {
+
+    $token_result = get_gmail_access_token();
+
+    if (!empty($token_result['error'])) {
+        return $token_result;
+    }
+
+    $access_token = $token_result['access_token'];
+
+    $base_url = 'https://gmail.googleapis.com/gmail/v1/users/me/';
+
+    $url = add_query_arg(
+        $params,
+        $base_url . ltrim($endpoint, '/')
+    );
+
+    mc_gmail_debug('Gmail endpoint', $endpoint);
+    mc_gmail_debug('Gmail request parameters', $params);
+
+    $response = wp_remote_get(
+        $url,
+        [
+            'timeout' => 30,
             'headers' => [
                 'Authorization' => 'Bearer ' . $access_token,
+                'Accept'        => 'application/json',
             ],
+        ]
+    );
+
+    if (is_wp_error($response)) {
+        mc_gmail_debug(
+            'Gmail WordPress HTTP error',
+            $response->get_error_message()
+        );
+
+        return [
+            'error' => 'Gmail API connection error: ' .
+                $response->get_error_message(),
+        ];
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $raw_body    = wp_remote_retrieve_body($response);
+    $body        = json_decode($raw_body, true);
+
+    mc_gmail_debug('Gmail API HTTP status', $status_code);
+
+    if ($status_code < 200 || $status_code >= 300) {
+
+        $api_message = $body['error']['message']
+            ?? 'Unknown Gmail API error';
+
+        mc_gmail_debug('Gmail API error', [
+            'status'  => $status_code,
+            'message' => $api_message,
+            'body'    => $body,
         ]);
 
-        if (is_wp_error($response)) {
-            return null;
-        }
-
-        return json_decode(wp_remote_retrieve_body($response), true);
-    }
-
-
-        /**
-     * List Gmail messages with multi‑sender + subject fallback logic
-     */
-    function gmail_list_messages($query = '') {
-
-        // 1️⃣ Primary search (actual NHS sender)
-        $primary_queries = [
-            'from:ncs@nhsbsa.nhs.uk',
-            'from:noreply@cpe.org.uk'
+        return [
+            'error' => sprintf(
+                'Gmail API error %d: %s',
+                $status_code,
+                $api_message
+            ),
         ];
-
-        foreach ($primary_queries as $q) {
-            $result = gmail_api_get('messages', ['q' => $q]);
-            if (!empty($result['messages'])) {
-                return $result['messages'];
-            }
-        }
-
-        // 2️⃣ If developer passed a custom query, try that too
-        if (!empty($query)) {
-            $result = gmail_api_get('messages', ['q' => $query]);
-            if (!empty($result['messages'])) {
-                return $result['messages'];
-            }
-        }
-
-        // 3️⃣ Fallback: subject contains "Price Concessions"
-        $result = gmail_api_get('messages', ['q' => 'subject:"Price Concessions"']);
-        if (!empty($result['messages'])) {
-            return $result['messages'];
-        }
-
-        // 4️⃣ Fallback: subject contains "Concession"
-        $result = gmail_api_get('messages', ['q' => 'subject:Concession']);
-        if (!empty($result['messages'])) {
-            return $result['messages'];
-        }
-
-        // 5️⃣ Fallback: search all inbox messages
-        $result = gmail_api_get('messages', ['q' => 'label:INBOX']);
-        if (!empty($result['messages'])) {
-            return $result['messages'];
-        }
-
-        // 6️⃣ Nothing found
-        return [];
     }
 
+    if (!is_array($body)) {
+        mc_gmail_debug(
+            'Gmail JSON error',
+            json_last_error_msg()
+        );
 
-
-    /**
-     * Fetch full Gmail message (needed for attachments)
-     */
-    function gmail_get_message($message_id) {
-
-        $result = gmail_api_get('messages/' . $message_id, ['format' => 'full']);
-
-        return $result ?: null;
+        return [
+            'error' => 'Gmail returned an invalid JSON response.',
+        ];
     }
+
+    mc_gmail_debug('Gmail API request', 'Successful');
+
+    return $body;
+}
+
+
+/**
+ * List Gmail concession messages.
+ */
+function gmail_list_messages($query = '') {
+
+    $queries = [
+        'from:ncs@nhsbsa.nhs.uk',
+        'from:noreply@cpe.org.uk',
+    ];
+
+    if (!empty($query) && !in_array($query, $queries, true)) {
+        $queries[] = $query;
+    }
+
+    $queries[] = 'subject:"Price Concessions"';
+    $queries[] = 'subject:Concession';
+    $queries[] = 'label:inbox';
+
+    foreach ($queries as $gmail_query) {
+
+        mc_gmail_debug('Running Gmail search', $gmail_query);
+
+        $result = gmail_api_get(
+            'messages',
+            [
+                'q'          => $gmail_query,
+                'maxResults' => 25,
+            ]
+        );
+
+        if (!empty($result['error'])) {
+            return $result;
+        }
+
+        $message_count = !empty($result['messages'])
+            ? count($result['messages'])
+            : 0;
+
+        mc_gmail_debug('Gmail search result', [
+            'query'         => $gmail_query,
+            'message_count' => $message_count,
+        ]);
+
+        if ($message_count > 0) {
+            return $result['messages'];
+        }
+    }
+
+    mc_gmail_debug(
+        'Gmail search complete',
+        'Connected successfully, but no matching messages were found'
+    );
+
+    return [];
+}
+
+
+/**
+ * Fetch a complete Gmail message.
+ */
+function gmail_get_message($message_id) {
+
+    $message_id = sanitize_text_field($message_id);
+
+    if ($message_id === '') {
+        return [
+            'error' => 'The Gmail message ID is missing.',
+        ];
+    }
+
+    $result = gmail_api_get(
+        'messages/' . rawurlencode($message_id),
+        [
+            'format' => 'full',
+        ]
+    );
+
+    return $result;
+}
 
 
     /**

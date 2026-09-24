@@ -695,39 +695,186 @@ class MediCompare_Pharmacy_Comparison {
 
       
     /* ---------------------------------------------------------
-       AJAX: ADD ITEM TO PENDING ORDER
+    AJAX: ADD OR MERGE ITEM INTO PENDING ORDER
     --------------------------------------------------------- */
     public function ajax_add_pending_item() {
+
         check_ajax_referer('mc_comparison_nonce', 'nonce');
 
         $pharmacy_id = $this->get_current_pharmacy_id();
-        if (!$pharmacy_id) wp_send_json_error(['message' => 'Not authorised.']);
 
-        $product_id  = (int) ($_POST['product_id'] ?? 0);
-        $supplier_id = (int) ($_POST['supplier_id'] ?? 0);
-        $unit_price  = (float) ($_POST['unit_price'] ?? 0);
-        $quantity    = (int) ($_POST['quantity'] ?? 1);
+        if (!$pharmacy_id) {
+            wp_send_json_error([
+                'message' => 'Not authorised.',
+            ]);
+        }
 
-        if ($product_id <= 0 || $supplier_id <= 0 || $unit_price <= 0 || $quantity <= 0) {
-            wp_send_json_error(['message' => 'Invalid item data.']);
+        $product_id = isset($_POST['product_id'])
+            ? absint($_POST['product_id'])
+            : 0;
+
+        $supplier_id = isset($_POST['supplier_id'])
+            ? absint($_POST['supplier_id'])
+            : 0;
+
+        $unit_price = isset($_POST['unit_price'])
+            ? (float) wp_unslash($_POST['unit_price'])
+            : 0;
+
+        $quantity = isset($_POST['quantity'])
+            ? absint($_POST['quantity'])
+            : 1;
+
+        if (
+            $product_id <= 0 ||
+            $supplier_id <= 0 ||
+            $unit_price <= 0 ||
+            $quantity <= 0
+        ) {
+            wp_send_json_error([
+                'message' => 'Invalid item data.',
+            ]);
         }
 
         global $wpdb;
 
-        $pending_order_id = $this->get_or_create_pending_order($pharmacy_id);
+        $pending_order_id = $this->get_or_create_pending_order(
+            $pharmacy_id
+        );
+
+        if (!$pending_order_id) {
+            wp_send_json_error([
+                'message' => 'Unable to create or locate the pending order.',
+            ]);
+        }
 
         $items_table = $wpdb->prefix . 'medi_pending_order_items';
 
-        $wpdb->insert($items_table, [
-            'pending_order_id' => $pending_order_id,
-            'product_id'       => $product_id,
-            'supplier_id'      => $supplier_id,
-            'quantity'         => $quantity,
-            'unit_price'       => $unit_price,
-            'line_total'       => $unit_price * $quantity,
-        ]);
+        /*
+        * Look for an existing row containing the same:
+        *
+        * - Pending order
+        * - Product
+        * - Supplier
+        */
+        $existing_item = $wpdb->get_row(
+            $wpdb->prepare(
+                "
+                SELECT
+                    id,
+                    quantity
+                FROM {$items_table}
+                WHERE pending_order_id = %d
+                AND product_id = %d
+                AND supplier_id = %d
+                ORDER BY id ASC
+                LIMIT 1
+                ",
+                $pending_order_id,
+                $product_id,
+                $supplier_id
+            ),
+            ARRAY_A
+        );
 
-        wp_send_json_success(['message' => 'Item added to pending order.']);
+        if ($existing_item) {
+
+            /*
+            * Add the newly selected quantity to the quantity already
+            * present in the pending order.
+            */
+            $new_quantity = (
+                (int) $existing_item['quantity'] +
+                $quantity
+            );
+
+            /*
+            * Use the latest selected supplier price and recalculate
+            * the complete line total.
+            */
+            $new_line_total = round(
+                $unit_price * $new_quantity,
+                2
+            );
+
+            $updated = $wpdb->update(
+                $items_table,
+                [
+                    'quantity'   => $new_quantity,
+                    'unit_price' => $unit_price,
+                    'line_total' => $new_line_total,
+                ],
+                [
+                    'id' => (int) $existing_item['id'],
+                ],
+                [
+                    '%d',
+                    '%f',
+                    '%f',
+                ],
+                [
+                    '%d',
+                ]
+            );
+
+            if ($updated === false) {
+                wp_send_json_error([
+                    'message' => 'Unable to update the existing pending item.',
+                ]);
+            }
+
+            wp_send_json_success([
+                'message'       => 'Pending item quantity updated.',
+                'merged'        => true,
+                'item_id'       => (int) $existing_item['id'],
+                'quantity'      => $new_quantity,
+                'unit_price'    => $unit_price,
+                'line_total'    => $new_line_total,
+            ]);
+        }
+
+        /*
+        * No matching product and supplier row exists, so create one.
+        */
+        $line_total = round(
+            $unit_price * $quantity,
+            2
+        );
+
+        $inserted = $wpdb->insert(
+            $items_table,
+            [
+                'pending_order_id' => $pending_order_id,
+                'product_id'       => $product_id,
+                'supplier_id'      => $supplier_id,
+                'quantity'         => $quantity,
+                'unit_price'       => $unit_price,
+                'line_total'       => $line_total,
+            ],
+            [
+                '%d',
+                '%d',
+                '%d',
+                '%d',
+                '%f',
+                '%f',
+            ]
+        );
+
+        if ($inserted === false) {
+            wp_send_json_error([
+                'message' => 'Unable to add the item to the pending order.',
+            ]);
+        }
+
+        wp_send_json_success([
+            'message'       => 'Item added to pending order.',
+            'merged'        => false,
+            'item_id'       => (int) $wpdb->insert_id,
+            'quantity'      => $quantity,
+            'unit_price'    => $unit_price,
+            'line_total'    => $line_total,
+        ]);
     }
 
     /* ---------------------------------------------------------

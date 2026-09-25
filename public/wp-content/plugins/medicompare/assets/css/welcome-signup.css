@@ -1,276 +1,994 @@
 /* ---------------------------------------------------------
-   MediCompare — Welcome & Signup Page Styles
+   Source Med Pharma
+   Welcome Signup Page
 --------------------------------------------------------- */
 
-.mc-welcome-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    font-family: Arial, sans-serif;
-    color: #003b4a;
+.mc-welcome-signup-page,
+.mc-welcome-signup-page * {
+    box-sizing: border-box;
 }
 
-/* HERO */
-.mc-hero {
-    text-align: center;
-    margin-bottom: 40px;
-}
+.mc-welcome-signup-page {
+    --mc-navy: #082560;
+    --mc-navy-dark: #041b4d;
+    --mc-green: #008f78;
+    --mc-green-dark: #007564;
+    --mc-green-light: #d8f5ed;
+    --mc-text: #1d3762;
+    --mc-muted: #657493;
+    --mc-border: #cbd5e1;
+    --mc-white: #ffffff;
 
-.mc-hero h1 {
-    font-size: 42px;
-    margin-bottom: 10px;
-    color: #006d7c;
-}
-
-.mc-hero p {
-    font-size: 20px;
-    color: #004b55;
-}
-
-.mc-hero-action {
-    font-size: 18px;
-    margin-top: 12px;
-    color: #cc0000;
-    font-weight: 600;
-}
-
-/* ⭐ VIDEO + FORM SIDE-BY-SIDE (layout reused) */
-.mc-video-section {
-    margin-bottom: 50px;
-}
-
-.mc-video-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 40px;
-    align-items: stretch;
-}
-
-.mc-video-container {
+    position: relative;
     width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(
+            circle at 75% 15%,
+            rgba(196, 235, 240, 0.95) 0,
+            rgba(196, 235, 240, 0) 38%
+        ),
+        linear-gradient(
+            120deg,
+            #f8fcff 0%,
+            #eef8fa 48%,
+            #dcecf3 100%
+        );
+
+    /*
+     * Add the background image later by uncommenting:
+     *
+     * background-image:
+     *     linear-gradient(
+     *         90deg,
+     *         rgba(255, 255, 255, 0.96) 0%,
+     *         rgba(255, 255, 255, 0.82) 48%,
+     *         rgba(230, 240, 247, 0.42) 100%
+     *     ),
+     *     url("../img/welcome-signup-background.jpg");
+     *
+     * background-position: center;
+     * background-repeat: no-repeat;
+     * background-size: cover;
+     */
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: var(--mc-text);
 }
 
-.mc-video-placeholder {
-    background: #f2f7f7;
-    border: 2px dashed #a3c5c9;
+.mc-welcome-background-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.7) 0%,
+            rgba(255, 255, 255, 0.25) 52%,
+            rgba(255, 255, 255, 0.05) 100%
+        );
+}
+
+/* ---------------------------------------------------------
+   PAGE LAYOUT
+--------------------------------------------------------- */
+
+.mc-welcome-layout {
+    width: min(100%, 1540px);
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 64px 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(460px, 0.9fr);
+    align-items: center;
+    gap: 72px;
+}
+
+/* ---------------------------------------------------------
+   LEFT CONTENT
+--------------------------------------------------------- */
+
+.mc-welcome-content {
+    width: 100%;
+    max-width: 790px;
+}
+
+/*
+.mc-welcome-logo {
+    margin-bottom: 66px;
+}
+*/    
+
+.mc-welcome-logo img {
+    display: block;
+    width: auto;
+    max-width: min(100%, 630px);
+    object-fit: contain;
+    object-position: left center;
+}
+
+.mc-welcome-introduction {
+    max-width: 720px;
+}
+
+.mc-welcome-introduction h1 {
+    margin: 0 0 22px;
+    padding: 0;
+    color: var(--mc-navy);
+    font-size: clamp(48px, 4.8vw, 76px);
+    font-weight: 800;
+    line-height: 0.99;
+    letter-spacing: -2.5px;
+}
+
+.mc-welcome-introduction h1 span {
+    color: var(--mc-green);
+}
+
+.mc-welcome-description {
+    max-width: 650px;
+    margin: 0;
+    color: var(--mc-text);
+    font-size: clamp(20px, 1.7vw, 27px);
+    font-weight: 400;
+    line-height: 1.42;
+}
+
+/* ---------------------------------------------------------
+   BENEFITS
+--------------------------------------------------------- */
+
+.mc-welcome-benefits {
+    display: grid;
+    gap: 28px;
+    max-width: 610px;
+    margin-top: 44px;
+}
+
+.mc-welcome-benefit {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+}
+
+.mc-benefit-icon {
+    width: 88px;
+    height: 88px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #5a7f82;
-    font-size: 20px;
-    border-radius: 12px;
-    padding: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(203, 246, 233, 0.92);
+    color: var(--mc-green);
 }
 
-/* FORM BLOCK */
-.mc-video-form {
-    margin-top: 0;
+.mc-benefit-icon .dashicons {
+    width: auto;
+    height: auto;
+    font-size: 45px;
+    line-height: 1;
 }
 
-.mc-video-form h2 {
-    text-align: center;
-    margin-bottom: 15px;
-    color: #006d7c;
+.mc-benefit-content h2 {
+    margin: 0 0 5px;
+    padding: 0;
+    color: var(--mc-navy);
+    font-size: 22px;
+    font-weight: 750;
+    line-height: 1.12;
 }
 
-.mc-form-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #d7e6e8;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    padding: 25px 25px 15px 15px;
+.mc-benefit-content p {
+    margin: 0;
+    color: var(--mc-text);
+    font-size: 18px;
+    line-height: 1.35;
 }
 
-.mc-form-row {
-    margin-bottom: 18px;
-}
+/* ---------------------------------------------------------
+   FORM COLUMN
+--------------------------------------------------------- */
 
-.mc-form-row-half {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-
-.mc-form-row label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #004b55;
-}
-
-.mc-form-row input {
+.mc-welcome-form-column {
     width: 100%;
-    padding: 11px;
-    border: 1px solid #a3c5c9;
-    border-radius: 6px;
+    max-width: 570px;
+    justify-self: end;
+}
+
+.mc-welcome-form-card {
+    width: 100%;
+    padding: 40px 42px 36px;
+    border: 1px solid rgba(255, 255, 255, 0.82);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow:
+        0 24px 65px rgba(18, 51, 82, 0.16),
+        0 5px 18px rgba(18, 51, 82, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.mc-form-introduction {
+    margin-bottom: 30px;
+}
+
+.mc-form-eyebrow {
+    margin: 0 0 18px;
+    color: var(--mc-navy);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+}
+
+.mc-form-introduction h2 {
+    margin: 0 0 6px;
+    padding: 0;
+    color: var(--mc-navy);
+    font-size: clamp(32px, 3vw, 44px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+}
+
+.mc-form-introduction > p:last-child {
+    margin: 0;
+    color: var(--mc-text);
+    font-size: 19px;
+    line-height: 1.45;
+}
+
+/* ---------------------------------------------------------
+   FORM MESSAGES
+--------------------------------------------------------- */
+
+.mc-form-message {
+    margin: 0 0 22px;
+    padding: 14px 16px;
+    border-radius: 8px;
     font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
 }
 
-.mc-form-row button {
+.mc-form-error {
+    border: 1px solid #e7a4a4;
+    background: #fff0f0;
+    color: #9b1c1c;
+}
+
+.mc-form-success {
+    border: 1px solid #8ed8bf;
+    background: #eafaf4;
+    color: #086d53;
+}
+
+/* ---------------------------------------------------------
+   FORM FIELDS
+--------------------------------------------------------- */
+
+.mc-welcome-interest-form {
     width: 100%;
-    padding: 13px;
-    background: #006d7c;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 17px;
+    margin: 0;
+    padding: 0;
+}
+
+.mc-welcome-form-row {
+    margin-bottom: 19px;
+}
+
+.mc-welcome-form-row label {
+    display: block;
+    margin: 0 0 8px;
+    color: var(--mc-navy);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.mc-welcome-form-row label span {
+    color: var(--mc-navy);
+}
+
+.mc-welcome-form-row input {
+    display: block;
+    width: 100%;
+    height: 50px;
+    margin: 0;
+    padding: 0 15px;
+    border: 1px solid var(--mc-border);
+    border-radius: 7px;
+    outline: none;
+    background: #ffffff;
+    box-shadow: none;
+    color: var(--mc-navy-dark);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 50px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.mc-welcome-form-row input::placeholder {
+    color: #8795ad;
+    opacity: 1;
+}
+
+.mc-welcome-form-row input:hover {
+    border-color: #9cadc0;
+}
+
+.mc-welcome-form-row input:focus {
+    border-color: var(--mc-green);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 143, 120, 0.13);
+}
+
+.mc-welcome-form-row input:-webkit-autofill,
+.mc-welcome-form-row input:-webkit-autofill:hover,
+.mc-welcome-form-row input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--mc-navy-dark);
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+}
+
+/* ---------------------------------------------------------
+   CONSENT
+--------------------------------------------------------- */
+
+.mc-welcome-consent {
+    margin: 3px 0 20px;
+}
+
+.mc-welcome-consent label {
+    display: grid;
+    grid-template-columns: 25px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    margin: 0;
     cursor: pointer;
 }
 
-.mc-form-row button:hover {
-    background: #005a67;
-}
-
-/* SUCCESS */
-.mc-success {
-    text-align: center;
-    color: #007c4a;
-    font-weight: bold;
-    margin-bottom: 20px;
-    font-size: 18px;
-}
-
-/* FEATURES (same styles, now inside left column) */
-.mc-features {
-    margin-bottom: 40px;
-}
-
-.mc-features h2 {
-    text-align: center;
-    margin-bottom: 40px;
-    color: #006d7c;
-}
-
-.mc-feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* ⭐ was 3, now 2 */
-    gap: 10px;
-}
-
-.mc-feature-card {
-    background: #ffffff;
-    border: 1px solid #d7e6e8;
-    padding: 22px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease;
-    height: auto;
-}
-
-.mc-feature-card-autoheight {
-    height: auto !important;
-}
-
-.mc-feature-card:hover {
-    transform: translateY(-4px);
-}
-
-/* FEATURE PREVIEW (unchanged) */
-.mc-feature-preview {
-    margin-top: 12px;
-}
-
-.mc-feature-preview-box {
-    background: #f7fbfb;
-    border-radius: 8px;
-    border: 1px solid #d7e6e8;
-    padding: 10px 12px;
-}
-
-.mc-preview-title {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #006d7c;
-    margin-bottom: 6px;
-}
-
-.mc-preview-bar {
-    height: 10px;
+.mc-welcome-consent input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 25px;
+    height: 25px;
+    margin: 1px 0 0;
+    border: 1.5px solid #71839e;
     border-radius: 5px;
-    background: linear-gradient(90deg, #a3c5c9, #006d7c);
-    margin-bottom: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    position: relative;
 }
 
-.mc-preview-lines span {
-    display: block;
-    height: 6px;
-    border-radius: 3px;
-    background: #d7e6e8;
-    margin-bottom: 4px;
+.mc-welcome-consent input[type="checkbox"]:checked {
+    border-color: var(--mc-green);
+    background: var(--mc-green);
 }
 
-.mc-preview-table span {
-    display: block;
-    height: 14px;
-    border-radius: 4px;
-    background: #d7e6e8;
-    margin-bottom: 5px;
+.mc-welcome-consent input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
-.mc-preview-mobile {
+.mc-welcome-consent input[type="checkbox"]:focus-visible {
+    outline: 3px solid rgba(0, 143, 120, 0.22);
+    outline-offset: 2px;
+}
+
+.mc-welcome-consent label > span {
+    color: var(--mc-text);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.mc-welcome-consent a {
+    color: var(--mc-green-dark);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.mc-welcome-consent a:hover,
+.mc-welcome-consent a:focus {
+    color: var(--mc-navy);
+}
+
+/* ---------------------------------------------------------
+   SUBMIT BUTTON
+--------------------------------------------------------- */
+
+.mc-welcome-submit-row {
+    margin-top: 13px;
+}
+
+.mc-welcome-submit-row button {
+    width: 100%;
+    min-height: 63px;
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 16px;
+    gap: 14px;
+    margin: 0;
+    padding: 16px 24px;
+    border: 0;
+    border-radius: 8px;
+    outline: none;
+    background: linear-gradient(
+        90deg,
+        var(--mc-green-dark) 0%,
+        var(--mc-green) 100%
+    );
+    box-shadow: 0 8px 22px rgba(0, 143, 120, 0.2);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
 
-.mc-mobile-screen {
-    width: 60px;
-    height: 100px;
-    border-radius: 10px;
-    border: 2px solid #006d7c;
-    background: #e9f3f4;
+.mc-welcome-submit-row button:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(
+        90deg,
+        #006d5d 0%,
+        #008674 100%
+    );
+    box-shadow: 0 11px 26px rgba(0, 143, 120, 0.27);
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .mc-video-grid {
+.mc-welcome-submit-row button:active {
+    transform: translateY(0);
+}
+
+.mc-welcome-submit-row button:focus-visible {
+    outline: 3px solid rgba(0, 143, 120, 0.3);
+    outline-offset: 3px;
+}
+
+.mc-welcome-submit-row button .dashicons {
+    width: auto;
+    height: auto;
+    font-size: 27px;
+    line-height: 1;
+}
+
+/* ---------------------------------------------------------
+   SECURITY MESSAGE
+--------------------------------------------------------- */
+
+.mc-welcome-security-message {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    margin-top: 20px;
+    color: var(--mc-muted);
+}
+
+.mc-welcome-security-message .dashicons {
+    width: auto;
+    height: auto;
+    margin-top: 1px;
+    color: #476486;
+    font-size: 25px;
+    line-height: 1;
+}
+
+.mc-welcome-security-message p {
+    margin: 0;
+    color: var(--mc-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+/* ---------------------------------------------------------
+   WORDPRESS THEME OVERRIDES
+--------------------------------------------------------- */
+
+body.page-welcome-signup {
+    margin: 0;
+}
+
+body.page-welcome-signup .site-main,
+body.page-welcome-signup main,
+body.page-welcome-signup article,
+body.page-welcome-signup .entry-content {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.mc-welcome-signup-page h1,
+.mc-welcome-signup-page h2,
+.mc-welcome-signup-page h3,
+.mc-welcome-signup-page p,
+.mc-welcome-signup-page label {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+.mc-welcome-signup-page img {
+    border: 0;
+    box-shadow: none;
+    height: 160px;
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE: LAPTOP
+--------------------------------------------------------- */
+
+@media (max-width: 1250px) {
+
+    .mc-welcome-layout {
+        padding: 48px 42px;
+        grid-template-columns: minmax(0, 1fr) minmax(420px, 0.85fr);
+        gap: 46px;
+    }
+
+    .mc-welcome-logo {
+        margin-bottom: 50px;
+    }
+
+    .mc-welcome-form-card {
+        padding: 36px 34px 32px;
+    }
+
+    .mc-welcome-benefit {
+        grid-template-columns: 76px minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .mc-benefit-icon {
+        width: 76px;
+        height: 76px;
+    }
+
+    .mc-benefit-icon .dashicons {
+        font-size: 39px;
+    }
+
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE: TABLET
+--------------------------------------------------------- */
+
+@media (max-width: 980px) {
+
+    .mc-welcome-signup-page {
+        min-height: auto;
+    }
+
+    .mc-welcome-layout {
+        min-height: auto;
+        padding: 40px 28px 60px;
         grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .mc-welcome-content {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .mc-welcome-form-column {
+        max-width: 650px;
+        justify-self: center;
+    }
+
+    .mc-welcome-logo {
+        margin-bottom: 42px;
+    }
+
+    .mc-welcome-logo img {
+        max-width: 560px;
+        max-height: 96px;
+    }
+
+    .mc-welcome-introduction h1 {
+        max-width: 700px;
+    }
+
+    .mc-welcome-description {
+        max-width: 680px;
+    }
+
+    .mc-welcome-benefits {
+        max-width: 680px;
+    }
+
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE: MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 640px) {
+
+    .mc-welcome-layout {
+        padding: 26px 16px 40px;
+        gap: 38px;
+    }
+
+    .mc-welcome-logo {
+        margin-bottom: 34px;
+    }
+
+    .mc-welcome-logo img {
+        max-width: 100%;
+        max-height: 72px;
+    }
+
+    .mc-welcome-introduction h1 {
+        margin-bottom: 18px;
+        font-size: 42px;
+        line-height: 1.02;
+        letter-spacing: -1.5px;
+    }
+
+    .mc-welcome-description {
+        font-size: 18px;
+        line-height: 1.45;
+    }
+
+    .mc-welcome-benefits {
+        gap: 23px;
+        margin-top: 34px;
+    }
+
+    .mc-welcome-benefit {
+        grid-template-columns: 64px minmax(0, 1fr);
+        align-items: start;
+        gap: 16px;
+    }
+
+    .mc-benefit-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .mc-benefit-icon .dashicons {
+        font-size: 33px;
+    }
+
+    .mc-benefit-content h2 {
+        font-size: 18px;
+    }
+
+    .mc-benefit-content p {
+        font-size: 16px;
+    }
+
+    .mc-welcome-form-card {
+        padding: 28px 20px 26px;
+        border-radius: 16px;
+    }
+
+    .mc-form-eyebrow {
+        margin-bottom: 14px;
+        font-size: 11px;
+        letter-spacing: 3.5px;
+    }
+
+    .mc-form-introduction h2 {
+        font-size: 31px;
+        letter-spacing: -1px;
+    }
+
+    .mc-form-introduction > p:last-child {
+        font-size: 17px;
+    }
+
+    .mc-welcome-form-row {
+        margin-bottom: 17px;
+    }
+
+    .mc-welcome-form-row input {
+        height: 48px;
+        font-size: 16px;
+        line-height: 48px;
+    }
+
+    .mc-welcome-consent label > span {
+        font-size: 13px;
+    }
+
+    .mc-welcome-submit-row button {
+        min-height: 57px;
+        padding: 14px 18px;
+        font-size: 16px;
+    }
+
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE: SMALL MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 390px) {
+
+    .mc-welcome-layout {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .mc-welcome-introduction h1 {
+        font-size: 36px;
+    }
+
+    .mc-welcome-benefit {
+        grid-template-columns: 55px minmax(0, 1fr);
+        gap: 13px;
+    }
+
+    .mc-benefit-icon {
+        width: 55px;
+        height: 55px;
+    }
+
+    .mc-benefit-icon .dashicons {
+        font-size: 29px;
+    }
+
+    .mc-welcome-form-card {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+}
+
+/* ---------------------------------------------------------
+   BREAK OUT OF WORDPRESS CONSTRAINED PAGE LAYOUT
+--------------------------------------------------------- */
+
+.entry-content > .mc-welcome-signup-page {
+    position: relative;
+    left: 50%;
+    width: 100vw;
+    max-width: none !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: -50vw !important;
+}
+
+.entry-content:has(.mc-welcome-signup-page) {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.wp-block-post-content:has(.mc-welcome-signup-page) {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+main:has(.mc-welcome-signup-page),
+article:has(.mc-welcome-signup-page) {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+article:has(.mc-welcome-signup-page) .wp-block-post-title {
+    display: none !important;
+}
+
+.mc-welcome-signup-page {
+    width: 100vw !important;
+    max-width: none !important;
+    min-height: 100vh;
+    margin: 0 !important;
+}
+
+.mc-welcome-layout {
+    width: 100% !important;
+    max-width: 1540px !important;
+    margin: 0 auto !important;
+    grid-template-columns:
+        minmax(0, 1.35fr)
+        minmax(460px, 0.9fr) !important;
+}
+
+.mc-welcome-content,
+.mc-welcome-introduction,
+.mc-welcome-description {
+    min-width: 0;
+}
+
+.mc-welcome-form-column {
+    min-width: 0;
+}
+
+/* ---------------------------------------------------------
+   FORCE WELCOME PAGE HEADINGS TO DISPLAY
+--------------------------------------------------------- */
+
+.mc-welcome-signup-page h1,
+.mc-welcome-signup-page h2 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    text-indent: 0 !important;
+}
+
+/* Main welcome heading */
+.mc-welcome-signup-page .mc-welcome-introduction h1 {
+    margin: 0 0 22px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: clamp(48px, 4.8vw, 76px) !important;
+    font-weight: 800 !important;
+    line-height: 0.99 !important;
+    letter-spacing: -2.5px !important;
+    text-transform: none !important;
+}
+
+.mc-welcome-signup-page .mc-welcome-introduction h1 span {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #008f78 !important;
+}
+
+/* Form heading */
+.mc-welcome-signup-page .mc-form-introduction h2 {
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: clamp(32px, 3vw, 44px) !important;
+    font-weight: 800 !important;
+    line-height: 1.08 !important;
+    letter-spacing: -1.5px !important;
+    text-transform: none !important;
+}
+
+/* Benefit headings */
+.mc-welcome-signup-page .mc-benefit-content h2 {
+    margin: 0 0 5px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Keep only the normal WordPress page title hidden */
+article:has(.mc-welcome-signup-page) > header,
+article:has(.mc-welcome-signup-page) .wp-block-post-title {
+    display: none !important;
+}
+
+/* Mobile heading sizes */
+@media (max-width: 640px) {
+
+    .mc-welcome-signup-page .mc-welcome-introduction h1 {
+        font-size: 42px !important;
+        line-height: 1.02 !important;
+        letter-spacing: -1.5px !important;
+    }
+
+    .mc-welcome-signup-page .mc-form-introduction h2 {
+        font-size: 31px !important;
+        letter-spacing: -1px !important;
+    }
+
+    .mc-welcome-signup-page .mc-benefit-content h2 {
+        font-size: 18px !important;
     }
 }
 
-/* Force our styling for the Sign Up Interest heading */
-.mc-form-heading.mc-card-title {
-    font-size: 24px !important;
+/* ---------------------------------------------------------
+   WELCOME PAGE HEADING OVERRIDES
+--------------------------------------------------------- */
+
+.mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0 0 20px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-size: clamp(42px, 4vw, 64px) !important;
+    font-weight: 800 !important;
+    line-height: 1.02 !important;
+    letter-spacing: -2px !important;
+    text-transform: none !important;
+}
+
+.mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title span {
+    color: #008f78 !important;
+}
+
+.mc-welcome-signup-page .mc-form-introduction h2.mc-card-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-size: clamp(26px, 2vw, 34px) !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -1px !important;
+    text-align: left !important;
+    text-transform: none !important;
+    white-space: nowrap;
+}
+
+.mc-welcome-signup-page .mc-benefit-content h2.mc-card-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0 0 5px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
-    color: #006d7c !important;
-    margin-bottom: 20px !important;
-    text-align: center !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    text-transform: none !important;
 }
 
-.mc-video-section h2.mc-card-title,
-.mc-features h2.mc-card-title {
-    font-size: 24px !important;
-    font-weight: 700 !important;
-    color: #006d7c !important;
-    margin-bottom: 20px !important;
-    text-align: center !important;
-}
+@media (max-width: 640px) {
 
-.mc-features h2.mc-card-title {
-    padding-top: 20px !important;
-} 
+    .mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
+        font-size: 38px !important;
+        letter-spacing: -1.5px !important;
+    }
 
-.mc-video-iframe {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    object-fit: cover;
-}
+    .mc-welcome-signup-page .mc-form-introduction h2.mc-card-title {
+        font-size: 26px !important;
+        white-space: normal;
+    }
 
-.mc-video-wrapper {
-    width: 100%;
-    max-width: 720px;
-    aspect-ratio: 16 / 9;
-    margin: 0 auto;
-}
-
-.mc-video-iframe {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.mc-interest-form {
-    padding: 10px 10px;
+    .mc-welcome-signup-page .mc-benefit-content h2.mc-card-title {
+        font-size: 18px !important;
+    }
 }

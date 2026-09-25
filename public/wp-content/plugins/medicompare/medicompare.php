@@ -27,6 +27,18 @@ class MediCompare {
         // ⭐ NEW: Auto-create Welcome Signup page
         register_activation_hook(__FILE__, [$this, 'create_welcome_signup_page']);
 
+        // Auto-create static legal pages.
+        register_activation_hook(
+            __FILE__,
+            [$this, 'ensure_static_pages']
+        );
+
+        // Also create/update them on existing installations.
+        add_action(
+            'admin_init',
+            [$this, 'ensure_static_pages']
+        );
+
         // Make sure timezone is set properly
         register_activation_hook(__FILE__, [$this,'mc_fix_timezone_on_activation']);
 
@@ -69,7 +81,8 @@ class MediCompare {
         add_filter('the_content', [$this, 'add_header_to_search_instructions']);
 
         add_action('wp_footer', [$this, 'render_global_footer']);
-        
+
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_static_page_assets']);
 
         // Load admin menu
         require_once plugin_dir_path(__FILE__) . 'includes/class-admin-menu.php';
@@ -85,6 +98,24 @@ class MediCompare {
 
         // ⭐ NEW: Welcome Signup page template loader
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/welcome-signup.php';
+
+        // Static legal page templates.
+        $static_page_files = [
+            'terms-of-use.php',
+            'privacy-policy.php',
+            'cookie-policy.php',
+        ];
+
+        foreach ($static_page_files as $static_page_file) {
+
+            $static_page_path = plugin_dir_path(__FILE__) .
+                'includes/frontend/static/' .
+                $static_page_file;
+
+            if (file_exists($static_page_path)) {
+                require_once $static_page_path;
+            }
+        }
 
         // Hide theme header/footer for MediCompare pages
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/hide-theme-ui.php';
@@ -279,8 +310,17 @@ class MediCompare {
     public function render_global_footer() {
 
         if (is_admin()) return;
-        // Hide on welcome signup page
-        if (is_page('welcome-signup')) return;
+        // Hide on welcome signup page, terms of use, privacy policy and cookie policy.
+        // once go live then we only want to hide it on the welcome sign up page.
+       if (
+            is_page([
+                'welcome-signup',
+                'terms-of-use',
+                'privacy-policy',
+                'cookie-policy',
+            ])) {
+            return;
+        }
         
 
         // Include global support modal
@@ -316,6 +356,134 @@ class MediCompare {
             'post_type'    => 'page',
             'post_content' => '[mc_welcome_signup]'
         ]);
+    }
+
+    /**
+    * Create and maintain the static legal pages.
+    */
+    public function ensure_static_pages() {
+
+        $pages = [
+            'terms-of-use' => [
+                'title'     => 'Terms of Use',
+                'shortcode' => '[mc_terms_of_use]',
+            ],
+
+            'privacy-policy' => [
+                'title'     => 'Privacy Policy',
+                'shortcode' => '[mc_privacy_policy]',
+            ],
+
+            'cookie-policy' => [
+                'title'     => 'Cookie Policy',
+                'shortcode' => '[mc_cookie_policy]',
+            ],
+        ];
+
+        foreach ($pages as $slug => $page_data) {
+
+            $existing_page = get_page_by_path(
+                $slug,
+                OBJECT,
+                'page'
+            );
+
+            /*
+            * Create the page if it does not already exist.
+            */
+            if (!$existing_page) {
+
+                $page_id = wp_insert_post(
+                    [
+                        'post_title'   => $page_data['title'],
+                        'post_name'    => $slug,
+                        'post_content' => $page_data['shortcode'],
+                        'post_status'  => 'publish',
+                        'post_type'    => 'page',
+                    ],
+                    true
+                );
+
+                if (is_wp_error($page_id)) {
+                    error_log(
+                        sprintf(
+                            'MediCompare could not create the %s page: %s',
+                            $page_data['title'],
+                            $page_id->get_error_message()
+                        )
+                    );
+                }
+
+                continue;
+            }
+
+            /*
+            * Restore the page if it currently exists in the bin.
+            */
+            if ($existing_page->post_status === 'trash') {
+
+                wp_untrash_post($existing_page->ID);
+
+                wp_update_post([
+                    'ID'           => $existing_page->ID,
+                    'post_title'   => $page_data['title'],
+                    'post_name'    => $slug,
+                    'post_content' => $page_data['shortcode'],
+                    'post_status'  => 'publish',
+                ]);
+
+                continue;
+            }
+
+            /*
+            * Keep the existing page but ensure it contains
+            * the correct title, slug, shortcode and status.
+            */
+            $requires_update = false;
+
+            if ($existing_page->post_title !== $page_data['title']) {
+                $requires_update = true;
+            }
+
+            if ($existing_page->post_name !== $slug) {
+                $requires_update = true;
+            }
+
+            if (
+                trim($existing_page->post_content) !==
+                $page_data['shortcode']
+            ) {
+                $requires_update = true;
+            }
+
+            if ($existing_page->post_status !== 'publish') {
+                $requires_update = true;
+            }
+
+            if ($requires_update) {
+
+                $updated_page = wp_update_post(
+                    [
+                        'ID'           => $existing_page->ID,
+                        'post_title'   => $page_data['title'],
+                        'post_name'    => $slug,
+                        'post_content' => $page_data['shortcode'],
+                        'post_status'  => 'publish',
+                    ],
+                    true
+                );
+
+                if (is_wp_error($updated_page)) {
+                    error_log(
+                        sprintf(
+                            'MediCompare could not update the %s page: %s',
+                            $page_data['title'],
+                            $updated_page->get_error_message()
+                        )
+                    );
+                }
+            }
+        }
     }
 
     /**
@@ -455,6 +623,40 @@ class MediCompare {
             $wpdb->query($sql);
         }
     }
+
+    /**
+    * Enqueue shared styles for static legal pages.
+    */
+    public function enqueue_static_page_assets() {
+
+        if (
+            !is_page([
+                'terms-of-use',
+                'privacy-policy',
+                'cookie-policy',
+            ])
+        ) {
+            return;
+        }
+
+        $css_path = plugin_dir_path(__FILE__) .
+            'assets/css/static-pages.css';
+
+        $css_url = plugin_dir_url(__FILE__) .
+            'assets/css/static-pages.css';
+
+        wp_enqueue_style('dashicons');
+
+        wp_enqueue_style(
+            'mc-static-pages',
+            $css_url,
+            [],
+            file_exists($css_path)
+                ? filemtime($css_path)
+                : '1.0.0'
+        );
+    }
+
 
 }
 

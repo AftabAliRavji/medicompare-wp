@@ -237,31 +237,87 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
     }
 
     /* ---------------------------------------------------------
-       SEND WELCOME SIGN UP NOTIFICATION EMAIL to admin
+   SEND WELCOME SIGNUP NOTIFICATION EMAIL TO ADMIN
     --------------------------------------------------------- */
+    public function send_welcome_signup_notification(
+        $pharmacy_name,
+        $pharmacy_postcode,
+        $contact_name,
+        $contact_number,
+        $contact_email
+    ) {
 
-    public function send_welcome_signup_notification($pharmacy_name, $contact_name, $contact_number, $contact_email) {
+        $template = $this->load_template(
+            'welcome-signup-notification.php'
+        );
 
-        // Load template
-        $template = $this->load_template('welcome-signup-notification.php');
+        $body = $this->fill_template(
+            $template,
+            [
+                'pharmacy_name'     => $pharmacy_name,
+                'pharmacy_postcode' => $pharmacy_postcode,
+                'contact_name'      => $contact_name,
+                'contact_number'    => $contact_number,
+                'contact_email'     => $contact_email,
+                'submitted_at'      => wp_date('d M Y H:i'),
+            ]
+        );
 
-        // Fill placeholders
-        $body = $this->fill_template($template, [
-            'pharmacy_name'  => $pharmacy_name,
-            'contact_name'   => $contact_name,
-            'contact_number' => $contact_number,
-            'contact_email'  => $contact_email,
-            'submitted_at'   => wp_date('d M Y H:i')
-        ]);
-
-        // Send to admin email
-        wp_mail(
+        return wp_mail(
             get_option('admin_email'),
-            "New Pharmacy Signup Interest — {$pharmacy_name}",
+            'New Pharmacy Signup Interest - ' . $pharmacy_name,
             $body,
-            ['Content-Type: text/html; charset=UTF-8']
+            [
+                'Content-Type: text/html; charset=UTF-8',
+                'Reply-To: ' . $contact_name . ' <' . $contact_email . '>',
+            ]
         );
     }
+
+    /* ---------------------------------------------------------
+    SEND WELCOME SIGNUP CONFIRMATION EMAIL TO PHARMACY
+    --------------------------------------------------------- */
+    public function send_welcome_signup_pharmacy_notification(
+        $pharmacy_name,
+        $pharmacy_postcode,
+        $contact_name,
+        $contact_number,
+        $contact_email
+    ) {
+        if (!is_email($contact_email)) {
+            return false;
+        }
+
+        $template = $this->load_template(
+            'welcome-signup-pharmacy-notification.php'
+        );
+
+        $contact_email_address = get_option('admin_email');
+
+        $body = $this->fill_template(
+            $template,
+            [
+                'pharmacy_name'      => $pharmacy_name,
+                'pharmacy_postcode'  => $pharmacy_postcode,
+                'contact_name'       => $contact_name,
+                'contact_number'     => $contact_number,
+                'contact_email'      => $contact_email,
+                'smp_contact_email'  => $contact_email_address,
+                'submitted_at'       => wp_date('d M Y H:i'),
+            ]
+        );
+
+        return wp_mail(
+            $contact_email,
+            'We have received your registration of interest',
+            $body,
+            [
+                'Content-Type: text/html; charset=UTF-8',
+                'Reply-To: Source Med Pharma <' . $contact_email_address . '>',
+            ]
+        );
+    }
+
 
     /* ---------------------------------------------------------
         SEND CUSTOM EMAIL

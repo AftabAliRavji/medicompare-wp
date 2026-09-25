@@ -17,6 +17,7 @@
 <h3>Pharmacy Details</h3>
 <ul>
     <li><strong>Pharmacy Name:</strong> {{pharmacy_name}}</li>
+    <li><strong>Pharmacy PostCode:</strong> {{pharmacy_postcode}}</li>
     <li><strong>Contact Name:</strong> {{contact_name}}</li>
     <li><strong>Contact Number:</strong> {{contact_number}}</li>
     <li><strong>Contact Email:</strong> {{contact_email}}</li>

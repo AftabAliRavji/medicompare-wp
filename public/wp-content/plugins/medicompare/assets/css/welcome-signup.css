@@ -539,7 +539,7 @@ body.page-welcome-signup .entry-content {
 .mc-welcome-signup-page img {
     border: 0;
     box-shadow: none;
-    height: 160px;
+    height: auto;
 }
 
 /* ---------------------------------------------------------
@@ -818,9 +818,6 @@ article:has(.mc-welcome-signup-page) .wp-block-post-title {
     width: 100% !important;
     max-width: 1540px !important;
     margin: 0 auto !important;
-    grid-template-columns:
-        minmax(0, 1.35fr)
-        minmax(460px, 0.9fr) !important;
 }
 
 .mc-welcome-content,
@@ -992,3 +989,43 @@ article:has(.mc-welcome-signup-page) .wp-block-post-title {
         font-size: 18px !important;
     }
 }
+
+/* ---------------------------------------------------------
+   FINAL RESPONSIVE LAYOUT OVERRIDES
+--------------------------------------------------------- */
+
+@media (max-width: 980px) {
+
+    .mc-welcome-signup-page {
+        width: 100% !important;
+        min-height: auto;
+        overflow-x: hidden;
+    }
+
+    .mc-welcome-layout {
+        width: 100% !important;
+        min-height: auto;
+        padding: 40px 28px 60px !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 48px;
+    }
+
+    .mc-welcome-content,
+    .mc-welcome-form-column {
+        width: 100%;
+        max-width: 650px;
+        min-width: 0;
+        margin: 0 auto;
+        justify-self: center;
+    }
+}
+
+@media (max-width: 640px) {
+
+    .mc-welcome-layout {
+        padding: 24px 16px 40px !important;
+        gap: 36px;
+    }
+
+    .mc-welcome-logo img {
+        width: 

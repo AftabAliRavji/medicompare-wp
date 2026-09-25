@@ -286,7 +286,7 @@ function mc_welcome_signup_shortcode() {
                 <div class="mc-welcome-form-card">
                     <div class="mc-form-introduction">
                         <p class="mc-form-eyebrow">Register your interest</p>
-                        <h2 class="mc-card-title">Join Source <span>Med</span> Pharma</h2>
+                        <h2 class="mc-card-title">Join Source <span class="mc-green-text">Med</span> Pharma</h2>
                         <p>
                             Be the first to receive updates about our platform and how it can support your pharmacy.
                         </p>

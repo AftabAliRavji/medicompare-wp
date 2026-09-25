@@ -542,6 +542,10 @@ body.page-welcome-signup .entry-content {
     height: auto;
 }
 
+.mc-green-text {
+    color: var(--mc-green);
+}
+
 /* ---------------------------------------------------------
    RESPONSIVE: LAPTOP
 --------------------------------------------------------- */

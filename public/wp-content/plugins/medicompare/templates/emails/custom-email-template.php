@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Admin Email Template
  *
@@ -6,12 +7,14 @@
  * {{email_subject}}
  * {{custom_content}}
  */
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>{{email_subject}}</title>
 </head>
 
 <body style="
@@ -28,9 +31,7 @@
         border="0"
         style="background:#f5f5f5;padding:30px 0;"
     >
-
         <tr>
-
             <td align="center">
 
                 <table
@@ -49,7 +50,6 @@
                     <!-- HEADER -->
                     <tr>
                         <td>
-
                             <?php
 
                             $mc_assets =
@@ -60,9 +60,9 @@
                                 . '/templates/header-pharmacy.php';
 
                             ?>
-
                         </td>
                     </tr>
+
 
                     <!-- SUBJECT -->
                     <tr>
@@ -81,36 +81,31 @@
                         </td>
                     </tr>
 
+
                     <!-- BODY -->
                     <tr>
-
-                        <td
-                            style="
-                                padding:25px 30px;
-                                color:#333333;
-                                font-size:15px;
-                                line-height:1.7;
-                            "
-                        >
+                        <td style="
+                            padding:25px 30px;
+                            color:#333333;
+                            font-size:15px;
+                            line-height:1.7;
+                        ">
 
                             {{custom_content}}
 
                         </td>
-
                     </tr>
+
 
                     <!-- FOOTER -->
                     <tr>
-
-                        <td
-                            style="
-                                border-top:1px solid #e5e5e5;
-                                padding:30px;
-                                background:#fafafa;
-                                color:#555555;
-                                font-size:14px;
-                            "
-                        >
+                        <td style="
+                            border-top:1px solid #e5e5e5;
+                            padding:30px;
+                            background:#fafafa;
+                            color:#555555;
+                            font-size:14px;
+                        ">
 
                             <p style="
                                 margin:0 0 10px 0;
@@ -137,6 +132,7 @@
                                 margin:0 0 15px 0;
                             ">
                                 Email:
+
                                 <a
                                     href="mailto:support@sourcemedpharma.com"
                                     style="
@@ -163,15 +159,12 @@
                             </p>
 
                         </td>
-
                     </tr>
 
                 </table>
 
             </td>
-
         </tr>
-
     </table>
 
 </body>

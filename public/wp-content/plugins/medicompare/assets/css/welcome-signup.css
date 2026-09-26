@@ -24,41 +24,20 @@
     min-height: 100vh;
     overflow: hidden;
     isolation: isolate;
-    background:
-        radial-gradient(
-            circle at 75% 15%,
-            rgba(196, 235, 240, 0.95) 0,
-            rgba(196, 235, 240, 0) 38%
-        ),
+    background-color: #eef8fa;
+    background-image:
         linear-gradient(
-            120deg,
-            #f8fcff 0%,
-            #eef8fa 48%,
-            #dcecf3 100%
-        );
-
-    /*
-     * Add the background image later by uncommenting:
-     *
-     * background-image:
-     *     linear-gradient(
-     *         90deg,
-     *         rgba(255, 255, 255, 0.96) 0%,
-     *         rgba(255, 255, 255, 0.82) 48%,
-     *         rgba(230, 240, 247, 0.42) 100%
-     *     ),
-     *     url("../img/welcome-signup-background.jpg");
-     *
-     * background-position: center;
-     * background-repeat: no-repeat;
-     * background-size: cover;
-     */
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+            90deg,
+            rgba(255, 255, 255, 0.97) 0%,
+            rgba(255, 255, 255, 0.88) 42%,
+            rgba(255, 255, 255, 0.42) 70%,
+            rgba(255, 255, 255, 0.12) 100%
+        ),
+        url("../img/welcome-page/welcome-signup-background.jpeg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    font-family: Arial, Helvetica, sans-serif;
     color: var(--mc-text);
 }
 
@@ -67,13 +46,12 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.7) 0%,
-            rgba(255, 255, 255, 0.25) 52%,
-            rgba(255, 255, 255, 0.05) 100%
-        );
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.25) 52%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
 }
 
 /* ---------------------------------------------------------
@@ -84,7 +62,7 @@
     width: min(100%, 1540px);
     min-height: 100vh;
     margin: 0 auto;
-    padding: 64px 64px;
+    padding: 64px;
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(460px, 0.9fr);
     align-items: center;
@@ -99,12 +77,6 @@
     width: 100%;
     max-width: 790px;
 }
-
-/*
-.mc-welcome-logo {
-    margin-bottom: 66px;
-}
-*/    
 
 .mc-welcome-logo img {
     display: block;
@@ -128,7 +100,8 @@
     letter-spacing: -2.5px;
 }
 
-.mc-welcome-introduction h1 span {
+.mc-welcome-introduction h1 span,
+.mc-green-text {
     color: var(--mc-green);
 }
 
@@ -178,12 +151,17 @@
     line-height: 1;
 }
 
+.mc-benefit-icon svg {
+    width: 34px;
+    height: 34px;
+}
+
 .mc-benefit-content h2 {
     margin: 0 0 5px;
     padding: 0;
     color: var(--mc-navy);
     font-size: 22px;
-    font-weight: 750;
+    font-weight: 700;
     line-height: 1.12;
 }
 
@@ -530,20 +508,123 @@ body.page-welcome-signup .entry-content {
 .mc-welcome-signup-page h3,
 .mc-welcome-signup-page p,
 .mc-welcome-signup-page label {
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .mc-welcome-signup-page img {
+    max-width: 100%;
+    height: auto;
     border: 0;
     box-shadow: none;
-    height: auto;
 }
 
-.mc-green-text {
-    color: var(--mc-green);
+/* ---------------------------------------------------------
+   BREAK OUT OF WORDPRESS CONSTRAINED PAGE LAYOUT
+--------------------------------------------------------- */
+
+.entry-content > .mc-welcome-signup-page {
+    position: relative;
+    left: 50%;
+    width: 100vw;
+    max-width: none !important;
+    margin: 0 0 0 -50vw !important;
+}
+
+.entry-content:has(.mc-welcome-signup-page),
+.wp-block-post-content:has(.mc-welcome-signup-page),
+main:has(.mc-welcome-signup-page),
+article:has(.mc-welcome-signup-page) {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+article:has(.mc-welcome-signup-page) > header,
+article:has(.mc-welcome-signup-page) .wp-block-post-title {
+    display: none !important;
+}
+
+.mc-welcome-signup-page {
+    width: 100vw !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+.mc-welcome-layout {
+    width: 100% !important;
+    max-width: 1540px !important;
+    margin: 0 auto !important;
+}
+
+.mc-welcome-content,
+.mc-welcome-introduction,
+.mc-welcome-description,
+.mc-welcome-form-column {
+    min-width: 0;
+}
+
+/* ---------------------------------------------------------
+   HEADING OVERRIDES
+--------------------------------------------------------- */
+
+.mc-welcome-signup-page h1,
+.mc-welcome-signup-page h2 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    text-indent: 0 !important;
+}
+
+.mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
+    margin: 0 0 20px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: clamp(42px, 4vw, 64px) !important;
+    font-weight: 800 !important;
+    line-height: 1.02 !important;
+    letter-spacing: -2px !important;
+    text-transform: none !important;
+}
+
+.mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title span {
+    display: inline !important;
+    color: #008f78 !important;
+}
+
+.mc-welcome-signup-page .mc-form-introduction h2.mc-card-title {
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: clamp(26px, 2vw, 34px) !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -1px !important;
+    text-align: left !important;
+    text-transform: none !important;
+    white-space: nowrap;
+}
+
+.mc-welcome-signup-page .mc-benefit-content h2.mc-card-title {
+    margin: 0 0 5px !important;
+    padding: 0 !important;
+    color: #082560 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    text-transform: none !important;
 }
 
 /* ---------------------------------------------------------
@@ -551,7 +632,6 @@ body.page-welcome-signup .entry-content {
 --------------------------------------------------------- */
 
 @media (max-width: 1250px) {
-
     .mc-welcome-layout {
         padding: 48px 42px;
         grid-template-columns: minmax(0, 1fr) minmax(420px, 0.85fr);
@@ -579,7 +659,6 @@ body.page-welcome-signup .entry-content {
     .mc-benefit-icon .dashicons {
         font-size: 39px;
     }
-
 }
 
 /* ---------------------------------------------------------
@@ -587,423 +666,16 @@ body.page-welcome-signup .entry-content {
 --------------------------------------------------------- */
 
 @media (max-width: 980px) {
-
-    .mc-welcome-signup-page {
-        min-height: auto;
-    }
-
-    .mc-welcome-layout {
-        min-height: auto;
-        padding: 40px 28px 60px;
-        grid-template-columns: 1fr;
-        gap: 48px;
-    }
-
-    .mc-welcome-content {
-        max-width: 760px;
-        margin: 0 auto;
-    }
-
-    .mc-welcome-form-column {
-        max-width: 650px;
-        justify-self: center;
-    }
-
-    .mc-welcome-logo {
-        margin-bottom: 42px;
-    }
-
-    .mc-welcome-logo img {
-        max-width: 560px;
-        max-height: 96px;
-    }
-
-    .mc-welcome-introduction h1 {
-        max-width: 700px;
-    }
-
-    .mc-welcome-description {
-        max-width: 680px;
-    }
-
-    .mc-welcome-benefits {
-        max-width: 680px;
-    }
-
-}
-
-/* ---------------------------------------------------------
-   RESPONSIVE: MOBILE
---------------------------------------------------------- */
-
-@media (max-width: 640px) {
-
-    .mc-welcome-layout {
-        padding: 26px 16px 40px;
-        gap: 38px;
-    }
-
-    .mc-welcome-logo {
-        margin-bottom: 34px;
-    }
-
-    .mc-welcome-logo img {
-        max-width: 100%;
-        max-height: 72px;
-    }
-
-    .mc-welcome-introduction h1 {
-        margin-bottom: 18px;
-        font-size: 42px;
-        line-height: 1.02;
-        letter-spacing: -1.5px;
-    }
-
-    .mc-welcome-description {
-        font-size: 18px;
-        line-height: 1.45;
-    }
-
-    .mc-welcome-benefits {
-        gap: 23px;
-        margin-top: 34px;
-    }
-
-    .mc-welcome-benefit {
-        grid-template-columns: 64px minmax(0, 1fr);
-        align-items: start;
-        gap: 16px;
-    }
-
-    .mc-benefit-icon {
-        width: 64px;
-        height: 64px;
-    }
-
-    .mc-benefit-icon .dashicons {
-        font-size: 33px;
-    }
-
-    .mc-benefit-content h2 {
-        font-size: 18px;
-    }
-
-    .mc-benefit-content p {
-        font-size: 16px;
-    }
-
-    .mc-welcome-form-card {
-        padding: 28px 20px 26px;
-        border-radius: 16px;
-    }
-
-    .mc-form-eyebrow {
-        margin-bottom: 14px;
-        font-size: 11px;
-        letter-spacing: 3.5px;
-    }
-
-    .mc-form-introduction h2 {
-        font-size: 31px;
-        letter-spacing: -1px;
-    }
-
-    .mc-form-introduction > p:last-child {
-        font-size: 17px;
-    }
-
-    .mc-welcome-form-row {
-        margin-bottom: 17px;
-    }
-
-    .mc-welcome-form-row input {
-        height: 48px;
-        font-size: 16px;
-        line-height: 48px;
-    }
-
-    .mc-welcome-consent label > span {
-        font-size: 13px;
-    }
-
-    .mc-welcome-submit-row button {
-        min-height: 57px;
-        padding: 14px 18px;
-        font-size: 16px;
-    }
-
-}
-
-/* ---------------------------------------------------------
-   RESPONSIVE: SMALL MOBILE
---------------------------------------------------------- */
-
-@media (max-width: 390px) {
-
-    .mc-welcome-layout {
-        padding-right: 12px;
-        padding-left: 12px;
-    }
-
-    .mc-welcome-introduction h1 {
-        font-size: 36px;
-    }
-
-    .mc-welcome-benefit {
-        grid-template-columns: 55px minmax(0, 1fr);
-        gap: 13px;
-    }
-
-    .mc-benefit-icon {
-        width: 55px;
-        height: 55px;
-    }
-
-    .mc-benefit-icon .dashicons {
-        font-size: 29px;
-    }
-
-    .mc-welcome-form-card {
-        padding-right: 16px;
-        padding-left: 16px;
-    }
-
-}
-
-/* ---------------------------------------------------------
-   BREAK OUT OF WORDPRESS CONSTRAINED PAGE LAYOUT
---------------------------------------------------------- */
-
-.entry-content > .mc-welcome-signup-page {
-    position: relative;
-    left: 50%;
-    width: 100vw;
-    max-width: none !important;
-    margin-top: 0 !important;
-    margin-right: 0 !important;
-    margin-bottom: 0 !important;
-    margin-left: -50vw !important;
-}
-
-.entry-content:has(.mc-welcome-signup-page) {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.wp-block-post-content:has(.mc-welcome-signup-page) {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-main:has(.mc-welcome-signup-page),
-article:has(.mc-welcome-signup-page) {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-article:has(.mc-welcome-signup-page) .wp-block-post-title {
-    display: none !important;
-}
-
-.mc-welcome-signup-page {
-    width: 100vw !important;
-    max-width: none !important;
-    min-height: 100vh;
-    margin: 0 !important;
-}
-
-.mc-welcome-layout {
-    width: 100% !important;
-    max-width: 1540px !important;
-    margin: 0 auto !important;
-}
-
-.mc-welcome-content,
-.mc-welcome-introduction,
-.mc-welcome-description {
-    min-width: 0;
-}
-
-.mc-welcome-form-column {
-    min-width: 0;
-}
-
-/* ---------------------------------------------------------
-   FORCE WELCOME PAGE HEADINGS TO DISPLAY
---------------------------------------------------------- */
-
-.mc-welcome-signup-page h1,
-.mc-welcome-signup-page h2 {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    width: auto !important;
-    height: auto !important;
-    max-width: none !important;
-    overflow: visible !important;
-    clip: auto !important;
-    clip-path: none !important;
-    text-indent: 0 !important;
-}
-
-/* Main welcome heading */
-.mc-welcome-signup-page .mc-welcome-introduction h1 {
-    margin: 0 0 22px !important;
-    padding: 0 !important;
-    color: #082560 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: clamp(48px, 4.8vw, 76px) !important;
-    font-weight: 800 !important;
-    line-height: 0.99 !important;
-    letter-spacing: -2.5px !important;
-    text-transform: none !important;
-}
-
-.mc-welcome-signup-page .mc-welcome-introduction h1 span {
-    display: inline !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    color: #008f78 !important;
-}
-
-/* Form heading */
-.mc-welcome-signup-page .mc-form-introduction h2 {
-    margin: 0 0 8px !important;
-    padding: 0 !important;
-    color: #082560 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: clamp(32px, 3vw, 44px) !important;
-    font-weight: 800 !important;
-    line-height: 1.08 !important;
-    letter-spacing: -1.5px !important;
-    text-transform: none !important;
-}
-
-/* Benefit headings */
-.mc-welcome-signup-page .mc-benefit-content h2 {
-    margin: 0 0 5px !important;
-    padding: 0 !important;
-    color: #082560 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0 !important;
-    text-transform: none !important;
-}
-
-/* Keep only the normal WordPress page title hidden */
-article:has(.mc-welcome-signup-page) > header,
-article:has(.mc-welcome-signup-page) .wp-block-post-title {
-    display: none !important;
-}
-
-/* Mobile heading sizes */
-@media (max-width: 640px) {
-
-    .mc-welcome-signup-page .mc-welcome-introduction h1 {
-        font-size: 42px !important;
-        line-height: 1.02 !important;
-        letter-spacing: -1.5px !important;
-    }
-
-    .mc-welcome-signup-page .mc-form-introduction h2 {
-        font-size: 31px !important;
-        letter-spacing: -1px !important;
-    }
-
-    .mc-welcome-signup-page .mc-benefit-content h2 {
-        font-size: 18px !important;
-    }
-}
-
-/* ---------------------------------------------------------
-   WELCOME PAGE HEADING OVERRIDES
---------------------------------------------------------- */
-
-.mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    margin: 0 0 20px !important;
-    padding: 0 !important;
-    color: #082560 !important;
-    font-size: clamp(42px, 4vw, 64px) !important;
-    font-weight: 800 !important;
-    line-height: 1.02 !important;
-    letter-spacing: -2px !important;
-    text-transform: none !important;
-}
-
-.mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title span {
-    color: #008f78 !important;
-}
-
-.mc-welcome-signup-page .mc-form-introduction h2.mc-card-title {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    margin: 0 0 8px !important;
-    padding: 0 !important;
-    color: #082560 !important;
-    font-size: clamp(26px, 2vw, 34px) !important;
-    font-weight: 800 !important;
-    line-height: 1.1 !important;
-    letter-spacing: -1px !important;
-    text-align: left !important;
-    text-transform: none !important;
-    white-space: nowrap;
-}
-
-.mc-welcome-signup-page .mc-benefit-content h2.mc-card-title {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    margin: 0 0 5px !important;
-    padding: 0 !important;
-    color: #082560 !important;
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    line-height: 1.2 !important;
-    letter-spacing: 0 !important;
-    text-align: left !important;
-    text-transform: none !important;
-}
-
-@media (max-width: 640px) {
-
-    .mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
-        font-size: 38px !important;
-        letter-spacing: -1.5px !important;
-    }
-
-    .mc-welcome-signup-page .mc-form-introduction h2.mc-card-title {
-        font-size: 26px !important;
-        white-space: normal;
-    }
-
-    .mc-welcome-signup-page .mc-benefit-content h2.mc-card-title {
-        font-size: 18px !important;
-    }
-}
-
-/* ---------------------------------------------------------
-   FINAL RESPONSIVE LAYOUT OVERRIDES
---------------------------------------------------------- */
-
-@media (max-width: 980px) {
-
     .mc-welcome-signup-page {
         width: 100% !important;
         min-height: auto;
         overflow-x: hidden;
+        background-position: 65% center;
+        background-attachment: scroll;
+    }
+
+    .mc-welcome-background-overlay {
+        background: rgba(255, 255, 255, 0.78);
     }
 
     .mc-welcome-layout {
@@ -1022,14 +694,184 @@ article:has(.mc-welcome-signup-page) .wp-block-post-title {
         margin: 0 auto;
         justify-self: center;
     }
+
+    .mc-welcome-logo {
+        margin-bottom: 42px;
+    }
+
+    .mc-welcome-logo img {
+        width: 100%;
+        max-width: 560px;
+        height: auto !important;
+    }
+
+    .mc-welcome-introduction h1 {
+        max-width: 700px;
+    }
+
+    .mc-welcome-description,
+    .mc-welcome-benefits {
+        max-width: 680px;
+    }
 }
 
+/* ---------------------------------------------------------
+   RESPONSIVE: MOBILE
+--------------------------------------------------------- */
+
 @media (max-width: 640px) {
+    .mc-welcome-signup-page {
+        background-position: 62% center;
+    }
+
+    .mc-welcome-background-overlay {
+        background: rgba(255, 255, 255, 0.9);
+    }
 
     .mc-welcome-layout {
         padding: 24px 16px 40px !important;
         gap: 36px;
     }
 
+    .mc-welcome-logo {
+        margin-bottom: 34px;
+    }
+
     .mc-welcome-logo img {
-        width: 
+        width: 100%;
+        max-width: 420px;
+        max-height: none;
+        height: auto !important;
+    }
+
+    .mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
+        font-size: 38px !important;
+        line-height: 1.05 !important;
+        letter-spacing: -1.2px !important;
+    }
+
+    .mc-welcome-description {
+        max-width: none;
+        font-size: 18px;
+        line-height: 1.45;
+    }
+
+    .mc-welcome-benefits {
+        gap: 23px;
+        margin-top: 34px;
+    }
+
+    .mc-welcome-benefit {
+        grid-template-columns: 60px minmax(0, 1fr);
+        align-items: start;
+        gap: 15px;
+    }
+
+    .mc-benefit-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .mc-benefit-icon .dashicons {
+        font-size: 31px;
+    }
+
+    .mc-benefit-icon svg {
+        width: 31px;
+        height: 31px;
+    }
+
+    .mc-welcome-signup-page .mc-benefit-content h2.mc-card-title {
+        font-size: 18px !important;
+    }
+
+    .mc-benefit-content p {
+        font-size: 16px;
+    }
+
+    .mc-welcome-form-column {
+        max-width: none;
+    }
+
+    .mc-welcome-form-card {
+        width: 100%;
+        padding: 28px 20px 26px;
+        border-radius: 16px;
+    }
+
+    .mc-form-eyebrow {
+        margin-bottom: 14px;
+        font-size: 11px;
+        letter-spacing: 3.5px;
+    }
+
+    .mc-welcome-signup-page .mc-form-introduction h2.mc-card-title {
+        font-size: 27px !important;
+        letter-spacing: -1px !important;
+        white-space: normal;
+    }
+
+    .mc-form-introduction > p:last-child {
+        font-size: 17px;
+    }
+
+    .mc-welcome-form-row {
+        margin-bottom: 17px;
+    }
+
+    .mc-welcome-form-row input {
+        width: 100%;
+        height: 48px;
+        font-size: 16px;
+        line-height: 48px;
+    }
+
+    .mc-welcome-consent label > span {
+        font-size: 13px;
+    }
+
+    .mc-welcome-submit-row button {
+        min-height: 57px;
+        padding: 14px 18px;
+        font-size: 16px;
+    }
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE: SMALL MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 390px) {
+    .mc-welcome-layout {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+    }
+
+    .mc-welcome-signup-page .mc-welcome-introduction h1.mc-portal-title {
+        font-size: 34px !important;
+    }
+
+    .mc-welcome-benefit {
+        grid-template-columns: 55px minmax(0, 1fr);
+        gap: 13px;
+    }
+
+    .mc-benefit-icon {
+        width: 55px;
+        height: 55px;
+    }
+
+    .mc-benefit-icon .dashicons {
+        font-size: 29px;
+    }
+
+    .mc-benefit-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .mc-welcome-form-card {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+}

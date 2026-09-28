@@ -1,0 +1,35 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ftp-deploy:
+    name: FTP Deploy Staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Upload child theme, plugin, vendor and project-req
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.STAGING_FTP_HOST }}
+          username: ${{ secrets.STAGING_FTP_USERNAME }}
+          password: ${{ secrets.STAGING_FTP_PASSWORD }}
+
+          local-dir: public/
+          server-dir: /home/staging_user/public_html/
+
+          exclude: |
+            **/*
+            !wp-content/
+            !wp-content/themes/
+            !wp-content/themes/twentytwentyfive-child/**
+            !wp-content/plugins/
+            !wp-content/plugins/medicompare/**
+            !project-req/**
+            !vendor/**
+            !composer.json
+            !composer.lock

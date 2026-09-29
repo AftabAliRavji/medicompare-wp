@@ -11,4 +11,4 @@ CREATE TABLE `wp_medi_order_supplier_summary` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   KEY `supplier_id` (`supplier_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.STAGING_FTP_PASSWORD }}
 
           local-dir: public/
-          server-dir: /home/staging_user/public_html/
+          server-dir: /public_html/
 
           exclude: |
             **/*

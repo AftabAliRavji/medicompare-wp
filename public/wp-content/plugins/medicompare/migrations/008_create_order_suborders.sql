@@ -18,4 +18,4 @@ CREATE TABLE IF NOT EXISTS wp_medi_order_suborders (
     KEY idx_order_id (order_id),
     KEY idx_supplier_id (supplier_id),
     UNIQUE KEY uq_suborder_number (suborder_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

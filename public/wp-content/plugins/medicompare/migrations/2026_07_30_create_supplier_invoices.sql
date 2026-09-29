@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS `wp_medi_supplier_invoices` (
     PRIMARY KEY (`id`),
     KEY `supplier_id_idx` (`supplier_id`),
     KEY `invoice_ref_idx` (`invoice_reference`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

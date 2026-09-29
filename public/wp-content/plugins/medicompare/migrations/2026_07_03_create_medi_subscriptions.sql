@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS wp_medi_subscriptions (
     renewal_date DATETIME,
     status VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -9,4 +9,4 @@ CREATE TABLE `wp_medi_supplier_products` (
   UNIQUE KEY `supplier_product` (`supplier_id`,`product_id`),
   KEY `price` (`price`),
   KEY `stock` (`stock`)
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci
+) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

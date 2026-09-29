@@ -10,4 +10,4 @@ CREATE TABLE `wp_medi_orders` (
   KEY `pharmacy_id` (`pharmacy_id`),
   KEY `status` (`status`),
   KEY `created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

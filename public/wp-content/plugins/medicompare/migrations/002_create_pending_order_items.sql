@@ -10,4 +10,4 @@ CREATE TABLE `wp_medi_pending_order_items` (
   KEY `pending_order_id` (`pending_order_id`),
   KEY `supplier_id` (`supplier_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

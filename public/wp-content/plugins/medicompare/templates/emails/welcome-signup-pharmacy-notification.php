@@ -20,7 +20,16 @@ $logo_url = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/logo.png';
         <td align="center" style="padding:30px 15px;">
 
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:650px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(0,0,0,0.08);">
-
+                <tr>
+                    <td align="center" style="padding:30px 30px 24px;border-bottom:1px solid #dce8ea;">
+                            <img
+                                src="<?php echo esc_url($logo_url); ?>"
+                                alt="Source Med Pharma"
+                                width="360"
+                                style="display:block;width:100%;max-width:360px;height:auto;border:0;"
+                            >
+                    </td>
+                </tr>
                 <tr>
                     <td style="padding:36px 40px;">
                         <h1 style="margin:0 0 24px;color:#072765;font-size:28px;line-height:1.3;">
@@ -79,16 +88,6 @@ $logo_url = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/logo.png';
                                 The Source Med Pharma Team
                             </strong>
                         </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center" style="padding:30px 30px 24px;border-bottom:1px solid #dce8ea;">
-                            <img
-                                src="<?php echo esc_url($logo_url); ?>"
-                                alt="Source Med Pharma"
-                                width="360"
-                                style="display:block;width:100%;max-width:360px;height:auto;border:0;"
-                            >
                     </td>
                 </tr>
             </table>

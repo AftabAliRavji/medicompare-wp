@@ -132,8 +132,8 @@ function mc_cookie_policy_shortcode() {
                     <p>
                         If you do not want your visit to be included in our website
                         analytics, you can contact us at
-                        <a href="mailto:support@sourcemedpharma.co.uk">
-                            support@sourcemedpharma.co.uk
+                        <a href="mailto:support@sourcemedpharma.com">
+                            support@sourcemedpharma.com
                         </a>
                         and ask to opt out of analytics.
                     </p>
@@ -206,8 +206,8 @@ function mc_cookie_policy_shortcode() {
                     <address class="mc-static-page-address">
                         <strong>Source Med Pharma Ltd</strong><br>
                         Email:
-                        <a href="mailto:support@sourcemedpharma.co.uk">
-                            support@sourcemedpharma.co.uk
+                        <a href="mailto:support@sourcemedpharma.com">
+                            support@sourcemedpharma.com
                         </a>
                     </address>
                 </section>

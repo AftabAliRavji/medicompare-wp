@@ -68,8 +68,8 @@ $logo_url = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/logo.png';
                             <p style="margin:0;font-size:16px;line-height:1.7;">
                                 Simply reply to this email or contact us directly.<br>
                                 <strong>Email:</strong>
-                                <a href="mailto:support@sourcemdpharma.co.uk" style="color:#006d7c;text-decoration:underline;">
-                                    support@sourcemdpharma.co.uk
+                                <a href="mailto:support@sourcemedpharma.com" style="color:#006d7c;text-decoration:underline;">
+                                    support@sourcemedpharma.com
                                 </a>
                             </p>
                         </div>

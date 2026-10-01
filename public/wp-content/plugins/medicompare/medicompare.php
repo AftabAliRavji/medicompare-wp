@@ -346,17 +346,27 @@ class MediCompare {
      */
     public function create_welcome_signup_page() {
 
-        $existing = get_page_by_path('welcome-signup');
-        if ($existing) return;
+    $existing = get_page_by_path('welcome-signup');
+
+        if ($existing) {
+
+            wp_update_post([
+                'ID'         => $existing->ID,
+                'post_title' => 'Register Your Interest'
+            ]);
+
+            return;
+        }
 
         wp_insert_post([
-            'post_title'   => 'Welcome to MediCompare',
+            'post_title'   => 'Register Your Interest',
             'post_name'    => 'welcome-signup',
             'post_status'  => 'publish',
             'post_type'    => 'page',
             'post_content' => '[mc_welcome_signup]'
         ]);
     }
+
 
     /**
     * Create and maintain the static legal pages.

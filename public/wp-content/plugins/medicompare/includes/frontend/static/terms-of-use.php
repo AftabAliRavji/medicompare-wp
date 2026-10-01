@@ -227,8 +227,8 @@ function mc_terms_of_use_shortcode() {
                     <address class="mc-static-page-address">
                         <strong>Source Med Pharma Ltd</strong><br>
                         Email:
-                        <a href="mailto:support@sourcemdpharma.co.uk">
-                            support@sourcemdpharma.co.uk
+                        <a href="mailto:support@sourcemedpharma.com">
+                            support@sourcemedpharma.com
                         </a>
                     </address>
                 </section>

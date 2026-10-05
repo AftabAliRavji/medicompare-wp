@@ -68,6 +68,9 @@ class MediCompare_Admin_Menu {
         //for supplier payment action
         add_action('admin_post_mc_add_supplier_payment_action', 'mc_add_supplier_payment_action');
 
+        // Hook into admin-post for both logged-in and non-logged-in users (or omit nopriv for admin-only)
+        add_action('admin_post_mc_export_signup', [$this, 'export_signup_leads_csv']);
+
         //to handle gmail oauth call back
         add_action('admin_init', [$this, 'handle_gmail_oauth_callback']);
 
@@ -1760,8 +1763,64 @@ class MediCompare_Admin_Menu {
     /* ---------------------------------------------------------
    ⭐ NEW — SIGNUP LEADS PAGE
     --------------------------------------------------------- */
-    public function signup_leads_page() {
-        include __DIR__ . '/admin-pages/signup-leads.php';
+        public function signup_leads_page() {
+            include __DIR__ . '/admin-pages/signup-leads.php';
+        }
+
+    /*------------------------------------------------------
+    Export function for sign up leads to csv
+    ------------------------------------------------------*/
+    public function export_signup_leads_csv() {
+    // 1. Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized user.');
+        }
+
+        // 2. Safely clean output buffers without crashing
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // 3. Set headers before writing output
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="signup-leads.csv"');
+        header('Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        // 4. Stream CSV directly to php://output
+        $output = fopen('php://output', 'w');
+
+        // Header row
+        fputcsv($output, [
+            'Pharmacy Name',
+            'Pharmacy Postcode',
+            'Contact Name',
+            'Contact Number',
+            'Contact Email',
+            'Submitted At'
+        ]);
+
+        // Query database
+        global $wpdb;
+        $table = $wpdb->prefix . 'mc_interest';
+        $rows  = $wpdb->get_results("SELECT * FROM {$table} ORDER BY created_at DESC", ARRAY_A);
+
+        if (!empty($rows)) {
+            foreach ($rows as $row) {
+                fputcsv($output, [
+                    $row['pharmacy_name'] ?? '',
+                    $row['pharmacy_postcode'] ?? '',
+                    $row['contact_name'] ?? '',
+                    $row['contact_number'] ?? '',
+                    $row['contact_email'] ?? '',
+                    $row['created_at'] ?? ''
+                ]);
+            }
+        }
+
+        fclose($output);
+        exit; // Terminate script clean without triggering extra WP output
     }
 
         /**

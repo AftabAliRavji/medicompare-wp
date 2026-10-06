@@ -2955,6 +2955,10 @@ private function handle_concession_import() {
             'gphc_number','contact_name','status'
         ];
 
+        $optional = [ 
+            'accountid' 
+        ];
+
         foreach ($required as $col) {
             if (!in_array($col, $header)) {
                 return ['error' => "Missing required column: $col"];
@@ -2980,6 +2984,7 @@ private function handle_concession_import() {
                 'postcode'       => $data['postcode'],
                 'gphc_number'    => $data['gphc_number'],
                 'contact_name'   => $data['contact_name'],
+                'account_id'     => isset($data['accountid']) ? $data['accountid'] : '',
                 'status'         => strtolower($data['status']),
             ];
         }
@@ -3151,63 +3156,45 @@ private function handle_concession_import() {
     /* ---------------------------------------------------------
        INSERT / UPDATE PHARMACY
     --------------------------------------------------------- */
-    public function insert_or_update_pharmacy_from_row($row) {
-
-        $code = trim($row['pharmacy_code']);
-        $name = trim($row['pharmacy_name']);
+   public function insert_or_update_pharmacy_from_row($row) {
+        $code = trim($row['pharmacy_code']); 
+        $name = trim($row['pharmacy_name']); 
 
         if ($code === '' || $name === '') {
-            return 'skipped';
-        }
-
-        $existing = get_posts([
-            'post_type'      => 'mc_pharmacy',
-            'post_status'    => 'any',
-            'meta_key'       => '_mc_pharmacy_code',
-            'meta_value'     => $code,
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-        ]);
-
-        if (!empty($existing)) {
-            $pharmacy_id = $existing[0];
-
-            wp_update_post([
-                'ID'         => $pharmacy_id,
-                'post_title' => $name,
-                'post_name'  => sanitize_title($code),
-            ]);
-
-            $action = 'updated';
-
+            return 'skipped'; 
+        } 
+        $existing = get_posts([ 'post_type' => 'mc_pharmacy', 'post_status' => 'any', 'meta_key' => '_mc_pharmacy_code', 'meta_value' => $code, 'posts_per_page' => 1, 'fields' => 'ids', ]);
+        
+        if (!empty($existing)) { 
+            $pharmacy_id = $existing[0]; wp_update_post([ 'ID' => $pharmacy_id, 'post_title' => $name, 'post_name' => sanitize_title($code), ]);
+            $action = 'updated'; 
         } else {
-
-            $pharmacy_id = wp_insert_post([
-                'post_title'  => $name,
-                'post_name'   => sanitize_title($code),
-                'post_type'   => 'mc_pharmacy',
-                'post_status' => 'publish'
-            ]);
-
+            $pharmacy_id = wp_insert_post([ 'post_title' => $name, 'post_name' => sanitize_title($code), 'post_type' => 'mc_pharmacy', 'post_status' => 'publish' ]);
+        
             if (is_wp_error($pharmacy_id) || !$pharmacy_id) {
-                return 'skipped';
-            }
-
-            $action = 'inserted';
-        }
-
+                return 'skipped'; 
+            } 
+            $action = 'inserted'; 
+        } 
         update_post_meta($pharmacy_id, '_mc_pharmacy_code', $code);
-        update_post_meta($pharmacy_id, '_mc_email', $row['email']);
-        update_post_meta($pharmacy_id, '_mc_phone', $row['phone']);
-        update_post_meta($pharmacy_id, '_mc_address_line_1', $row['address_line_1']);
-        update_post_meta($pharmacy_id, '_mc_address_line_2', $row['address_line_2']);
-        update_post_meta($pharmacy_id, '_mc_city', $row['city']);
-        update_post_meta($pharmacy_id, '_mc_postcode', $row['postcode']);
-        update_post_meta($pharmacy_id, '_mc_gphc_number', $row['gphc_number']);
-        update_post_meta($pharmacy_id, '_mc_contact_name', $row['contact_name']);
+        update_post_meta($pharmacy_id, '_mc_email', $row['email']); 
+        update_post_meta($pharmacy_id, '_mc_phone', $row['phone']); 
+        update_post_meta($pharmacy_id, '_mc_address_line_1', $row['address_line_1']); 
+        update_post_meta($pharmacy_id, '_mc_address_line_2', $row['address_line_2']); 
+        update_post_meta($pharmacy_id, '_mc_city', $row['city']); 
+        update_post_meta($pharmacy_id, '_mc_postcode', $row['postcode']); 
+        update_post_meta($pharmacy_id, '_mc_gphc_number', $row['gphc_number']); 
+        update_post_meta($pharmacy_id, '_mc_contact_name', $row['contact_name']); 
+        
+        if (isset($row['account_id'])) {
+            update_post_meta( $pharmacy_id, '_mc_account_id', sanitize_text_field($row['account_id']) );
+        } 
         update_post_meta($pharmacy_id, '_mc_status', $row['status']);
-
-        return $action;
+        /* * Trigger claim-email workflow ONLY * when a brand-new pharmacy is created. */ 
+        if ($action === 'inserted') {
+            do_action( 'mc_csv_pharmacy_imported', $pharmacy_id ); 
+        } 
+        return $action; 
     }
 
     /* ---------------------------------------------------------

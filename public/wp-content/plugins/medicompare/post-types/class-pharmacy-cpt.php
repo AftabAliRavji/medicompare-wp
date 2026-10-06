@@ -135,6 +135,7 @@ class MediCompare_Pharmacy_CPT {
             'postcode'        => '_mc_postcode',
             'gphc_number'     => '_mc_gphc_number',
             'contact_name'    => '_mc_contact_name',
+            'account_id'      => '_mc_account_id',
             'status'          => '_mc_status',
         ];
 
@@ -206,7 +207,11 @@ class MediCompare_Pharmacy_CPT {
                 <th><label>Contact Name</label></th>
                 <td><input type="text" name="mc_contact_name" value="<?php echo esc_attr($values['contact_name']); ?>" class="regular-text"></td>
             </tr>
-
+            <tr> 
+                <th><label>AccountId</label></th> 
+                <td> <input type="text" name="mc_account_id" value="<?php echo esc_attr($values['account_id']); ?>" class="regular-text" > <p class="description">Optional account identifier supplied by supplier.</p> 
+                </td> 
+            </tr>
             <tr>
                 <th><label>Status</label></th>
                 <td>
@@ -277,6 +282,8 @@ class MediCompare_Pharmacy_CPT {
             }
         }
 
+        $old_status = get_post_meta( $post_id, '_mc_status', true );
+
         /* ---------------------------------------------------------
         SAVE STANDARD FIELDS
         --------------------------------------------------------- */
@@ -290,6 +297,7 @@ class MediCompare_Pharmacy_CPT {
             'mc_postcode'       => '_mc_postcode',
             'mc_gphc_number'    => '_mc_gphc_number',
             'mc_contact_name'   => '_mc_contact_name',
+            'mc_account_id'     => '_mc_account_id',
             'mc_status'         => '_mc_status',
         ];
 
@@ -297,6 +305,18 @@ class MediCompare_Pharmacy_CPT {
             if (isset($_POST[$form_key])) {
                 update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$form_key]));
             }
+        }
+
+        $new_status = get_post_meta( $post_id, '_mc_status', true ); 
+        if ( $old_status === 'pending_verification' && $new_status === 'active' ) {
+             $subscription_status = get_post_meta( $post_id, '_mc_subscription_status', true ); 
+             
+             if (empty($subscription_status)) {
+                 update_post_meta( $post_id, '_mc_subscription_status', 'trial' ); 
+                 update_post_meta( $post_id, '_mc_trial_start', time() ); 
+                 update_post_meta( $post_id, '_mc_trial_end', strtotime('+30 days') ); 
+            } 
+            $this->send_activation_email($post_id); 
         }
 
         /* ---------------------------------------------------------
@@ -323,6 +343,30 @@ class MediCompare_Pharmacy_CPT {
         }
     }
 
+    /* ------------------------------------
+    Send the activation email for pharmacy once verification is copmpleted by admin
+    --------------------------------------*/
+    private function send_activation_email($post_id) {
+         $email = get_post_meta( $post_id, '_mc_email', true ); 
+         
+         if (!$email) {
+             return; 
+        } 
+        $contact_name = get_post_meta( $post_id, '_mc_contact_name', true );
+        $greeting = $contact_name ? 'Hello ' . $contact_name . ',' : 'Hello,';
+        $subject = 'Your Source Med Pharma Account Is Now Active'; 
+        $message = $greeting . "\n\n";
+        $message .= "Your pharmacy account has now been verified and activated.\n\n";
+        $message .= "Your free trial has started.\n\n"; 
+        $message .= "You can now log in using:\n\n"; 
+        $message .= home_url(); 
+        $message .= "\n\n"; 
+        $message .= "Regards,\n"; 
+        $message .= "Source Med Pharma Team"; 
+        
+        wp_mail( $email, $subject, $message ); 
+    }
+
 
     /* ---------------------------------------------------------
        ADMIN COLUMNS (UPDATED)
@@ -342,6 +386,7 @@ class MediCompare_Pharmacy_CPT {
         $new['postcode']      = 'Postcode';
         $new['gphc']          = 'GPhC';
         $new['contact']       = 'Contact';
+        $new['account_id']    = 'AccountId';
         $new['status']        = 'Status';
 
         // ⭐ NEW SUBSCRIPTION COLUMNS
@@ -401,6 +446,9 @@ class MediCompare_Pharmacy_CPT {
             case 'status':
                 $status = get_post_meta($post_id, '_mc_status', true);
                 echo esc_html(ucwords(str_replace('_', ' ', $status)));
+                break;
+            case 'account_id': 
+                echo esc_html( get_post_meta( $post_id, '_mc_account_id', true ) ); 
                 break;
 
             /* ---------------------------------------------------------

@@ -26,6 +26,7 @@
 
 <h3>Pharmacy Information</h3>
 <ul>
+    {{account_id_row}}
     <li><strong>Name:</strong> {{pharmacy_name}}</li>
     <li><strong>Address:</strong> {{pharmacy_address}}</li>
     <li><strong>Email:</strong> {{pharmacy_email}}</li>

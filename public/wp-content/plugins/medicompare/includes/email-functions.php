@@ -76,16 +76,22 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
         /* ---------------------------------------------------------
            FILL TEMPLATE
         --------------------------------------------------------- */
+        $account_id_row = ''; 
+        if (!empty($pharmacy['account_id'])) {
+             $account_id_row = '<li><strong>Account ID:</strong> ' . esc_html($pharmacy['account_id']) . '</li>'; 
+        } 
+        
         $body = $this->fill_template($template, [
-            'suborder_number' => $suborder_number,
-            'order_number'    => $order_number,
-            'order_date'      => wp_date('d M Y H:i'),
-            'pharmacy_name'   => $pharmacy['name'],
-            'pharmacy_address'=> $pharmacy['address'],
-            'pharmacy_email'  => $pharmacy['email'],
-            'pharmacy_phone'  => $pharmacy['phone'],
-            'items_table'     => $rows,
-            'supplier_total'  => $supplier_total
+             'suborder_number' => $suborder_number, 
+             'order_number' => $order_number, 
+             'order_date' => wp_date('d M Y H:i'), 
+             'pharmacy_name' => $pharmacy['name'], 
+             'pharmacy_address'=> $pharmacy['address'], 
+             'pharmacy_email' => $pharmacy['email'], 
+             'pharmacy_phone' => $pharmacy['phone'], 
+             'account_id_row' => $account_id_row, 
+             'items_table' => $rows, 
+             'supplier_total' => $supplier_total 
         ]);
 
         /* ---------------------------------------------------------

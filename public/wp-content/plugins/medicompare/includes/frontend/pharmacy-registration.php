@@ -7,6 +7,7 @@ class MediCompare_Pharmacy_Registration {
     public function __construct() {
         add_shortcode('mc_pharmacy_register', [$this, 'render_registration_form']);
         add_action('init', [$this, 'handle_registration']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_recaptcha_assets']);
     }
 
     /* ---------------------------------------------------------
@@ -19,6 +20,14 @@ class MediCompare_Pharmacy_Registration {
         update_option('mc_last_pharmacy_code', $next);
 
         return 'PHARM-' . str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
+    
+    //enqueue the reCAPTHCA script needed
+    public function enqueue_recaptcha_assets() {
+         if (!is_page('pharmacy-registration')) {
+             return; 
+         } 
+         wp_enqueue_script( 'google-recaptcha', 'https://www.google.com/recaptcha/api.js', [], null, true ); 
     }
 
     private function find_pharmacy_by_email($email) {
@@ -239,7 +248,7 @@ class MediCompare_Pharmacy_Registration {
         $message .= "GPhC Number: " . sanitize_text_field($_POST['mc_gphc_number']) . "\n\n";
         $message .= "View in admin:\n";
         $message .= admin_url("post.php?post={$post_id}&action=edit") . "\n\n";
-        $message .= "Regards,\nMediCompare System";
+        $message .= "Regards,\nSource Med Pharma System";
 
         wp_mail($admin_email, $subject, $message);
 

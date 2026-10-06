@@ -1529,7 +1529,10 @@ class MediCompare_Pharmacy_Comparison {
             'email'   => get_post_meta($pharmacy_id, '_mc_email', true),
             'phone'   => get_post_meta($pharmacy_id, '_mc_phone', true),
             'address' => $full_address,
+            'account_id' => get_post_meta($pharmacy_id, '_mc_account_id', true),
         ];
+
+        error_log( 'MC ACCOUNT ID = ' . print_r($pharmacy['account_id'], true) );
 
         $suppliers = $wpdb->get_results($wpdb->prepare(
             "SELECT supplier_id, suborder_number, supplier_total_amount

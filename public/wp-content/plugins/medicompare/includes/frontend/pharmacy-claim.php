@@ -6,12 +6,20 @@ class MediCompare_Pharmacy_Claim {
 
     public function __construct() {
         // Generate tokens when pharmacies are created
-        add_action('save_post_mc_pharmacy', [$this, 'generate_claim_token'], 99, 3);
         add_action('mc_csv_pharmacy_imported', [$this, 'generate_claim_token_after_csv'], 10, 1);
 
         // Front-end claim flow
         add_shortcode('mc_pharmacy_claim', [$this, 'render_claim_form']);
         add_action('init', [$this, 'handle_claim_submission']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_recaptcha_assets']);
+    }
+
+    //enqueue the recaptcha script
+    public function enqueue_recaptcha_assets() { 
+        if ( !is_page([ 'complete-registration', 'pharmacy-registration' ]) ) { 
+            return; 
+        } 
+        wp_enqueue_script( 'google-recaptcha', 'https://www.google.com/recaptcha/api.js', [], null, true ); 
     }
 
     /* ---------------------------------------------------------
@@ -109,13 +117,13 @@ class MediCompare_Pharmacy_Claim {
     private function send_claim_email($email, $token) {
         $link = site_url('/pharmacy/complete-registration/?token=' . urlencode($token));
 
-        $subject = "Complete Your MediCompare Registration";
+        $subject = "Complete Your Source Med Pharma Registration";
         $message  = "Hello,\n\n";
-        $message .= "Your pharmacy has been added to MediCompare.\n\n";
+        $message .= "Your pharmacy has been added to Source Med Pharma.\n\n";
         $message .= "Please complete your registration using the secure link below:\n\n";
         $message .= $link . "\n\n";
         $message .= "This link will expire in 48 hours.\n\n";
-        $message .= "Regards,\nMediCompare Team";
+        $message .= "Regards,\nSource Med Pharma Team";
 
         wp_mail($email, $subject, $message);
     }
@@ -133,7 +141,7 @@ class MediCompare_Pharmacy_Claim {
         $message .= "A pharmacy has completed its registration and is awaiting verification.\n\n";
         $message .= "Pharmacy: " . $pharmacy_name . "\n";
         $message .= "View in admin: " . admin_url('post.php?post=' . $post_id . '&action=edit') . "\n\n";
-        $message .= "Regards,\nMediCompare System";
+        $message .= "Regards,\nSource Med Pharma System";
 
         wp_mail($admin_email, $subject, $message);
     }

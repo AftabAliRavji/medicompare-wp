@@ -8,7 +8,7 @@
     <p>Expected CSV columns:</p>
     <code>
         pharmacy_code, pharmacy_name, email, phone, address_line_1, address_line_2,
-        city, postcode, gphc_number, contact_name, status
+        city, postcode, gphc_number, contact_name, accountid, status
     </code>
 
     <?php if (!empty($result['error'])): ?>
@@ -33,7 +33,7 @@
                 <tr>
                     <th>Code</th><th>Name</th><th>Email</th><th>Phone</th>
                     <th>Address 1</th><th>Address 2</th><th>City</th><th>Postcode</th>
-                    <th>GPhC</th><th>Contact</th><th>Status</th>
+                    <th>GPhC</th><th>Contact</th><th>AccountId</th><th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,6 +49,7 @@
                         <td><?php echo esc_html($row['postcode']); ?></td>
                         <td><?php echo esc_html($row['gphc_number']); ?></td>
                         <td><?php echo esc_html($row['contact_name']); ?></td>
+                        <td><?php echo esc_html($row['account_id']); ?></td>
                         <td><?php echo esc_html($row['status']); ?></td>
                     </tr>
                 <?php endforeach; ?>

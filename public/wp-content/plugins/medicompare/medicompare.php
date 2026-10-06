@@ -39,6 +39,12 @@ class MediCompare {
             [$this, 'ensure_static_pages']
         );
 
+        // Automatically creates the pages if missing without reactivation of plugin.
+        add_action( 
+            'admin_init', 
+            [$this, 'create_pharmacy_pages'] 
+        );
+
         // Make sure timezone is set properly
         register_activation_hook(__FILE__, [$this,'mc_fix_timezone_on_activation']);
 
@@ -558,6 +564,10 @@ class MediCompare {
             'subscription' => [
                 'title'   => 'Subscription History',
                 'content' => '[mc_pharmacy_subscription]'
+            ],
+            'complete-registration' => [ 
+                'title' => 'Complete Registration', 
+                'content' => '[mc_pharmacy_claim]' 
             ],
         ];
 

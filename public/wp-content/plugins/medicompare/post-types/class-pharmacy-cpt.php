@@ -361,7 +361,7 @@ class MediCompare_Pharmacy_CPT {
         $message .= "You can now log in using:\n\n"; 
         $message .= home_url(); 
         $message .= "\n\n"; 
-        $message .= "Regards,\n"; 
+        $message .= "\n\nRegards,\n"; 
         $message .= "Source Med Pharma Team"; 
         
         wp_mail( $email, $subject, $message ); 

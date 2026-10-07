@@ -539,7 +539,7 @@ class MediCompare {
         $pages = [
             'pharmacy-registration' => [
                 'title'   => 'Pharmacy Registration',
-                'content' => '[mc_pharmacy_registration]'
+                'content' => '[mc_pharmacy_register]'
             ],
             'edit-details' => [
                 'title'   => 'Edit Pharmacy Details',

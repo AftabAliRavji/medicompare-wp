@@ -360,8 +360,8 @@ public function render_edit_details() {
     $subscription_label = ucfirst($subscription_state['status']);
 
     // Address/contact
-    $address_1 = get_post_meta($pharmacy_id, '_mc_address_1', true);
-    $address_2 = get_post_meta($pharmacy_id, '_mc_address_2', true);
+    $address_1 = get_post_meta($pharmacy_id, '_mc_address_line_1', true);
+    $address_2 = get_post_meta($pharmacy_id, '_mc_address_line_2', true);
     $postcode  = get_post_meta($pharmacy_id, '_mc_postcode', true);
     $phone     = get_post_meta($pharmacy_id, '_mc_phone', true);
     $contact   = get_post_meta($pharmacy_id, '_mc_contact_name', true);
@@ -586,8 +586,8 @@ public function handle_edit_details_submit() {
     // Send email
     wp_mail(
         $user->user_email,
-        'Your MediCompare password has been changed',
-        "Hello,\n\nYour password has been successfully updated.\n\nIf this wasn't you, contact support immediately.\n\nMediCompare"
+        'Your Source Med Pharma Account password has been changed',
+        "Hello,\n\nYour password has been successfully updated.\n\nIf this wasn't you, contact support immediately.\n\nRegards. Source Med Pharma Team"
     );
 
     wp_redirect(add_query_arg('password_updated', '1', site_url('/pharmacy/edit-details/')));

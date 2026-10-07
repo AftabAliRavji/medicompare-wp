@@ -97,11 +97,12 @@ class MediCompare_Pharmacy_Verification_Page {
 
     private function send_welcome_email($email) {
 
-        $subject = "Your MediCompare Account is Now Active";
+        $subject = "Your Source Med Pharma Account is Now Active";
         $message  = "Hello,\n\n";
         $message .= "Your pharmacy account has now been verified and activated.\n\n";
-        $message .= "You may now log in and begin using MediCompare.\n\n";
-        $message .= "Regards,\nMediCompare Team";
+        $message .= "You may now log in and begin using Source Med Pharma at \n\n";
+        $message .= home_url();
+        $message .= "Regards,\nSource Med Pharma Team";
 
         wp_mail($email, $subject, $message);
     }

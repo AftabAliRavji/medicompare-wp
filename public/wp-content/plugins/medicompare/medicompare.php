@@ -86,6 +86,9 @@ class MediCompare {
 
         add_filter('the_content', [$this, 'add_header_to_search_instructions']);
 
+        //DONT WANT OUT OF THE BOX PASSWORD CHANGE EMAIL TO BE SENT
+        add_filter( 'send_password_change_email', '__return_false' );
+
         add_action('wp_footer', [$this, 'render_global_footer']);
 
         add_action('wp_enqueue_scripts', [$this, 'enqueue_static_page_assets']);

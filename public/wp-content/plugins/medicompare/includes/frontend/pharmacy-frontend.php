@@ -584,11 +584,39 @@ public function handle_edit_details_submit() {
     ]);
 
     // Send email
-    wp_mail(
-        $user->user_email,
-        'Your Source Med Pharma Account password has been changed',
-        "Hello,\n\nYour password has been successfully updated.\n\nIf this wasn't you, contact support immediately.\n\nRegards. Source Med Pharma Team"
-    );
+    $logo_url = home_url('/wp-content/plugins/medicompare/assets/img/logo.png');
+    $password_message = ' <!DOCTYPE html> 
+            <html> 
+            <body style="font-family:Arial,sans-serif;background:#f5f7f8;margin:0;padding:0;">
+             <table width="100%" cellpadding="0" cellspacing="0" border="0"> 
+             <tr>
+              <td align="center" style="padding:40px 20px;">
+               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;background:#ffffff;border:1px solid #dce8ea;">
+                <tr>
+                 <td align="center" style="padding:30px 30px 24px;border-bottom:1px solid #dce8ea;"> 
+                    <img src="' . esc_url($logo_url) . '" alt="Source Med Pharma" width="360" style="display:block;width:100%;max-width:360px;height:auto;border:0;" >
+                 </td>
+                </tr>
+                <tr>
+                 <td style="padding:30px;">
+                  <p>Hello</p>
+                  <p> Your Source Med Pharma account password has been successfully updated. </p>
+                  <p> If this was not you, please contact support immediately. </p>
+                  <p> <a href="mailto:support@sourcemedpharma.com" style="color:#006d7c;text-decoration:underline;">
+                                    support@sourcemedpharma.com</a></p>
+                  <p> Regards,<br> Source Med Pharma Team </p>
+                 </td>
+                </tr>
+               </table>
+              </td>
+             </tr>
+            </table>
+            </body>
+            </html> '; 
+        
+     wp_mail( $user->user_email, 'Your Source Med Pharma Account password has been changed', 
+        $password_message, [ 'Content-Type: text/html; charset=UTF-8' ] 
+     );
 
     wp_redirect(add_query_arg('password_updated', '1', site_url('/pharmacy/edit-details/')));
     exit;

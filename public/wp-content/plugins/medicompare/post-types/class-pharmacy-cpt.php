@@ -307,7 +307,22 @@ class MediCompare_Pharmacy_CPT {
             }
         }
 
+        $is_new_pharmacy = !get_post_meta( $post_id, '_mc_admin_claim_sent', true ); 
+        if ( $is_new_pharmacy && !empty($_POST['mc_email']) ) {
+             update_post_meta( $post_id, '_mc_admin_claim_sent', 1 );
+             error_log( 'MC ADMIN CREATED ACTION FIRING: ' . $post_id ); 
+             do_action( 'mc_admin_pharmacy_created', $post_id ); 
+        }
+
+
         $new_status = get_post_meta( $post_id, '_mc_status', true ); 
+        /* |-------------------------------------------------------------------------- 
+           | STATUS TRANSITIONS |-------------------------------------------------------------------------- |
+            | pending_verification -> active | Start trial (if not already started) | Send activation email |
+            | pending_verification -> suspended | Send suspension email |
+            | active -> suspended | Send suspension email |
+            | suspended -> active | Send activation email | Do NOT restart trial |
+        ----------------------------------------------------------------------------- */
         if ( $old_status === 'pending_verification' && $new_status === 'active' ) {
              $subscription_status = get_post_meta( $post_id, '_mc_subscription_status', true ); 
              
@@ -318,6 +333,18 @@ class MediCompare_Pharmacy_CPT {
             } 
             $this->send_activation_email($post_id); 
         }
+
+        if ( $old_status === 'pending_verification' && $new_status === 'suspended' ) {
+             $this->send_suspension_email($post_id); 
+        }
+
+        if ( $old_status === 'active' && $new_status === 'suspended' ) {
+             $this->send_suspension_email($post_id); 
+        }
+        
+        if ( $old_status === 'suspended' && $new_status === 'active' ) {
+             $this->send_activation_email($post_id);
+        }        
 
         /* ---------------------------------------------------------
         ⭐ SAVE SUPPLIER RESTRICTIONS
@@ -353,20 +380,88 @@ class MediCompare_Pharmacy_CPT {
              return; 
         } 
         $contact_name = get_post_meta( $post_id, '_mc_contact_name', true );
+        $home = home_url();
         $greeting = $contact_name ? 'Hello ' . $contact_name . ',' : 'Hello,';
+        $logo_url = plugins_url( 'assets/img/logo.png', dirname(dirname(__FILE__)) . '/medicompare.php' );
+        error_log($logo_url);
+
         $subject = 'Your Source Med Pharma Account Is Now Active'; 
-        $message = $greeting . "\n\n";
-        $message .= "Your pharmacy account has now been verified and activated.\n\n";
-        $message .= "Your free trial has started.\n\n"; 
-        $message .= "You can now log in using:\n\n"; 
-        $message .= home_url(); 
-        $message .= "\n\n"; 
-        $message .= "\n\nRegards,\n"; 
-        $message .= "Source Med Pharma Team"; 
+        $message = ' <!DOCTYPE html> 
+            <html> 
+            <body style="font-family:Arial,sans-serif;background:#f5f7f8;margin:0;padding:0;">
+             <table width="100%" cellpadding="0" cellspacing="0" border="0"> 
+             <tr>
+              <td align="center" style="padding:40px 20px;">
+               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;background:#ffffff;border:1px solid #dce8ea;">
+                <tr>
+                 <td align="center" style="padding:30px 30px 24px;border-bottom:1px solid #dce8ea;"> 
+                    <img src="' . esc_url($logo_url) . '" alt="Source Med Pharma" width="360" style="display:block;width:100%;max-width:360px;height:auto;border:0;" >
+                 </td>
+                </tr>
+                <tr>
+                 <td style="padding:30px;">
+                  <p>' . esc_html($greeting) . '</p>
+                  <p> Your pharmacy account has now been verified and activated. </p>
+                  <p> Your free trial has started and your account is now ready to use. </p>
+                  <p> You can now access the platform using: </p>
+                  <p> <a href="' . esc_url($home) . '"> Access Source Med Pharma Platform </a> </p>
+                  <p> Regards,<br> Source Med Pharma Team </p>
+                 </td>
+                </tr>
+               </table>
+              </td>
+             </tr>
+            </table>
+            </body>
+            </html> '; 
         
-        wp_mail( $email, $subject, $message ); 
+        $headers = [ 'Content-Type: text/html; charset=UTF-8' ]; 
+        wp_mail( $email, $subject, $message, $headers ); 
     }
 
+    private function send_suspension_email($post_id) {
+         $email = get_post_meta($post_id, '_mc_email', true); 
+         
+         if (!$email) { return; } 
+            $contact_name = get_post_meta($post_id, '_mc_contact_name', true); 
+            $greeting = $contact_name ? 'Hello ' . $contact_name . ',' : 'Hello,'; 
+            $logo_url = plugins_url( 'assets/img/logo.png', dirname(dirname(__FILE__)) . '/medicompare.php' );
+            error_log($logo_url);
+
+            $subject = 'Your Source Med Pharma Account Has Been Suspended'; 
+            
+            $message = ' <!DOCTYPE html> 
+            <html> 
+            <body style="font-family:Arial,sans-serif;background:#f5f7f8;margin:0;padding:0;">
+             <table width="100%" cellpadding="0" cellspacing="0" border="0"> 
+             <tr>
+              <td align="center" style="padding:40px 20px;">
+               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;background:#ffffff;border:1px solid #dce8ea;">
+                <tr>
+                 <td align="center" style="padding:30px 30px 24px;border-bottom:1px solid #dce8ea;"> 
+                    <img src="' . esc_url($logo_url) . '" alt="Source Med Pharma" width="360" style="display:block;width:100%;max-width:360px;height:auto;border:0;" >
+                 </td>
+                </tr>
+                <tr>
+                 <td style="padding:30px;">
+                  <p>' . esc_html($greeting) . '</p>
+                  <p> Your Source Med Pharma account has been suspended. </p>
+                  <p> Please contact support for further information regarding this decision. </p>
+                  <p> <a href="mailto:support@sourcemedpharma.com" style="color:#006d7c;text-decoration:underline;">
+                                    support@sourcemedpharma.com</a></p>
+                  <p> Regards,<br> Source Med Pharma Team </p>
+                 </td>
+                </tr>
+               </table>
+              </td>
+             </tr>
+            </table>
+            </body>
+            </html> '; 
+
+            $headers = [ 'Content-Type: text/html; charset=UTF-8' ]; 
+            wp_mail( $email, $subject, $message, $headers );
+    }
 
     /* ---------------------------------------------------------
        ADMIN COLUMNS (UPDATED)

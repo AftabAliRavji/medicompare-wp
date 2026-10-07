@@ -6,11 +6,24 @@
  * {{pharmacy_name}}, {{pharmacy_address}}, {{pharmacy_email}}, {{pharmacy_phone}},
  * {{items_table}}, {{supplier_total}}
  */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+$logo_url = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/logo.png';
+
 ?>
 <!DOCTYPE html>
 <html>
 <body style="font-family: Arial, sans-serif;">
-
+<p><img
+                                src="<?php echo esc_url($logo_url); ?>"
+                                alt="Source Med Pharma"
+                                width="360"
+                                style="display:block;width:100%;max-width:360px;height:auto;border:0;"
+                            >
+</p>
 <h2>New Order Received — Sub‑Order {{suborder_number}}</h2>
 
 <p>Hello,</p>

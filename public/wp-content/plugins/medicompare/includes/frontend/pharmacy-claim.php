@@ -5,8 +5,10 @@ if (!defined('ABSPATH')) exit;
 class MediCompare_Pharmacy_Claim {
 
     public function __construct() {
-        // Generate tokens when pharmacies are created
+        // Generate tokens when pharmacies are created via CSV
         add_action('mc_csv_pharmacy_imported', [$this, 'generate_claim_token_after_csv'], 10, 1);
+        // Generate tokens when pharmacies are create via admin - Pharmacies Add New section
+        add_action( 'mc_admin_pharmacy_created', [$this, 'generate_claim_token_after_admin'], 10, 1 );
 
         // Front-end claim flow
         add_shortcode('mc_pharmacy_claim', [$this, 'render_claim_form']);
@@ -110,22 +112,68 @@ class MediCompare_Pharmacy_Claim {
         // Setup email for CSV-imported pharmacy
         $this->send_claim_email($email, $token);
     }
+    
+    /* ----------------------------------------------------------
+        WHEN PHARMACY IS CREATED VIA THE ADMIN PHARMACIES ADD NEW SCREEN
+    -------------------------------------------------------------*/ 
+    public function generate_claim_token_after_admin($post_id) {
+        error_log( 'MC ADMIN CLAIM RECEIVED: ' . $post_id );
+         $email = get_post_meta( $post_id, '_mc_email', true );
+         error_log( 'MC ADMIN CLAIM EMAIL: ' . $email );
+        if (!$email) {
+             return; 
+        } 
+           
+        if (email_exists($email)) {
+             return; 
+        } 
+        
+        $token = $this->create_secure_token();
+        $expiry = time() + (48 * 60 * 60);
+
+        update_post_meta( $post_id, '_mc_claim_token', $token );
+        update_post_meta( $post_id, '_mc_claim_token_expiry', $expiry );
+        
+        $this->send_claim_email( $email, $token );
+    }
 
     /* ---------------------------------------------------------
        SEND CLAIM EMAIL (SETUP EMAIL)
     --------------------------------------------------------- */
     private function send_claim_email($email, $token) {
-        $link = site_url('/pharmacy/complete-registration/?token=' . urlencode($token));
-
-        $subject = "Complete Your Source Med Pharma Registration";
-        $message  = "Hello,\n\n";
-        $message .= "Your pharmacy has been added to Source Med Pharma.\n\n";
-        $message .= "Please complete your registration using the secure link below:\n\n";
-        $message .= $link . "\n\n";
-        $message .= "This link will expire in 48 hours.\n\n";
-        $message .= "Regards,\nSource Med Pharma Team";
-
-        wp_mail($email, $subject, $message);
+          $link = site_url('/pharmacy/complete-registration/?token=' . urlencode($token));
+          $logo_url = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/logo.png';
+          $subject = 'Complete Your Source Med Pharma Registration'; 
+          $message = ' <!DOCTYPE html> 
+            <html> 
+            <body style="font-family:Arial,sans-serif;background:#f5f7f8;margin:0;padding:0;">
+             <table width="100%" cellpadding="0" cellspacing="0" border="0"> 
+             <tr>
+              <td align="center" style="padding:40px 20px;">
+               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;background:#ffffff;border:1px solid #dce8ea;">
+                <tr>
+                 <td align="center" style="padding:30px 30px 24px;border-bottom:1px solid #dce8ea;"> 
+                    <img src="' . esc_url($logo_url) . '" alt="Source Med Pharma" width="360" style="display:block;width:100%;max-width:360px;height:auto;border:0;" >
+                 </td>
+                </tr>
+                <tr>
+                 <td style="padding:30px;">
+                  <p>Hello,</p>
+                  <p> Your pharmacy has been added to Source Med Pharma. </p>
+                  <p> Please complete your registration using the secure link below: </p>
+                  <p> <a href="' . esc_url($link) . '"> Complete Registration </a> </p>
+                  <p> This link will expire in 48 hours. </p>
+                  <p> Regards,<br> Source Med Pharma Team </p>
+                 </td>
+                </tr>
+               </table>
+              </td>
+             </tr>
+            </table>
+            </body>
+            </html> ';
+            $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+            wp_mail( $email, $subject, $message, $headers ); 
     }
 
     /* ---------------------------------------------------------

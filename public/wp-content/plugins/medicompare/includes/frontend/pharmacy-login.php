@@ -12,6 +12,7 @@ function mc_debug($msg) {
 class MediCompare_Pharmacy_Login {
 
     public function __construct() {
+        
         add_shortcode('mc_pharmacy_login', [$this, 'render_login_form']);
         add_action('init', [$this, 'handle_login']);
         add_action('init', [$this, 'handle_logout']);

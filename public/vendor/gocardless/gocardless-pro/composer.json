@@ -1,0 +1,45 @@
+{
+  "name": "gocardless/gocardless-pro",
+  "description": "GoCardless PHP Client Library",
+  "version": "8.14.2",
+  "keywords": [
+    "gocardless",
+    "direct debit",
+    "api"
+  ],
+  "homepage": "https://gocardless.com/",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "GoCardless and contributors",
+      "homepage": "https://github.com/gocardless/gocardless-pro-php/contributors"
+    }
+  ],
+  "require": {
+    "php": ">=8.2",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "guzzlehttp/guzzle": "^7.4|^8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6.35",
+    "squizlabs/php_codesniffer": "^4.0.4",
+    "phpstan/phpstan": "^2.2.8"
+  },
+  "config": {
+    "platform": {
+      "php": "8.2"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "GoCardlessPro\\" : "lib/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "GoCardlessPro\\": "tests/"
+    }
+  }
+}

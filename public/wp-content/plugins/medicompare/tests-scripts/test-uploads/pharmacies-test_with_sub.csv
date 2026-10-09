@@ -1,0 +1,2 @@
+pharmacy_code,pharmacy_name,email,phone,address_line_1,address_line_2,city,postcode,gphc_number,contact_name,accountid,status
+AFPHARM23,afsourcemed Pharmacy,afsource@gmail.com,01733123456,123 Netherton Road,,Peterborough,PE39XYZ,9012345,af source,ACC-10045,pending_verification

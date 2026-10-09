@@ -136,6 +136,7 @@ class MediCompare_Pharmacy_CPT {
             'gphc_number'     => '_mc_gphc_number',
             'contact_name'    => '_mc_contact_name',
             'account_id'      => '_mc_account_id',
+            'subscription_amount' => '_mc_subscription_amount',
             'status'          => '_mc_status',
         ];
 
@@ -210,6 +211,11 @@ class MediCompare_Pharmacy_CPT {
             <tr> 
                 <th><label>AccountId</label></th> 
                 <td> <input type="text" name="mc_account_id" value="<?php echo esc_attr($values['account_id']); ?>" class="regular-text" > <p class="description">Optional account identifier supplied by supplier.</p> 
+                </td> 
+            </tr>
+            <tr> 
+                <th> <label>Monthly Subscription Amount (£)</label> </th> 
+                <td> <input type="number" step="0.01" min="0" name="mc_subscription_amount" value="<?php echo esc_attr( $values['subscription_amount'] ? $values['subscription_amount'] : '30.00' ); ?>" class="regular-text" > <p class="description"> Monthly subscription amount once trial ends. </p> 
                 </td> 
             </tr>
             <tr>
@@ -298,6 +304,7 @@ class MediCompare_Pharmacy_CPT {
             'mc_gphc_number'    => '_mc_gphc_number',
             'mc_contact_name'   => '_mc_contact_name',
             'mc_account_id'     => '_mc_account_id',
+            'mc_subscription_amount' => '_mc_subscription_amount',
             'mc_status'         => '_mc_status',
         ];
 
@@ -305,6 +312,10 @@ class MediCompare_Pharmacy_CPT {
             if (isset($_POST[$form_key])) {
                 update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$form_key]));
             }
+        }
+
+        if ( !get_post_meta( $post_id, '_mc_subscription_amount', true ) ) { 
+            update_post_meta( $post_id, '_mc_subscription_amount', '30.00' ); 
         }
 
         $is_new_pharmacy = !get_post_meta( $post_id, '_mc_admin_claim_sent', true ); 
@@ -483,6 +494,7 @@ class MediCompare_Pharmacy_CPT {
         $new['contact']       = 'Contact';
         $new['account_id']    = 'AccountId';
         $new['status']        = 'Status';
+        $new['subscription_amount'] = 'Monthly Sub fee';
 
         // ⭐ NEW SUBSCRIPTION COLUMNS
         $new['sub_status']      = 'Subscription';
@@ -544,6 +556,10 @@ class MediCompare_Pharmacy_CPT {
                 break;
             case 'account_id': 
                 echo esc_html( get_post_meta( $post_id, '_mc_account_id', true ) ); 
+                break;
+            case 'subscription_amount': 
+                $amount = get_post_meta( $post_id, '_mc_subscription_amount', true ); 
+                echo '£' . esc_html( $amount ? $amount : '30.00' ); 
                 break;
 
             /* ---------------------------------------------------------

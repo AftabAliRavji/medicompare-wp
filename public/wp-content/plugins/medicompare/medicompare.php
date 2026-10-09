@@ -134,6 +134,11 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-stripe.php';
         require_once plugin_dir_path(__FILE__) . 'includes/stripe-webhooks.php';
 
+        // GoCardless config + checkout
+        require_once plugin_dir_path(__FILE__) . 'includes/gocardless-config.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-gocardless.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/gocardless-webhooks.php';
+
         // Requirements board
         require_once ABSPATH . 'project-req/requirements-board-endpoints.php';
 

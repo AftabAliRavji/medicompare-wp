@@ -51,6 +51,31 @@ add_action('template_redirect', function () {
 
 });
 
+function mc_get_pharmacy_by_gocardless_subscription(
+    $subscription_id
+) {
+
+    global $wpdb;
+
+    $pharmacy_id = $wpdb->get_var(
+        $wpdb->prepare(
+            "
+            SELECT post_id
+            FROM {$wpdb->postmeta}
+            WHERE meta_key = '_mc_gocardless_subscription_id'
+            AND meta_value = %s
+            LIMIT 1
+            ",
+            $subscription_id
+        )
+    );
+
+    return $pharmacy_id
+        ? (int) $pharmacy_id
+        : 0;
+}
+
+
 /**
  * Main webhook handler
  */
@@ -98,14 +123,53 @@ function mc_handle_gocardless_webhook() {
 
         foreach ($data['events'] as $event) {
 
+            $resource_type = $event['resource_type'] ?? '';
+
+            $action = $event['action'] ?? '';
+
             error_log(
-                'GC EVENT TYPE: ' .
-                ($event['action'] ?? 'unknown')
+                "GC EVENT: {$resource_type} {$action}"
             );
 
-        }
+            if (
+                $resource_type === 'subscriptions' &&
+                $action === 'created'
+            ) 
+       {
 
-    }
+        $subscription_id =
+            $event['links']['subscription'] ?? '';
+
+            if ($subscription_id) {
+
+                $pharmacy_id =
+                    mc_get_pharmacy_by_gocardless_subscription(
+                        $subscription_id
+                    );
+
+                if ($pharmacy_id) {
+
+                    update_post_meta(
+                        $pharmacy_id,
+                        '_mc_subscription_status',
+                        'active'
+                    );
+
+                    update_post_meta(
+                        $pharmacy_id,
+                        '_mc_status',
+                        'active'
+                    );
+
+                    error_log(
+                        "GC ACTIVE PHARMACY {$pharmacy_id}"
+                    );
+                }
+            }
+       }
+   }
+
+ }
 
     status_header(200);
 

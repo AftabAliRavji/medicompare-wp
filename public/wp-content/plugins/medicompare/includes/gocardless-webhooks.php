@@ -137,8 +137,15 @@ function mc_handle_gocardless_webhook() {
             ) 
        {
 
+	error_log('GC SUBSCRIPTION CREATED BLOCK ENTERED');	
+
         $subscription_id =
             $event['links']['subscription'] ?? '';
+
+	error_log(
+    	'GC SUBSCRIPTION ID: ' .
+    	$subscription_id
+	);
 
             if ($subscription_id) {
 
@@ -146,6 +153,11 @@ function mc_handle_gocardless_webhook() {
                     mc_get_pharmacy_by_gocardless_subscription(
                         $subscription_id
                     );
+
+		error_log(
+    		'GC PHARMACY ID: ' .
+    		$pharmacy_id
+		);
 
                 if ($pharmacy_id) {
 

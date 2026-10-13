@@ -125,11 +125,11 @@ function mc_get_pharmacy_by_gocardless_billing_request( $billing_request_id ) {
 /**
  * helper function to get the get pharmacy from the gocardless payment id
  */
-function mc_get_pharmacy_by_gocardless_payment( $payment_id ) {
-     global $wpdb; 
-     $pharmacy_id = $wpdb->get_var( 
-        $wpdb->prepare( " SELECT pharmacy_id FROM {$wpdb->prefix}medi_gocardless_events WHERE resource_id = %s AND pharmacy_id > 0 ORDER BY id DESC LIMIT 1 ", $payment_id ) 
-        ); 
+function mc_get_pharmacy_by_gocardless_payment( $payment_id ) { 
+    global $wpdb; 
+    $pharmacy_id = $wpdb->get_var( $wpdb->prepare( 
+        " SELECT pharmacy_id FROM {$wpdb->prefix}medi_gocardless_events WHERE resource_id = %s AND pharmacy_id > 0 LIMIT 1 ", $payment_id ) 
+    ); 
     return $pharmacy_id ? (int) $pharmacy_id : 0; 
 }
 
@@ -217,11 +217,20 @@ function mc_handle_gocardless_webhook() {
 
 		}
 
+        if ( $resource_type === 'payments' && $action === 'created' ) { 
+            $payment_id = $event['links']['payment'] ?? ''; 
+            if ( $pharmacy_id && $payment_id ) { 
+                update_post_meta( $pharmacy_id, '_mc_gocardless_payment_id', $payment_id ); 
+                error_log( 'GC PAYMENT STORED: ' . $payment_id ); 
+            } 
+        }
+
         if ( $resource_type === 'payments' && $action === 'confirmed' ) 
             { 
                 $payment_id = $event['links']['payment'] ?? ''; 
                 error_log( 'GC PAYMENT CONFIRMED: ' . $payment_id ); 
-                
+                error_log( 'GC PAYMENT CONFIRMED PHARMACY: ' . $pharmacy_id );
+
                 if ($pharmacy_id) { 
                     update_post_meta( $pharmacy_id, '_mc_last_payment_id', $payment_id ); 
                     update_post_meta( $pharmacy_id, '_mc_last_payment_status', 'confirmed' ); 
@@ -234,7 +243,8 @@ function mc_handle_gocardless_webhook() {
                 { 
                     $payment_id = $event['links']['payment'] ?? ''; 
                     error_log( 'GC PAYMENT PAID OUT: ' . $action );
-                    
+                    error_log( 'GC PAYMENT PAID OUT PHARMACY: ' . $pharmacy_id );
+
                     if ($pharmacy_id) { 
                         update_post_meta( $pharmacy_id, '_mc_last_payout_id', $payment_id ); 
                         update_post_meta( $pharmacy_id, '_mc_last_payout_date', current_time('timestamp') 
@@ -299,83 +309,81 @@ function mc_handle_gocardless_webhook() {
     echo 'OK';
 }
 
-    function mc_gocardless_log_event(
-    $pharmacy_id,
-    $event
-) {
+    function mc_gocardless_log_event($pharmacy_id,$event) 
+    {
 
-    global $wpdb;
+        global $wpdb;
 
-    $table =
-        $wpdb->prefix .
-        'medi_gocardless_events';
+        $table =
+            $wpdb->prefix .
+            'medi_gocardless_events';
 
-    error_log(
-        'GC AUDIT FUNCTION HIT'
-    );
+        error_log(
+            'GC AUDIT FUNCTION HIT'
+        );
 
-    error_log(
-        'GC AUDIT TABLE: ' .
-        $table
-    );
+        error_log(
+            'GC AUDIT TABLE: ' .
+            $table
+        );
 
-    $resource_id = '';
+        $resource_id = ''; 
+        if (!empty($event['links']['payment'])) { 
+            $resource_id = $event['links']['payment']; 
+        } 
+        elseif (!empty($event['links']['subscription'])) { 
+            $resource_id = $event['links']['subscription']; 
+        } 
+        elseif (!empty($event['links']['mandate'])) { 
+            $resource_id = $event['links']['mandate']; 
+        } 
+        elseif (!empty($event['links']['billing_request'])) { 
+            $resource_id = $event['links']['billing_request']; 
+        } 
+        elseif (!empty($event['links']['payout'])) { 
+            $resource_id = $event['links']['payout']; 
+        } 
+        elseif (!empty($event['links']['billing_request_flow'])) { 
+            $resource_id = $event['links']['billing_request_flow']; 
+        }
 
-    if (!empty($event['links']['payment'])) {
+        error_log(
+            'GC AUDIT INSERT START'
+        );
 
-        $resource_id =
-            $event['links']['payment'];
+        $wpdb->insert(
+            $table,
+            [
+                'pharmacy_id' =>
+                    $pharmacy_id,
 
-    } elseif (!empty($event['links']['subscription'])) {
+                'event_id' =>
+                    $event['id'] ?? '',
 
-        $resource_id =
-            $event['links']['subscription'];
+                'resource_type' =>
+                    $event['resource_type'] ?? '',
 
-    } elseif (!empty($event['links']['mandate'])) {
+                'action_name' =>
+                    $event['action'] ?? '',
 
-        $resource_id =
-            $event['links']['mandate'];
+                'resource_id' =>
+                    $resource_id,
+
+                'raw_payload' => wp_json_encode( $event, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ),
+
+                'created_at' =>
+                    current_time('mysql')
+            ] 
+        );
+
+        error_log(
+            'GC AUDIT INSERT ID: ' .
+            $wpdb->insert_id
+        );
+
+        error_log(
+            'GC AUDIT LAST ERROR: ' .
+            $wpdb->last_error
+        );
 
     }
-
-    error_log(
-        'GC AUDIT INSERT START'
-    );
-
-    $wpdb->insert(
-        $table,
-        [
-            'pharmacy_id' =>
-                $pharmacy_id,
-
-            'event_id' =>
-                $event['id'] ?? '',
-
-            'resource_type' =>
-                $event['resource_type'] ?? '',
-
-            'action_name' =>
-                $event['action'] ?? '',
-
-            'resource_id' =>
-                $resource_id,
-
-            'raw_payload' =>
-                wp_json_encode($event),
-
-            'created_at' =>
-                current_time('mysql')
-        ]
-    );
-
-    error_log(
-        'GC AUDIT INSERT ID: ' .
-        $wpdb->insert_id
-    );
-
-    error_log(
-        'GC AUDIT LAST ERROR: ' .
-        $wpdb->last_error
-    );
-
-}

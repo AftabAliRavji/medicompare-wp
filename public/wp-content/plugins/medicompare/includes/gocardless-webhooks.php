@@ -122,6 +122,17 @@ function mc_get_pharmacy_by_gocardless_billing_request( $billing_request_id ) {
     return $pharmacy_id ? (int) $pharmacy_id : 0;
 }
 
+/**
+ * helper function to get the get pharmacy from the gocardless payment id
+ */
+function mc_get_pharmacy_by_gocardless_payment( $payment_id ) {
+     global $wpdb; 
+     $pharmacy_id = $wpdb->get_var( 
+        $wpdb->prepare( " SELECT pharmacy_id FROM {$wpdb->prefix}medi_gocardless_events WHERE resource_id = %s AND pharmacy_id > 0 ORDER BY id DESC LIMIT 1 ", $payment_id ) 
+        ); 
+    return $pharmacy_id ? (int) $pharmacy_id : 0; 
+}
+
 
 /**
  * Main webhook handler
@@ -178,36 +189,18 @@ function mc_handle_gocardless_webhook() {
                 "GC EVENT: {$resource_type} {$action}"
             );
 
-           $pharmacy_id = 0;
-
-            if (
-                !empty($event['links']['subscription'])
-            ) {
-
-                $pharmacy_id =
-                    mc_get_pharmacy_by_gocardless_subscription(
-                        $event['links']['subscription']
-                    );
-
-            }
-
-            if (
-                !$pharmacy_id &&
-                !empty($event['links']['mandate'])
-            ) {
-
-               if ( !$pharmacy_id && !empty($event['links']['billing_request']) ) { 
-                $pharmacy_id = 
-                    mc_get_pharmacy_by_gocardless_billing_request( 
-                        $event['links']['billing_request'] 
-                    ); 
-                }  
-
-                $pharmacy_id =
-                    mc_get_pharmacy_by_gocardless_mandate(
-                        $event['links']['mandate']
-                    );
-
+           $pharmacy_id = 0; 
+           if ( !empty($event['links']['subscription']) ) { 
+            $pharmacy_id = mc_get_pharmacy_by_gocardless_subscription( $event['links']['subscription'] ); 
+            } 
+            if ( !$pharmacy_id && !empty($event['links']['mandate']) ) { 
+                $pharmacy_id = mc_get_pharmacy_by_gocardless_mandate( $event['links']['mandate'] ); 
+            } 
+            if ( !$pharmacy_id && !empty($event['links']['billing_request']) ) { 
+                $pharmacy_id = mc_get_pharmacy_by_gocardless_billing_request( $event['links']['billing_request'] ); 
+            } 
+            if ( !$pharmacy_id && !empty($event['links']['payment']) ) { 
+                $pharmacy_id = mc_get_pharmacy_by_gocardless_payment( $event['links']['payment'] ); 
             }
 
             mc_gocardless_log_event(

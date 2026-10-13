@@ -5,7 +5,7 @@
 
         <p>Your subscription has expired or your trial has ended.</p>
 
-        <p>Please renew your subscription to continue using MediCompare.</p>
+        <p>Please renew your subscription to continue using Source Med Pharma.</p>
 
         <button id="mc-renew-subscription" class="mc-btn-primary">
             Renew Subscription

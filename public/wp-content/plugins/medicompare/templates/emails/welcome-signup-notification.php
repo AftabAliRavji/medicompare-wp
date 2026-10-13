@@ -12,7 +12,7 @@
 
 <h2>New Pharmacy Signup Interest</h2>
 
-<p>A pharmacy has registered interest in joining the MediCompare platform.</p>
+<p>A pharmacy has registered interest in joining the Source Med Pharma platform.</p>
 
 <h3>Pharmacy Details</h3>
 <ul>

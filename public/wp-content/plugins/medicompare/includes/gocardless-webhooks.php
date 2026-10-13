@@ -51,6 +51,9 @@ add_action('template_redirect', function () {
 
 });
 
+/**
+  * helper function to get the subscription id for the pharmacy
+  */
 function mc_get_pharmacy_by_gocardless_subscription(
     $subscription_id
 ) {
@@ -76,7 +79,7 @@ function mc_get_pharmacy_by_gocardless_subscription(
 }
 
  /**
-  * helper function
+  * helper function to get mandate_id for the pharmacy
   */
 
    function mc_get_pharmacy_by_gocardless_mandate(
@@ -102,6 +105,21 @@ function mc_get_pharmacy_by_gocardless_subscription(
         ? (int) $pharmacy_id
         : 0;
 
+}
+
+/**
+ * helper function to get the billing request id for the pharmacy
+ */
+function mc_get_pharmacy_by_gocardless_billing_request( $billing_request_id ) { 
+    global $wpdb; 
+    
+    $pharmacy_id = $wpdb->get_var( 
+        $wpdb->prepare( 
+            " SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_mc_gocardless_billing_request_id' AND meta_value = %s LIMIT 1 ", 
+            $billing_request_id 
+        ) 
+    ); 
+    return $pharmacy_id ? (int) $pharmacy_id : 0;
 }
 
 
@@ -178,6 +196,13 @@ function mc_handle_gocardless_webhook() {
                 !empty($event['links']['mandate'])
             ) {
 
+               if ( !$pharmacy_id && !empty($event['links']['billing_request']) ) { 
+                $pharmacy_id = 
+                    mc_get_pharmacy_by_gocardless_billing_request( 
+                        $event['links']['billing_request'] 
+                    ); 
+                }  
+
                 $pharmacy_id =
                     mc_get_pharmacy_by_gocardless_mandate(
                         $event['links']['mandate']
@@ -199,38 +224,31 @@ function mc_handle_gocardless_webhook() {
 
 		}
 
-        if (
-            $resource_type === 'payments' &&
-            $action === 'confirmed') 
-            {
-
-                $payment_id =
-                    $event['links']['payment'] ?? '';
-
-                error_log(
-                    'GC PAYMENT CONFIRMED: ' .
-                    $payment_id
-                );
-
-                update_post_meta(
-                    25,
-                    '_mc_last_payment_id',
-                    $payment_id
-                );
-
-                update_post_meta(
-                    25,
-                    '_mc_last_payment_status',
-                    'confirmed'
-                );
-
-                update_post_meta(
-                    25,
-                    '_mc_last_payment_date',
-                    current_time('timestamp')
-                );
-
+        if ( $resource_type === 'payments' && $action === 'confirmed' ) 
+            { 
+                $payment_id = $event['links']['payment'] ?? ''; 
+                error_log( 'GC PAYMENT CONFIRMED: ' . $payment_id ); 
+                
+                if ($pharmacy_id) { 
+                    update_post_meta( $pharmacy_id, '_mc_last_payment_id', $payment_id ); 
+                    update_post_meta( $pharmacy_id, '_mc_last_payment_status', 'confirmed' ); 
+                    update_post_meta( $pharmacy_id, '_mc_last_payment_date', current_time('timestamp') 
+                    ); 
+                } 
             }
+
+            if ( $resource_type === 'payments' && $action === 'paid_out' ) 
+                { 
+                    $payment_id = $event['links']['payment'] ?? ''; 
+                    error_log( 'GC PAYMENT PAID OUT: ' . $action );
+                    
+                    if ($pharmacy_id) { 
+                        update_post_meta( $pharmacy_id, '_mc_last_payout_id', $payment_id ); 
+                        update_post_meta( $pharmacy_id, '_mc_last_payout_date', current_time('timestamp') 
+                        ); 
+                    } 
+                }
+
 
             if (
                 $resource_type === 'subscriptions' &&

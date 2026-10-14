@@ -72,10 +72,20 @@ add_action('init', function () {
 
             $session_token = wp_generate_password(32, false);
 
-                update_option(
-                    'mc_gc_test_session_token',
-                    $session_token
+                $user_id = get_current_user_id();
+
+                $pharmacy_id = mc_get_pharmacy_id_by_user(
+                    $user_id
                 );
+
+                if ($pharmacy_id) {
+
+                    update_post_meta(
+                        $pharmacy_id,
+                        '_mc_gocardless_session_token',
+                        $session_token
+                    );
+                }
 
                 $redirectFlow = $client->redirectFlows()->create([
                     "params" => [
@@ -127,8 +137,14 @@ add_action('init', function () {
                 wp_die('Missing redirect_flow_id');
             }
 
-            $session_token = get_option(
-                'mc_gc_test_session_token'
+            $user_id = get_current_user_id();
+
+            $pharmacy_id = mc_get_pharmacy_id_by_user($user_id);
+
+            $session_token = get_post_meta(
+                $pharmacy_id,
+                '_mc_gocardless_session_token',
+                true
             );
 
             $client = new \GoCardlessPro\Client([
@@ -145,6 +161,11 @@ add_action('init', function () {
                 ]
             );
 
+            delete_post_meta(
+                $pharmacy_id,
+                '_mc_gocardless_session_token'
+            );
+
             $customer_id = $completed->links->customer ?? '';
 
             $mandate_id = $completed->links->mandate ?? '';
@@ -153,9 +174,6 @@ add_action('init', function () {
 
             $billing_request_id = $completed->links->billing_request ?? '';
 
-            $user_id = get_current_user_id();
-
-            $pharmacy_id = mc_get_pharmacy_id_by_user($user_id);
 
             if ($pharmacy_id) {
 

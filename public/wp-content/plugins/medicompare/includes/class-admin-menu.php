@@ -546,6 +546,13 @@ class MediCompare_Admin_Menu {
         register_setting('mc_redirect_settings_group', 'mc_enable_home_redirect');
         register_setting('mc_redirect_settings_group', 'mc_enable_login_redirect');
         register_setting('mc_redirect_settings_group', 'mc_enable_home_to_pharmacy_redirect');
+        register_setting('mc_settings_group', 'mc_gocardless_environment');
+        register_setting('mc_settings_group', 'mc_gocardless_sandbox_access_token');
+        register_setting('mc_settings_group', 'mc_gocardless_sandbox_webhook_secret');
+        register_setting('mc_settings_group', 'mc_gocardless_sandbox_creditor_id');
+        register_setting('mc_settings_group', 'mc_gocardless_production_access_token');
+        register_setting('mc_settings_group', 'mc_gocardless_production_webhook_secret');
+        register_setting('mc_settings_group', 'mc_gocardless_production_creditor_id');
     }
 
 
@@ -783,7 +790,7 @@ class MediCompare_Admin_Menu {
     public function settings_page() {
         ?>
         <div class="wrap">
-            <h1>MediCompare Settings</h1>
+            <h1>Source Med Pharma Settings</h1>
 
             <h2 class="title">Search Instructions</h2>
             <p>Click below to edit the instructions shown under the product search box.</p>
@@ -856,6 +863,159 @@ class MediCompare_Admin_Menu {
 
                 <?php submit_button('Save Settings'); ?>
             </form>
+
+                    <hr><br>
+
+        <h2 class="title">GoCardless Settings</h2>
+
+        <form method="post" action="options.php">
+
+            <?php settings_fields('mc_settings_group'); ?>
+
+            <table class="form-table">
+
+                <tr>
+                    <th scope="row">Environment</th>
+                    <td>
+                        <select name="mc_gocardless_environment">
+
+                            <option value="sandbox"
+                                <?php selected(
+                                    get_option(
+                                        'mc_gocardless_environment',
+                                        'sandbox'
+                                    ),
+                                    'sandbox'
+                                ); ?>>
+                                Sandbox
+                            </option>
+
+                            <option value="production"
+                                <?php selected(
+                                    get_option(
+                                        'mc_gocardless_environment',
+                                        'sandbox'
+                                    ),
+                                    'production'
+                                ); ?>>
+                                Production
+                            </option>
+
+                        </select>
+
+                        <p class="description">
+                            Current GoCardless environment.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">Sandbox Access Token</th>
+                    <td>
+                        <input
+                            type="text"
+                            class="regular-text"
+                            name="mc_gocardless_sandbox_access_token"
+                            value="<?php echo esc_attr(
+                                get_option(
+                                    'mc_gocardless_sandbox_access_token',
+                                    ''
+                                )
+                            ); ?>"
+                        />
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">Sandbox Webhook Secret</th>
+                    <td>
+                        <input
+                            type="text"
+                            class="regular-text"
+                            name="mc_gocardless_sandbox_webhook_secret"
+                            value="<?php echo esc_attr(
+                                get_option(
+                                    'mc_gocardless_sandbox_webhook_secret',
+                                    ''
+                                )
+                            ); ?>"
+                        />
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">Sandbox Creditor ID</th>
+                    <td>
+                        <input
+                            type="text"
+                            class="regular-text"
+                            name="mc_gocardless_sandbox_creditor_id"
+                            value="<?php echo esc_attr(
+                                get_option(
+                                    'mc_gocardless_sandbox_creditor_id',
+                                    ''
+                                )
+                            ); ?>"
+                        />
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">Production Access Token</th>
+                    <td>
+                        <input
+                            type="text"
+                            class="regular-text"
+                            name="mc_gocardless_production_access_token"
+                            value="<?php echo esc_attr(
+                                get_option(
+                                    'mc_gocardless_production_access_token',
+                                    ''
+                                )
+                            ); ?>"
+                        />
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">Production Webhook Secret</th>
+                    <td>
+                        <input
+                            type="text"
+                            class="regular-text"
+                            name="mc_gocardless_production_webhook_secret"
+                            value="<?php echo esc_attr(
+                                get_option(
+                                    'mc_gocardless_production_webhook_secret',
+                                    ''
+                                )
+                            ); ?>"
+                        />
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">Production Creditor ID</th>
+                    <td>
+                        <input
+                            type="text"
+                            class="regular-text"
+                            name="mc_gocardless_production_creditor_id"
+                            value="<?php echo esc_attr(
+                                get_option(
+                                    'mc_gocardless_production_creditor_id',
+                                    ''
+                                )
+                            ); ?>"
+                        />
+                    </td>
+                </tr>
+
+            </table>
+
+            <?php submit_button('Save GoCardless Settings'); ?>
+
+        </form>
         </div>
         <?php
     }

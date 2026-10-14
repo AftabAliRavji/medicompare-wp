@@ -4468,7 +4468,7 @@ public function transferred_orders_page() {
             );
             ?>
 
-            <div id="mc-subscription-audit-log">
+            <div id="mc-subscription-audit-log-NEW">
 
                 <?php if (empty($audit_rows)) : ?>
 

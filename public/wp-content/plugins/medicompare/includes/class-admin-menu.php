@@ -4451,8 +4451,135 @@ public function transferred_orders_page() {
             <!-- AUDIT LOG -->
             <h2>Audit Log</h2>
 
+            <?php
+            global $wpdb;
+
+            $audit_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "
+                    SELECT *
+                    FROM {$wpdb->prefix}medi_gocardless_events
+                    WHERE pharmacy_id = %d
+                    ORDER BY event_created_at DESC
+                    ",
+                    $selected_id
+                ),
+                ARRAY_A
+            );
+            ?>
+
             <div id="mc-subscription-audit-log">
-                <p class="mc-muted">Audit log will load here.</p>
+
+                <?php if (empty($audit_rows)) : ?>
+
+                    <p class="mc-muted">
+                        No GoCardless audit events found for this pharmacy.
+                    </p>
+
+                <?php else : ?>
+
+                    <table class="widefat striped">
+                        <thead>
+                            <tr>
+                                <th style="width:180px;">Date</th>
+                                <th style="width:160px;">Resource</th>
+                                <th style="width:180px;">Action</th>
+                                <th>Resource ID</th>
+                                <th style="width:220px;">Details</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <?php foreach ($audit_rows as $row) : ?>
+
+                                <tr>
+                                    <td>
+                                        <?php
+                                        echo !empty($row['event_created_at'])
+                                            ? esc_html(
+                                                date(
+                                                    'd M Y H:i:s',
+                                                    strtotime($row['event_created_at'])
+                                                )
+                                            )
+                                            : '—';
+                                        ?>
+                                    </td>
+
+                                    <td>
+                                        <?php echo esc_html($row['resource_type']); ?>
+                                    </td>
+
+                                    <td>
+                                        <?php echo esc_html($row['action_name']); ?>
+                                    </td>
+
+                                    <td>
+                                        <code>
+                                            <?php echo esc_html($row['resource_id']); ?>
+                                        </code>
+                                    </td>
+
+                                    <td>
+
+                                        <details style="margin-bottom:10px;">
+                                            <summary>
+                                                View Event JSON
+                                            </summary>
+
+                                            <pre style="
+                                                margin-top:10px;
+                                                max-height:350px;
+                                                overflow:auto;
+                                                background:#f6f7f7;
+                                                padding:12px;
+                                                border:1px solid #ddd;
+                                            "><?php
+                                                echo esc_html(
+                                                    json_encode(
+                                                        json_decode(
+                                                            $row['raw_payload'],
+                                                            true
+                                                        ),
+                                                        JSON_PRETTY_PRINT |
+                                                        JSON_UNESCAPED_SLASHES
+                                                    )
+                                                );
+                                            ?></pre>
+
+                                        </details>
+
+                                        <details>
+                                            <summary>
+                                                View Full Webhook
+                                            </summary>
+
+                                            <pre style="
+                                                margin-top:10px;
+                                                max-height:500px;
+                                                overflow:auto;
+                                                background:#f6f7f7;
+                                                padding:12px;
+                                                border:1px solid #ddd;
+                                            "><?php
+                                                echo esc_html(
+                                                    $row['webhook_payload']
+                                                );
+                                            ?></pre>
+
+                                        </details>
+
+                                    </td>
+                                </tr>
+
+                            <?php endforeach; ?>
+
+                        </tbody>
+                    </table>
+
+                <?php endif; ?>
+
             </div>
 
         </div>
@@ -4486,8 +4613,8 @@ public function transferred_orders_page() {
         $fields = [
             'trial_start' => '_mc_trial_start',
             'trial_end'   => '_mc_trial_end',
-            'sub_start'   => '_mc_subscription_start',
-            'sub_end'     => '_mc_subscription_end',
+            'sub_start' => '_mc_subscription_period_start',
+            'sub_end' => '_mc_subscription_period_end',
             'next_billing'=> '_mc_next_billing_date',
         ];
 
@@ -4562,13 +4689,13 @@ public function transferred_orders_page() {
 
             case 'activate':
                 update_post_meta($pid, '_mc_subscription_status', 'active');
-                update_post_meta($pid, '_mc_subscription_start', $now);
+                update_post_meta($pid, '_mc_subscription_period_start', $now);
                 $this->log_subscription_event($pid, "Subscription activated");
                 break;
 
             case 'expire':
                 update_post_meta($pid, '_mc_subscription_status', 'expired');
-                update_post_meta($pid, '_mc_subscription_end', $now);
+                update_post_meta($pid, '_mc_subscription_period_end', $now);
                 $this->log_subscription_event($pid, "Subscription marked expired");
                 break;
 

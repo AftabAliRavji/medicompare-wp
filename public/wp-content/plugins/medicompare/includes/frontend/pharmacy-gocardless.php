@@ -67,7 +67,7 @@ add_action('init', function () {
 
             $client = new \GoCardlessPro\Client([
                 'access_token' => mc_get_gocardless_access_token(),
-                'environment'  => \GoCardlessPro\Environment::SANDBOX,
+                'environment'  => mc_get_gocardless_environment(),
             ]);
 
             $session_token = wp_generate_password(32, false);
@@ -87,9 +87,21 @@ add_action('init', function () {
                     );
                 }
 
+                $subscription_amount = get_post_meta(
+                    $pharmacy_id,
+                    '_mc_subscription_amount',
+                    true
+                );
+
                 $redirectFlow = $client->redirectFlows()->create([
                     "params" => [
-                        "description" => "SourceMed Subscription",
+                        "description" => sprintf(
+                            'SourceMed Monthly Subscription - £%s per month',
+                            number_format(
+                                (float) $subscription_amount,
+                                2
+                            )
+                        ),
                         "session_token" => $session_token,
                         "success_redirect_url" => home_url('/gocardless-success/')
                     ]
@@ -149,7 +161,7 @@ add_action('init', function () {
 
             $client = new \GoCardlessPro\Client([
                 'access_token' => mc_get_gocardless_access_token(),
-                'environment'  => \GoCardlessPro\Environment::SANDBOX,
+                'environment'  => mc_get_gocardless_environment(),
             ]);
 
             $completed = $client->redirectFlows()->complete(

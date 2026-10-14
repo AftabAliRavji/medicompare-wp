@@ -205,7 +205,8 @@ function mc_handle_gocardless_webhook() {
 
             mc_gocardless_log_event(
                 $pharmacy_id,
-                $event
+                $event,
+                $payload
             );
 
 		if ($resource_type === 'payments') {
@@ -309,7 +310,10 @@ function mc_handle_gocardless_webhook() {
     echo 'OK';
 }
 
-    function mc_gocardless_log_event($pharmacy_id,$event) 
+    function mc_gocardless_log_event(
+    $pharmacy_id,
+    $event,
+    $payload = null) 
     {
 
         global $wpdb;
@@ -327,24 +331,45 @@ function mc_handle_gocardless_webhook() {
             $table
         );
 
-        $resource_id = ''; 
-        if (!empty($event['links']['payment'])) { 
-            $resource_id = $event['links']['payment']; 
-        } 
-        elseif (!empty($event['links']['subscription'])) { 
-            $resource_id = $event['links']['subscription']; 
-        } 
-        elseif (!empty($event['links']['mandate'])) { 
-            $resource_id = $event['links']['mandate']; 
-        } 
-        elseif (!empty($event['links']['billing_request'])) { 
-            $resource_id = $event['links']['billing_request']; 
-        } 
-        elseif (!empty($event['links']['payout'])) { 
-            $resource_id = $event['links']['payout']; 
-        } 
-        elseif (!empty($event['links']['billing_request_flow'])) { 
-            $resource_id = $event['links']['billing_request_flow']; 
+        $resource_id = '';
+
+        if (!empty($event['links']['payment'])) {
+            $resource_id = $event['links']['payment'];
+        }
+        elseif (!empty($event['links']['subscription'])) {
+            $resource_id = $event['links']['subscription'];
+        }
+        elseif (!empty($event['links']['mandate'])) {
+            $resource_id = $event['links']['mandate'];
+        }
+        elseif (!empty($event['links']['billing_request'])) {
+            $resource_id = $event['links']['billing_request'];
+        }
+        elseif (!empty($event['links']['payout'])) {
+            $resource_id = $event['links']['payout'];
+        }
+        elseif (!empty($event['links']['billing_request_flow'])) {
+            $resource_id = $event['links']['billing_request_flow'];
+        }
+
+        $pretty_payload = null;
+
+        if (!empty($payload)) {
+
+            $decoded_payload = json_decode(
+                $payload,
+                true
+            );
+
+            if ($decoded_payload) {
+
+                $pretty_payload = wp_json_encode(
+                    $decoded_payload,
+                    JSON_PRETTY_PRINT |
+                    JSON_UNESCAPED_SLASHES |
+                    JSON_UNESCAPED_UNICODE
+                );
+            }
         }
 
         error_log(
@@ -369,11 +394,27 @@ function mc_handle_gocardless_webhook() {
                 'resource_id' =>
                     $resource_id,
 
-                'raw_payload' => wp_json_encode( $event, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ),
+                'event_created_at' =>
+                    !empty($event['created_at'])
+                        ? gmdate(
+                            'Y-m-d H:i:s',
+                            strtotime($event['created_at'])
+                        )
+                        : null,
+
+                'raw_payload' =>
+                    wp_json_encode(
+                        $event,
+                        JSON_UNESCAPED_SLASHES |
+                        JSON_UNESCAPED_UNICODE
+                    ),
+
+                'webhook_payload' =>
+                    $pretty_payload,
 
                 'created_at' =>
                     current_time('mysql')
-            ] 
+            ]
         );
 
         error_log(
@@ -385,5 +426,4 @@ function mc_handle_gocardless_webhook() {
             'GC AUDIT LAST ERROR: ' .
             $wpdb->last_error
         );
-
     }

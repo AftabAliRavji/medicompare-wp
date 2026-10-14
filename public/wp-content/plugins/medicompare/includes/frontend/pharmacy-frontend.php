@@ -242,7 +242,7 @@ public function render_dashboard() {
 
                         } elseif (!empty($state['next_billing'])) {
                             $days_left = max(0, floor(($state['next_billing'] - $now) / 86400));
-                            $label = "Subscription: {$days_left} days until renewal";
+                            $label = "Your subscription renews automatically in {$days_left} days";
 
                         } else {
                             $label = "Subscription active";
@@ -1329,18 +1329,24 @@ public function render_orders_page() {
         $sub_period_start      = (int) get_post_meta($pharmacy_id, '_mc_subscription_period_start', true);
         $sub_period_end        = (int) get_post_meta($pharmacy_id, '_mc_subscription_period_end', true);
         $next_billing          = (int) get_post_meta($pharmacy_id, '_mc_next_billing_date', true);
-        $stripe_customer_id    = get_post_meta($pharmacy_id, '_mc_stripe_customer_id', true);
-        $stripe_subscription_id= get_post_meta($pharmacy_id, '_mc_stripe_subscription_id', true);
+        //$stripe_customer_id    = get_post_meta($pharmacy_id, '_mc_stripe_customer_id', true);
+        //$stripe_subscription_id= get_post_meta($pharmacy_id, '_mc_stripe_subscription_id', true);
+        $gocardless_customer_id  = get_post_meta($pharmacy_id, '_mc_gocardless_customer_id',true);
+        $gocardless_subscription_id = get_post_meta($pharmacy_id, '_mc_gocardless_subscription_id',true);
 
         // Readable dates
         $trial_start_readable      = $trial_start      ? date('d M Y', $trial_start)      : 'N/A';
         $trial_end_readable        = $trial_end        ? date('d M Y', $trial_end)        : 'N/A';
         $sub_period_start_readable = $sub_period_start ? date('d M Y', $sub_period_start) : 'N/A';
-        $sub_period_end_readable   = $sub_period_end   ? date('d M Y', $sub_period_end)   : 'N/A';
+        $sub_period_end_readable   = $sub_period_end   ? date('d M Y', $sub_period_end)   : 'Ongoing';
         $next_billing_readable     = $next_billing     ? date('d M Y', $next_billing)     : 'N/A';
 
         // Determine if currently in trial
         $is_trial = ($trial_end && $trial_end > time());
+
+        $subscription_success = isset($_GET['subscription_success']);
+
+        $subscription_failed = isset($_GET['subscription_failed']);
 
         ob_start();
 
@@ -1352,6 +1358,22 @@ public function render_orders_page() {
         <!-- FULL-WIDTH TOP BAR -->
         <div class="wp-block-group alignfull" style="padding:0;margin:0;">
             <div class="mc-page-container">
+
+            <?php if ($subscription_success): ?>
+
+                <div class="mc-success">
+                    Subscription successfully activated.
+                </div>
+
+            <?php endif; ?>
+
+            <?php if ($subscription_failed): ?>
+
+                <div class="mc-error">
+                    Subscription setup failed. Please try again.
+                </div>
+
+            <?php endif; ?>
 
                 <div class="mc-topbar-inner">
 

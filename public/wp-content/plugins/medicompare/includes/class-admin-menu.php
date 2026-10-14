@@ -3193,6 +3193,9 @@ private function handle_concession_import() {
         /* * Trigger claim-email workflow ONLY * when a brand-new pharmacy is created. */ 
         if ($action === 'inserted') {
             do_action( 'mc_csv_pharmacy_imported', $pharmacy_id ); 
+        }
+        if ( !get_post_meta( $pharmacy_id, '_mc_subscription_amount', true ) ) { 
+            update_post_meta( $pharmacy_id, '_mc_subscription_amount', '30.00' ); 
         } 
         return $action; 
     }
@@ -4274,11 +4277,17 @@ public function transferred_orders_page() {
             $status          = get_post_meta($selected_id, '_mc_subscription_status', true);
             $trial_start     = get_post_meta($selected_id, '_mc_trial_start', true);
             $trial_end       = get_post_meta($selected_id, '_mc_trial_end', true);
-            $sub_start       = get_post_meta($selected_id, '_mc_subscription_start', true);
-            $sub_end         = get_post_meta($selected_id, '_mc_subscription_end', true);
+            //$sub_start       = get_post_meta($selected_id, '_mc_subscription_start', true);
+            //$sub_end         = get_post_meta($selected_id, '_mc_subscription_end', true);
+            $sub_start        = get_post_meta($selected_id,'_mc_subscription_period_start',true);
+            $sub_end          = get_post_meta($selected_id,'_mc_subscription_period_end',true);
             $next_billing    = get_post_meta($selected_id, '_mc_next_billing_date', true);
-            $stripe_customer = get_post_meta($selected_id, '_mc_stripe_customer_id', true);
-            $stripe_sub      = get_post_meta($selected_id, '_mc_stripe_subscription_id', true);
+            //$stripe_customer = get_post_meta($selected_id,'_mc_stripe_customer_id',true);
+            //$stripe_sub = get_post_meta($selected_id,'_mc_stripe_subscription_id',true);
+            $gocardless_customer = get_post_meta($selected_id, '_mc_gocardless_customer_id', true);
+            $gocardless_mandate = get_post_meta($selected_id, '_mc_gocardless_mandate_id', true);
+            $gocardless_subscription = get_post_meta($selected_id, '_mc_gocardless_subscription_id', true);
+            $gocardless_billing_request = get_post_meta($selected_id, '_mc_gocardless_billing_request_id', true);
             ?>
 
             <hr>
@@ -4306,19 +4315,44 @@ public function transferred_orders_page() {
                     </tr>
                     <tr>
                         <th>Subscription End</th>
-                        <td><?php echo $sub_end ? date('d M Y', $sub_end) : '—'; ?></td>
+                        <td>
+                            <?php
+                            echo $sub_end
+                                ? date('d M Y', $sub_end)
+                                : 'Ongoing';
+                            ?>
+                            </td>
                     </tr>
                     <tr>
                         <th>Next Billing</th>
                         <td><?php echo $next_billing ? date('d M Y', $next_billing) : '—'; ?></td>
                     </tr>
-                    <tr>
+                    <!--<tr>
                         <th>Stripe Customer ID</th>
                         <td><?php echo esc_html($stripe_customer ?: '—'); ?></td>
                     </tr>
                     <tr>
                         <th>Stripe Subscription ID</th>
                         <td><?php echo esc_html($stripe_sub ?: '—'); ?></td>
+                    </tr> -->
+                    <tr>
+                        <th>GoCardless Customer ID</th>
+                        <td><?php echo esc_html($gocardless_customer ?: '—'); ?></td>
+                    </tr>
+
+                    <tr>
+                        <th>GoCardless Mandate ID</th>
+                        <td><?php echo esc_html($gocardless_mandate ?: '—'); ?></td>
+                    </tr>
+
+                    <tr>
+                        <th>GoCardless Subscription ID</th>
+                        <td><?php echo esc_html($gocardless_subscription ?: '—'); ?></td>
+                    </tr>
+
+                    <tr>
+                        <th>GoCardless Billing Request ID</th>
+                        <td><?php echo esc_html($gocardless_billing_request ?: '—'); ?></td>
                     </tr>
                 </table>
             </div>
@@ -4405,8 +4439,8 @@ public function transferred_orders_page() {
                 <button class="button" data-action="past_due">Mark Past Due</button>
                 <button class="button" data-action="cancel">Cancel Subscription</button>
                 <button class="button" data-action="clear_billing">Clear Next Billing</button>
-                <button class="button" data-action="stripe_sync">Sync from Stripe</button>
-                <button class="button" data-action="billing_history_sync">Sync Billing History</button>
+                <!--<button class="button" data-action="stripe_sync">Sync from Stripe</button>-->
+                <!--<button class="button" data-action="billing_history_sync">Sync Billing History</button>-->
 
             </div>
 
@@ -4711,6 +4745,7 @@ public function transferred_orders_page() {
 
      /* ---------------------------------------------------------
    AJAX: BILLING HISTORY SYNC
+   LEGACY STRIPE BILLING HISTORY
 --------------------------------------------------------- */
     public function ajax_billing_history_sync()
     {

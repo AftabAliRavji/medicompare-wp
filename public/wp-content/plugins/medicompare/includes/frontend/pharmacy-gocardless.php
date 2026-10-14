@@ -6,14 +6,14 @@ if (!defined('ABSPATH')) {
 
 /**
  * Add pretty URL:
- * /gocardless-test/
+ * /gocardless-subscribe/
  */
 add_action('init', function () {
 
     add_rewrite_rule(
-        '^gocardless-test/?$',
-        'index.php?mc_gocardless_subscribe=1',
-        'top'
+    '^gocardless-subscribe/?$',
+    'index.php?mc_gocardless_subscribe=1',
+    'top'
     );
 
 });
@@ -27,6 +27,23 @@ add_filter('query_vars', function ($vars) {
 
     return $vars;
 
+});
+
+/**
+ * Load subscription JS
+ */
+add_action('wp_enqueue_scripts', function () {
+    wp_enqueue_script(
+        'mc-subscription-js',
+        plugin_dir_url(dirname(__FILE__, 2)) . 'assets/js/subscription.js',
+        ['jquery'],
+        null,
+        true
+    );
+
+    wp_localize_script('mc-subscription-js', 'mcSubscription', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ]);
 });
 
 /**
@@ -62,7 +79,7 @@ add_action('init', function () {
 
                 $redirectFlow = $client->redirectFlows()->create([
                     "params" => [
-                        "description" => "SourceMed Subscription Test",
+                        "description" => "SourceMed Subscription",
                         "session_token" => $session_token,
                         "success_redirect_url" => home_url('/gocardless-success/')
                     ]
@@ -81,6 +98,17 @@ add_action('init', function () {
             echo '</pre>';
 
         }
+
+        exit;
+    }
+
+    if ($path === '/gocardless-cancel') {
+
+        wp_redirect(
+            home_url(
+                '/pharmacy/subscription/?subscription_failed=1'
+            )
+        );
 
         exit;
     }
@@ -149,18 +177,6 @@ add_action('init', function () {
                     $billing_request_id
                 );
 
-                update_post_meta(
-                    $pharmacy_id,
-                    '_mc_gocardless_subscription_id',
-                    $subscription->id
-                );
-
-                update_post_meta(
-                    $pharmacy_id,
-                    '_mc_subscription_status',
-                    'active'
-                );
-
             }
 
             $subscription_amount = get_post_meta(
@@ -169,11 +185,15 @@ add_action('init', function () {
                 true
             );
 
+            error_log(
+                'GC SUBSCRIPTION AMOUNT: ' .
+                print_r($subscription_amount, true)
+            );
+
             $amount_in_pence = intval(
                 round($subscription_amount * 100)
             );
 
-            echo '</pre>';
             $subscription = $client->subscriptions()->create([
                 "params" => [
                     "amount" => $amount_in_pence,
@@ -187,45 +207,94 @@ add_action('init', function () {
                 ]
             ]);
 
-            echo '<h1>Redirect Flow Completed</h1>';
+            error_log(
+                'GC SUBSCRIPTION OBJECT: ' .
+                print_r($subscription, true)
+            );
 
-            echo '<h2>Subscription Amount</h2>';
+            if ($pharmacy_id && !empty($subscription->id)) {
 
-            echo '<pre>';
-            var_dump($subscription_amount);
-            echo '</pre>';
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_gocardless_subscription_id',
+                    $subscription->id
+                );
 
-            echo '<h2>Subscription Created</h2>';
+                $subscription_start = !empty($subscription->start_date)
+                    ? strtotime($subscription->start_date)
+                    : 0;
 
-            echo '<pre>';
+                $next_billing_date = 0;
 
-            print_r([
-                'subscription_id' => $subscription->id,
-            ]);
+                if (
+                    !empty($subscription->upcoming_payments) &&
+                    !empty($subscription->upcoming_payments[0]->charge_date)
+                ) {
+                    $next_billing_date = strtotime(
+                        $subscription->upcoming_payments[0]->charge_date
+                    );
+                }
 
-            echo '</pre>';
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_subscription_period_start',
+                    current_time('timestamp')
+                );
 
-            echo '<h2>Saved Values</h2>';
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_subscription_period_end',
+                    0
+                );
 
-            echo '<pre>';
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_next_billing_date',
+                    $next_billing_date
+                );
 
-            print_r([
-                'pharmacy_id'          => $pharmacy_id,
-                'customer_id'          => $customer_id,
-                'mandate_id'           => $mandate_id,
-                'bank_account_id'      => $bank_account_id,
-                'billing_request_id'   => $billing_request_id,
-                'subscription_amount'  => $subscription_amount,
-                'subscription_id'      => $subscription->id ?? '',
-            ]);
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_subscription_currency',
+                    $subscription->currency
+                );
 
-            echo '</pre>';
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_subscription_status',
+                    'active'
+                );
+
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_status',
+                    'active'
+                );
+
+            }
+
+            wp_redirect(
+                home_url(
+                    '/pharmacy/subscription/?subscription_success=1'
+                )
+            );
+
+            exit; 
 
         } catch (\Exception $e) {
 
-            echo '<pre>';
-            echo esc_html($e->getMessage());
-            echo '</pre>';
+            error_log(
+                'GC SUBSCRIPTION ERROR: ' .
+                $e->getMessage()
+            );
+
+            wp_redirect(
+                home_url(
+                    '/pharmacy/subscription/?subscription_failed=1'
+                )
+            );
+
+            exit;
 
         }
 
@@ -233,3 +302,4 @@ add_action('init', function () {
     }
 
 });
+

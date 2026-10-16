@@ -96,7 +96,7 @@ add_action('init', function () {
                 $redirectFlow = $client->redirectFlows()->create([
                     "params" => [
                         "description" => sprintf(
-                            'SourceMed Monthly Subscription - £%s per month',
+                            'Source Med Pharma Subscription - £%s per month',
                             number_format(
                                 (float) $subscription_amount,
                                 2

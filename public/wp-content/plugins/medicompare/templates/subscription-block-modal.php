@@ -34,13 +34,14 @@ error_log(
 
         <h2>Subscription Required</h2>
 
-        <p>
+        <p style="color:red; font-weight:bold">
             Your subscription has expired or your trial has ended.
         </p>
 
         <div class="mc-subscription-summary">
 
             <div class="mc-subscription-price">
+                <span>Subscription:</span>
                 £<?php echo number_format(
                     (float) get_post_meta(
                         $pharmacy_id,
@@ -51,13 +52,8 @@ error_log(
                 ); ?>
                 <span>per month</span>
             </div>
-
             <p>
-                Payment is collected automatically by Direct Debit.
-            </p>
-
-            <p>
-                You will be redirected to GoCardless to authorise
+                Please click below and you will be redirected to GoCardless to authorise
                 your Direct Debit mandate.
             </p>
 

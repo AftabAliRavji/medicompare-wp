@@ -299,11 +299,109 @@ function mc_handle_gocardless_webhook() {
                                 "GC ACTIVE PHARMACY {$pharmacy_id}"
                             );
                         }
+                    }
             }
-       }
-   }
 
- }
+            if (
+                $resource_type === 'subscriptions'
+                &&
+                $action === 'payment_created'
+            ) {
+
+                $subscription_id =
+                    $event['links']['subscription'] ?? '';
+
+                error_log(
+                    'GC SUBSCRIPTION PAYMENT CREATED: ' .
+                    $subscription_id
+                );
+
+                if (
+                    $pharmacy_id
+                    &&
+                    $subscription_id
+                ) {
+
+                    try {
+
+                        require_once ABSPATH . 'vendor/autoload.php';
+
+                        $client = new \GoCardlessPro\Client([
+                            'access_token' => mc_get_gocardless_access_token(),
+                            'environment'  => mc_get_gocardless_environment(),
+                        ]);
+
+                        $subscription =
+                            $client
+                                ->subscriptions()
+                                ->get(
+                                    $subscription_id
+                                );
+
+                        if (
+                            !empty(
+                                $subscription->upcoming_payments
+                            )
+                            &&
+                            !empty(
+                                $subscription->upcoming_payments[0]->charge_date
+                            )
+                        ) {
+
+                            $next_billing_date =
+                                strtotime(
+                                    $subscription
+                                        ->upcoming_payments[0]
+                                        ->charge_date
+                                );
+
+                            /*
+                            Temporarily disabled.
+
+                            The subscription API currently returns
+                            the next future cycle (e.g. Nov) instead
+                            of the currently pending payment (e.g. Oct).
+
+                            Awaiting confirmation of renewal behaviour.
+
+                            update_post_meta(
+                                $pharmacy_id,
+                                '_mc_subscription_last_refresh',
+                                current_time('timestamp')
+                            );
+
+                            update_post_meta(
+                                $pharmacy_id,
+                                '_mc_next_billing_date',
+                                $next_billing_date
+                            );
+                            */
+
+                            error_log(
+                                'GC NEXT BILLING DATE UPDATED: ' .
+                                date(
+                                    'Y-m-d',
+                                    $next_billing_date
+                                )
+                            );
+
+                        }
+
+                    } catch (\Exception $e) {
+
+                        error_log(
+                            'GC SUBSCRIPTION REFRESH ERROR: ' .
+                            $e->getMessage()
+                        );
+
+                    }
+
+                }
+
+            }
+        }
+
+    }
 
     status_header(200);
 

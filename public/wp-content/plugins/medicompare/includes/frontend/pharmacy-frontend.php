@@ -96,6 +96,105 @@ class MediCompare_Pharmacy_Frontend {
         ];
     }
 
+    /* ------------------------------
+        GETTING NEXT BILLING DATE FROM GET SUBSCRIPTION API CALL
+        JUST IN CASE WEBHOOK DOESNT RECORD THE NEXT PAYMENT DATE 
+        OF SUBSCRIPTION
+        TEMPORARILY DISABLED UNTIL WE SEE IF THE BILLING DATE 
+        GETS AUTOMATICALLY UPDATED VIA WEBHOOK PAYMENT EVENT
+       ------------------------------- 
+        private function mc_refresh_gocardless_next_billing_date(
+        $pharmacy_id
+    ) {
+
+        $subscription_id = get_post_meta(
+            $pharmacy_id,
+            '_mc_gocardless_subscription_id',
+            true
+        );
+
+        if (!$subscription_id) {
+            return;
+        }
+
+        $last_refresh = (int) get_post_meta(
+            $pharmacy_id,
+            '_mc_subscription_last_refresh',
+            true
+        );
+
+        if (
+            $last_refresh &&
+            (time() - $last_refresh) < 3600
+        ) {
+            return;
+        }
+
+        try {
+
+            require_once ABSPATH . 'vendor/autoload.php';
+
+            $client = new \GoCardlessPro\Client([
+                'access_token' => mc_get_gocardless_access_token(),
+                'environment'  => mc_get_gocardless_environment(),
+            ]);
+
+            $subscription =
+                $client
+                    ->subscriptions()
+                    ->get(
+                        $subscription_id
+                    );
+
+            if (
+                !empty($subscription->upcoming_payments)
+                &&
+                !empty(
+                    $subscription->upcoming_payments[0]->charge_date
+                )
+            ) {
+
+                $next_billing_date = strtotime(
+                    $subscription
+                        ->upcoming_payments[0]
+                        ->charge_date
+                );
+
+                error_log(
+                    'GC NEXT BILLING DATE RAW: ' .
+                    $subscription->upcoming_payments[0]->charge_date
+                );
+
+                error_log(
+                    'GC NEXT BILLING DATE TIMESTAMP: ' .
+                    $next_billing_date
+                );
+
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_next_billing_date',
+                    $next_billing_date
+                );
+
+                update_post_meta(
+                    $pharmacy_id,
+                    '_mc_subscription_last_refresh',
+                    current_time('timestamp')
+                );
+
+            }
+
+        } catch (\Exception $e) {
+
+            error_log(
+                'GC FRONTEND REFRESH ERROR: ' .
+                $e->getMessage()
+            );
+
+        }
+
+    }
+        */
 
     private function get_current_pharmacy() {
 
@@ -953,6 +1052,18 @@ public function render_orders_page() {
     global $wpdb;
     $pharmacy_id   = $pharmacy->ID;
     $current_user  = wp_get_current_user();
+    /*
+    Temporarily disabled.
+
+    Subscription API returns the next future
+    subscription payment rather than the
+    currently pending payment.
+
+    Re-enable after recurring renewal testing.
+    $this->mc_refresh_gocardless_next_billing_date(
+        $pharmacy_id
+    );
+    */
 
     $this->mc_enforce_subscription_access($pharmacy_id);
 
@@ -1456,17 +1567,19 @@ public function render_orders_page() {
                     <?php endif; ?>
                 </section>
 
-                <!-- STRIPE DETAILS CARD 
+                <?php if (false): ?>
+                <!-- GOCARDLESS DETAILS CARD -->
                 <section class="mc-card-pro mc-card-orange">
                     <div class="mc-card-icon">💳</div>
-                    <h2 class="mc-card-title">Stripe Details</h2>
+                    <h2 class="mc-card-title">GoCardLess Details</h2>
 
-                    <p><strong>Stripe Customer ID:</strong><br>
-                        <?php echo esc_html($stripe_customer_id ?: 'Not set'); ?></p>
+                    <p><strong>GoCardLess Customer ID:</strong><br>
+                        <?php echo esc_html($gocardless_customer_id ?: 'Not set'); ?></p>
 
-                    <p><strong>Stripe Subscription ID:</strong><br>
-                        <?php echo esc_html($stripe_subscription_id ?: 'Not set'); ?></p>
-                </section> -->
+                    <p><strong>GoCardLess Subscription ID:</strong><br>
+                        <?php echo esc_html($gocardless_subscription_id ?: 'Not set'); ?></p>
+                </section>
+                <?php endif; ?>
 
             </div>
 

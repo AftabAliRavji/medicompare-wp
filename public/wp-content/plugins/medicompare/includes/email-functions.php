@@ -364,4 +364,43 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
 
     }
 
+    public function send_gocardless_alert(
+    $pharmacy_id,
+    $event_type,
+    $event_message
+        ) {
+
+            $template = $this->load_template(
+                'gocardless-alert-template.php'
+            );
+
+            $pharmacy_name = get_the_title(
+                $pharmacy_id
+            );
+
+            $body = $this->fill_template(
+                $template,
+                [
+                    'event_type'     => $event_type,
+                    'event_message'  => $event_message,
+                    'pharmacy_name'  => $pharmacy_name,
+                    'pharmacy_id'    => $pharmacy_id,
+                    'event_time'     => wp_date('d M Y H:i'),
+                    'admin_link'     => admin_url(
+                        "post.php?post={$pharmacy_id}&action=edit"
+                    ),
+                ]
+            );
+
+            return wp_mail(
+                'admin@sourcemedpharma.com',
+                '[Action Required] ' . $event_type,
+                $body,
+                [
+                    'Content-Type: text/html; charset=UTF-8',
+                    'From: SourceMed Pharma <support@sourcemedpharma.com>'
+                ]
+            );
+        }
+
 }

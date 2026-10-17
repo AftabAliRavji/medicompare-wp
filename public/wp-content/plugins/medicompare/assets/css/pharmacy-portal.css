@@ -827,10 +827,12 @@ h1.mc-section-title {
 }
 .mc-subscription-modal-overlay {
     position: fixed;
+    inset: 0;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
     background: rgba(0,0,0,0.75);
     z-index: 999999;
     display: flex;

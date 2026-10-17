@@ -160,6 +160,45 @@ class MediCompare_Pharmacy_CPT {
         $restricted_list = $use_all ? [] : json_decode($restriction_raw, true);
 
         wp_nonce_field('mc_save_pharmacy_meta', 'mc_pharmacy_meta_nonce');
+        $subscription_status = get_post_meta(
+                                $post->ID,
+                                '_mc_subscription_status',
+                                true
+                            );
+
+                            $restricted = get_post_meta(
+                                $post->ID,
+                                '_mc_account_restricted',
+                                true
+                            );
+
+                            if ($restricted === 'yes') {
+
+                                echo '<div style="
+                                    background:#fff3f3;
+                                    border-left:4px solid #c62828;
+                                    padding:15px;
+                                    margin:0 0 20px;
+                                ">';
+
+                                echo '<strong>⚠ Attention Required</strong><br>';
+
+                                echo 'This pharmacy account is currently restricted.<br>';
+
+                                echo 'Subscription Status: <strong>' .
+                                    esc_html(
+                                        ucwords(
+                                            str_replace(
+                                                "_",
+                                                " ",
+                                                $subscription_status
+                                            )
+                                        )
+                                    ) .
+                                    '</strong>';
+
+                                echo '</div>';
+                            }
         ?>
 
         <table class="form-table">
@@ -567,9 +606,66 @@ class MediCompare_Pharmacy_CPT {
             --------------------------------------------------------- */
 
             case 'sub_status':
-                $status = get_post_meta($post_id, '_mc_subscription_status', true);
-                echo esc_html(ucfirst($status ?: 'unknown'));
-                break;
+            $status = get_post_meta(
+                $post_id,
+                '_mc_subscription_status',
+                true
+            );
+
+            $restricted = get_post_meta(
+                $post_id,
+                '_mc_account_restricted',
+                true
+            );
+
+            if ($restricted === 'yes') {
+
+                echo '<span style="
+                    color:#c62828;
+                    font-weight:bold;
+                ">⚠ Attention Required</span><br>';
+
+                echo esc_html(
+                    ucwords(
+                        str_replace(
+                            '_',
+                            ' ',
+                            $status
+                        )
+                    )
+                );
+
+            } else {
+
+                switch ($status) {
+
+                    case 'active':
+                        echo '<span style="
+                            color:#2e7d32;
+                            font-weight:bold;
+                        ">✅ Active</span>';
+                        break;
+
+                    case 'trial':
+                        echo '<span style="
+                            color:#ef6c00;
+                            font-weight:bold;
+                        ">🟠 Trial</span>';
+                        break;
+
+                    default:
+                        echo esc_html(
+                            ucwords(
+                                str_replace(
+                                    '_',
+                                    ' ',
+                                    $status ?: 'Unknown'
+                                )
+                            )
+                        );
+                }
+            }
+            break;
 
             case 'trial_remaining':
                 $trial_end = (int) get_post_meta($post_id, '_mc_trial_end', true);

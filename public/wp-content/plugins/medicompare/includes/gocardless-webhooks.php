@@ -133,6 +133,97 @@ function mc_get_pharmacy_by_gocardless_payment( $payment_id ) {
     return $pharmacy_id ? (int) $pharmacy_id : 0; 
 }
 
+    /**
+     * Update pharmacy subscription status
+     */
+    function mc_update_subscription_status(
+        $pharmacy_id,
+        $status,
+        $restricted = 'no'
+    ) {
+
+        if (!$pharmacy_id) {
+            return;
+        }
+
+        update_post_meta(
+            $pharmacy_id,
+            '_mc_subscription_status',
+            $status
+        );
+
+        update_post_meta(
+            $pharmacy_id,
+            '_mc_account_restricted',
+            $restricted
+        );
+
+        error_log(
+            "GC STATUS UPDATED: Pharmacy {$pharmacy_id} => {$status}"
+        );
+    }
+
+    /**
+     * Send admin alert email
+     */
+    function mc_send_gocardless_alert_email(
+    $pharmacy_id,
+    $event_type,
+    $message
+    ) {
+
+        if (!$pharmacy_id) {
+            return;
+        }
+
+        $mailer = new MediCompare_Email_Engine();
+
+        $mailer->send_gocardless_alert(
+            $pharmacy_id,
+            $event_type,
+            $message
+        );
+    }
+
+    /**
+     * Write pharmacy subscription audit log
+     */
+    function mc_write_gocardless_audit(
+        $pharmacy_id,
+        $event_type,
+        $message
+    ) {
+
+        if (!$pharmacy_id) {
+            return;
+        }
+
+        $logs = get_post_meta(
+            $pharmacy_id,
+            '_mc_subscription_audit_log',
+            true
+        );
+
+        if (!is_array($logs)) {
+            $logs = [];
+        }
+
+        $logs[] = [
+            'timestamp' => time(),
+            'message'   => '[GoCardless] ' . $message
+        ];
+
+        update_post_meta(
+            $pharmacy_id,
+            '_mc_subscription_audit_log',
+            $logs
+        );
+
+        error_log(
+            "GC AUDIT WRITTEN: {$event_type} | Pharmacy {$pharmacy_id}"
+        );
+    }
+
 
 /**
  * Main webhook handler
@@ -283,16 +374,22 @@ function mc_handle_gocardless_webhook() {
 
                         if ($pharmacy_id) {
 
-                            update_post_meta(
+                            mc_update_subscription_status(
                                 $pharmacy_id,
-                                '_mc_subscription_status',
-                                'active'
+                                'active',
+                                'no'
                             );
 
                             update_post_meta(
                                 $pharmacy_id,
                                 '_mc_status',
                                 'active'
+                            );
+
+                            mc_write_gocardless_audit(
+                                $pharmacy_id,
+                                'subscription_active',
+                                'Subscription created and active'
                             );
 
                             error_log(
@@ -399,6 +496,174 @@ function mc_handle_gocardless_webhook() {
                 }
 
             }
+
+            if (
+                $resource_type === 'payments'
+                &&
+                $action === 'failed'
+            ) {
+
+                error_log(
+                    'GC PAYMENT FAILED: ' .
+                    $pharmacy_id
+                );
+
+                if ($pharmacy_id) {
+
+                    mc_update_subscription_status(
+                        $pharmacy_id,
+                        'payment_failed',
+                        'yes'
+                    );
+
+                    update_post_meta(
+                        $pharmacy_id,
+                        '_mc_last_payment_failure_date',
+                        current_time('timestamp')
+                    );
+
+                    mc_write_gocardless_audit(
+                        $pharmacy_id,
+                        'payment_failed',
+                        'Recurring payment failed'
+                    );
+
+                    mc_send_gocardless_alert_email(
+                        $pharmacy_id,
+                        'Payment Failed',
+                        'GoCardless recurring payment failed.'
+                    );
+                }
+            }
+
+            if (
+                $resource_type === 'mandates'
+                &&
+                $action === 'cancelled'
+            ) {
+
+                if ($pharmacy_id) {
+
+                    mc_update_subscription_status(
+                        $pharmacy_id,
+                        'mandate_cancelled',
+                        'yes'
+                    );
+
+                    mc_write_gocardless_audit(
+                        $pharmacy_id,
+                        'mandate_cancelled',
+                        'Mandate cancelled'
+                    );
+
+                    mc_send_gocardless_alert_email(
+                        $pharmacy_id,
+                        'Mandate Cancelled',
+                        'Mandate was cancelled in GoCardless.'
+                    );
+                }
+            }
+
+            if (
+                $resource_type === 'mandates'
+                &&
+                $action === 'failed'
+            ) {
+
+                if ($pharmacy_id) {
+
+                    mc_update_subscription_status(
+                        $pharmacy_id,
+                        'mandate_failed',
+                        'yes'
+                    );
+
+                    mc_write_gocardless_audit(
+                        $pharmacy_id,
+                        'mandate_failed',
+                        'Mandate failed'
+                    );
+
+                    mc_send_gocardless_alert_email(
+                        $pharmacy_id,
+                        'Mandate Failed',
+                        'Mandate failed in GoCardless.'
+                    );
+                }
+            }
+
+            if (
+                $resource_type === 'subscriptions'
+                &&
+                $action === 'cancelled'
+            ) {
+
+                if ($pharmacy_id) {
+
+                    mc_update_subscription_status(
+                        $pharmacy_id,
+                        'subscription_cancelled',
+                        'yes'
+                    );
+
+                    mc_write_gocardless_audit(
+                        $pharmacy_id,
+                        'subscription_cancelled',
+                        'Subscription cancelled'
+                    );
+
+                    mc_send_gocardless_alert_email(
+                        $pharmacy_id,
+                        'Subscription Cancelled',
+                        'Subscription was cancelled.'
+                    );
+                }
+            }
+
+            if (
+                $resource_type === 'subscriptions'
+                &&
+                $action === 'expired'
+            ) {
+
+                if ($pharmacy_id) {
+
+                    mc_update_subscription_status(
+                        $pharmacy_id,
+                        'expired',
+                        'yes'
+                    );
+
+                    mc_write_gocardless_audit(
+                        $pharmacy_id,
+                        'subscription_expired',
+                        'Subscription expired'
+                    );
+                }
+            }
+
+            if (
+                $resource_type === 'subscriptions'
+                &&
+                $action === 'active'
+            ) {
+
+                if ($pharmacy_id) {
+
+                    mc_update_subscription_status(
+                        $pharmacy_id,
+                        'active',
+                        'no'
+                    );
+
+                    mc_write_gocardless_audit(
+                        $pharmacy_id,
+                        'subscription_active',
+                        'Subscription active'
+                    );
+                }
+            }
+
         }
 
     }

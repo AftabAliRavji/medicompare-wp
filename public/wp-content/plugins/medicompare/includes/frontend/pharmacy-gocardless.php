@@ -297,6 +297,17 @@ add_action('init', function () {
 
                 update_post_meta(
                     $pharmacy_id,
+                    '_mc_account_restricted',
+                    'no'
+                );
+
+                error_log(
+                    'GC RESTRICTION FLAG RESET FOR PHARMACY: ' .
+                    $pharmacy_id
+                );
+
+                update_post_meta(
+                    $pharmacy_id,
                     '_mc_status',
                     'active'
                 );

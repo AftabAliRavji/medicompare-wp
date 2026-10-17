@@ -28,8 +28,28 @@ class MediCompare_Pharmacy_Frontend {
         $trial_start    = (int) get_post_meta($pharmacy_id, '_mc_trial_start', true);
         $trial_end      = (int) get_post_meta($pharmacy_id, '_mc_trial_end', true);
         $next_billing   = (int) get_post_meta($pharmacy_id, '_mc_next_billing_date', true);
+        $restricted     = get_post_meta($pharmacy_id,'_mc_account_restricted',true);
+
+        error_log(
+            'MC RESTRICTED FLAG: ' .
+            print_r($restricted, true)
+        );
 
         $now = time();
+
+        /* Account restricted by webhook */
+        if ($restricted === 'yes') {
+
+            error_log(
+                'MC ACCOUNT IS RESTRICTED'
+            );
+
+            return [
+                'status' => $status,
+                'restricted' => true,
+                'is_access_allowed' => false
+            ];
+        }
 
         /* Trial active */
         if ($status === 'trial') {
@@ -82,7 +102,21 @@ class MediCompare_Pharmacy_Frontend {
         }
 
         /* Past due / expired / canceled */
-        if (in_array($status, ['past_due', 'expired', 'canceled'])) {
+        if (
+            in_array(
+                $status,
+                [
+                    'past_due',
+                    'expired',
+                    'canceled',
+                     'cancelled',
+                    'payment_failed',
+                    'mandate_failed',
+                    'mandate_cancelled',
+                    'subscription_cancelled'
+                ]
+            )
+        ) {
             return [
                 'status' => $status,
                 'is_access_allowed' => false
@@ -224,6 +258,31 @@ class MediCompare_Pharmacy_Frontend {
             if (!isset($state['is_access_allowed']) || $state['is_access_allowed'] !== true) {
 
                 $GLOBALS['mc_subscription_blocked'] = $state;
+
+                add_action('wp_footer', function () {
+                    ?>
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+
+                        document.body.style.overflow = 'hidden';
+
+                        document.querySelectorAll(
+                            'input, select, textarea, button, a'
+                        ).forEach(function(el) {
+
+                            if (
+                                !el.closest('.mc-subscription-modal')
+                            ) {
+                                el.style.pointerEvents = 'none';
+                            }
+
+                        });
+
+                    });
+                    </script>
+                    <?php
+                });
+
                 return;
             }
         }

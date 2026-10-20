@@ -903,8 +903,52 @@ public function render_search() {
     <!-- FORCE FULL-WIDTH WRAPPER TO BREAK OUT OF BLOCK THEME CONSTRAINTS -->
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
 
-        <!-- SHARED PAGE CONTAINER -->
+        <div class="mc-hero-section">
+
+    <div class="mc-hero-content">
+
+        <div class="mc-hero-left">
+
+            <div class="mc-hero-kicker">
+                SEARCH AND COMPARE
+            </div>
+
+            <h1 class="mc-hero-title">
+                Find the best prices for your pharmacy
+            </h1>
+
+            <p class="mc-hero-description">
+                Search for a product to compare prices, check availability and order from multiple approved suppliers.
+            </p>
+
+            <div class="mc-hero-search">
+
+                <input
+                    type="text"
+                    class="mc-hero-search-input"
+                    placeholder="Start typing product name to search and compare..."
+                >
+
+                <select class="mc-hero-search-category">
+                    <option>All products</option>
+                </select>
+
+                <button class="mc-hero-search-btn">
+                    Search
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+    <!-- SHARED PAGE CONTAINER -->
         <div class="mc-page-container">
+
 
             <!-- SEARCH + RIGHT PANEL -->
             <div class="mc-search-layout">

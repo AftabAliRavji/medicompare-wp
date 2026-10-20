@@ -2524,3 +2524,137 @@ body.page-id-71 .mc-search-left {
     white-space: nowrap;
 }
 
+/* =========================================================
+   HERO SECTION
+========================================================= */
+
+.mc-hero-section {
+    position: relative;
+
+    width: 100%;
+
+    min-height: 340px;
+
+    display: flex;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(230,245,255,0.95) 0%,
+            rgba(230,245,255,0.90) 50%,
+            rgba(230,245,255,0.30) 100%
+        ),
+        url('/wp-content/plugins/medicompare/assets/img/hero-pharmacy.png');
+
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: contain;
+
+    overflow: hidden;
+}
+
+.mc-hero-content {
+    width: 100%;
+    max-width: 1600px;
+
+    margin: 0 auto;
+
+    padding: 50px 80px;
+}
+
+.mc-hero-left {
+    max-width: 650px;
+}
+
+.mc-hero-kicker {
+    font-size: 18px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+
+    color: #0073aa;
+
+    font-weight: 600;
+
+    margin-bottom: 18px;
+}
+
+.mc-hero-title {
+    font-size: 56px;
+    line-height: 1.1;
+
+    font-weight: 700;
+
+    color: #0d1b6b;
+
+    margin-bottom: 20px;
+}
+
+.mc-hero-description {
+    font-size: 22px;
+    line-height: 1.5;
+
+    color: #334155;
+
+    margin-bottom: 30px;
+}
+
+.mc-hero-search {
+    display: flex;
+    align-items: center;
+
+    background: #fff;
+
+    border-radius: 18px;
+
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+
+    overflow: hidden;
+
+    max-width: 900px;
+}
+
+.mc-hero-search-input {
+    flex: 1;
+
+    border: none;
+
+    padding: 22px 24px;
+
+    font-size: 18px;
+
+    outline: none;
+}
+
+.mc-hero-search-category {
+    border: none;
+
+    border-left: 1px solid #e5e7eb;
+
+    padding: 22px 20px;
+
+    font-size: 16px;
+
+    background: #fff;
+}
+
+.mc-hero-search-btn {
+    border: none;
+
+    background: #1976d2;
+
+    color: #fff;
+
+    padding: 22px 40px;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.mc-hero-search-btn:hover {
+    background: #1565c0;
+}
+

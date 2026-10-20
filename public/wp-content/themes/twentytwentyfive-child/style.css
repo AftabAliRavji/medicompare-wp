@@ -5,6 +5,21 @@
 
 @import url("../twentytwentyfive/style.css");
 
+
+body:has(.mc-portal-shell) {
+    --wp--style--root--padding-left: 0px;
+    --wp--style--root--padding-right: 0px;
+}
+
+body:has(.mc-portal-shell) #wp--skip-link--target {
+    margin-top: 0 !important;
+}
+
+body:has(.mc-portal-shell)
+.wp-block-group.alignfull.has-global-padding.is-layout-constrained {
+    padding-top: 0 !important;
+}
+
 /* MediCompare custom styles */
 .mc-register-form {
     max-width: 500px;

@@ -130,6 +130,21 @@ class MediCompare_Pharmacy_Frontend {
         ];
     }
 
+    private function mc_get_header_data($pharmacy_id)
+    {
+        $current_user = wp_get_current_user();
+
+        $subscription_state = $this->mc_get_pharmacy_subscription_state(
+            $pharmacy_id
+        );
+
+        return [
+            'user_email' => $current_user->user_email,
+            'status'     => ucfirst($subscription_state['status']),
+            'state'      => $subscription_state
+        ];
+    }
+
     /* ------------------------------
         GETTING NEXT BILLING DATE FROM GET SUBSCRIPTION API CALL
         JUST IN CASE WEBHOOK DOESNT RECORD THE NEXT PAYMENT DATE 
@@ -333,6 +348,9 @@ public function render_dashboard() {
 
     $trial_start_readable = $trial_start ? date('d M Y', $trial_start) : 'N/A';
     $trial_end_readable   = $trial_end ? date('d M Y', $trial_end) : 'N/A';
+    
+    $subscription_state = $this->mc_get_pharmacy_subscription_state($pharmacy->ID);
+    $subscription_label = ucfirst($subscription_state['status']);
 
     $current_user = wp_get_current_user();
 
@@ -346,11 +364,11 @@ public function render_dashboard() {
 
     <div class="mc-dashboard">
 
-        <!-- Header Bar -->
+        <!-- Header Bar
         <div class="mc-dashboard-header">
             <span>Welcome, <?php echo esc_html($current_user->user_email); ?></span>
             <a class="mc-logout-btn" href="<?php echo site_url('/pharmacy/login/?mc_logout=1'); ?>">Logout</a>
-        </div>
+        </div>  -->
 
         <!-- DASHBOARD GRID -->
         <div class="mc-dashboard-grid">
@@ -879,67 +897,14 @@ public function render_search() {
     $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
     /* ⭐ END HEADER */
-    ?>
+?>
+    
 
     <!-- FORCE FULL-WIDTH WRAPPER TO BREAK OUT OF BLOCK THEME CONSTRAINTS -->
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
 
         <!-- SHARED PAGE CONTAINER -->
         <div class="mc-page-container">
-
-            <!-- TOP BAR -->
-            <div class="mc-topbar-inner">
-
-                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
-                class="mc-topbar-btn mc-back-btn">
-                    ← Back to Dashboard
-                </a>
-
-                <!-- EXTRA NAV BUTTONS -->
-                <div class="mc-topbar-links">
-
-                    <a href="<?php echo esc_url(site_url('/pharmacy/edit-details/')); ?>"
-                    class="mc-topbar-btn mc-nav-btn mc-teal-btn">
-                        Pharmacy Details
-                    </a>
-
-                    <a href="<?php echo esc_url(site_url('/pharmacy/subscription/')); ?>" 
-                    class="mc-topbar-btn mc-nav-btn mc-green-btn">
-                        Subscription
-                    </a>
-
-                    <a href="<?php echo esc_url(site_url('/pharmacy/orders/')); ?>"
-                    class="mc-topbar-btn mc-nav-btn mc-orange-btn">
-                        Transferred Orders
-                    </a>
-
-                    <a href="javascript:void(0);"
-                    class="mc-topbar-btn mc-nav-btn mc-purple-btn"
-                    onclick="mcOpenSupportModal();">
-                    Contact Support
-                </a>
-
-                </div>
-
-                <div class="mc-topbar-right">
-                    <span class="mc-topbar-badge mc-welcome-badge">
-                        Welcome, <?php echo esc_html($current_user->user_email); ?>
-                    </span>
-
-                   <?php
-                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
-                    ?>
-                    <span class="<?php echo esc_attr($badge_class); ?>">
-                        <?php echo esc_html($subscription_label); ?>
-                    </span>
-
-                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
-                    class="mc-topbar-btn mc-logout-btn">
-                        Logout
-                    </a>
-                </div>
-
-            </div>
 
             <!-- SEARCH + RIGHT PANEL -->
             <div class="mc-search-layout">
@@ -1182,29 +1147,6 @@ public function render_orders_page() {
 
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
         <div class="mc-page-container">
-
-            <!-- TOP BAR -->
-            <div class="mc-topbar-inner">
-                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
-                   class="mc-topbar-btn mc-back-btn">← Back to Dashboard</a>
-
-                <div class="mc-topbar-right">
-                    <span class="mc-topbar-badge mc-welcome-badge">
-                        Welcome, <?php echo esc_html($current_user->user_email); ?>
-                    </span>
-
-                    <!-- ⭐ NEW: Subscription Status Badge -->
-                    <?php
-                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
-                    ?>
-                    <span class="<?php echo esc_attr($badge_class); ?>">
-                        <?php echo esc_html($subscription_label); ?>
-                    </span>
-
-                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
-                       class="mc-topbar-btn mc-logout-btn">Logout</a>
-                </div>
-            </div>
 
             <h2 class="mc-section-title">Transferred Orders</h2>
 

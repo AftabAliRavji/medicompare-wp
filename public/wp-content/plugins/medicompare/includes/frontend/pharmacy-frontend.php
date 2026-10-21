@@ -1010,16 +1010,13 @@ public function render_search() {
 
                 <input
                     type="text"
+                    id="mc-search-input"
                     class="mc-hero-search-input"
                     placeholder="Start typing product name to search and compare..."
                 >
 
-                <select class="mc-hero-search-category">
-                    <option>All products</option>
-                </select>
-
-                <button class="mc-hero-search-btn">
-                    Search
+                <button id="mc-hero-search-btn" class="mc-hero-search-btn">
+                    Search <span>→</span>
                 </button>
 
             </div>
@@ -1040,14 +1037,6 @@ public function render_search() {
 
                 <!-- LEFT SIDE -->
                 <div class="mc-search-left">
-
-                    <h2 class="mc-search-heading">Search Products & Compare Suppliers</h2>
-
-                    <div class="mc-search-bar">
-                        <label for="mc-search-input">Search Product name</label><br>
-                        <input type="text" id="mc-search-input"
-                            placeholder="Start typing product name to start search and comparison...">
-                    </div>
 
                     <!-- ⭐ Comparison results ALWAYS appear first -->
                     <div id="mc-search-results" class="mc-search-results"></div>

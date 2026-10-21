@@ -1,5 +1,5 @@
 /* Hide WP-generated page titles on pharmacy portal, keep portal-specific ones */
-h1:not(.mc-portal-title),
+h1:not(.mc-portal-title):not(.mc-hero-title),
 h2:not(.mc-card-title),
 .wp-block-post-title,
 .wp-block-heading.wp-block-post-title {

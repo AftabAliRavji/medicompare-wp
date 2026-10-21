@@ -147,104 +147,189 @@ class MediCompare_Pharmacy_Frontend {
 
     /* ------------------------------
         GETTING NEXT BILLING DATE FROM GET SUBSCRIPTION API CALL
-        JUST IN CASE WEBHOOK DOESNT RECORD THE NEXT PAYMENT DATE 
-        OF SUBSCRIPTION
-        TEMPORARILY DISABLED UNTIL WE SEE IF THE BILLING DATE 
-        GETS AUTOMATICALLY UPDATED VIA WEBHOOK PAYMENT EVENT
-       ------------------------------- 
+
+        RULE:
+        Only call GoCardless when:
+
+        1. Stored billing date has passed
+        2. Sync cooldown has expired
+
+        This avoids jumping to the next billing
+        cycle too early whilst still ensuring
+        the date advances after the billing date
+        has passed.
+        -------------------------------- */
         private function mc_refresh_gocardless_next_billing_date(
-        $pharmacy_id
-    ) {
-
-        $subscription_id = get_post_meta(
-            $pharmacy_id,
-            '_mc_gocardless_subscription_id',
-            true
-        );
-
-        if (!$subscription_id) {
-            return;
-        }
-
-        $last_refresh = (int) get_post_meta(
-            $pharmacy_id,
-            '_mc_subscription_last_refresh',
-            true
-        );
-
-        if (
-            $last_refresh &&
-            (time() - $last_refresh) < 3600
+            $pharmacy_id
         ) {
-            return;
-        }
 
-        try {
+            $subscription_id = get_post_meta(
+                $pharmacy_id,
+                '_mc_gocardless_subscription_id',
+                true
+            );
 
-            require_once ABSPATH . 'vendor/autoload.php';
+            if (!$subscription_id) {
 
-            $client = new \GoCardlessPro\Client([
-                'access_token' => mc_get_gocardless_access_token(),
-                'environment'  => mc_get_gocardless_environment(),
-            ]);
+                error_log(
+                    'GC BILLING CHECK SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | No Subscription ID'
+                );
 
-            $subscription =
-                $client
-                    ->subscriptions()
-                    ->get(
-                        $subscription_id
-                    );
+                return;
+            }
 
-            if (
-                !empty($subscription->upcoming_payments)
-                &&
-                !empty(
-                    $subscription->upcoming_payments[0]->charge_date
+            /*
+            * Current stored billing date
+            */
+            $current_billing_date = (int) get_post_meta(
+                $pharmacy_id,
+                '_mc_next_billing_date',
+                true
+            );
+
+            /*
+            * Today's date at midnight
+            */
+            $today_timestamp = strtotime(
+                current_time('Y-m-d')
+            );
+
+            error_log(
+                'GC BILLING CHECK | Pharmacy: ' .
+                $pharmacy_id .
+                ' | Stored Date: ' .
+                (
+                    $current_billing_date
+                        ? date(
+                            'Y-m-d',
+                            $current_billing_date
+                        )
+                        : 'NONE'
                 )
+            );
+
+            /*
+            * If current billing date is still today
+            * or in the future, keep it.
+            */
+            if (
+                $current_billing_date &&
+                $current_billing_date >= $today_timestamp
             ) {
 
-                $next_billing_date = strtotime(
-                    $subscription
-                        ->upcoming_payments[0]
-                        ->charge_date
+                error_log(
+                    'GC BILLING REFRESH SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | Stored Date Still Valid'
                 );
+
+                return;
+            }
+
+            /*
+            * Safety throttle
+            */
+            $last_refresh = (int) get_post_meta(
+                $pharmacy_id,
+                '_mc_subscription_last_refresh',
+                true
+            );
+
+            if (
+                $last_refresh &&
+                (time() - $last_refresh) < 3600
+            ) {
 
                 error_log(
-                    'GC NEXT BILLING DATE RAW: ' .
-                    $subscription->upcoming_payments[0]->charge_date
+                    'GC BILLING REFRESH SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | Cooldown Active'
                 );
+
+                return;
+            }
+
+            error_log(
+                'GC BILLING REFRESH STARTING | Pharmacy: ' .
+                $pharmacy_id
+            );
+
+            try {
+
+                require_once ABSPATH . 'vendor/autoload.php';
+
+                $client = new \GoCardlessPro\Client([
+                    'access_token' => mc_get_gocardless_access_token(),
+                    'environment'  => mc_get_gocardless_environment(),
+                ]);
+
+                $subscription =
+                    $client
+                        ->subscriptions()
+                        ->get(
+                            $subscription_id
+                        );
+
+                if (
+                    !empty($subscription->upcoming_payments)
+                    &&
+                    !empty(
+                        $subscription->upcoming_payments[0]->charge_date
+                    )
+                ) {
+
+                    $next_billing_date = strtotime(
+                        $subscription
+                            ->upcoming_payments[0]
+                            ->charge_date
+                    );
+
+                    error_log(
+                        'GC NEXT BILLING DATE RAW | Pharmacy: ' .
+                        $pharmacy_id .
+                        ' | Date: ' .
+                        $subscription
+                            ->upcoming_payments[0]
+                            ->charge_date
+                    );
+
+                    update_post_meta(
+                        $pharmacy_id,
+                        '_mc_next_billing_date',
+                        $next_billing_date
+                    );
+
+                    update_post_meta(
+                        $pharmacy_id,
+                        '_mc_subscription_last_refresh',
+                        current_time('timestamp')
+                    );
+
+                    error_log(
+                        'GC BILLING REFRESH SUCCESS | Pharmacy: ' .
+                        $pharmacy_id .
+                        ' | New Date: ' .
+                        date(
+                            'Y-m-d',
+                            $next_billing_date
+                        )
+                    );
+                }
+
+            } catch (\Exception $e) {
 
                 error_log(
-                    'GC NEXT BILLING DATE TIMESTAMP: ' .
-                    $next_billing_date
-                );
-
-                update_post_meta(
-                    $pharmacy_id,
-                    '_mc_next_billing_date',
-                    $next_billing_date
-                );
-
-                update_post_meta(
-                    $pharmacy_id,
-                    '_mc_subscription_last_refresh',
-                    current_time('timestamp')
+                    'GC BILLING REFRESH ERROR | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | ' .
+                    $e->getMessage()
                 );
 
             }
-
-        } catch (\Exception $e) {
-
-            error_log(
-                'GC FRONTEND REFRESH ERROR: ' .
-                $e->getMessage()
-            );
-
         }
-
-    }
-        */
-
+        
     private function get_current_pharmacy() {
 
         if (!is_user_logged_in()) {
@@ -1120,18 +1205,10 @@ public function render_orders_page() {
     global $wpdb;
     $pharmacy_id   = $pharmacy->ID;
     $current_user  = wp_get_current_user();
-    /*
-    Temporarily disabled.
-
-    Subscription API returns the next future
-    subscription payment rather than the
-    currently pending payment.
-
-    Re-enable after recurring renewal testing.
+    
     $this->mc_refresh_gocardless_next_billing_date(
         $pharmacy_id
     );
-    */
 
     $this->mc_enforce_subscription_access($pharmacy_id);
 

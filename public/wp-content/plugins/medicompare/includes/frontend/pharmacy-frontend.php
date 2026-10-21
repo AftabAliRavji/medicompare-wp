@@ -130,11 +130,20 @@ class MediCompare_Pharmacy_Frontend {
         ];
     }
 
-       /* ------------------------------
+        /* ------------------------------
         GETTING NEXT BILLING DATE FROM GET SUBSCRIPTION API CALL
-        CHECKS IF DATE STORED HAS PASSED AND SYNC EXPIRED THEN CALL
-        SUBSCRIPTION API AND STORE THE FIRST FUTURE DATE WE HAVE
-       ------------------------------- */   
+
+        RULE:
+        Only call GoCardless when:
+
+        1. Stored billing date has passed
+        2. Sync cooldown has expired
+
+        This avoids jumping to the next billing
+        cycle too early whilst still ensuring
+        the date advances after the billing date
+        has passed.
+        -------------------------------- */
         private function mc_refresh_gocardless_next_billing_date(
             $pharmacy_id
         ) {
@@ -146,6 +155,13 @@ class MediCompare_Pharmacy_Frontend {
             );
 
             if (!$subscription_id) {
+
+                error_log(
+                    'GC BILLING CHECK SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | No Subscription ID'
+                );
+
                 return;
             }
 
@@ -159,15 +175,29 @@ class MediCompare_Pharmacy_Frontend {
             );
 
             /*
-            * Today's date (midnight)
+            * Today's date at midnight
             */
             $today_timestamp = strtotime(
                 current_time('Y-m-d')
             );
 
+            error_log(
+                'GC BILLING CHECK | Pharmacy: ' .
+                $pharmacy_id .
+                ' | Stored Date: ' .
+                (
+                    $current_billing_date
+                        ? date(
+                            'Y-m-d',
+                            $current_billing_date
+                        )
+                        : 'NONE'
+                )
+            );
+
             /*
-            * If billing date is still today or in the future,
-            * do not refresh yet.
+            * If current billing date is still today
+            * or in the future, keep it.
             */
             if (
                 $current_billing_date &&
@@ -175,11 +205,9 @@ class MediCompare_Pharmacy_Frontend {
             ) {
 
                 error_log(
-                    'GC BILLING DATE REFRESH SKIPPED - CURRENT DATE STILL VALID: ' .
-                    date(
-                        'Y-m-d',
-                        $current_billing_date
-                    )
+                    'GC BILLING REFRESH SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | Stored Date Still Valid'
                 );
 
                 return;
@@ -200,11 +228,18 @@ class MediCompare_Pharmacy_Frontend {
             ) {
 
                 error_log(
-                    'GC BILLING DATE REFRESH SKIPPED - COOLDOWN ACTIVE'
+                    'GC BILLING REFRESH SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | Cooldown Active'
                 );
 
                 return;
             }
+
+            error_log(
+                'GC BILLING REFRESH STARTING | Pharmacy: ' .
+                $pharmacy_id
+            );
 
             try {
 
@@ -237,15 +272,12 @@ class MediCompare_Pharmacy_Frontend {
                     );
 
                     error_log(
-                        'GC NEXT BILLING DATE RAW: ' .
+                        'GC NEXT BILLING DATE RAW | Pharmacy: ' .
+                        $pharmacy_id .
+                        ' | Date: ' .
                         $subscription
                             ->upcoming_payments[0]
                             ->charge_date
-                    );
-
-                    error_log(
-                        'GC NEXT BILLING DATE TIMESTAMP: ' .
-                        $next_billing_date
                     );
 
                     update_post_meta(
@@ -261,7 +293,9 @@ class MediCompare_Pharmacy_Frontend {
                     );
 
                     error_log(
-                        'GC BILLING DATE UPDATED TO: ' .
+                        'GC BILLING REFRESH SUCCESS | Pharmacy: ' .
+                        $pharmacy_id .
+                        ' | New Date: ' .
                         date(
                             'Y-m-d',
                             $next_billing_date
@@ -272,14 +306,15 @@ class MediCompare_Pharmacy_Frontend {
             } catch (\Exception $e) {
 
                 error_log(
-                    'GC BILLING DATE REFRESH ERROR: ' .
+                    'GC BILLING REFRESH ERROR | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | ' .
                     $e->getMessage()
                 );
 
             }
-
-        } 
-
+        }
+        
     private function get_current_pharmacy() {
 
         if (!is_user_logged_in()) {

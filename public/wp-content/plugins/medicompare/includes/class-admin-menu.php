@@ -5100,11 +5100,20 @@ public function transferred_orders_page() {
         update_post_meta($pid, '_mc_subscription_audit_log', $logs);
     }
 
-       /* ------------------------------
+        /* ------------------------------
         GETTING NEXT BILLING DATE FROM GET SUBSCRIPTION API CALL
-        CHECKS IF DATE STORED HAS PASSED AND SYNC EXPIRED THEN CALL
-        SUBSCRIPTION API AND STORE THE FIRST FUTURE DATE WE HAVE
-       ------------------------------- */   
+
+        RULE:
+        Only call GoCardless when:
+
+        1. Stored billing date has passed
+        2. Sync cooldown has expired
+
+        This avoids jumping to the next billing
+        cycle too early whilst still ensuring
+        the date advances after the billing date
+        has passed.
+        -------------------------------- */
         private function mc_refresh_gocardless_next_billing_date(
             $pharmacy_id
         ) {
@@ -5116,6 +5125,13 @@ public function transferred_orders_page() {
             );
 
             if (!$subscription_id) {
+
+                error_log(
+                    'GC BILLING CHECK SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | No Subscription ID'
+                );
+
                 return;
             }
 
@@ -5129,15 +5145,29 @@ public function transferred_orders_page() {
             );
 
             /*
-            * Today's date (midnight)
+            * Today's date at midnight
             */
             $today_timestamp = strtotime(
                 current_time('Y-m-d')
             );
 
+            error_log(
+                'GC BILLING CHECK | Pharmacy: ' .
+                $pharmacy_id .
+                ' | Stored Date: ' .
+                (
+                    $current_billing_date
+                        ? date(
+                            'Y-m-d',
+                            $current_billing_date
+                        )
+                        : 'NONE'
+                )
+            );
+
             /*
-            * If billing date is still today or in the future,
-            * do not refresh yet.
+            * If current billing date is still today
+            * or in the future, keep it.
             */
             if (
                 $current_billing_date &&
@@ -5145,11 +5175,9 @@ public function transferred_orders_page() {
             ) {
 
                 error_log(
-                    'GC BILLING DATE REFRESH SKIPPED - CURRENT DATE STILL VALID: ' .
-                    date(
-                        'Y-m-d',
-                        $current_billing_date
-                    )
+                    'GC BILLING REFRESH SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | Stored Date Still Valid'
                 );
 
                 return;
@@ -5170,11 +5198,18 @@ public function transferred_orders_page() {
             ) {
 
                 error_log(
-                    'GC BILLING DATE REFRESH SKIPPED - COOLDOWN ACTIVE'
+                    'GC BILLING REFRESH SKIPPED | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | Cooldown Active'
                 );
 
                 return;
             }
+
+            error_log(
+                'GC BILLING REFRESH STARTING | Pharmacy: ' .
+                $pharmacy_id
+            );
 
             try {
 
@@ -5207,15 +5242,12 @@ public function transferred_orders_page() {
                     );
 
                     error_log(
-                        'GC NEXT BILLING DATE RAW: ' .
+                        'GC NEXT BILLING DATE RAW | Pharmacy: ' .
+                        $pharmacy_id .
+                        ' | Date: ' .
                         $subscription
                             ->upcoming_payments[0]
                             ->charge_date
-                    );
-
-                    error_log(
-                        'GC NEXT BILLING DATE TIMESTAMP: ' .
-                        $next_billing_date
                     );
 
                     update_post_meta(
@@ -5231,7 +5263,9 @@ public function transferred_orders_page() {
                     );
 
                     error_log(
-                        'GC BILLING DATE UPDATED TO: ' .
+                        'GC BILLING REFRESH SUCCESS | Pharmacy: ' .
+                        $pharmacy_id .
+                        ' | New Date: ' .
                         date(
                             'Y-m-d',
                             $next_billing_date
@@ -5242,14 +5276,14 @@ public function transferred_orders_page() {
             } catch (\Exception $e) {
 
                 error_log(
-                    'GC BILLING DATE REFRESH ERROR: ' .
+                    'GC BILLING REFRESH ERROR | Pharmacy: ' .
+                    $pharmacy_id .
+                    ' | ' .
                     $e->getMessage()
                 );
 
             }
-
-        }   
-
+        }
 
    /* ---------------------------------------------------------
    ENQUEUE JS FOR SUBSCRIPTION CONTROL PAGE

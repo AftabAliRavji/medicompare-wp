@@ -256,34 +256,73 @@ jQuery(function ($) {
     /* ---------------------------------------------------------
        SEARCH INPUT (DEBOUNCED) → PRODUCT LIST
     --------------------------------------------------------- */
-    $searchInput.on('keyup', function () {
-        var q = $.trim($searchInput.val());
+    function runSearch(q) {
 
-        if (debounceTimer) clearTimeout(debounceTimer);
+            q = $.trim(q);
 
-        if (q.length < 3) {
-            $searchResults.removeClass('active').html('');
-            return;
-        }
+            if (q.length < 3) {
+                $searchResults.removeClass('active').html('');
+                return;
+            }
 
-        $searchResults.addClass('active').html('<p>Searching products...</p>');
-
-        debounceTimer = setTimeout(function () {
+            $searchResults
+                .addClass('active')
+                .html('<p>Searching products...</p>');
 
             $.post(mcComparison.ajaxUrl, {
                 action: 'mc_search_products',
                 nonce: mcComparison.nonce,
                 q: q
             }).done(function (resp) {
+
                 if (resp.success) {
                     $searchResults.html(resp.data.html);
                 } else {
-                    $searchResults.html('<p>' + (resp.data?.message || 'Search error.') + '</p>');
+                    $searchResults.html(
+                        '<p>' +
+                        (resp.data?.message || 'Search error.') +
+                        '</p>'
+                    );
                 }
-            });
 
-        }, 300);
-    });
+            });
+        }
+
+        $searchInput.on('keyup', function () {
+
+            var q = $searchInput.val();
+
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
+            }
+
+            debounceTimer = setTimeout(function () {
+                runSearch(q);
+            }, 300);
+
+        });
+
+        $('#mc-hero-search-btn').on('click', function () {
+
+            runSearch(
+                $('#mc-search-input').val()
+            );
+
+        });
+
+        $searchInput.on('keydown', function (e) {
+
+            if (e.key === 'Enter') {
+
+                e.preventDefault();
+
+                runSearch(
+                    $('#mc-search-input').val()
+                );
+
+            }
+
+        });
 
     /* ---------------------------------------------------------
        FUZZY SUGGESTION HOVER + CLICK HANDLERS (OPTION 3)

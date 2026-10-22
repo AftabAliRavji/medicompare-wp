@@ -78,7 +78,8 @@
     grid-template-columns: 1.6fr 1fr;
     gap: 24px;
     align-items: flex-start;
-    margin-top: 20px;
+   /* margin-top: 20px; */
+   margin-top: 8px;
 }
 
 /* Panels */
@@ -90,8 +91,16 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
+/*.mc-search-left {
+    min-width: 580px;
+}
+    */
+
 .mc-search-left {
     min-width: 580px;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
 }
 
 .mc-search-right {
@@ -145,7 +154,8 @@
 .mc-selected-card {
     background: #ffffff;
     padding: 16px;
-    border-radius: 8px;
+    border: 2px solid #d9e2ef;
+    border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     margin-top: 20px;
 }
@@ -254,8 +264,9 @@
     background: #f2f2f2;
     border: none;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
+    font-weight:600;
 }
 
 .mc-order-tab-active {
@@ -307,7 +318,7 @@
 .mc-pending-order-table th {
     text-align: left;
     padding: 8px 10px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     background: #f7f7f7;
     border-bottom: 2px solid #e5e5e5;
@@ -317,13 +328,14 @@
 .mc-pending-order-table td {
     padding: 10px 10px;
     font-size: 14px;
+    font-weight: 600;
     border-bottom: 1px solid #eee;
     vertical-align: middle;
 }
 
 .mc-pending-order-title {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 800;
     margin-bottom: 12px;
 }
 
@@ -390,6 +402,7 @@
     border-radius: 6px;
     background: #f8fafc;
     border: 1px solid #e3e8f0;
+    font-size: 18px;
 }
 
 .mc-suborder-header {
@@ -400,7 +413,7 @@
 }
 
 .mc-suborder-ref {
-    font-size: 12px;
+    font-size: 14px;
     color: #666;
 }
 
@@ -441,7 +454,7 @@
 
 .mc-suborder-table td {
     padding: 6px 8px;
-    font-size: 13px;
+    font-size: 16px;
     border-bottom: 1px solid #e5e7eb;
     font-weight: 300;
 }
@@ -501,7 +514,7 @@
 }
 
 .mc-email-indicator {
-    font-size: 12px;
+    font-size: 14px;
     margin-top: 4px;
     display: block;
     opacity: 0.8;
@@ -1503,7 +1516,7 @@ body .mc-logout-btn:hover {
 --------------------------------------------------------- */
 
 .entry-content .mc-page-container {
-    width: 80% !important;       /* shared width for top bar + search layout */
+    width: 90% !important;       /* shared width for top bar + search layout */
     margin: 0 auto !important;   /* center on page */
 }
 
@@ -1607,7 +1620,7 @@ body.page-id-71 .mc-search-layout {
 /* Align top edges */
 body.page-id-71 .mc-search-left,
 body.page-id-71 .mc-search-right {
-    margin-top: 0 !important;
+    margin-top: 5px !important;
 }
 
 
@@ -2028,9 +2041,9 @@ body.page-id-71 .mc-search-left {
     margin-top: 6px;
     margin-bottom: 16px;
     padding: 14px 16px;
-    border-radius: 8px;
-    border: 1px solid #e3e3e3;
-    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px solid #d9e2ef;
+    background: #ffffff;
 }
 
 .mc-discover-header {
@@ -2041,8 +2054,8 @@ body.page-id-71 .mc-search-left {
 }
 
 .mc-discover-title {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 800;
     color: #1f2933;
 }
 
@@ -2074,7 +2087,7 @@ body.page-id-71 .mc-search-left {
 }
 
 .mc-discover-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: #111827;
 }
@@ -2086,14 +2099,15 @@ body.page-id-71 .mc-search-left {
 }
 
 .mc-discover-action {
-    font-size: 12px;
+    font-size: 16px;
     color: #4b5563;
+    font-weight: 600;
 }
 
 .mc-stock-pill {
     padding: 4px 10px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
 }
 
@@ -2124,7 +2138,7 @@ body.page-id-71 .mc-search-left {
 }
 
 .mc-discover-scroll {
-    max-height: 350px;   /* fits ~10 items */
+    max-height: 400px;   /* fits ~10 items */
     overflow-y: auto;
     padding-right: 6px;  /* avoid scrollbar overlap */
 }
@@ -2220,7 +2234,7 @@ body.page-id-71 .mc-search-left {
     align-items: center;
     flex-wrap: nowrap;
     gap: 8px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 
@@ -2641,7 +2655,7 @@ body.page-id-71 .mc-search-left {
 
     padding: 22px 24px;
 
-    font-size: 18px;
+    font-size: 22px;
 
     outline: none;
 }
@@ -2678,3 +2692,72 @@ body.page-id-71 .mc-search-left {
     background: #1565c0;
 }
 
+/* ==========================================
+   Hero Wrapper Breakout
+========================================== */
+
+.mc-hero-wrapper {
+    width: 100vw !important;
+    max-width: none !important;
+
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+
+    padding: 0 !important;
+}
+
+/* NEW SEARCH STYLING FOR NEW UI */
+#mc-search-results.active {
+    width: 100%;
+}
+
+#mc-search-results table {
+    width: 100%;
+}
+
+.mc-search-right {
+    border: 2px solid #d9e2ef;
+    border-radius: 12px;
+}
+
+/* ==========================================
+   Pending Order Actions - Final Override
+========================================== */
+
+.mc-pending-order-table td.mc-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
+}
+
+.mc-pending-order-table td.mc-actions button {
+    margin: 0 !important;
+}
+
+/* ==========================================
+   Pending Order Action Buttons - Final Final
+========================================== */
+
+/* Green tick button */
+.mc-pending-order-table td .mc-update-row {
+    background: #22c55e !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.mc-pending-order-table td .mc-update-row:hover {
+    background: #16a34a !important;
+}
+
+/* Red bin button */
+.mc-pending-order-table td .mc-remove-pending-item {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.mc-pending-order-table td .mc-remove-pending-item:hover {
+    background: #dc2626 !important;
+}

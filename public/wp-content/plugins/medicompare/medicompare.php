@@ -103,6 +103,7 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-login.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-portal.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/hero-component.php';
         require_once plugin_dir_path(__FILE__) . 'includes/pharmacy-comparison.php';
 
         // ⭐ NEW: Welcome Signup page template loader

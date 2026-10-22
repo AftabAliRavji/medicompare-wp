@@ -41,13 +41,35 @@ class MediCompare_Pharmacy_Login {
 
             <h2>Pharmacy Login</h2>
 
-            <label>Email</label>
-            <input type="email" name="mc_login_email" required>
+           <div class="mc-login-form-row">
+                <label>Email Address</label>
 
-            <label>Password</label>
-            <input type="password" name="mc_login_password" required>
+                <input
+                    type="email"
+                    name="mc_login_email"
+                    placeholder="Enter your email address"
+                    required
+                >
+            </div>
 
-            <button type="submit" name="mc_login_submit">Login</button>
+            <div class="mc-login-form-row">
+                <label>Password</label>
+
+                <input
+                    type="password"
+                    name="mc_login_password"
+                    placeholder="Enter your password"
+                    required
+                >
+            </div>
+
+            <div class="mc-login-submit-row">
+                <button
+                    type="submit"
+                    name="mc_login_submit">
+                    Login
+                </button>
+            </div>
 
             <p>
                 New pharmacy?

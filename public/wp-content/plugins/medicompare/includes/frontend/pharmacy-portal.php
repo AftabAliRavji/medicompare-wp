@@ -43,15 +43,22 @@ add_shortcode('mc_pharmacy_portal', function () {
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
     ?>
 
+    <?php
+
+        mc_render_hero([
+            'kicker'      => 'SMP Pharmacy Portal',
+            'title'       => 'One platform. Multiple suppliers. Better prices.',
+            'description' => 'Compare supplier pricing, manage orders and streamline purchasing through a single platform.',
+        ]);
+
+        ?>
+
 
     <!-- MAIN TWO-COLUMN LAYOUT -->
     <div class="mc-portal-container">
 
         <!-- LEFT SIDE: FEATURE CARDS + ONBOARDING -->
         <div class="mc-portal-left">
-
-            <h1 class="mc-portal-title">SMP Pharmacy Portal</h1>
-            <p class="mc-portal-subtitle">A modern platform built for independent pharmacies.</p>
 
             <div class="mc-feature-row">
                 <div class="mc-feature-card">
@@ -115,7 +122,21 @@ add_shortcode('mc_pharmacy_portal', function () {
         <div class="mc-portal-right">
             <div class="mc-portal-card">
 
-                <h2 class="mc-card-title">Pharmacy Login</h2>
+                <div class="mc-login-introduction">
+
+                    <p class="mc-login-eyebrow">
+                        PHARMACY PORTAL
+                    </p>
+
+                    <h2 class="mc-card-title">
+                        Welcome Back
+                    </h2>
+
+                    <p>
+                        Sign in to access product comparison, order management and supplier pricing.
+                    </p>
+
+                </div>
 
                 <?php
                 echo do_shortcode('[mc_pharmacy_login]');

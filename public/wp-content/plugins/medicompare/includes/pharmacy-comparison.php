@@ -1036,7 +1036,7 @@ class MediCompare_Pharmacy_Comparison {
                                     data-item-id="<?php echo esc_attr($item['id']); ?>"
                                     title="Remove item"
                                 >
-                                    ❌
+                                    🗑️
                                 </button>
 
                             </td>

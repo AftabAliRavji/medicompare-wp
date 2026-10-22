@@ -188,7 +188,7 @@ body.page-template-default.page footer {
     border: 1px solid #e3e8f0;
     box-shadow: 0 6px 18px rgba(0,0,0,0.05);
     width: 100%;
-    max-width: 360px;
+    max-width: 420px;
     align-self: flex-start;
 }
 
@@ -870,4 +870,119 @@ h1.mc-section-title {
 .wp-block-group {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
+}
+
+.mc-login-introduction {
+    margin-bottom: 28px;
+}
+
+.mc-login-eyebrow {
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #082560;
+}
+
+.mc-login-introduction h2 {
+    margin: 0 0 8px;
+    color: #082560;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.mc-login-introduction p {
+    margin: 0;
+    color: #46607b;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.mc-login-form-row {
+    margin-bottom: 18px;
+}
+
+.mc-login-form-row label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #082560;
+}
+.mc-login-form-row input {
+    width: 100%;
+    height: 50px;
+
+    padding: 0 15px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    background: #fff;
+
+    font-size: 15px;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+.mc-login-form-row input:focus {
+    border-color: #008f78;
+
+    box-shadow:
+        0 0 0 3px rgba(0,143,120,.12);
+
+    outline: none;
+}
+.mc-login-submit-row {
+    margin-top: 8px;
+}
+.mc-login-submit-row button {
+    width: 100%;
+
+    min-height: 56px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: linear-gradient(
+        90deg,
+        #007564 0%,
+        #008f78 100%
+    );
+
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+.mc-login-submit-row button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 24px rgba(0,143,120,.20);
+}
+.mc-login-form > p:last-child {
+    margin-top: 18px;
+    text-align: center;
+    color: #556274;
+    font-size: 14px;
+}
+
+.mc-login-form > p:last-child a {
+    color: #008f78;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mc-login-form > p:last-child a:hover {
+    text-decoration: underline;
 }

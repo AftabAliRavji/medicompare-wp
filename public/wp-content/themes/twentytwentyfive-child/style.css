@@ -125,11 +125,11 @@ body.page-id-71 .mc-search-layout {
 #mc-search-input {
     width: 100%;
     padding: 6px;
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc;*/
     border-radius: 4px;
 }
 
-/* Search results */
+/* Search results -OLD
 .mc-search-results {
     margin-top: 10px;
     max-height: 300px;
@@ -138,6 +138,16 @@ body.page-id-71 .mc-search-layout {
     border-radius: 4px;
     padding: 8px;
     background: #fff;
+} */
+
+.mc-search-results {
+    margin-top: 6px;
+    border: 2px solid #d9e2ef;
+    border-radius: 12px;
+    padding: 0;
+    background: #ffffff;
+    max-height: none;
+    overflow: hidden;
 }
 
 .mc-search-results-table {
@@ -149,7 +159,8 @@ body.page-id-71 .mc-search-layout {
 .mc-search-results-table td {
     padding: 6px 8px;
     border-bottom: 1px solid #eee;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .mc-search-row {
@@ -189,7 +200,7 @@ body.page-id-71 .mc-search-layout {
     border-radius: 4px;
     background: #f5f5f5;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .mc-order-tab-active {
@@ -225,8 +236,10 @@ body.page-id-71 .mc-search-layout {
 .mc-pending-order-table th,
 .mc-pending-order-table td {
     padding: 6px 8px;
+    font-weight: 600;
     border-bottom: 1px solid #eee;
-    font-size: 13px;
+    font-size: 14px;
+    color:darkslateblue;
 }
 
 .mc-remove-pending-item {

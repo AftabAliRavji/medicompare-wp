@@ -982,51 +982,40 @@ public function render_search() {
     $mc_assets = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/';
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
     /* ⭐ END HEADER */
+
+    $hero_search = '
+    <div class="mc-hero-search">
+
+        <input
+            type="text"
+            id="mc-search-input"
+            class="mc-hero-search-input"
+            placeholder="Start typing product name to search and compare..."
+        >
+
+        <button
+            id="mc-hero-search-btn"
+            class="mc-hero-search-btn">
+            Search <span>→</span>
+        </button>
+
+    </div>';
 ?>
     
 
     <!-- FORCE FULL-WIDTH WRAPPER TO BREAK OUT OF BLOCK THEME CONSTRAINTS -->
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
 
-        <div class="mc-hero-section">
+    <?php
 
-    <div class="mc-hero-content">
+        mc_render_hero([
+            'kicker'       => 'SEARCH AND COMPARE',
+            'title'        => 'Find the best prices for your pharmacy',
+            'description'  => 'Search for a product to compare prices, check availability and order from multiple approved suppliers.',
+            'content'     => $hero_search,
+        ]);
 
-        <div class="mc-hero-left">
-
-            <div class="mc-hero-kicker">
-                SEARCH AND COMPARE
-            </div>
-
-            <h1 class="mc-hero-title">
-                Find the best prices for your pharmacy
-            </h1>
-
-            <p class="mc-hero-description">
-                Search for a product to compare prices, check availability and order from multiple approved suppliers.
-            </p>
-
-            <div class="mc-hero-search">
-
-                <input
-                    type="text"
-                    id="mc-search-input"
-                    class="mc-hero-search-input"
-                    placeholder="Start typing product name to search and compare..."
-                >
-
-                <button id="mc-hero-search-btn" class="mc-hero-search-btn">
-                    Search <span>→</span>
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
+        ?>
 
     <!-- SHARED PAGE CONTAINER -->
         <div class="mc-page-container">
@@ -1046,7 +1035,7 @@ public function render_search() {
 
                     <!-- ⭐ Intro text + Discover Panel ALWAYS BELOW existing behaviour -->
                     <p class="mc-discover-intro">
-                        You can also select a product directly from the list below — this will take you straight to the comparison.
+                        Alternatively you can also select a product directly from the list below — this will take you straight to the comparison.
                     </p>
 
                     <?php
@@ -1086,7 +1075,7 @@ public function render_search() {
                                             <span class="mc-stock-pill <?php echo esc_attr($band_class); ?>">
                                                 Stock: <?php echo (int) $row['total_stock']; ?>
                                             </span>
-                                            <span class="mc-discover-action">Click to Compare</span>
+                                            <span class="mc-discover-action">⚖️ Compare</span>
                                         </div>
 
                                     </div>
@@ -1103,10 +1092,10 @@ public function render_search() {
 
                     <div class="mc-order-tabs">
                         <button type="button" class="mc-order-tab mc-order-tab-active" data-tab="pending">
-                            Pending Order
+                            🛒 Pending Order
                         </button>
                         <button type="button" class="mc-order-tab" data-tab="transferred">
-                            Transferred Orders
+                            📄 Transferred Orders
                         </button>
                     </div>
 
@@ -1131,7 +1120,7 @@ public function render_search() {
                             class="mc-transfer-btn <?php echo ($pending_order_exists ? '' : 'mc-transfer-btn-disabled mc-disabled'); ?>"
                             <?php echo ($pending_order_exists ? '' : 'disabled'); ?>
                         >
-                            Transfer Pending Order
+                            Transfer Pending Order <span>→</span>
                         </button>
 
                     </div>

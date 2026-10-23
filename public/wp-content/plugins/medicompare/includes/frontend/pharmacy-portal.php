@@ -103,13 +103,13 @@ add_shortcode('mc_pharmacy_portal', function () {
                     <div class="mc-onboarding-step">
                         <span class="mc-step-number">2</span>
                         <h4>Verification & Approval</h4>
-                        <p>After verification is complete, you’ll receive an email confirming your pharmacy has been approved. You can then log in and access the full MedicCompare portal.</p>
+                        <p>After verification is complete, you’ll receive an email confirming your pharmacy has been approved. You can then log in and access the full Source Med Pharma portal.</p>
                     </div>
 
                     <div class="mc-onboarding-step">
                         <span class="mc-step-number">3</span>
                         <h4>Start Your Free 30‑Day Trial</h4>
-                        <p>Explore all features — price comparison, order management, supplier insights — completely free for 30 days. After the trial, a <strong>monthly subscription</strong> applies. For full details, see the upcoming <a href="/pharmacy/pharmacy-guidelines/">Pharmacy Guidelines</a> page.</p>
+                        <p>Explore all features — price comparison, order management, supplier insights — completely free for 30 days. After the trial, a <strong>monthly subscription</strong> applies.</p>
                     </div>
 
                 </div>

@@ -879,6 +879,9 @@ body.page-id-71 .mc-search-layout {
     z-index: 9999;
 }
 
+:root :where(.is-layout-constrained) > * {
+    margin-block-start: 0rem;
+}
 /* Show only on mobile */
 @media (max-width: 768px) {
     #mc-back-to-top {

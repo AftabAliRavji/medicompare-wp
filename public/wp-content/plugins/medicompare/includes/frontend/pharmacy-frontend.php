@@ -446,6 +446,15 @@ public function render_dashboard() {
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
     /* ⭐ END HEADER */
     ?>
+    
+    <?php
+        mc_render_hero([
+            'kicker'      => 'PHARMACY DASHBOARD',
+            'title'       => 'Welcome to your pharmacy portal',
+            'description' => 'Manage your account, compare products, track orders and access supplier pricing from one central dashboard.',
+        ]);
+
+    ?>
 
     <div class="mc-dashboard">
 
@@ -639,37 +648,17 @@ public function render_edit_details() {
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
     ?>
 
+    <?php
+        mc_render_hero([
+            'kicker'      => 'ACCOUNT MANAGEMENT',
+            'title'       => 'Your Pharmacy Details',
+            'description' => 'View your pharmacy information and manage your account password securely.',
+        ]);
+        ?>
+
     <!-- FULL-WIDTH TOP BAR -->
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
         <div class="mc-page-container">
-
-            <div class="mc-topbar-inner">
-
-                <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
-                   class="mc-topbar-btn mc-back-btn">
-                    ← Back to Dashboard
-                </a>
-
-                <div class="mc-topbar-right">
-                    <span class="mc-topbar-badge mc-welcome-badge">
-                        Welcome, <?php echo esc_html($current_user->user_email); ?>
-                    </span>
-
-                     <?php
-                        $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
-                    ?>
-                    <span class="<?php echo esc_attr($badge_class); ?>">
-                        <?php echo esc_html($subscription_label); ?>
-                    </span>
-
-                    <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
-                       class="mc-topbar-btn mc-logout-btn">
-                        Logout
-                    </a>
-                </div>
-
-            </div>
-
         </div>
     </div>
 
@@ -688,7 +677,7 @@ public function render_edit_details() {
     <!-- LEFT COLUMN -->
 <div class="mc-card mc-info-card">
 
-    <h2 class="mc-reset-title">Pharmacy Details</h2>
+    <h2 class="mc-reset-title">Pharmacy Information</h2>
 
     <div class="mc-form-row-2col">
         <label>Name</label>

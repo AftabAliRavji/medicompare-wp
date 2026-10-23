@@ -71,51 +71,175 @@ class MediCompare_Pharmacy_Registration {
         }
 
         ?>
+        <?php
+            mc_render_hero([
+                'kicker'      => 'PHARMACY REGISTRATION',
+                'title'       => 'Join Source Med Pharma',
+                'description' => 'Register your pharmacy to compare prices, manage orders and access supplier pricing from one platform.',
+            ]);
 
-        <form method="post" class="mc-register-form">
+        ?>
 
-            <?php wp_nonce_field('mc_pharmacy_register', 'mc_pharmacy_register_nonce'); ?>
+        <div class="mc-registration-wrapper">
 
-            <h2>Pharmacy Registration</h2>
+            <div class="mc-registration-card">
 
-            <label>Pharmacy Name</label>
-            <input type="text" name="mc_pharmacy_name" required>
+                <div class="mc-registration-introduction">
 
-            <label>Email</label>
-            <input type="email" name="mc_email" required>
+                    <p class="mc-registration-eyebrow">
+                        PHARMACY PORTAL
+                    </p>
 
-            <label>Phone</label>
-            <input type="text" name="mc_phone">
+                    <h2 class="mc-registration-title">
+                        Register Your Pharmacy
+                    </h2>
 
-            <label>Address Line 1</label>
-            <input type="text" name="mc_address_line_1" required>
+                    <p>
+                        Complete the details below and our onboarding team will review your registration.
+                    </p>
 
-            <label>Address Line 2</label>
-            <input type="text" name="mc_address_line_2">
+                </div>
 
-            <label>City</label>
-            <input type="text" name="mc_city" required>
+                <form method="post" class="mc-register-form">
 
-            <label>Postcode</label>
-            <input type="text" name="mc_postcode" required>
+                    <?php wp_nonce_field('mc_pharmacy_register', 'mc_pharmacy_register_nonce'); ?>
 
-            <label>GPhC Number</label>
-            <input type="text" name="mc_gphc_number" required>
+                    <div class="mc-registration-grid">
 
-            <label>Contact Name</label>
-            <input type="text" name="mc_contact_name" required>
+                        <div class="mc-register-form-row">
+                            <label>Pharmacy Name</label>
+                            <input
+                                type="text"
+                                name="mc_pharmacy_name"
+                                placeholder="Enter pharmacy name"
+                                required
+                            >
+                        </div>
 
-            <label>Password</label>
-            <input type="password" name="mc_password" required>
+                        <div class="mc-register-form-row">
+                            <label>Email Address</label>
+                            <input
+                                type="email"
+                                name="mc_email"
+                                placeholder="Enter email address"
+                                required
+                            >
+                        </div>
 
-            <label>Confirm Password</label>
-            <input type="password" name="mc_password_confirm" required>
+                        <div class="mc-register-form-row">
+                            <label>Phone Number</label>
+                            <input
+                                type="text"
+                                name="mc_phone"
+                                placeholder="Enter phone number"
+                            >
+                        </div>
 
-            <div class="g-recaptcha" data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc"></div>
+                        <div class="mc-register-form-row">
+                            <label>GPhC Number</label>
+                            <input
+                                type="text"
+                                name="mc_gphc_number"
+                                placeholder="Enter GPhC number"
+                                required
+                            >
+                        </div>
 
-            <button type="submit" name="mc_register_submit">Register</button>
+                        <div class="mc-register-form-row">
+                            <label>Address Line 1</label>
+                            <input
+                                type="text"
+                                name="mc_address_line_1"
+                                placeholder="Enter address line 1"
+                                required
+                            >
+                        </div>
 
-        </form>
+                        <div class="mc-register-form-row">
+                            <label>Address Line 2</label>
+                            <input
+                                type="text"
+                                name="mc_address_line_2"
+                                placeholder="Enter address line 2"
+                            >
+                        </div>
+
+                        <div class="mc-register-form-row">
+                            <label>City</label>
+                            <input
+                                type="text"
+                                name="mc_city"
+                                placeholder="Enter city"
+                                required
+                            >
+                        </div>
+
+                        <div class="mc-register-form-row">
+                            <label>Postcode</label>
+                            <input
+                                type="text"
+                                name="mc_postcode"
+                                placeholder="Enter postcode"
+                                required
+                            >
+                        </div>
+
+                        <div class="mc-register-form-row">
+                            <label>Contact Name</label>
+                            <input
+                                type="text"
+                                name="mc_contact_name"
+                                placeholder="Enter contact name"
+                                required
+                            >
+                        </div>
+
+                        <div class="mc-register-form-row">
+                            <label>Password</label>
+                            <input
+                                type="password"
+                                name="mc_password"
+                                placeholder="Create password"
+                                required
+                            >
+                        </div>
+
+                        <div class="mc-register-form-row">
+                            <label>Confirm Password</label>
+                            <input
+                                type="password"
+                                name="mc_password_confirm"
+                                placeholder="Confirm password"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="mc-register-captcha">
+                        <div
+                            class="g-recaptcha"
+                            data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc">
+                        </div>
+                    </div>
+
+                    <div class="mc-register-submit-row">
+
+                        <button
+                            type="submit"
+                            name="mc_register_submit">
+
+                            Register Pharmacy
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
 
         <?php
 

@@ -1,6 +1,6 @@
 /* Hide WP-generated page titles on pharmacy portal, keep portal-specific ones */
 h1:not(.mc-portal-title):not(.mc-hero-title),
-h2:not(.mc-card-title),
+h2:not(.mc-card-title):not(.mc-registration-title),
 .wp-block-post-title,
 .wp-block-heading.wp-block-post-title {
     display: none !important;
@@ -188,7 +188,7 @@ body.page-template-default.page footer {
     border: 1px solid #e3e8f0;
     box-shadow: 0 6px 18px rgba(0,0,0,0.05);
     width: 100%;
-    max-width: 420px;
+    max-width: 450px;
     align-self: flex-start;
 }
 
@@ -565,7 +565,7 @@ body.page-template-default.page footer {
 /* WIDEN THE GRID AGAIN */
 .mc-details-grid.mc-details-grid-wide {
     display: grid !important;
-    grid-template-columns: 1.6fr 1.2fr !important; /* LEFT NOW MUCH WIDER */
+    grid-template-columns: 1.6fr 1.2fr !important; 
     gap: 48px !important;
     width: 100% !important;
 }
@@ -575,10 +575,10 @@ body.page-template-default.page footer {
 /* Make the entire details grid wider and centered */
 .mc-details-grid.mc-details-grid-wide {
     width: 100% !important;
-    max-width: 1200px !important;   /* ← increase overall width */
+    max-width: 1200px !important;   
     margin: 0 auto !important;
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;  /* ← both columns larger */
+    grid-template-columns: 1fr 1fr !important;  
     gap: 40px !important;
 }
 
@@ -763,13 +763,13 @@ h1.mc-section-title {
     margin-bottom: 20px !important;
     color: #111 !important;
 }
-/* Shrink the right-hand card to fit its content */
+/* Shrink the right-hand card to fit its content 
 .mc-reset-card {
-    min-height: 0 !important;     /* ← removes theme’s forced height */
-    height: auto !important;      /* ← allows natural content height */
-    padding-bottom: 20px !important; /* ← keeps nice spacing */
-    align-self: flex-start !important;   /* ← prevents forced stretching */
-}
+    min-height: 0 !important;     
+    height: auto !important;      
+    padding-bottom: 20px !important; 
+    align-self: flex-start !important;   
+} */
 /* Only make the Reset Password button full width on the Edit Details page */
 .mc-details-grid-wide .mc-reset-card .mc-btn-primary {
     width: 100% !important;
@@ -896,8 +896,9 @@ h1.mc-section-title {
 .mc-login-introduction p {
     margin: 0;
     color: #46607b;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
+    margin-bottom: 22px;
 }
 
 .mc-login-form-row {
@@ -985,4 +986,450 @@ h1.mc-section-title {
 
 .mc-login-form > p:last-child a:hover {
     text-decoration: underline;
+}
+
+.mc-portal-right {
+    margin-top: -35px;
+}
+
+/* ========================================================
+   REGISTRATION PAGE
+======================================================== */
+
+.mc-registration-wrapper {
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.mc-registration-card {
+
+    background: #f7f9fc;
+    margin-top: 5px;
+
+    border: 1px solid #e3e8f0;
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    box-shadow:
+        0 24px 65px rgba(18,51,82,.12),
+        0 5px 18px rgba(18,51,82,.06);
+}
+
+
+/* ========================================================
+   INTRODUCTION
+======================================================== */
+
+.mc-registration-introduction {
+    margin-bottom: 32px;
+}
+
+.mc-registration-eyebrow {
+    margin: 0 0 18px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 3px;
+
+    text-transform: uppercase;
+
+    color: #082560;
+}
+
+.mc-registration-title {
+    display: block !important;
+
+    margin: 0 0 14px !important;
+
+    color: #082560 !important;
+
+    font-size: 34px !important;
+
+    font-weight: 800 !important;
+
+    line-height: 1.1 !important;
+}
+
+.mc-registration-introduction p {
+    margin: 10px 0 22px 0;
+
+    max-width: 650px;
+
+    color: #46607b;
+
+    font-size: 18px;
+
+    line-height: 1.6;
+}
+
+
+/* ========================================================
+   FORM GRID
+======================================================== */
+
+.mc-registration-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 28px 36px;
+
+    max-width: 920px;
+
+    margin: 0 auto;
+}
+
+
+/* ========================================================
+   FORM ROWS
+======================================================== */
+
+.mc-register-form-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-register-form-row label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #082560;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+/* ========================================================
+   INPUTS
+======================================================== */
+
+.mc-register-form-row input {
+    display: block;
+
+    width: 100%;
+
+    height: 56px;
+
+    padding: 0 18px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #fff;
+
+    color: #082560;
+
+    font-size: 16px;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background-color .2s ease;
+
+    box-sizing: border-box;
+}
+
+.mc-register-form-row input::placeholder {
+    color: #8795ad;
+}
+
+.mc-register-form-row input:hover {
+    border-color: #9cadc0;
+}
+
+.mc-register-form-row input:focus {
+    border-color: #008f78;
+
+    box-shadow:
+        0 0 0 3px rgba(0,143,120,.13);
+
+    background: #fff;
+}
+
+
+/* ========================================================
+   CAPTCHA
+======================================================== */
+
+.mc-register-captcha {
+    width: 304px;
+    margin: 36px auto 12px auto;
+}
+
+
+/* ========================================================
+   BUTTON
+======================================================== */
+
+.mc-register-submit-row {
+    width: 304px;
+    margin: 0 auto;
+}
+
+.mc-register-submit-row button {
+    width: 100%;
+    height: 58px;
+
+    min-height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: linear-gradient(
+        90deg,
+        #007564 0%,
+        #008f78 100%
+    );
+
+    color: #fff;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.mc-register-submit-row button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 24px rgba(0,143,120,.22);
+}
+
+
+/* ========================================================
+   SUCCESS / ERROR MESSAGES
+======================================================== */
+
+.mc-success,
+.mc-error {
+    max-width: 1100px;
+    margin: 25px auto;
+}
+
+.mc-success {
+    border: 1px solid #8ed8bf;
+    background: #eafaf4;
+    color: #086d53;
+
+    padding: 14px 18px;
+    border-radius: 8px;
+}
+
+.mc-error {
+    border: 1px solid #e7a4a4;
+    background: #fff0f0;
+    color: #9b1c1c;
+
+    padding: 14px 18px;
+    border-radius: 8px;
+}
+
+
+/* ========================================================
+   MOBILE
+======================================================== */
+
+@media (max-width: 900px) {
+
+    .mc-registration-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mc-registration-card {
+        padding: 28px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .mc-registration-wrapper {
+        padding: 0 16px;
+    }
+
+    .mc-registration-card {
+        padding: 22px;
+    }
+
+    .mc-registration-introduction h2 {
+        font-size: 28px;
+    }
+
+}
+
+.mc-info-card,
+.mc-reset-card {
+
+    background: #f7f9fc !important;
+
+    border: 1px solid #e3e8f0 !important;
+
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 24px 65px rgba(18,51,82,.12),
+        0 5px 18px rgba(18,51,82,.06);
+
+    padding: 32px !important;
+}
+
+.mc-reset-title {
+
+    color: #082560 !important;
+
+    font-size: 30px !important;
+
+    font-weight: 800 !important;
+
+    margin-bottom: 28px !important;
+
+    line-height: 1.1 !important;
+}
+.mc-info-card .mc-form-row-2col input[disabled] {
+
+    background: #ffffff !important;
+
+    color: #334155 !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    opacity: 1 !important;
+
+    cursor: default;
+
+    height: 48px !important;
+
+    font-size: 15px !important;
+
+    font-weight: 500 !important;
+}
+.mc-reset-card input[type="password"] {
+
+    height: 56px !important;
+
+    padding: 0 18px !important;
+
+    border-radius: 8px !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    font-size: 16px !important;
+}
+.mc-reset-card input[type="password"]:focus {
+
+    border-color: #008f78 !important;
+
+    box-shadow:
+        0 0 0 3px rgba(0,143,120,.13) !important;
+
+    outline: none !important;
+}
+.mc-reset-card .mc-btn-primary {
+
+    width: 100% !important;
+
+    min-height: 58px !important;
+
+    border-radius: 8px !important;
+
+    background: linear-gradient(
+        90deg,
+        #007564 0%,
+        #008f78 100%
+    ) !important;
+
+    color: #fff !important;
+
+    font-size: 17px !important;
+
+    font-weight: 700 !important;
+}
+.mc-reset-card .mc-form-row-2col {
+    grid-template-columns: 120px 1fr !important;
+}
+.mc-info-card .mc-form-row-2col label {
+
+    font-size: 14px !important;
+
+    font-weight: 600 !important;
+
+    color: #475569 !important;
+}
+.mc-reset-card input[type="password"] {
+
+    height: 56px !important;
+
+    font-size: 16px !important;
+}
+.mc-reset-card .mc-reset-title {
+    margin-bottom: 30px !important;
+}
+
+/* ========================================================
+   EDIT DETAILS - FINAL LAYOUT
+======================================================== */
+
+.mc-details-grid.mc-details-*rid-wide {
+
+    display: grid !important;
+
+    grid-template-columns:minmax(0, 1fr) minmax(0, 1fr) !important;
+
+    gap: 32px !important;
+    max-width: 1200px !important;
+   width: 100% !important;
+
+    margin: -20px auto 0 auto !important;
+
+    align-items: start !important;
+}
+
+.mc-info-card,
+.mc-reset-card{
+
+    width: 100% !important;
+
+   max-width: none !important;
+
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    align-self: s*art !important;
+}
+
+.mc-reset-card { 
+
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+
+    left: auto !important;
+
+    right: auto !important;
 }

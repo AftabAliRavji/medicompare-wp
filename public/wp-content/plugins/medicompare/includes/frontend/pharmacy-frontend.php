@@ -752,12 +752,12 @@ public function render_edit_details() {
         <form method="post">
             <?php wp_nonce_field('mc_reset_password', 'mc_reset_password_nonce'); ?>
 
-            <div class="mc-form-row-2col">
+            <div class="mc-reset-form-row">
                 <label>Old Password</label>
                 <input type="password" name="mc_old_password" required>
             </div>
 
-            <div class="mc-form-row-2col">
+            <div class="mc-reset-form-row">
                 <label>New Password</label>
                 <input type="password" name="mc_new_password" required>
             </div>
@@ -1233,16 +1233,30 @@ public function render_orders_page() {
     /* ⭐ END HEADER */
     ?>
 
+    <?php
+        mc_render_hero([
+            'kicker'      => 'ORDER MANAGEMENT',
+            'title'       => 'Transferred Orders',
+            'description' => 'Review transferred orders, supplier breakdowns, and order history.',
+        ]);
+    ?>
+
     <div class="wp-block-group alignfull" style="padding:0;margin:0;">
         <div class="mc-page-container">
 
-            <h2 class="mc-section-title">Transferred Orders</h2>
+        <div class="mc-orders-intro">
+            <h3>Find Orders</h3>
+            <p>
+                Search by date range or enter a specific order number.
+                To view your complete order history, select <strong>View All</strong>.
+            </p>
+        </div>
 
             <!-- FILTER BAR -->
-            <form method="get" class="mc-filter-bar">
+            <form method="get" class="mc-orders-filter-card">
 
                 <!-- ROW 1: DATE RANGE FILTERS -->
-                <div class="mc-filter-row">
+                <div class="mc-orders-filter-row">
                     <label>Start Date</label>
                     <input type="date" name="start" value="<?php echo esc_attr($start_date); ?>">
 
@@ -1255,7 +1269,7 @@ public function render_orders_page() {
                 </div>
 
                 <!-- ROW 2: ORDER NUMBER FILTER -->
-                <div class="mc-filter-row mc-filter-row--order">
+                <div class="mc-orders-filter-row mc-orders-filter-row-order">
                     <label>Order Number</label>
                     <input type="number" name="order_number" value="<?php echo esc_attr($order_number); ?>">
 
@@ -1267,7 +1281,7 @@ public function render_orders_page() {
             </form>
 
             <!-- ROW 3: SECONDARY ACTIONS -->
-            <div class="mc-filter-actions">
+            <div class="mc-orders-filter-actions">
                 <a href="<?php echo esc_url(add_query_arg(['view' => 'all'], site_url('/pharmacy/orders/'))); ?>"
                    class="mc-btn mc-btn-secondary mc-btn-inline">
                     View All
@@ -1282,9 +1296,6 @@ public function render_orders_page() {
             <div class="mc-transferred-orders-wrapper">
 
                 <?php if (!$should_load_orders): ?>
-
-                    <p style="margin-top:20px;">Please enter a date range OR enter an Order Number.<br>
-                    Alternatively, click View All to see all orders.</p>
 
                 <?php elseif (!$orders): ?>
 
@@ -1303,7 +1314,7 @@ public function render_orders_page() {
                                     <?php echo esc_html(ucfirst(strtolower($order['status']))); ?>
                                 </span>
 
-                                <span class="mc-order-collapse-arrow">▼</span>
+                                <span class="mc-order-collapse-arrow">▶</span>
                             </div>
 
                             <div class="mc-order-collapse-content" style="display:none;">
@@ -1446,45 +1457,47 @@ public function render_orders_page() {
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const cards = document.querySelectorAll('.mc-transferred-order-card');
-
-            cards.forEach(card => {
-                const header = card.querySelector('.mc-order-collapse-header');
-                const content = card.querySelector('.mc-order-collapse-content');
-
-                if (!header || !content) return;
-
-                header.addEventListener('click', () => {
-                    const isOpen = content.style.display === 'block';
-
-                    document.querySelectorAll('.mc-order-collapse-content').forEach(c => c.style.display = 'none');
-                    document.querySelectorAll('.mc-transferred-order-card').forEach(c => c.classList.remove('mc-order-expanded'));
-
-                    if (!isOpen) {
-                        content.style.display = 'block';
-                        card.classList.add('mc-order-expanded');
-                    }
-                });
-            });
-        });
-    </script>
-
-    <button id="mc-back-to-top">↑ Back to Top</button>
-    
-        <script>
             document.addEventListener('DOMContentLoaded', function () {
-            const btn = document.getElementById('mc-back-to-top');
 
-            if (btn) {
-                btn.addEventListener('click', function () {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
+                const cards = document.querySelectorAll('.mc-transferred-order-card');
+
+                cards.forEach(card => {
+
+                    const header = card.querySelector('.mc-order-collapse-header');
+                    const content = card.querySelector('.mc-order-collapse-content');
+                    const arrow = card.querySelector('.mc-order-collapse-arrow');
+
+                    if (!header || !content) return;
+
+                    header.addEventListener('click', () => {
+
+                        const isOpen = content.style.display === 'block';
+
+                        document.querySelectorAll('.mc-order-collapse-content')
+                            .forEach(c => c.style.display = 'none');
+
+                        document.querySelectorAll('.mc-order-collapse-arrow')
+                            .forEach(a => a.textContent = '▶');
+
+                        document.querySelectorAll('.mc-transferred-order-card')
+                            .forEach(c => c.classList.remove('mc-order-expanded'));
+
+                        if (!isOpen) {
+
+                            content.style.display = 'block';
+
+                            card.classList.add('mc-order-expanded');
+
+                            if (arrow) {
+                                arrow.textContent = '▼';
+                            }
+                        }
+
                     });
+
                 });
-            }
-        });
+
+            });
         </script>
 
     <?php
@@ -1555,6 +1568,14 @@ public function render_orders_page() {
         include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
         ?>
 
+        <?php
+            mc_render_hero([
+                'kicker'      => 'SUBSCRIPTION MANAGEMENT',
+                'title'       => 'Manage Your Subscription',
+                'description' => 'View your subscription status, trial information, billing dates and account access details.',
+            ]);
+        ?>
+
         <!-- FULL-WIDTH TOP BAR -->
         <div class="wp-block-group alignfull" style="padding:0;margin:0;">
             <div class="mc-page-container">
@@ -1575,40 +1596,11 @@ public function render_orders_page() {
 
             <?php endif; ?>
 
-                <div class="mc-topbar-inner">
-
-                    <a href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>" 
-                       class="mc-topbar-btn mc-back-btn">
-                        ← Back to Dashboard
-                    </a>
-
-                    <div class="mc-topbar-right">
-                        <span class="mc-topbar-badge mc-welcome-badge">
-                            Welcome, <?php echo esc_html($current_user->user_email); ?>
-                        </span>
-
-                        <?php
-                            $badge_class = 'mc-topbar-badge mc-subscription-badge mc-sub-' . strtolower($subscription_state['status']);
-                        ?>
-                        <span class="<?php echo esc_attr($badge_class); ?>">
-                            <?php echo esc_html($subscription_label); ?>
-                        </span>
-
-                        <a href="<?php echo wp_logout_url(site_url('/pharmacy/login/')); ?>" 
-                           class="mc-topbar-btn mc-logout-btn">
-                            Logout
-                        </a>
-                    </div>
-
-                </div>
-
             </div>
         </div>
 
         <!-- PAGE CONTENT -->
         <div class="mc-page-container">
-
-            <h1 class="mc-page-title">Subscription Overview</h1>
 
             <div class="mc-subscription-grid">
 

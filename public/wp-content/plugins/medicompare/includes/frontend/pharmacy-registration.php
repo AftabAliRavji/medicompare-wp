@@ -141,7 +141,6 @@ class MediCompare_Pharmacy_Registration {
                                 type="text"
                                 name="mc_gphc_number"
                                 placeholder="Enter GPhC number"
-                                required
                             >
                         </div>
 

@@ -36,14 +36,15 @@ function mc_terms_of_use_shortcode() {
                 </a>
 
             </div>
+        <?php
+            mc_render_hero([
+                'kicker'      => 'LEGAL INFORMATION',
+                'title'       => 'Terms of Use',
+                'description' => 'The terms and conditions governing access to and use of the Source Med Pharma platform.',
+            ]);
+        ?>
 
             <main class="mc-static-page-content">
-
-                <h1 class="mc-portal-title">Terms of Use</h1>
-
-                <p class="mc-static-page-introduction">
-                    Please read these Terms of Use carefully before using this website.
-                </p>
 
                 <section class="mc-static-page-section">
                     <h2 class="mc-card-title">1. About these Terms</h2>

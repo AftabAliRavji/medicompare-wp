@@ -38,14 +38,16 @@ function mc_cookie_policy_shortcode() {
 
             </div>
 
+            <?php
+
+                mc_render_hero([
+                    'kicker'      => 'LEGAL INFORMATION',
+                    'title'       => 'Cookie Policy',
+                    'description' => 'Learn how Source Med Pharma uses cookies, analytics and similar technologies when you use our website.',
+                ]);
+
+            ?>
             <main class="mc-static-page-content">
-
-                <h1 class="mc-portal-title">Cookie Policy</h1>
-
-                <p class="mc-static-page-introduction">
-                    This Cookie Policy explains how Source Med Pharma Ltd uses cookies
-                    and similar technologies when you visit our website.
-                </p>
 
                 <section class="mc-static-page-section">
                     <h2 class="mc-card-title">1. About this Cookie Policy</h2>

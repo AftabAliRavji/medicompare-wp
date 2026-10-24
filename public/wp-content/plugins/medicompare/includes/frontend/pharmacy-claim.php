@@ -212,6 +212,13 @@ public function render_claim_form() {
     include dirname(__FILE__, 3) . '/templates/header-pharmacy.php';
     /* ⭐ END HEADER */
 
+    mc_render_hero([
+        'kicker'      => 'ACCOUNT ACTIVATION',
+        'title'       => 'Complete Pharmacy Registration',
+        'description' => 'Review your pharmacy details, create your password and activate your pharmacy account.',
+    ]);
+
+
     if (isset($_GET['claimed']) && $_GET['claimed'] == '1') {
         echo '<div class="mc-success">Your account has been created. You can now log in once verified.</div>';
         return ob_get_clean();
@@ -242,51 +249,101 @@ public function render_claim_form() {
     $contact_name   = get_post_meta($post_id, '_mc_contact_name', true);
     ?>
 
-    <form method="post" class="mc-register-form">
+    <div class="mc-registration-wrapper">
+
+    <div class="mc-registration-card">
+
+        <div class="mc-registration-introduction">
+
+            <p class="mc-registration-eyebrow">
+                ACCOUNT ACTIVATION
+            </p>
+
+            <h2 class="mc-registration-title">
+                Complete Your Registration
+            </h2>
+
+            <p>
+                Review the information below and create your password to activate your pharmacy account.
+            </p>
+
+        </div>
+
+        <form method="post" class="mc-register-form">
         <?php wp_nonce_field('mc_pharmacy_claim', 'mc_pharmacy_claim_nonce'); ?>
 
-        <h2>Complete Pharmacy Registration</h2>
-
+    <div class="mc-registration-grid">
         <input type="hidden" name="mc_claim_token" value="<?php echo esc_attr($token); ?>">
         <input type="hidden" name="mc_pharmacy_id" value="<?php echo esc_attr($post_id); ?>">
 
-        <label>Pharmacy Name</label>
-        <input type="text" name="mc_pharmacy_name" value="<?php echo esc_attr($pharmacy_name); ?>" required>
+        <div class="mc-register-form-row">
+            <label>Pharmacy Name</label>
+            <input type="text" name="mc_pharmacy_name" value="<?php echo esc_attr($pharmacy_name); ?>" required>
+        </div>
 
-        <label>Email</label>
-        <input type="email" name="mc_email" value="<?php echo esc_attr($email); ?>" readonly>
+        <div class="mc-register-form-row">
+            <label>Email</label>
+            <input type="email" name="mc_email" value="<?php echo esc_attr($email); ?>" readonly>
+        </div>
 
-        <label>Phone</label>
-        <input type="text" name="mc_phone" value="<?php echo esc_attr($phone); ?>">
+        <div class="mc-register-form-row">
+            <label>Phone</label>
+            <input type="text" name="mc_phone" value="<?php echo esc_attr($phone); ?>">
+        </div>
 
-        <label>Address Line 1</label>
-        <input type="text" name="mc_address_line_1" value="<?php echo esc_attr($address1); ?>" required>
+        <div class="mc-register-form-row">
+            <label>Address Line 1</label>
+            <input type="text" name="mc_address_line_1" value="<?php echo esc_attr($address1); ?>" required>
+        </div>
 
-        <label>Address Line 2</label>
-        <input type="text" name="mc_address_line_2" value="<?php echo esc_attr($address2); ?>">
+        <div class="mc-register-form-row">
+            <label>Address Line 2</label>
+            <input type="text" name="mc_address_line_2" value="<?php echo esc_attr($address2); ?>">
+        </div>
 
-        <label>City</label>
-        <input type="text" name="mc_city" value="<?php echo esc_attr($city); ?>" required>
+        <div class="mc-register-form-row">
+            <label>City</label>
+            <input type="text" name="mc_city" value="<?php echo esc_attr($city); ?>" required>
+        </div>
 
-        <label>Postcode</label>
-        <input type="text" name="mc_postcode" value="<?php echo esc_attr($postcode); ?>" required>
+        <div class="mc-register-form-row">
+            <label>Postcode</label>
+            <input type="text" name="mc_postcode" value="<?php echo esc_attr($postcode); ?>" required>
+        </div>
 
-        <label>GPhC Number</label>
-        <input type="text" name="mc_gphc_number" value="<?php echo esc_attr($gphc); ?>" required>
+        <div class="mc-register-form-row">
+            <label>GPhC Number</label>
+            <input type="text" name="mc_gphc_number" value="<?php echo esc_attr($gphc); ?>">
+        </div>
 
-        <label>Contact Name</label>
-        <input type="text" name="mc_contact_name" value="<?php echo esc_attr($contact_name); ?>" required>
+        <div class="mc-register-form-row">
+            <label>Contact Name</label>
+            <input type="text" name="mc_contact_name" value="<?php echo esc_attr($contact_name); ?>" required>
+        </div>
 
-        <label>Password</label>
-        <input type="password" name="mc_password" required>
+        <div class="mc-register-form-row">
+            <label>Password</label>
+            <input type="password" name="mc_password" required>
+        </div>
 
-        <label>Confirm Password</label>
-        <input type="password" name="mc_password_confirm" required>
+        <div class="mc-register-form-row">
+            <label>Confirm Password</label>
+            <input type="password" name="mc_password_confirm" required>
+        </div>
+    </div>
+        <div class="mc-register-captcha">
+            <div class="g-recaptcha" data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc"></div>
+        </div>
 
-        <div class="g-recaptcha" data-sitekey="6LeaBgstAAAAAKApstMhgvBj8zMYO9gxOv0cs7Yc"></div>
+        <div class="mc-register-submit-row">
 
-        <button type="submit" name="mc_claim_submit">Complete Registration</button>
-    </form>
+        <button type="submit" name="mc_claim_submit">Activate Account</button>
+ </div>
+</form>
+
+    </div>
+
+</div>
 
     <?php
 

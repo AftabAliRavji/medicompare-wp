@@ -36,15 +36,14 @@ function mc_privacy_policy_shortcode() {
                 </a>
 
             </div>
-
+            <?php
+            mc_render_hero([
+                'kicker'      => 'LEGAL INFORMATION',
+                'title'       => 'Privacy Policy',
+                'description' => 'Learn how Source Med Pharma collects, uses and protects your personal information.',
+            ]);
+            ?>
             <main class="mc-static-page-content">
-
-                <h1 class="mc-portal-title">Privacy Policy</h1>
-
-                <p class="mc-static-page-introduction">
-                    This Privacy Policy explains how Source Med Pharma Ltd collects,
-                    uses and protects your personal information.
-                </p>
 
                 <section class="mc-static-page-section">
                     <h2 class="mc-card-title">1. Who we are</h2>

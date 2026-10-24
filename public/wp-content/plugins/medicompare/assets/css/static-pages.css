@@ -375,6 +375,7 @@ article:has(.mc-static-page) .wp-block-post-title {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    margin-bottom: 2px !important;
 }
 
 .mc-static-page .mc-static-page-header.mc-portal-header img.mc-static-page-logo {

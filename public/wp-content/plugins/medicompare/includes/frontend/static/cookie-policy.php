@@ -12,6 +12,19 @@ function mc_cookie_policy_shortcode() {
     $logo_url = plugin_dir_url(dirname(__FILE__, 3)) .
         'assets/img/welcome-page/logo.png';
 
+        $logo_link = home_url('/');
+
+        if (is_user_logged_in()) {
+
+            $user = wp_get_current_user();
+
+            if (in_array('pharmacy_user', $user->roles, true)) {
+
+                $logo_link = site_url('/pharmacy/search/');
+
+            } 
+        }
+
     $privacy_policy_url = home_url('/privacy-policy/');
     $terms_url          = home_url('/terms-of-use/');
 
@@ -24,11 +37,11 @@ function mc_cookie_policy_shortcode() {
 
             <div class="mc-static-page-header mc-portal-header">
 
-                <!--<a
-                    href="<?php echo esc_url(home_url('/')); ?>"
+                <a
+                    href="<?php echo esc_url($logo_link); ?>"
                     class="mc-static-page-logo-link"
-                    aria-label="Return to the Source Med Pharma homepage"
-                >--> 
+                    aria-label="Return to Source Med Pharma"
+                >
                     <img
                         src="<?php echo esc_url($logo_url); ?>"
                         alt="Source Med Pharma"

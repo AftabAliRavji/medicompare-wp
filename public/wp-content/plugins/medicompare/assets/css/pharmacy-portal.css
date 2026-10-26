@@ -1660,3 +1660,52 @@ h1.mc-section-title {
 
     cursor: not-allowed;
 }
+
+
+
+
+
+
+
+
+/* =========================================================
+   MOBILE OVERRIDES
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .mc-details-grid.mc-details-grid-wide {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+    }
+
+    .mc-form-row-2col {
+        grid-template-columns: 1fr !important;
+    }
+
+    .mc-form-row-2col label {
+        margin-bottom: 8px !important;
+    }
+
+    .mc-registration-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .mc-registration-title {
+        font-size: 28px !important;
+    }
+
+    .mc-registration-card {
+        padding: 20px !important;
+    }
+
+    .mc-subscription-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .mc-register-submit-row,
+    .mc-register-captcha {
+        width: 100% !important;
+    }
+
+}

@@ -104,11 +104,16 @@ body:has(.mc-portal-shell)
 }
 */
 /* Restore correct grid layout for the search page */
-body.page-id-71 .mc-search-layout {
-    display: grid !important;
-    grid-template-columns: 1.6fr 1fr !important;
-    gap: 24px !important;
-    align-items: flex-start !important;
+/* Desktop only */
+@media (min-width: 769px) {
+
+    body.page-id-71 .mc-search-layout {
+        display: grid !important;
+        grid-template-columns: 1.6fr 1fr !important;
+        gap: 24px !important;
+        align-items: flex-start !important;
+    }
+
 }
 
 

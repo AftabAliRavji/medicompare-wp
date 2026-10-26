@@ -1610,29 +1610,22 @@ body .mc-logout-btn:hover {
 }
 
 /* Force correct grid layout */
-body.page-id-71 .mc-search-layout {
-    display: grid !important;
-    grid-template-columns: 1.6fr 1fr !important;
-    gap: 24px !important;
-    align-items: start !important;
+/* Desktop only */
+@media (min-width: 769px) {
+
+    body.page-id-71 .mc-search-layout {
+        display: grid !important;
+        grid-template-columns: 1.6fr 1fr !important;
+        gap: 24px !important;
+        align-items: flex-start !important;
+    }
+
 }
 
 /* Align top edges */
 body.page-id-71 .mc-search-left,
 body.page-id-71 .mc-search-right {
     margin-top: 5px !important;
-}
-
-
-/* 1. Remove the gap between the two columns */
-body.page-id-71 .mc-search-layout {
-    display: flex;              /* or grid, doesn't matter for this trick */
-    gap: 0 !important;
-}
-
-/* 2. Recreate the spacing using margin on the left column */
-body.page-id-71 .mc-search-left {
-    margin-right: 24px !important;  /* adjust to taste */
 }
 
 .mc-order-actions {
@@ -2760,4 +2753,440 @@ body.page-id-71 .mc-search-left {
 
 .mc-pending-order-table td .mc-remove-pending-item:hover {
     background: #dc2626 !important;
+}
+
+
+
+
+
+
+
+/* =========================================================
+   MOBILE RESPONSIVE OVERRIDES
+   PHASE 1
+========================================================= */
+
+@media (max-width: 768px) {
+
+    /* -----------------------------------------
+       Portal Header
+    ----------------------------------------- */
+
+    .mc-portal-shell {
+        height: auto !important;
+    }
+
+    .mc-portal-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 15px !important;
+        gap: 15px !important;
+    }
+
+    .mc-portal-logo {
+        margin-right: 0 !important;
+        text-align: center;
+    }
+
+    .mc-portal-nav {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        margin-right: 0 !important;
+    }
+
+    .mc-portal-user {
+        border-left: none !important;
+        border-top: 1px solid #edf1f7;
+        padding-left: 0 !important;
+        padding-top: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* -----------------------------------------
+       Hero
+    ----------------------------------------- */
+
+    .mc-hero-section {
+        min-height: auto !important;
+        background-size: cover !important;
+        border-bottom-left-radius: 25px !important;
+        border-bottom-right-radius: 25px !important;
+    }
+
+    .mc-hero-content {
+        padding: 30px 20px !important;
+    }
+
+    .mc-hero-title {
+        font-size: 34px !important;
+        line-height: 1.2 !important;
+    }
+
+    .mc-hero-description {
+        font-size: 16px !important;
+    }
+
+    /* -----------------------------------------
+       Search Layout
+    ----------------------------------------- */
+
+    .mc-search-layout,
+    body.page-id-71 .mc-search-layout {
+
+        display: block !important;
+    }
+
+    .mc-search-left,
+    .mc-search-right {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin-bottom: 20px;
+    }
+
+    .mc-search-left {
+        margin-right: 0 !important;
+    }
+
+    /* -----------------------------------------
+       Search Results Tables
+    ----------------------------------------- */
+
+    .mc-search-results {
+        overflow-x: auto;
+    }
+
+    .mc-search-results-table {
+        min-width: 700px;
+    }
+
+    .mc-selected-table {
+        min-width: 700px;
+    }
+
+    .mc-selected-card {
+        overflow-x: auto;
+    }
+
+    /* -----------------------------------------
+       Pending Orders
+    ----------------------------------------- */
+
+    .mc-pending-order-table {
+        min-width: 700px;
+    }
+
+    .mc-order-panel {
+        overflow-x: auto;
+    }
+
+    /* -----------------------------------------
+       Order Action Buttons
+    ----------------------------------------- */
+
+    .mc-order-actions {
+        flex-direction: column !important;
+        gap: 12px;
+    }
+
+    .mc-order-actions .mc-cancel-order-btn,
+    .mc-order-actions .mc-transfer-btn {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* -----------------------------------------
+       Discover Panel
+    ----------------------------------------- */
+
+    .mc-discover-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .mc-discover-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* -----------------------------------------
+       Orders History Tables
+    ----------------------------------------- */
+
+    .mc-suborder-table {
+        min-width: 650px;
+    }
+
+    .mc-order-collapse-content {
+        overflow-x: auto;
+    }
+
+    /* -----------------------------------------
+       Better Mobile Spacing
+    ----------------------------------------- */
+
+    .mc-pharmacy-page {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+}
+
+/* =========================================================
+   MOBILE SEARCH PAGE IMPROVEMENTS
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .mc-search-results,
+    .mc-selected-card,
+    .mc-order-panel,
+    .mc-order-collapse-content,
+    .mc-transferred-orders-wrapper {
+
+        overflow-x: auto !important;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mc-search-results-table,
+    .mc-selected-table,
+    .mc-pending-order-table,
+    .mc-suborder-table {
+
+        min-width: 850px !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-selected-card {
+
+        padding: 12px !important;
+    }
+
+    .mc-selected-title {
+
+        font-size: 15px !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-pending-order-table td.mc-actions {
+
+        min-width: 110px !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-order-actions {
+
+        flex-direction: column !important;
+
+        align-items: stretch !important;
+    }
+
+    .mc-cancel-order-btn,
+    .mc-transfer-btn {
+
+        width: 100% !important;
+
+        min-width: 0 !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-nav-item {
+
+        font-size: 14px !important;
+    }
+
+    .mc-welcome-email {
+
+        max-width: 100% !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-discover-row {
+
+        padding: 10px !important;
+    }
+
+    .mc-discover-main {
+
+        width: 100%;
+    }
+
+    .mc-discover-name {
+
+        font-size: 14px !important;
+
+        word-break: break-word;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-search-layout,
+    body.page-id-71 .mc-search-layout {
+
+        display: flex !important;
+
+        flex-direction: column !important;
+
+        gap: 24px !important;
+    }
+
+    .mc-search-left,
+    .mc-search-right {
+
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        max-width: 100% !important;
+
+        margin: 0 !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-selected-card {
+
+        width: 100% !important;
+
+        overflow-x: auto;
+
+        padding: 12px !important;
+    }
+
+    .mc-selected-table {
+
+        min-width: 750px !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-order-tabs {
+
+        flex-direction: column !important;
+
+        gap: 8px !important;
+    }
+
+    .mc-order-tab {
+
+        width: 100% !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-hero-section {
+
+        min-height: 220px !important;
+    }
+
+    .mc-hero-title {
+
+        font-size: 28px !important;
+    }
+
+    .mc-hero-search {
+
+        width: 100% !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .mc-order-tabs {
+
+        display: flex !important;
+
+        flex-direction: row !important;
+
+        width: 100% !important;
+    }
+
+    .mc-order-tab {
+
+        flex: 1 !important;
+    }
+
+}
+
+/* =========================================================
+   SEARCH PAGE MOBILE FIX
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .mc-search-layout,
+    body.page-id-71 .mc-search-layout,
+    .entry-content .mc-search-layout {
+
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 24px !important;
+    }
+
+    .mc-search-left {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    .mc-search-right {
+
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+
+        flex: none !important;
+
+        margin-top: 20px !important;
+
+        display: block !important;
+    }
+
+    .mc-order-tabs {
+
+        display: flex !important;
+        width: 100% !important;
+    }
+
+    .mc-order-tab {
+
+        flex: 1 1 50% !important;
+    }
+
+    .mc-order-panel {
+
+        width: 100% !important;
+
+        box-sizing: border-box;
+    }
+
 }

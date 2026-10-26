@@ -76,10 +76,61 @@ public function send_supplier_emails($order_id, $order_number, $pharmacy, $suppl
         /* ---------------------------------------------------------
            FILL TEMPLATE
         --------------------------------------------------------- */
-        $account_id_row = ''; 
-        if (!empty($pharmacy['account_id'])) {
-             $account_id_row = '<li><strong>Account ID:</strong> ' . esc_html($pharmacy['account_id']) . '</li>'; 
-        } 
+
+        error_log(
+            'MC ACCOUNT LOOKUP | Pharmacy: ' .
+            $pharmacy['id'] .
+            ' | Supplier: ' .
+            $supplier_id
+        );
+        global $wpdb;
+
+            $account_table =
+                $wpdb->prefix .
+                'medi_pharmacy_supplier_accounts';
+
+            $supplier_account_id =
+                $wpdb->get_var(
+                    $wpdb->prepare(
+                        "
+                        SELECT account_id
+                        FROM {$account_table}
+                        WHERE pharmacy_id = %d
+                        AND supplier_id = %d
+                        LIMIT 1
+                        ",
+                        $pharmacy['id'],
+                        $supplier_id
+                    )
+                );
+
+            error_log(
+                'MC ACCOUNT LOOKUP RESULT = ' .
+                print_r($supplier_account_id, true)
+            );
+
+            /*
+            Fallback to legacy field
+            during migration period
+            */
+            if (
+                empty($supplier_account_id)
+                &&
+                !empty($pharmacy['account_id'])
+            ) {
+                $supplier_account_id =
+                    $pharmacy['account_id'];
+            }
+
+            $account_id_row = '';
+
+            if (!empty($supplier_account_id)) {
+
+                $account_id_row =
+                    '<li><strong>Account ID:</strong> ' .
+                    esc_html($supplier_account_id) .
+                    '</li>';
+            }
         
         $body = $this->fill_template($template, [
              'suborder_number' => $suborder_number, 

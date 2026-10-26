@@ -12,6 +12,7 @@ class MediCompare_Pharmacy_CPT {
         add_action('save_post_mc_pharmacy', [$this, 'save_pharmacy_meta'], 20, 2);
         add_action('restrict_manage_posts', [$this, 'add_pharmacy_filters']);
         add_action('pre_get_posts', [$this, 'filter_pharmacy_query']);
+        add_action('admin_head', [$this, 'mc_pharmacy_admin_column_styles']);
 
         //will trigger on load or edit to make sure the next billing date is checked for the pharmacy
         add_action('load-edit.php',[$this, 'mc_maybe_refresh_visible_pharmacies']);
@@ -53,6 +54,25 @@ class MediCompare_Pharmacy_CPT {
         ];
 
         register_post_type('mc_pharmacy', $args);
+    }
+
+    public function mc_pharmacy_admin_column_styles()
+    {
+        global $typenow;
+
+        if ($typenow !== 'mc_pharmacy') {
+            return;
+        }
+
+        ?>
+        <style>
+
+            .column-supplier_accounts {
+                width: 280px;
+            }
+
+        </style>
+        <?php
     }
 
     /* ---------------------------------------------------------
@@ -157,6 +177,28 @@ class MediCompare_Pharmacy_CPT {
             'meta_value'     => 'active',
         ]);
 
+        global $wpdb;
+
+        $account_table = $wpdb->prefix . 'medi_pharmacy_supplier_accounts';
+
+        $existing_supplier_accounts = $wpdb->get_results(
+            $wpdb->prepare(
+                "
+                SELECT supplier_id, account_id
+                FROM {$account_table}
+                WHERE pharmacy_id = %d
+                ",
+                $post->ID
+            ),
+            ARRAY_A
+        );
+
+        $supplier_accounts = [];
+
+        foreach ($existing_supplier_accounts as $row) {
+            $supplier_accounts[(int)$row['supplier_id']] = $row['account_id'];
+        }
+
         // Load existing restrictions
         $restriction_raw = get_post_meta($post->ID, '_mc_supplier_restrictions', true);
         $use_all = ($restriction_raw === '' || $restriction_raw === 'ALL');
@@ -254,6 +296,62 @@ class MediCompare_Pharmacy_CPT {
                 <th><label>AccountId</label></th> 
                 <td> <input type="text" name="mc_account_id" value="<?php echo esc_attr($values['account_id']); ?>" class="regular-text" > <p class="description">Optional account identifier supplied by supplier.</p> 
                 </td> 
+            </tr>
+            <tr>
+                <th>
+                    <label>Supplier Account IDs</label>
+                </th>
+
+                <td>
+
+                    <p class="description">
+                        Optional supplier-specific account references.
+                    </p>
+
+                    <div style="
+                        max-height:300px;
+                        overflow:auto;
+                        border:1px solid #ddd;
+                        padding:12px;
+                        background:#fff;
+                    ">
+
+                        <?php foreach ($suppliers as $supplier): ?>
+                            
+                            <?php
+                            $current_account_id =
+                                $supplier_accounts[$supplier->ID] ?? '';
+                                error_log( 'ACCOINT ID linked to SUPPLIER is ' . $current_account_id ); 
+                            ?>
+
+                            <div style="
+                                display:flex;
+                                align-items:center;
+                                margin-bottom:8px;
+                                gap:12px;
+                            ">
+
+                                <div style="
+                                    width:220px;
+                                    font-weight:600;
+                                ">
+                                    <?php echo esc_html($supplier->post_title); ?>
+                                </div>
+
+                                <input
+                                    type="text"
+                                    name="mc_supplier_account_ids[<?php echo (int)$supplier->ID; ?>]"
+                                    value="<?php echo esc_attr($current_account_id); ?>"
+                                    class="regular-text"
+                                >
+
+                            </div>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+                </td>
             </tr>
             <tr> 
                 <th> <label>Monthly Subscription Amount (£)</label> </th> 
@@ -421,6 +519,85 @@ class MediCompare_Pharmacy_CPT {
                 update_post_meta($post_id, '_mc_supplier_restrictions', json_encode($allowed));
             }
         }
+
+        /* ---------------------------------------------------------
+        SAVE SUPPLIER ACCOUNT IDS
+        --------------------------------------------------------- */
+        global $wpdb;
+
+        $account_table =
+            $wpdb->prefix .
+            'medi_pharmacy_supplier_accounts';
+
+        if (isset($_POST['mc_supplier_account_ids'])) {
+
+            foreach ($_POST['mc_supplier_account_ids'] as $supplier_id => $account_id) {
+
+                $supplier_id = (int) $supplier_id;
+
+                $account_id = trim(
+                    sanitize_text_field($account_id)
+                );
+
+                /*
+                Blank account id
+                = remove mapping
+                */
+                if (empty($account_id)) {
+
+                    $wpdb->delete(
+                        $account_table,
+                        [
+                            'pharmacy_id' => $post_id,
+                            'supplier_id' => $supplier_id,
+                        ]
+                    );
+
+                    continue;
+                }
+
+                /*
+                Update existing
+                */
+                $existing = $wpdb->get_var(
+                    $wpdb->prepare(
+                        "
+                        SELECT id
+                        FROM {$account_table}
+                        WHERE pharmacy_id = %d
+                        AND supplier_id = %d
+                        LIMIT 1
+                        ",
+                        $post_id,
+                        $supplier_id
+                    )
+                );
+
+                if ($existing) {
+
+                    $wpdb->update(
+                        $account_table,
+                        [
+                            'account_id' => $account_id,
+                        ],
+                        [
+                            'id' => $existing,
+                        ]
+                    );
+
+                } else {
+
+                    $wpdb->insert(
+                        $account_table,
+                        [
+                            'pharmacy_id' => $post_id,
+                            'supplier_id' => $supplier_id,
+                            'account_id' => $account_id,
+                        ]
+                    );
+                }
+            }
+        }
     }
 
     /* ------------------------------------
@@ -563,6 +740,7 @@ class MediCompare_Pharmacy_CPT {
         $new['gphc']          = 'GPhC';
         $new['contact']       = 'Contact';
         $new['account_id']    = 'AccountId';
+        $new['supplier_accounts'] = 'Supplier Accounts';
         $new['status']        = 'Status';
         $new['subscription_amount'] = 'Monthly Sub fee';
 
@@ -626,6 +804,67 @@ class MediCompare_Pharmacy_CPT {
                 break;
             case 'account_id': 
                 echo esc_html( get_post_meta( $post_id, '_mc_account_id', true ) ); 
+                break;
+            case 'supplier_accounts':
+
+                global $wpdb;
+
+                $table = $wpdb->prefix . 'medi_pharmacy_supplier_accounts';
+
+                $rows = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "
+                        SELECT supplier_id, account_id
+                        FROM {$table}
+                        WHERE pharmacy_id = %d
+                        ORDER BY supplier_id
+                        ",
+                        $post_id
+                    ),
+                    ARRAY_A
+                );
+
+                if (empty($rows)) {
+
+                    echo '<div style="
+                        background:#ffebee;
+                        border:1px solid #ef9a9a;
+                        color:#c62828;
+                        padding:8px;
+                        border-radius:4px;
+                        font-weight:600;
+                    ">
+                        Needs Adding Through Edit
+                    </div>';
+
+                    break;
+                }
+
+                echo '<div style="
+                    background:#e8f5e9;
+                    border:1px solid #81c784;
+                    padding:8px;
+                    border-radius:4px;
+                ">';
+
+                foreach ($rows as $row) {
+
+                    $supplier_name = get_the_title(
+                        (int) $row['supplier_id']
+                    );
+
+                    echo '<div style="margin-bottom:4px;">';
+
+                    echo '<strong>' .
+                        esc_html($supplier_name) .
+                        ':</strong> ' .
+                        esc_html($row['account_id']);
+
+                    echo '</div>';
+                }
+
+                echo '</div>';
+
                 break;
             case 'subscription_amount': 
                 $amount = get_post_meta( $post_id, '_mc_subscription_amount', true ); 

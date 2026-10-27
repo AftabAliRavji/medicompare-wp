@@ -1,0 +1,160 @@
+product_code,product_name,category,strength,pack_size,description,dmd_vmp,dmd_vmpp
+CON0001,Acamprosate 333mg gastro-resistant tablets,Concession,333mg,168.0,Acamprosate 333mg gastro-resistant tablets - Concession product,42267511000001104,994511000001109
+CON0002,Aceclofenac 100mg tablets,Concession,100mg,60.0,Aceclofenac 100mg tablets - Concession product,42099211000001100,953511000001103
+CON0003,Aciclovir 400mg tablets,Concession,400mg,56.0,Aciclovir 400mg tablets - Concession product,41485611000001107,1109511000001108
+CON0004,Alendronic acid 70mg tablets,Concession,70mg,4.0,Alendronic acid 70mg tablets - Concession product,39731311000001108,1273311000001106
+CON0005,Alfacalcidol 500nanogram capsules,Concession,500nanogram,30.0,Alfacalcidol 500nanogram capsules - Concession product,41980511000001100,1123711000001109
+CON0006,Allopurinol 100mg tablets,Concession,100mg,28.0,Allopurinol 100mg tablets - Concession product,42099411000001101,1189011000001101
+CON0007,Allopurinol 300mg tablets,Concession,300mg,28.0,Allopurinol 300mg tablets - Concession product,42099511000001102,1134211000001101
+CON0008,Amitriptyline 10mg tablets,Concession,10mg,28.0,Amitriptyline 10mg tablets - Concession product,42291111000001104,1170011000001101
+CON0009,Amoxicillin 125mg/5ml oral suspension,Concession,125mg/5ml,100.0,Amoxicillin 125mg/5ml oral suspension - Concession product,41940811000001105,1006611000001106
+CON0010,Amoxicillin 250mg capsules,Concession,250mg,15.0,Amoxicillin 250mg capsules - Concession product,39732311000001104,1317011000001102
+CON0011,Amoxicillin 250mg capsules,Concession,250mg,21.0,Amoxicillin 250mg capsules - Concession product,39732311000001104,1200411000001101
+CON0012,Amoxicillin 250mg/5ml oral suspension,Concession,250mg/5ml,100.0,Amoxicillin 250mg/5ml oral suspension - Concession product,41941111000001109,960811000001104
+CON0013,Amoxicillin 250mg/5ml oral suspension sugar free,Concession,250mg/5ml,100.0,Amoxicillin 250mg/5ml oral suspension sugar free - Concession product,39021911000001105,1031411000001106
+CON0014,Amoxicillin 500mg capsules,Concession,500mg,15.0,Amoxicillin 500mg capsules - Concession product,39732411000001106,10741811000001101
+CON0015,Amoxicillin 500mg capsules,Concession,500mg,21.0,Amoxicillin 500mg capsules - Concession product,39732411000001106,1037711000001109
+CON0016,Aripiprazole 10mg tablets,Concession,10mg,28.0,Aripiprazole 10mg tablets - Concession product,42268111000001109,7637011000001100
+CON0017,Ascorbic acid 500mg tablets,Concession,500mg,28.0,Ascorbic acid 500mg tablets - Concession product,41981211000001109,1231111000001106
+CON0018,Atorvastatin 30mg tablets,Concession,30mg,28.0,Atorvastatin 30mg tablets - Concession product,20528511000001106,20512811000001102
+CON0019,Atorvastatin 40mg tablets,Concession,40mg,28.0,Atorvastatin 40mg tablets - Concession product,39733111000001107,1214511000001109
+CON0020,Atorvastatin 60mg tablets,Concession,60mg,28.0,Atorvastatin 60mg tablets - Concession product,20528611000001105,20513111000001103
+CON0021,Azathioprine 50mg tablets,Concession,50mg,56.0,Azathioprine 50mg tablets - Concession product,41759311000001100,998711000001107
+CON0022,Azelastine 0.05% eye drops,Concession,0.05%,8.0,Azelastine 0.05% eye drops - Concession product,3654711000001100,4891011000001104
+CON0023,Bendroflumethiazide 2.5mg tablets,Concession,2.5mg,28.0,Bendroflumethiazide 2.5mg tablets - Concession product,42206611000001103,1119411000001107
+CON0024,Bicalutamide 150mg tablets,Concession,150mg,28.0,Bicalutamide 150mg tablets - Concession product,42033111000001102,1206011000001108
+CON0025,Bisoprolol 3.75mg tablets,Concession,3.75mg,28.0,Bisoprolol 3.75mg tablets - Concession product,42371411000001105,971011000001108
+CON0026,Bisoprolol 7.5mg tablets,Concession,7.5mg,28.0,Bisoprolol 7.5mg tablets - Concession product,42371611000001108,1137011000001103
+CON0027,Candesartan 2mg tablets,Concession,2mg,7.0,Candesartan 2mg tablets - Concession product,42371811000001107,948711000001104
+CON0028,Candesartan 32mg tablets,Concession,32mg,28.0,Candesartan 32mg tablets - Concession product,42371911000001102,8983811000001102
+CON0029,Candesartan 4mg tablets,Concession,4mg,7.0,Candesartan 4mg tablets - Concession product,42372011000001109,1021711000001102
+CON0030,Cefalexin 500mg capsules,Concession,500mg,21.0,Cefalexin 500mg capsules - Concession product,39694811000001102,1261911000001101
+CON0031,Chloramphenicol 0.5% eye drops,Concession,0.5%,10.0,Chloramphenicol 0.5% eye drops - Concession product,42186611000001102,1064411000001101
+CON0032,Chloramphenicol 1% eye ointment,Concession,1%,4.0,Chloramphenicol 1% eye ointment - Concession product,42186711000001106,1128711000001103
+CON0033,Chlorpromazine 25mg tablets,Concession,25mg,28.0,Chlorpromazine 25mg tablets - Concession product,42269111000001102,1233911000001105
+CON0034,Chlorpromazine 50mg tablets,Concession,50mg,28.0,Chlorpromazine 50mg tablets - Concession product,42269211000001108,1055411000001105
+CON0035,Clarithromycin 125mg/5ml oral suspension,Concession,125mg/5ml,70.0,Clarithromycin 125mg/5ml oral suspension - Concession product,35368711000001104,967911000001105
+CON0036,Clarithromycin 250mg tablets,Concession,250mg,14.0,Clarithromycin 250mg tablets - Concession product,41946311000001103,1130711000001102
+CON0037,Clotrimazole 500mg pessary and Clotrimazole 2% cream,Concession,500mg,1.0,Clotrimazole 500mg pessary and Clotrimazole 2% cream - Concession product,39706111000001109,3364211000001107
+CON0038,Co-amilofruse 2.5mg/20mg tablets,Concession,2.5mg/20mg,28.0,Co-amilofruse 2.5mg/20mg tablets - Concession product,42293311000001101,1122311000001100
+CON0039,Co-codamol 8mg/500mg capsules,Concession,8mg/500mg,100.0,Co-codamol 8mg/500mg capsules - Concession product,42010011000001101,12872811000001103
+CON0040,Co-codamol 8mg/500mg capsules,Concession,8mg/500mg,32.0,Co-codamol 8mg/500mg capsules - Concession product,42010011000001101,10687711000001100
+CON0041,Codeine 15mg tablets,Concession,15mg,28.0,Codeine 15mg tablets - Concession product,42010311000001103,1316211000001105
+CON0042,Codeine 15mg tablets,Concession,15mg,100.0,Codeine 15mg tablets - Concession product,42010311000001103,1307711000001103
+CON0043,Codeine 30mg tablets,Concession,30mg,28.0,Codeine 30mg tablets - Concession product,42010411000001105,966311000001106
+CON0044,Codeine 30mg tablets,Concession,30mg,100.0,Codeine 30mg tablets - Concession product,42010411000001105,1022311000001105
+CON0045,Co-trimoxazole 80mg/400mg tablets,Concession,80mg/400mg,28.0,Co-trimoxazole 80mg/400mg tablets - Concession product,41947411000001107,1105111000001101
+CON0046,Cyanocobalamin 50microgram tablets,Concession,50microgram,50.0,Cyanocobalamin 50microgram tablets - Concession product,41984111000001100,955711000001109
+CON0047,Dabigatran etexilate 150mg capsules,Concession,150mg,60.0,Dabigatran etexilate 150mg capsules - Concession product,19469811000001101,19465711000001107
+CON0048,Desogestrel 75microgram tablets,Concession,75microgram,84.0,Desogestrel 75microgram tablets - Concession product,41874011000001104,3410511000001107
+CON0049,Dexamfetamine 5mg tablets,Concession,5mg,28.0,Dexamfetamine 5mg tablets - Concession product,39708411000001103,3145011000001100
+CON0050,Diclofenac 100mg suppositories,Concession,100mg,10.0,Diclofenac 100mg suppositories - Concession product,42101311000001103,955411000001103
+CON0051,Digoxin 125microgram tablets,Concession,125microgram,28.0,Digoxin 125microgram tablets - Concession product,42208511000001101,1229611000001100
+CON0052,Digoxin 62.5microgram tablets,Concession,62.5microgram,28.0,Digoxin 62.5microgram tablets - Concession product,42208711000001106,1034411000001108
+CON0053,Dipyridamole 200mg modified-release capsules,Concession,200mg,60.0,Dipyridamole 200mg modified-release capsules - Concession product,39020811000001108,1249311000001108
+CON0054,Esomeprazole 20mg gastro-resistant tablets,Concession,20mg,28.0,Esomeprazole 20mg gastro-resistant tablets - Concession product,42353711000001101,1057211000001103
+CON0055,Estriol 0.01% vaginal cream with applicator,Concession,0.01%,1.0,Estriol 0.01% vaginal cream with applicator - Concession product,3408711000001103,3194311000001106
+CON0056,Ezetimibe 10mg tablets,Concession,10mg,28.0,Ezetimibe 10mg tablets - Concession product,42209811000001105,4495311000001107
+CON0057,Famotidine 20mg tablets,Concession,20mg,28.0,Famotidine 20mg tablets - Concession product,42354011000001101,941511000001104
+CON0058,Famotidine 40mg tablets,Concession,40mg,28.0,Famotidine 40mg tablets - Concession product,42354111000001100,959111000001105
+CON0059,Fenofibrate micronised 200mg capsules,Concession,200mg,28.0,Fenofibrate micronised 200mg capsules - Concession product,42210011000001105,2951511000001103
+CON0060,Fesoterodine 4mg modified-release tablets,Concession,4mg,28.0,Fesoterodine 4mg modified-release tablets - Concession product,38894011000001104,13617911000001100
+CON0061,Fesoterodine 8mg modified-release tablets,Concession,8mg,28.0,Fesoterodine 8mg modified-release tablets - Concession product,38893911000001102,13618211000001108
+CON0062,Flucloxacillin 125mg/5ml oral solution,Concession,125mg/5ml,100.0,Flucloxacillin 125mg/5ml oral solution - Concession product,41949911000001106,1020911000001107
+CON0063,Flucloxacillin 250mg capsules,Concession,250mg,28.0,Flucloxacillin 250mg capsules - Concession product,39692111000001101,967311000001109
+CON0064,Flucloxacillin 250mg/5ml oral solution,Concession,250mg/5ml,100.0,Flucloxacillin 250mg/5ml oral solution - Concession product,41950311000001104,4835511000001100
+CON0065,Flucloxacillin 250mg/5ml oral solution sugar free,Concession,250mg/5ml,100.0,Flucloxacillin 250mg/5ml oral solution sugar free - Concession product,16089711000001107,16086511000001107
+CON0066,Flucloxacillin 500mg capsules,Concession,500mg,28.0,Flucloxacillin 500mg capsules - Concession product,39692211000001107,1257611000001106
+CON0067,Fluoxetine 20mg capsules,Concession,20mg,30.0,Fluoxetine 20mg capsules - Concession product,42271711000001106,1214811000001107
+CON0068,Fluoxetine 20mg/5ml oral solution,Concession,20mg/5ml,70.0,Fluoxetine 20mg/5ml oral solution - Concession product,42271811000001103,1074111000001101
+CON0069,Fluoxetine 40mg capsules,Concession,40mg,30.0,Fluoxetine 40mg capsules - Concession product,42271911000001108,32938911000001104
+CON0070,Fluticasone 400microgram/unit dose nasal drops,Concession,400microgram,30.0,Fluticasone 400microgram/unit dose nasal drops - Concession product,38894911000001100,41810911000001102
+CON0071,Gabapentin 50mg/ml oral solution sugar free,Concession,50mg,150.0,Gabapentin 50mg/ml oral solution sugar free - Concession product,21660111000001105,21658011000001103
+CON0072,Gliclazide 80mg tablets,Concession,80mg,28.0,Gliclazide 80mg tablets - Concession product,42082911000001100,1059111000001103
+CON0073,Indapamide 2.5mg tablets,Concession,2.5mg,28.0,Indapamide 2.5mg tablets - Concession product,39696211000001108,1171411000001101
+CON0074,Itraconazole 100mg capsules,Concession,100mg,15.0,Itraconazole 100mg capsules - Concession product,41789311000001106,1160611000001100
+CON0075,Labetalol 100mg tablets,Concession,100mg,56.0,Labetalol 100mg tablets - Concession product,42375711000001102,1240311000001104
+CON0076,Lacidipine 2mg tablets,Concession,2mg,28.0,Lacidipine 2mg tablets - Concession product,42212811000001103,982111000001107
+CON0077,Lacidipine 4mg tablets,Concession,4mg,28.0,Lacidipine 4mg tablets - Concession product,42212911000001108,1196711000001105
+CON0078,Lacosamide 100mg tablets,Concession,100mg,56.0,Lacosamide 100mg tablets - Concession product,42130111000001100,14199411000001102
+CON0079,Lacosamide 200mg tablets,Concession,200mg,56.0,Lacosamide 200mg tablets - Concession product,42130311000001103,14194311000001108
+CON0080,Lansoprazole 15mg orodispersible tablets,Concession,15mg,28.0,Lansoprazole 15mg orodispersible tablets - Concession product,4053411000001103,4040611000001106
+CON0081,Lansoprazole 30mg orodispersible tablets,Concession,30mg,28.0,Lansoprazole 30mg orodispersible tablets - Concession product,4053511000001104,4041611000001101
+CON0082,Lercanidipine 20mg tablets,Concession,20mg,28.0,Lercanidipine 20mg tablets - Concession product,10225911000001102,10198611000001106
+CON0083,Levetiracetam 100mg/ml oral solution sugar free,Concession,100mg,300.0,Levetiracetam 100mg/ml oral solution sugar free - Concession product,8285511000001102,8176511000001104
+CON0084,Levetiracetam 1g tablets,Concession,1g,60.0,Levetiracetam 1g tablets - Concession product,42131111000001106,3637211000001104
+CON0085,Levetiracetam 500mg tablets,Concession,500mg,60.0,Levetiracetam 500mg tablets - Concession product,42131311000001108,1058311000001107
+CON0086,Levetiracetam 750mg tablets,Concession,750mg,60.0,Levetiracetam 750mg tablets - Concession product,42131411000001101,8171011000001100
+CON0087,Levomepromazine 25mg/1ml solution for injection ampoules,Concession,25mg/1ml,10.0,Levomepromazine 25mg/1ml solution for injection ampoules - Concession product,38895311000001102,4182511000001109
+CON0088,Levothyroxine sodium 100microgram tablets,Concession,100microgram,28.0,Levothyroxine sodium 100microgram tablets - Concession product,39697911000001101,1163011000001102
+CON0089,Levothyroxine sodium 25microgram tablets,Concession,25microgram,28.0,Levothyroxine sodium 25microgram tablets - Concession product,39698311000001101,1221311000001106
+CON0090,Levothyroxine sodium 50microgram tablets,Concession,50microgram,28.0,Levothyroxine sodium 50microgram tablets - Concession product,39698611000001106,1199511000001105
+CON0091,Levothyroxine sodium 75microgram tablets,Concession,75microgram,28.0,Levothyroxine sodium 75microgram tablets - Concession product,39698911000001100,33616411000001109
+CON0092,Lisinopril 10mg / Hydrochlorothiazide 12.5mg tablets,Concession,10mg,28.0,Lisinopril 10mg / Hydrochlorothiazide 12.5mg tablets - Concession product,42213111000001104,3144211000001109
+CON0093,Lisinopril 20mg / Hydrochlorothiazide 12.5mg tablets,Concession,20mg,28.0,Lisinopril 20mg / Hydrochlorothiazide 12.5mg tablets - Concession product,42376311000001106,3143011000001101
+CON0094,Lofepramine 70mg tablets,Concession,70mg,56.0,Lofepramine 70mg tablets - Concession product,39699211000001104,1279011000001106
+CON0095,Loratadine 5mg/5ml oral solution,Concession,5mg/5ml,100.0,Loratadine 5mg/5ml oral solution - Concession product,38896711000001106,3327611000001105
+CON0096,Lymecycline 408mg capsules,Concession,408mg,28.0,Lymecycline 408mg capsules - Concession product,41951411000001102,1002411000001107
+CON0097,Lymecycline 408mg capsules,Concession,408mg,56.0,Lymecycline 408mg capsules - Concession product,41951411000001102,7335811000001108
+CON0098,Meloxicam 15mg tablets,Concession,15mg,30.0,Meloxicam 15mg tablets - Concession product,42106611000001101,1314911000001109
+CON0099,Meloxicam 7.5mg tablets,Concession,7.5mg,30.0,Meloxicam 7.5mg tablets - Concession product,42106811000001102,1139511000001104
+CON0100,Metformin 1g modified-release tablets,Concession,1g,56.0,Metformin 1g modified-release tablets - Concession product,38893711000001104,15367711000001102
+CON0101,Metoclopramide 10mg tablets,Concession,10mg,28.0,Metoclopramide 10mg tablets - Concession product,42037611000001102,1181811000001106
+CON0102,Mirtazapine 15mg orodispersible tablets,Concession,15mg,30.0,Mirtazapine 15mg orodispersible tablets - Concession product,42274411000001103,5608711000001105
+CON0103,Mirtazapine 30mg orodispersible tablets,Concession,30mg,30.0,Mirtazapine 30mg orodispersible tablets - Concession product,42274611000001100,4859611000001102
+CON0104,Mirtazapine 45mg orodispersible tablets,Concession,45mg,30.0,Mirtazapine 45mg orodispersible tablets - Concession product,5627911000001100,5595711000001109
+CON0105,Modafinil 100mg tablets,Concession,100mg,30.0,Modafinil 100mg tablets - Concession product,42014611000001101,3682111000001103
+CON0106,Mometasone 0.1% cream,Concession,0.1%,30.0,Mometasone 0.1% cream - Concession product,41903511000001105,1242911000001104
+CON0107,Mometasone 0.1% cream,Concession,0.1%,100.0,Mometasone 0.1% cream - Concession product,41903511000001105,1121511000001103
+CON0108,Morphine sulfate 10mg/1ml solution for injection ampoules,Concession,10mg/1ml,10.0,Morphine sulfate 10mg/1ml solution for injection ampoules - Concession product,36128211000001109,4382611000001101
+CON0109,Naratriptan 2.5mg tablets,Concession,2.5mg,6.0,Naratriptan 2.5mg tablets - Concession product,42108011000001107,1182911000001107
+CON0110,Naratriptan 2.5mg tablets,Concession,2.5mg,12.0,Naratriptan 2.5mg tablets - Concession product,42108011000001107,1098711000001101
+CON0111,Nicorandil 10mg tablets,Concession,10mg,60.0,Nicorandil 10mg tablets - Concession product,42214811000001109,1319211000001101
+CON0112,Nicorandil 20mg tablets,Concession,20mg,60.0,Nicorandil 20mg tablets - Concession product,42214911000001104,1263911000001100
+CON0113,Nifedipine 10mg capsules,Concession,10mg,90.0,Nifedipine 10mg capsules - Concession product,42215011000001104,951911000001109
+CON0114,Nifedipine 5mg capsules,Concession,5mg,90.0,Nifedipine 5mg capsules - Concession product,42215111000001103,1107611000001102
+CON0115,Nortriptyline 10mg tablets,Concession,10mg,100.0,Nortriptyline 10mg tablets - Concession product,39701411000001105,1088711000001102
+CON0116,Nortriptyline 25mg tablets,Concession,25mg,100.0,Nortriptyline 25mg tablets - Concession product,39701511000001109,969711000001100
+CON0117,Olopatadine 1mg/ml eye drops,Concession,1mg,5.0,Olopatadine 1mg/ml eye drops - Concession product,42193511000001105,4532211000001107
+CON0118,Oxybutynin 5mg modified-release tablets,Concession,5mg,28.0,Oxybutynin 5mg modified-release tablets - Concession product,39112111000001104,40628811000001103
+CON0119,Oxycodone 5mg/5ml oral solution sugar free,Concession,5mg/5ml,250.0,Oxycodone 5mg/5ml oral solution sugar free - Concession product,36131211000001102,2898011000001100
+CON0120,Paracetamol 500mg effervescent tablets,Concession,500mg,100.0,Paracetamol 500mg effervescent tablets - Concession product,34878611000001106,34862611000001104
+CON0121,Phenobarbital 30mg tablets,Concession,30mg,28.0,Phenobarbital 30mg tablets - Concession product,42133911000001105,1014311000001109
+CON0122,Phenobarbital 60mg tablets,Concession,60mg,28.0,Phenobarbital 60mg tablets - Concession product,42134011000001108,1033111000001100
+CON0123,Phenoxymethylpenicillin 250mg tablets,Concession,250mg,28.0,Phenoxymethylpenicillin 250mg tablets - Concession product,41953811000001101,1140511000001108
+CON0124,Prasugrel 10mg tablets,Concession,10mg,28.0,Prasugrel 10mg tablets - Concession product,39702811000001103,15240111000001104
+CON0125,Pravastatin 40mg tablets,Concession,40mg,28.0,Pravastatin 40mg tablets - Concession product,42380011000001102,1241611000001104
+CON0126,Prednisolone 5mg tablets,Concession,5mg,28.0,Prednisolone 5mg tablets - Concession product,42087311000001104,1085511000001104
+CON0127,Prochlorperazine 3mg buccal tablets,Concession,3mg,50.0,Prochlorperazine 3mg buccal tablets - Concession product,42040011000001107,1144711000001109
+CON0128,Progesterone micronised 100mg capsules,Concession,100mg,30.0,Progesterone micronised 100mg capsules - Concession product,11763511000001102,11758811000001100
+CON0129,Promethazine hydrochloride 10mg tablets,Concession,10mg,56.0,Promethazine hydrochloride 10mg tablets - Concession product,42040511000001104,1280411000001102
+CON0130,Promethazine hydrochloride 25mg tablets,Concession,25mg,56.0,Promethazine hydrochloride 25mg tablets - Concession product,42040711000001109,1152811000001105
+CON0131,Quetiapine 25mg tablets,Concession,25mg,60.0,Quetiapine 25mg tablets - Concession product,42278311000001100,1125711000001105
+CON0132,Quinine sulfate 300mg tablets,Concession,300mg,28.0,Quinine sulfate 300mg tablets - Concession product,41988311000001108,1088311000001101
+CON0133,Ramipril 1.25mg capsules,Concession,1.25mg,28.0,Ramipril 1.25mg capsules - Concession product,42381011000001106,996911000001105
+CON0134,Ramipril 1.25mg tablets,Concession,1.25mg,28.0,Ramipril 1.25mg tablets - Concession product,42381111000001107,5010411000001107
+CON0135,Ramipril 10mg capsules,Concession,10mg,28.0,Ramipril 10mg capsules - Concession product,42381211000001101,1069111000001107
+CON0136,Ramipril 10mg tablets,Concession,10mg,28.0,Ramipril 10mg tablets - Concession product,42381311000001109,5011311000001105
+CON0137,Ramipril 2.5mg capsules,Concession,2.5mg,28.0,Ramipril 2.5mg capsules - Concession product,42381411000001102,1100011000001108
+CON0138,Ramipril 2.5mg tablets,Concession,2.5mg,28.0,Ramipril 2.5mg tablets - Concession product,42381511000001103,5010711000001101
+CON0139,Ramipril 5mg capsules,Concession,5mg,28.0,Ramipril 5mg capsules - Concession product,42381611000001104,975711000001107
+CON0140,Ramipril 5mg tablets,Concession,5mg,28.0,Ramipril 5mg tablets - Concession product,42381711000001108,5011011000001107
+CON0141,Rivastigmine 1.5mg capsules,Concession,1.5mg,28.0,Rivastigmine 1.5mg capsules - Concession product,42041311000001100,3757711000001103
+CON0142,Rivastigmine 3mg capsules,Concession,3mg,28.0,Rivastigmine 3mg capsules - Concession product,42041511000001106,3758311000001101
+CON0143,Rivastigmine 4.5mg capsules,Concession,4.5mg,28.0,Rivastigmine 4.5mg capsules - Concession product,42041611000001105,3888911000001105
+CON0144,Rivastigmine 6mg capsules,Concession,6mg,28.0,Rivastigmine 6mg capsules - Concession product,42041711000001101,3889611000001108
+CON0145,Sildenafil 25mg tablets,Concession,25mg,4.0,Sildenafil 25mg tablets - Concession product,42089511000001103,1127111000001100
+CON0146,Simvastatin 40mg tablets,Concession,40mg,28.0,Simvastatin 40mg tablets - Concession product,42382311000001100,1287911000001106
+CON0147,Sotalol 40mg tablets,Concession,40mg,28.0,Sotalol 40mg tablets - Concession product,42382611000001105,1283411000001105
+CON0148,Sumatriptan 100mg tablets,Concession,100mg,6.0,Sumatriptan 100mg tablets - Concession product,42111811000001105,1260811000001103
+CON0149,Sumatriptan 50mg tablets,Concession,50mg,6.0,Sumatriptan 50mg tablets - Concession product,42111911000001100,968611000001100
+CON0150,Tamoxifen 20mg tablets,Concession,20mg,30.0,Tamoxifen 20mg tablets - Concession product,39704511000001106,1300011000001101
+CON0151,Tamsulosin 400microgram / Dutasteride 500microgram capsules,Concession,400microgram,30.0,Tamsulosin 400microgram / Dutasteride 500microgram capsules - Concession product,17181511000001105,17177011000001102
+CON0152,Tamsulosin 400microgram modified-release capsules,Concession,400microgram,30.0,Tamsulosin 400microgram modified-release capsules - Concession product,38754011000001109,1215311000001104
+CON0153,Ticagrelor 60mg tablets,Concession,60mg,56.0,Ticagrelor 60mg tablets - Concession product,32472211000001106,32447311000001100
+CON0154,Ticagrelor 90mg tablets,Concession,90mg,56.0,Ticagrelor 90mg tablets - Concession product,42298811000001100,18290211000001107
+CON0155,Travoprost 40micrograms/ml eye drops,Concession,40microgram,2.5,Travoprost 40micrograms/ml eye drops - Concession product,42197011000001108,1099711000001105
+CON0156,Venlafaxine 37.5mg tablets,Concession,37.5mg,56.0,Venlafaxine 37.5mg tablets - Concession product,39707611000001104,949611000001104
+CON0157,Venlafaxine 75mg modified-release capsules,Concession,75mg,28.0,Venlafaxine 75mg modified-release capsules - Concession product,38750311000001104,1128011000001100
+CON0158,Venlafaxine 75mg tablets,Concession,75mg,56.0,Venlafaxine 75mg tablets - Concession product,39707411000001102,983811000001108
+CON0159,Warfarin 1mg tablets,Concession,1mg,28.0,Warfarin 1mg tablets - Concession product,42217511000001103,1119211000001108

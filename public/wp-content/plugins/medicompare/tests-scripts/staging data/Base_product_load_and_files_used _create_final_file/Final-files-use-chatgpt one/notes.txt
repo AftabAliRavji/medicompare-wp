@@ -1,0 +1,4 @@
+Make sure when file is created by chatgpt or copilot - in this case the chatgpt one created a better file then make sure the last two columns are
+format cells and then custom and then 0 which will then display the text as it should be or manually put in the needed corrected values
+
+then save as a normal csv file so it actually imports.

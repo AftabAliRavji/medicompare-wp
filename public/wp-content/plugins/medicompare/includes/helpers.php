@@ -1098,8 +1098,8 @@ function mc_build_label_for_matching($product_id) {
             }
 
             // FORM MATCH BONUS
-            $product_category = strtolower(get_post_meta($p->ID, 'mc_category', true));
-            $formNorm = strtolower($form);
+            $product_category = strtolower((string) get_post_meta($p->ID, 'mc_category', true));
+            $formNorm = strtolower((string) $form);
 
             if ($formNorm && $product_category && strpos($product_category, $formNorm) !== false) {
                 $score -= 5;

@@ -6,7 +6,13 @@
     <h1>Upload Supplier Product CSV</h1>
 
     <p>Expected CSV columns:</p>
-    <code>product_code, price, stock</code>
+    <code>product_name, price, stock</code>
+
+    <p>
+    Optional column:
+    <code>product_code</code>
+    (if supplied it will be used as the primary match key)
+    </p>
 
     <?php if (!empty($result['error'])): ?>
         <div class="notice notice-error"><p><?php echo esc_html($result['error']); ?></p></div>
@@ -36,8 +42,11 @@
 
         <table class="widefat striped">
             <thead>
-                <tr>
+               <tr>
                     <th>Product Code</th>
+                    <th>Supplier Product</th>
+                    <th>Matched Product</th>
+                    <th>Match Type</th>
                     <th>Price</th>
                     <th>Stock</th>
                 </tr>
@@ -45,9 +54,53 @@
             <tbody>
                 <?php foreach ($result['data'] as $row): ?>
                     <tr>
-                        <td><?php echo esc_html($row['product_code']); ?></td>
-                        <td><?php echo esc_html($row['price']); ?></td>
-                        <td><?php echo esc_html($row['stock']); ?></td>
+                        <td>
+                            <?php echo esc_html($row['product_code']); ?>
+                        </td>
+                        <td>
+                            <?php echo esc_html($row['product_name']); ?>
+                        </td>
+                        <td>
+                            <?php if (!empty($row['matched_product_id'])) : ?>
+
+                                <span style="color:green;font-weight:600;">
+                                    <?php echo esc_html($row['matched_product_name']); ?>
+                                    [ID: <?php echo (int) $row['matched_product_id']; ?>]
+                                </span>
+
+                            <?php else : ?>
+
+                                <span style="color:red;font-weight:600;">
+                                    NO MATCH
+                                </span>
+
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php
+                            $colour = '#666';
+
+                            if ($row['match_type'] === 'CODE') {
+                                $colour = 'green';
+                            } elseif ($row['match_type'] === 'EXACT') {
+                                $colour = '#0085ba';
+                            } elseif ($row['match_type'] === 'FUZZY') {
+                                $colour = '#d9831f';
+                            } elseif ($row['match_type'] === 'NONE') {
+                                $colour = 'red';
+                            }
+                            ?>
+
+                            <span style="font-weight:600;color:<?php echo esc_attr($colour); ?>;">
+                                <?php echo esc_html($row['match_type']); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <?php echo esc_html($row['price']); ?>
+                        </td>
+                        <td>
+                            <?php echo esc_html($row['stock']); ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

@@ -2972,7 +2972,7 @@ private function handle_concession_import() {
         $header = array_map('trim', array_shift($rows));
         $header = array_map('strtolower', $header);
 
-        $required = ['product_code', 'product_name', 'price', 'stock'];
+        $required = ['product_name', 'price', 'stock'];
 
         foreach ($required as $col) {
             if (!in_array($col, $header)) {
@@ -2988,17 +2988,148 @@ private function handle_concession_import() {
             $row = array_map('trim', $row);
             $data = array_combine($header, $row);
 
-            $mapped[] = [
-                'product_code' => $data['product_code'],
+            $product_row = [
+                'product_code' => $data['product_code'] ?? '',
                 'product_name' => $data['product_name'],
                 'price'        => (float) $data['price'],
                 'stock'        => (int) $data['stock'],
             ];
+
+            $match = $this->find_supplier_product_match($product_row);
+
+            $product_row['matched_product_id'] = $match['product_id'];
+
+            $product_row['matched_product_name'] = $match['product_id']
+                ? get_the_title($match['product_id'])
+                : '';
+
+            $product_row['match_type'] = $match['match_type'];
+
+            $mapped[] = $product_row;
         }
 
         return [
             'success' => true,
             'data' => $mapped
+        ];
+    }
+
+    /* ---------------------------------------------------------
+    FIND PRODUCT FOR SUPPLIER UPLOAD
+    --------------------------------------------------------- */
+    private function find_supplier_product_match($row) {
+
+        $product_code = trim($row['product_code'] ?? '');
+        $product_name = trim($row['product_name'] ?? '');
+
+        /*
+        * STEP 1
+        * Product code lookup
+        */
+        if ($product_code !== '') {
+
+            $product_ids = get_posts([
+                'post_type'      => 'mc_product',
+                'post_status'    => 'any',
+                'meta_key'       => 'mc_product_code',
+                'meta_value'     => $product_code,
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+            ]);
+
+            if (!empty($product_ids)) {
+
+                error_log(
+                    'Supplier Match [CODE]: ' .
+                    $product_name .
+                    ' => ' .
+                    $product_ids[0]
+                );
+
+                return [
+                    'product_id' => (int) $product_ids[0],
+                    'match_type' => 'CODE'
+                ];
+            }
+        }
+
+        /*
+        * STEP 2
+        * Exact title match
+        */
+        if ($product_name !== '') {
+
+            global $wpdb;
+
+            $product_id = $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                    SELECT ID
+                    FROM {$wpdb->posts}
+                    WHERE post_type = 'mc_product'
+                    AND post_status = 'publish'
+                    AND post_title = %s
+                    LIMIT 1
+                    ",
+                    $product_name
+                )
+            );
+
+            if ($product_id) {
+
+                error_log(
+                    'Supplier Match [EXACT]: ' .
+                    $product_name .
+                    ' => ' .
+                    $product_id
+                );
+
+                return [
+                    'product_id' => (int) $product_id,
+                    'match_type' => 'EXACT'
+                ];
+            }
+        }
+
+        /*
+        * STEP 3
+        * Existing fuzzy matcher
+        */
+        if (
+            function_exists('mc_match_product_id')
+            && !empty($product_name)
+        ) {
+
+            $product_id = mc_match_product_id(
+                $product_name,
+                null,
+                null
+            );
+
+            if ($product_id) {
+
+                error_log(
+                    'Supplier Match [FUZZY]: ' .
+                    $product_name .
+                    ' => ' .
+                    $product_id
+                );
+
+                return [
+                    'product_id' => (int) $product_id,
+                    'match_type' => 'FUZZY'
+                ];
+            }
+        }
+
+        error_log(
+            'Supplier Match [NOT FOUND]: ' .
+            $product_name
+        );
+
+        return [
+            'product_id' => 0,
+            'match_type' => 'NONE'
         ];
     }
 
@@ -3156,73 +3287,85 @@ private function handle_concession_import() {
     }
 
     /* ---------------------------------------------------------
-       INSERT OR UPDATE SUPPLIER PRODUCT ROW
+    INSERT OR UPDATE SUPPLIER PRODUCT ROW
     --------------------------------------------------------- */
     public function insert_supplier_product_row($supplier_id, $row) {
-    global $wpdb;
 
-    $table = $wpdb->prefix . 'medi_supplier_products';
+        global $wpdb;
 
-    $product_code = trim($row['product_code']);
+        $table = $wpdb->prefix . 'medi_supplier_products';
 
-    if ($product_code === '') {
-        return 'skipped';
-    }
+        /*
+        * Find product using:
+        *
+        * 1. Product Code
+        * 2. Product Name
+        */
+        $match = $this->find_supplier_product_match($row);
 
-    // Find existing product by mc_product_code (the canonical source of truth)
-    $product_ids = get_posts([
-        'post_type'      => 'mc_product',
-        'post_status'    => 'any',
-        'meta_key'       => 'mc_product_code',
-        'meta_value'     => $product_code,
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-    ]);
+        $product_id = (int) $match['product_id'];
 
-    if (empty($product_ids)) {
-        // Product does not exist – do NOT create it here
-        return 'skipped';
-    }
+        if (!$product_id) {
+            return 'skipped';
+        }
 
-    $product_id = $product_ids[0];
+        // Check if supplier/product row already exists
+        $existing = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT id
+                FROM {$table}
+                WHERE supplier_id = %d
+                AND product_id = %d",
+                $supplier_id,
+                $product_id
+            )
+        );
 
-    // Check if supplier/product row already exists
-    $existing = $wpdb->get_row($wpdb->prepare(
-        "SELECT id FROM {$table} WHERE supplier_id = %d AND product_id = %d",
-        $supplier_id,
-        $product_id
-    ));
+        if ($existing) {
 
-    if ($existing) {
-        $wpdb->update(
+            $wpdb->update(
+                $table,
+                [
+                    'price'        => (float) $row['price'],
+                    'stock'        => (int) $row['stock'],
+                    'last_updated' => current_time('mysql'),
+                ],
+                [
+                    'id' => $existing->id,
+                ],
+                [
+                    '%f',
+                    '%d',
+                    '%s',
+                ],
+                [
+                    '%d',
+                ]
+            );
+
+            return 'updated';
+        }
+
+        $wpdb->insert(
             $table,
             [
+                'supplier_id'  => (int) $supplier_id,
+                'product_id'   => (int) $product_id,
                 'price'        => (float) $row['price'],
                 'stock'        => (int) $row['stock'],
                 'last_updated' => current_time('mysql'),
             ],
-            ['id' => $existing->id],
-            ['%f', '%d', '%s'],
-            ['%d']
+            [
+                '%d',
+                '%d',
+                '%f',
+                '%d',
+                '%s',
+            ]
         );
 
-        return 'updated';
+        return 'inserted';
     }
-
-    $wpdb->insert(
-        $table,
-        [
-            'supplier_id'  => (int) $supplier_id,
-            'product_id'   => (int) $product_id,
-            'price'        => (float) $row['price'],
-            'stock'        => (int) $row['stock'],
-            'last_updated' => current_time('mysql'),
-        ],
-        ['%d', '%d', '%f', '%d', '%s']
-    );
-
-    return 'inserted';
-}
 
     /* ---------------------------------------------------------
    INSERT OR UPDATE PRODUCT — UPDATED FOR DM+D

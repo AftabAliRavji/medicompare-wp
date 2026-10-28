@@ -101,6 +101,7 @@ class MediCompare {
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-registration.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-claim.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-login.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-reset-password.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-portal.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/pharmacy-frontend.php';
         require_once plugin_dir_path(__FILE__) . 'includes/frontend/hero-component.php';
@@ -561,6 +562,10 @@ class MediCompare {
             'login' => [
                 'title'   => 'Pharmacy Login',
                 'content' => '[mc_pharmacy_login]'
+            ],
+            'reset-password' => [
+                'title'   => 'Reset Password',
+                'content' => '[mc_pharmacy_reset_password]'
             ],
             'search' => [
                 'title'   => 'Search Products',

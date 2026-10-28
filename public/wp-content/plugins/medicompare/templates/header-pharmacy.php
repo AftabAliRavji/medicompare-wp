@@ -9,6 +9,7 @@ $current_user = wp_get_current_user();
 $current_url = $_SERVER['REQUEST_URI'];
 
 $is_claim_page = strpos($current_url, '/complete-registration') !== false;
+$is_reset_password_page = strpos($current_url, '/reset-password') !== false;
 
 $is_dashboard    = strpos($current_url, '/dashboard') !== false;
 $is_details      = strpos($current_url, '/edit-details') !== false;
@@ -34,7 +35,7 @@ $is_search       = strpos($current_url, '/search') !== false;
 
         </div>
 
-        <?php if (!$is_claim_page) : ?>
+        <?php if (!$is_claim_page  && !$is_reset_password_page) : ?>
             <nav class="mc-portal-nav">
         <a
             href="<?php echo esc_url(site_url('/pharmacy/dashboard/')); ?>"

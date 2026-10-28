@@ -750,6 +750,37 @@ class MediCompare_Pharmacy_Comparison {
 
         $items_table = $wpdb->prefix . 'medi_pending_order_items';
 
+        $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
+
+        $available_stock = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "
+                SELECT stock
+                FROM {$supplier_products_table}
+                WHERE supplier_id = %d
+                AND product_id = %d
+                LIMIT 1
+                ",
+                $supplier_id,
+                $product_id
+            )
+        );
+
+        error_log(
+            sprintf(
+                'Stock Check: Product %d | Supplier %d | Available %d',
+                $product_id,
+                $supplier_id,
+                $available_stock
+            )
+        );
+
+        if ($available_stock <= 0) {
+            wp_send_json_error([
+                'message' => 'This product is currently unavailable from the selected supplier.',
+            ]);
+        }
+
         /*
         * Look for an existing row containing the same:
         *
@@ -787,6 +818,16 @@ class MediCompare_Pharmacy_Comparison {
                 (int) $existing_item['quantity'] +
                 $quantity
             );
+
+            if ($new_quantity > $available_stock) {
+
+                wp_send_json_error([
+                    'message' => sprintf(
+                        'Only %d available from this supplier.',
+                        $available_stock
+                    ),
+                ]);
+            }
 
             /*
             * Use the latest selected supplier price and recalculate
@@ -830,6 +871,16 @@ class MediCompare_Pharmacy_Comparison {
                 'quantity'      => $new_quantity,
                 'unit_price'    => $unit_price,
                 'line_total'    => $new_line_total,
+            ]);
+        }
+
+        if ($quantity > $available_stock) {
+
+            wp_send_json_error([
+                'message' => sprintf(
+                    'Only %d available from this supplier.',
+                    $available_stock
+                ),
             ]);
         }
 
@@ -1226,6 +1277,42 @@ class MediCompare_Pharmacy_Comparison {
 
         if (!$row || (int)$row['pharmacy_id'] !== (int)$pharmacy_id) {
             wp_send_json_error(['message' => 'Item not found.']);
+        }
+
+        $supplier_products_table = $wpdb->prefix . 'medi_supplier_products';
+
+        $available_stock = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "
+                SELECT stock
+                FROM {$supplier_products_table}
+                WHERE supplier_id = %d
+                AND product_id = %d
+                LIMIT 1
+                ",
+                (int) $row['supplier_id'],
+                (int) $row['product_id']
+            )
+        );
+
+        error_log(
+            sprintf(
+                'Pending Qty Check: Product %d | Supplier %d | Requested %d | Available %d',
+                (int) $row['product_id'],
+                (int) $row['supplier_id'],
+                $new_qty,
+                $available_stock
+            )
+        );
+
+        if ($new_qty > $available_stock) {
+
+            wp_send_json_error([
+                'message' => sprintf(
+                    'Only %d available from this supplier.',
+                    $available_stock
+                ),
+            ]);
         }
 
         $unit_price = (float)$row['unit_price'];
@@ -1864,7 +1951,7 @@ class MediCompare_Pharmacy_Comparison {
                                                             </span>
 
                                                             <span class="mc-email-indicator">
-                                                                Email:
+                                                                Order status:
                                                                 <?php if ($email_sent): ?>
                                                                     <strong>Sent</strong>
                                                                     <?php if ($email_sent_at): ?>

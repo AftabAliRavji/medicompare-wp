@@ -200,6 +200,7 @@ body.page-template-default.page footer {
 
 /* Professional form font */
 .mc-portal-card,
+.mc-reset-password-card
 .mc-login-form input,
 .mc-login-form label,
 .mc-btn-primary {
@@ -971,20 +972,20 @@ h1.mc-section-title {
     box-shadow:
         0 10px 24px rgba(0,143,120,.20);
 }
-.mc-login-form > p:last-child {
+.mc-login-links {
     margin-top: 18px;
     text-align: center;
     color: #556274;
     font-size: 14px;
 }
 
-.mc-login-form > p:last-child a {
+.mc-login-links a {
     color: #008f78;
     font-weight: 600;
     text-decoration: none;
 }
 
-.mc-login-form > p:last-child a:hover {
+.mc-login-links a:hover {
     text-decoration: underline;
 }
 
@@ -1661,7 +1662,44 @@ h1.mc-section-title {
     cursor: not-allowed;
 }
 
+.mc-reset-login-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
+    width: 100%;
+    min-height: 56px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: linear-gradient(
+        90deg,
+        #007564 0%,
+        #008f78 100%
+    );
+
+    color: #fff;
+    text-decoration: none;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.mc-reset-login-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 24px rgba(0,143,120,.20);
+
+    color: #fff;
+}
 
 
 

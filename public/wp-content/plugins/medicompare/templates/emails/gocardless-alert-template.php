@@ -8,6 +8,9 @@
  * {{event_time}}
  * {{admin_link}}
  */
+
+$logo_url = plugin_dir_url(dirname(__FILE__, 2)) . 'assets/img/logo.png';
+
 ?>
 
 <!DOCTYPE html>
@@ -33,6 +36,14 @@
         color:#ffffff;
         padding:20px;
     ">
+
+    <p><img
+                                src="<?php echo esc_url($logo_url); ?>"
+                                alt="Source Med Pharma"
+                                width="360"
+                                style="display:block;width:100%;max-width:360px;height:auto;border:0;"
+                            >
+</p>
         <h2 style="margin:0;">
             GoCardless Alert
         </h2>

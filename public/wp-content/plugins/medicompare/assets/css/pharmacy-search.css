@@ -1889,6 +1889,40 @@ body.page-id-71 .mc-search-right {
     font-style: normal;
 }
 
+/* ---------------------------------------------------------
+   Out of Stock Row Styling
+--------------------------------------------------------- */
+ .mc-out-of-stock-row {
+    background: #e8e8e8 !important;   /* slightly darker grey than tariff */
+    font-style: italic;               /* visually distinct */
+    color: #444 !important;           /* slightly darker muted text */
+}
+
+.mc-out-of-stock-row td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.mc-out-of-stock-row:hover td {
+    background-color: #f3f4f6 !important;
+}
+
+.mc-out-of-stock-row * {
+    cursor: not-allowed !important;
+}
+.mc-out-of-stock-label {
+    display: inline-block;
+    font-size: 11px;
+    background: #dc2626 !important;
+    color: #fff;
+    padding: 2px 8px;
+    margin-left: 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
 /* ---------------------------------------------
     Rendered table to add product to pending order
 ------------------------------------------------*/

@@ -638,19 +638,31 @@ class MediCompare_Pharmacy_Comparison {
                 $is_tariff     = !empty($row['is_tariff']);
                 $is_clawback   = !empty($row['is_clawback']);
 
+                $is_out_of_stock = (
+                    !$is_concession &&
+                    !$is_tariff &&
+                    !$is_clawback &&
+                    (int) $row['stock'] <= 0
+                );
+
                 $row_class = $is_concession ? 'mc-concession-row'
-                            : ($is_tariff ? 'mc-tariff-row'
-                            : ($is_clawback ? 'mc-clawback-row'
-                            : 'mc-supplier-row'));
+                    : ($is_tariff ? 'mc-tariff-row'
+                    : ($is_clawback ? 'mc-clawback-row'
+                    : ($is_out_of_stock ? 'mc-out-of-stock-row'
+                    : 'mc-supplier-row')));
 
                 $full_name = mc_get_full_product_label($row['product_id']);
                 ?>
 
-                <tr class="<?php echo $row_class; ?>"
-                    data-supplier-product-id="<?php echo esc_attr($row['supplier_product_id']); ?>"
-                    data-product-id="<?php echo esc_attr($row['product_id']); ?>"
-                    data-supplier-id="<?php echo esc_attr($row['supplier_id']); ?>"
-                    data-unit-price="<?php echo esc_attr($row['price']); ?>">
+                <tr
+                    class="<?php echo esc_attr($row_class); ?>"
+                    <?php if (!$is_out_of_stock): ?>
+                        data-supplier-product-id="<?php echo esc_attr($row['supplier_product_id']); ?>"
+                        data-product-id="<?php echo esc_attr($row['product_id']); ?>"
+                        data-supplier-id="<?php echo esc_attr($row['supplier_id']); ?>"
+                        data-unit-price="<?php echo esc_attr($row['price']); ?>"
+                    <?php endif; ?>
+                >
 
                     <td><?php echo esc_html($full_name); ?></td>
 
@@ -675,7 +687,23 @@ class MediCompare_Pharmacy_Comparison {
                     </td>
 
                     <td>
-                        <?php echo ($is_concession || $is_tariff || $is_clawback) ? '—' : (int) $row['stock']; ?>
+                        <?php
+
+                        if ($is_concession || $is_tariff || $is_clawback) {
+
+                            echo '—';
+
+                        } elseif ((int) $row['stock'] <= 0) {
+
+                            echo '<span class="mc-out-of-stock-label">Out of Stock</span>';
+
+                        } else {
+
+                            echo (int) $row['stock'];
+
+                        }
+
+                        ?>
                     </td>
 
                     <td>

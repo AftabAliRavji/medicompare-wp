@@ -147,6 +147,34 @@ jQuery(function ($) {
     }
 
     /* ---------------------------------------------------------
+         LOAD DISCOVER PRODUCTS - with AJAX (low stock)
+    --------------------------------------------------------- */
+    function loadDiscoverProducts() {
+
+        $.post(
+            mcComparison.ajaxUrl,
+            {
+                action: 'mc_get_discover_products',
+                nonce: mcComparison.nonce
+            }
+        ).done(function(resp) {
+
+            if (
+                resp.success &&
+                resp.data &&
+                resp.data.html
+            ) {
+
+                $('#mc-discover-products-wrapper')
+                    .html(resp.data.html);
+
+            }
+
+        });
+
+    }
+
+    /* ---------------------------------------------------------
        DATE TOGGLE (same behaviour as order toggle)
     --------------------------------------------------------- */
     $(document).on('click', '[data-date-toggle]', function () {
@@ -616,6 +644,7 @@ jQuery(function ($) {
 
                 loadPendingOrder();
                 loadTransferredOrders();
+                loadDiscoverProducts();
 
                 $('.mc-order-tab[data-tab="transferred"]').click();
 

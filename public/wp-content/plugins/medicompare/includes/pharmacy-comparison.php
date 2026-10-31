@@ -21,6 +21,9 @@ class MediCompare_Pharmacy_Comparison {
         // NEW: Update qty in pending order
         add_action('wp_ajax_mc_update_pending_qty', [$this, 'ajax_update_pending_qty']);
 
+        // AJAX: Discover products
+        add_action('wp_ajax_mc_get_discover_products',[$this, 'ajax_get_discover_products']);
+
         // AJAX: Transfer order
         add_action('wp_ajax_mc_transfer_order', [$this, 'ajax_transfer_order']);
 
@@ -1509,6 +1512,109 @@ class MediCompare_Pharmacy_Comparison {
         );
 
         wp_send_json_success();
+    }
+
+   /* ---------------------------------------------------------
+    AJAX: GET DISCOVER PRODUCTS (LOW STOCK)
+    --------------------------------------------------------- */
+    public function ajax_get_discover_products()
+    {
+
+    error_log('DISCOVER AJAX HIT');
+        check_ajax_referer(
+            'mc_comparison_nonce',
+            'nonce'
+        );
+
+        $pharmacy_id = $this->get_current_pharmacy_id();
+
+        if (!$pharmacy_id) {
+            wp_send_json_error([
+                'message' => 'Not authorised.'
+            ]);
+        }
+
+        $low_stock_threshold = (int) get_option(
+            'mc_low_stock_threshold',
+            50
+        );
+
+        $discover_rows = mc_get_discover_products(
+            $pharmacy_id,
+            $low_stock_threshold
+        );
+
+        ob_start();
+
+        if (!empty($discover_rows)) :
+        ?>
+            <div class="mc-discover-panel mc-discover-scroll">
+
+                <div class="mc-discover-header">
+                    <span class="mc-discover-title">
+                        Discover products by stock
+                    </span>
+                </div>
+
+                <div class="mc-discover-body">
+
+                    <?php foreach ($discover_rows as $row): ?>
+
+                        <?php
+                        $band_class = 'mc-stock-' . $row['band'];
+                        $search_term = $row['name'];
+                        ?>
+
+                        <div
+                            class="mc-discover-row <?php echo esc_attr($band_class); ?>"
+                            data-product-id="<?php echo (int) $row['product_id']; ?>"
+                            data-search="<?php echo esc_attr($search_term); ?>"
+                            data-band="<?php echo esc_attr($row['band']); ?>"
+                        >
+
+                            <div class="mc-discover-main">
+
+                                <span class="mc-discover-name">
+
+                                    <?php echo esc_html($row['name']); ?>
+
+                                    <?php if (!empty($row['override_label'])): ?>
+
+                                        <span class="mc-hot-seller-badge">
+                                            Hot Seller
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                </span>
+
+                            </div>
+
+                            <div class="mc-discover-meta">
+
+                                <span class="mc-stock-pill <?php echo esc_attr($band_class); ?>">
+                                    Stock: <?php echo (int) $row['total_stock']; ?>
+                                </span>
+
+                                <span class="mc-discover-action">
+                                    ⚖️ Compare
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            </div>
+        <?php
+        endif;
+
+        wp_send_json_success([
+            'html' => ob_get_clean()
+        ]);
     }
 
 

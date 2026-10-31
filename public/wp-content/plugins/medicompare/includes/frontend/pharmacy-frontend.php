@@ -1032,6 +1032,7 @@ public function render_search() {
                         $discover_rows = mc_get_discover_products($pharmacy->ID, $low_stock_threshold);
                     ?>
 
+                  <div id="mc-discover-products-wrapper">
                     <?php if (!empty($discover_rows)): ?>
                         <div class="mc-discover-panel mc-discover-scroll">
 
@@ -1073,6 +1074,7 @@ public function render_search() {
 
                         </div>
                     <?php endif; ?>
+                  </div>
 
                 </div>
 

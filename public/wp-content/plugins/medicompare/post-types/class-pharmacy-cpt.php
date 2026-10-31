@@ -421,6 +421,10 @@ class MediCompare_Pharmacy_CPT {
 
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
 
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
         // Set default status ONLY on new posts
         if ($post->post_status === 'auto-draft' || $post->post_date === $post->post_modified) {
             if (!get_post_meta($post_id, '_mc_status', true)) {

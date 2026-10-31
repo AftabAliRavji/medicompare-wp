@@ -394,7 +394,7 @@ class MediCompare_Pharmacy_Frontend {
         $text = get_option('mc_search_instructions_text', '');
         if (!$text) return '';
 
-        return '<div class="mc-search-instructions">' . wpautop($text) . '</div>';
+       return '<div class="mc-search-instructions">' .wp_kses_post(wpautop($text)) .'</div>';
     }
 
 
